@@ -64,7 +64,7 @@ Shader "Silent/SkyProbe Fog/Height"
             Lighting On
             Tags
             {
-                "LightMode" = "ForwardBase"
+                "LightMode" = "Always"
             }
             CGPROGRAM
             #pragma vertex vert
@@ -72,8 +72,8 @@ Shader "Silent/SkyProbe Fog/Height"
             #pragma target 3.0
 
             #pragma multi_compile_instancing
-            #pragma multi_compile_fwdbase nolightmap nodynlightmap novertexlight
-            #pragma multi_compile_fwdadd_fullshadows
+            // #pragma multi_compile_fwdbase nolightmap nodynlightmap novertexlight
+            // #pragma multi_compile_fwdadd_fullshadows
 
             #include "UnityCG.cginc"
             #include "AutoLight.cginc"

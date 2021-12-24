@@ -5,7 +5,7 @@
 // by Neitri, free of charge, free to redistribute
 // from https://github.com/netri/Neitri-Unity-Shaders
 
-Shader "Silent/SkyProbe Fog/Height"
+Shader "Silent/SkyProbe Fog (Height)"
 {
     Properties
     {
@@ -67,6 +67,7 @@ Shader "Silent/SkyProbe Fog/Height"
                 "LightMode" = "Always"
             }
             CGPROGRAM
+
             #pragma vertex vert
             #pragma fragment frag
             #pragma target 3.0
@@ -260,9 +261,6 @@ Shader "Silent/SkyProbe Fog/Height"
                     //color.rgb = color.rgb * (1-sunAtt) + sunAtt * _LightColor0.xyz;
                     color.rgb += sunAtt * _LightColor0.xyz;
                 }
-
-                //float horiFade = pow(1-abs(rayFromCamera.y), 1/(0.2*_FogStrengthB));
-                //float fogFade = fogFactorExp2(_FogStrengthB * 0.02, sceneDepth);
 
                 #if _CLOUDS
                 // Don't attempt to get noise if we're in the skybox.

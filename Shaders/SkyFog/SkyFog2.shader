@@ -124,12 +124,12 @@ Shader "Silent/SkyProbe Fog (Height)"
             struct v2f
             {
                 UNITY_VERTEX_INPUT_INSTANCE_ID 
+                UNITY_VERTEX_OUTPUT_STEREO
                 float4 pos : SV_POSITION;
                 float4 depthTextureUv : TEXCOORD1;
                 float4 rayFromCamera : TEXCOORD2;
                 float4 worldPosition : TEXCOORD4;
                 SHADOW_COORDS(3)
-                UNITY_VERTEX_OUTPUT_STEREO
             };
 
             UNITY_DECLARE_DEPTH_TEXTURE(_CameraDepthTexture);
@@ -158,11 +158,12 @@ Shader "Silent/SkyProbe Fog (Height)"
 
             v2f vert(appdata v)
             {
-                float4 worldPosition = mul(unity_ObjectToWorld, v.vertex);
-                const fixed3 baseWorldPos = unity_ObjectToWorld._m03_m13_m23;
                 v2f o;
                 UNITY_SETUP_INSTANCE_ID(v);
+                UNITY_INITIALIZE_OUTPUT(v2f, o); 
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+                float4 worldPosition = mul(unity_ObjectToWorld, v.vertex);
+                const fixed3 baseWorldPos = unity_ObjectToWorld._m03_m13_m23;
                 o.pos = mul(UNITY_MATRIX_VP, worldPosition);
                 o.depthTextureUv = ComputeGrabScreenPos(o.pos);
                 // Warp ray by the base world position, so it's possible to have reoriented fog
@@ -244,7 +245,7 @@ Shader "Silent/SkyProbe Fog (Height)"
 
             float4 frag(v2f i) : SV_Target
             {
-                UNITY_SETUP_INSTANCE_ID(ps);
+                UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i); 
                 float perspectiveDivide = 1.f / i.pos.w;
                 float4 rayFromCamera = i.rayFromCamera * perspectiveDivide;
 

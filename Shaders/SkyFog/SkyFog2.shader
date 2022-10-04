@@ -1,5 +1,5 @@
 ﻿// SkyProbe Fog by Silent
-// version 2
+// version 3
 
 // Based off Distance Fade Cube Volume
 // by Neitri, free of charge, free to redistribute
@@ -14,7 +14,10 @@ Shader "Silent/SkyProbe Fog (Height)"
         [Space]
         [Header(Base)]
         _Color("Color Tint", Color) = (0,0,0,1)
-        _BlurLevel("Blur Level (def: 4)", Range(0, 7)) = 4
+
+        [Header(Probe Settings)]
+        _BlurLevelNear("Blur Level Near (def: 4)", Range(0, 7)) = 4
+        _BlurLevelFar("Blur Level Far (def: 4)", Range(0, 7)) = 4
 
         [Header(Fog)]
         [Gamma]_FogStrengthA("Fog Density", Range(0.001, 1)) = .2
@@ -23,6 +26,7 @@ Shader "Silent/SkyProbe Fog (Height)"
         [ToggleUI]_ApplyClip ("Don't apply to foreground", Float) = 0.0
         [ToggleUI]_ApplySkybox ("Don't apply to skybox", Float) = 0.0
         [Space]
+        [ToggleUI]_ApplySun ("Show Sun", Float) = 0.0
         _SunSize ("Sun Size", Range(0, 1)) = 0.04
 
         [Header(Clouds)]
@@ -99,10 +103,12 @@ Shader "Silent/SkyProbe Fog (Height)"
             float _FadeFalloff;
             float _ApplyClip;
             float _ApplySkybox;
+            float _ApplySun;
             float _FogStrengthB;
             float _FogStrengthA;
             float _SunSize;
-            float _BlurLevel;
+            float _BlurLevelNear;
+            float _BlurLevelFar;
             float _CloudStrength;
             float _CloudDither;
             int _FadeType;
@@ -121,6 +127,7 @@ Shader "Silent/SkyProbe Fog (Height)"
                 float4 pos : SV_POSITION;
                 float4 depthTextureUv : TEXCOORD1;
                 float4 rayFromCamera : TEXCOORD2;
+                float4 worldPosition : TEXCOORD4;
                 SHADOW_COORDS(3)
                 UNITY_VERTEX_OUTPUT_STEREO
             };
@@ -159,8 +166,9 @@ Shader "Silent/SkyProbe Fog (Height)"
                 o.pos = mul(UNITY_MATRIX_VP, worldPosition);
                 o.depthTextureUv = ComputeGrabScreenPos(o.pos);
                 // Warp ray by the base world position, so it's possible to have reoriented fog
-                o.rayFromCamera.xyz = worldPosition.xyz - _WorldSpaceCameraPos.xyz;
+                o.rayFromCamera.xyz = (worldPosition.xyz - _WorldSpaceCameraPos.xyz);
                 o.rayFromCamera.w = dot(o.pos, CalculateObliqueFrustumCorrection()); // oblique frustrum correction factor
+                o.worldPosition = worldPosition;
                 //o.vertex2 = float4(UnityObjectToViewPos(v.pos), 1.0);
                 TRANSFER_SHADOW(o);
                 UNITY_TRANSFER_INSTANCE_ID(v, o);
@@ -223,11 +231,26 @@ Shader "Silent/SkyProbe Fog (Height)"
                 return c * exp(-rayOri.y*b) * (1.0-exp( -distance*rayDir.y*b ))/rayDir.y;
             }
 
+            float3 worldPosFromDepth(sampler2D depthTexture, float2 depthSamplePos, float3 camPos, float4 worldCoordinates)
+            {
+                float sampleDepth = SAMPLE_DEPTH_TEXTURE(depthTexture, depthSamplePos);
+                sampleDepth = DECODE_EYEDEPTH(sampleDepth);
+
+                // https://gamedev.stackexchange.com/questions/131978/shader-reconstructing-position-from-depth-in-vr-through-projection-matrix
+                float3 viewDirection = (worldCoordinates.xyz - camPos) / (-mul(UNITY_MATRIX_V, worldCoordinates).z);
+
+                return camPos + viewDirection * sampleDepth;
+            }
+
             float4 frag(v2f i) : SV_Target
             {
                 UNITY_SETUP_INSTANCE_ID(ps);
                 float perspectiveDivide = 1.f / i.pos.w;
                 float4 rayFromCamera = i.rayFromCamera * perspectiveDivide;
+
+                // https://gamedev.stackexchange.com/questions/131978/shader-reconstructing-position-from-depth-in-vr-through-projection-matrix
+                rayFromCamera.xyz = (i.worldPosition.xyz - _WorldSpaceCameraPos) / (-mul(UNITY_MATRIX_V, i.worldPosition).z);
+
                 float2 depthTextureUv = i.depthTextureUv.xy * perspectiveDivide;
                 const fixed3 baseWorldPos = unity_ObjectToWorld._m03_m13_m23;
 
@@ -247,15 +270,21 @@ Shader "Silent/SkyProbe Fog (Height)"
                 float4 localPosition = mul(unity_WorldToObject, float4(worldPosition, 1));
                 float localDepth = CorrectedLinearEyeDepth(i.pos.z, rayFromCamera.w);
 
+                worldPosition = worldPosFromDepth(_CameraDepthTexture, depthTextureUv, _WorldSpaceCameraPos, i.worldPosition);
+                //return float4(frac(worldPosition), 1);
+
                 float clipAt = (localDepth < sceneDepth);
 
                 localPosition.xyz /= localPosition.w;
 
-                float4 color = UNITY_SAMPLE_TEXCUBE_LOD( unity_SpecCube0, rayFromCamera, _BlurLevel);
+                float fogDepthForBlur = saturate(exp(-sceneDepth*_FogStrengthB));
+                float blurLevel = lerp(_BlurLevelFar, _BlurLevelNear, fogDepthForBlur);
+
+                float4 color = UNITY_SAMPLE_TEXCUBE_LOD( unity_SpecCube0, rayFromCamera, blurLevel);
                 color = _Color * float4(DecodeHDR(color, unity_SpecCube0_HDR), 1.0);
 
-                // Add sun, but ONLY to farthest depth
-                if (sceneZ == 0) //SceneZDefaultValue() is replaced by 0
+                // Add sun
+                if (_ApplySun) 
                 {
                     float sunAtt = calcSunAttenuation(_WorldSpaceLightPos0.xyz, rayFromCamera);
                     //color.rgb = color.rgb * (1-sunAtt) + sunAtt * _LightColor0.xyz;

@@ -1,6 +1,7 @@
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
+using VRC.SDK3.Data;
 
 namespace JanSharp
 {
@@ -24,8 +25,14 @@ namespace JanSharp
         public Image sortPermissionGroupAscendingImage;
         public Image sortPermissionGroupDescendingImage;
 
+        /// <summary>
+        /// <para><see cref="uint"/> persistentId => <see cref="PlayersBackendRow"/> row</para>
+        /// </summary>
+        private DataDictionary rowsByPersistentId = new DataDictionary();
         private PlayersBackendRow[] rows = new PlayersBackendRow[ArrList.MinCapacity];
         private int rowsCount = 0;
+        private PlayersBackendRow[] unusedRows = new PlayersBackendRow[ArrList.MinCapacity];
+        private int unusedRowsCount = 0;
         private string currentSortOrderFunction;
         private Image currentSortOrderImage;
 
@@ -86,7 +93,21 @@ namespace JanSharp
         [PlayerDataEvent(PlayerDataEventType.OnPlayerDataDeleted)]
         public void OnPlayerDataDeleted()
         {
-            // TODO: Delete row.
+            CorePlayerData core = playerDataManager.PlayerDataForEvent;
+            if (!rowsByPersistentId.Remove(core.persistentId, out DataToken rowToken))
+            {
+                // Somebody could delete player data inside of OnPlayerDataImportFinished, but before
+                // our handler has ran, thus deleting player data which we are not yet aware of.
+                // The rows are about to be rebuilt in that case, so just ignore.
+                // Or somebody could create offline player data and somebody decides to delete it in the
+                // created event before we receive the created event.
+                // (Once the API to create offline player data exists.)
+                return;
+            }
+            PlayersBackendRow row = (PlayersBackendRow)rowToken.Reference;
+            row.gameObject.SetActive(false);
+            row.transform.SetAsLastSibling();
+            ArrList.Add(ref unusedRows, ref unusedRowsCount, row);
         }
 
         [PlayerDataEvent(PlayerDataEventType.OnPlayerDataImportFinished)]
@@ -97,6 +118,8 @@ namespace JanSharp
 
         private PlayersBackendRow CreateRow()
         {
+            if (unusedRowsCount != 0)
+                return ArrList.RemoveAt(ref unusedRows, ref unusedRowsCount, unusedRowsCount - 1);
             GameObject go = Instantiate(rowPrefab);
             go.transform.SetParent(rowsParent, worldPositionStays: false);
             return go.GetComponent<PlayersBackendRow>();
@@ -104,6 +127,7 @@ namespace JanSharp
 
         private void InsertSortNewRow(PlayersBackendRow row)
         {
+            rowsByPersistentId.Add(row, row.rpPlayerData.core.persistentId);
             if (rowsCount == 0)
             {
                 ArrList.Add(ref rows, ref rowsCount, row);

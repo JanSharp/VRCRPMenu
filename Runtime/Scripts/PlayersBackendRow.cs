@@ -28,7 +28,7 @@ namespace JanSharp
         public void SetIndex(int index)
         {
             this.index = index;
-            bool isOdd = (index % 2) == 1;
+            bool isOdd = (index % 2) == 0; // index is 0 based.
             oddRowImage.enabled = isOdd;
             evenRowImage.enabled = !isOdd;
         }

@@ -64,29 +64,7 @@ namespace JanSharp
         [PlayerDataEvent(PlayerDataEventType.OnPlayerDataCreated)]
         public void OnPlayerDataCreated()
         {
-            PlayersBackendRow row = CreateRow();
-            CorePlayerData core = playerDataManager.PlayerDataForEvent;
-            RPPlayerData rpPlayerData = (RPPlayerData)core.customPlayerData[rpPlayerDataIndex];
-            PermissionsPlayerData permissionsPlayerData = (PermissionsPlayerData)core.customPlayerData[permissionsPlayerDataIndex];
-            row.rpPlayerData = rpPlayerData;
-            row.permissionsPlayerData = permissionsPlayerData;
-
-            string playerName = core.displayName;
-            string characterName = rpPlayerData.characterName;
-            string groupName = permissionsPlayerData.permissionGroup.groupName;
-
-            row.sortablePlayerName = playerName.ToLower();
-            row.sortableOverriddenDisplayName = rpPlayerData.PlayerDisplayName.ToLower();
-            row.sortableCharacterName = characterName.ToLower();
-            row.sortablePermissionGroupName = groupName.ToLower();
-
-            row.playerNameLabel.text = playerName;
-            row.overriddenDisplayNameField.text = rpPlayerData.overriddenDisplayName ?? "";
-            row.overriddenDisplayNameLabel.text = playerName;
-            row.characterNameField.text = characterName;
-            row.permissionGroupLabel.text = groupName;
-
-            row.gameObject.SetActive(true);
+            PlayersBackendRow row = CreateRowForPlayer(playerDataManager.PlayerDataForEvent);
             InsertSortNewRow(row);
         }
 
@@ -108,12 +86,67 @@ namespace JanSharp
             row.gameObject.SetActive(false);
             row.transform.SetAsLastSibling();
             ArrList.Add(ref unusedRows, ref unusedRowsCount, row);
+            int index = row.index;
+            ArrList.RemoveAt(ref rows, ref rowsCount, index);
+            for (int i = index; i < rowsCount; i++)
+                rows[i].SetIndex(i);
         }
 
         [PlayerDataEvent(PlayerDataEventType.OnPlayerDataImportFinished)]
         public void OnPlayerDataImportFinished()
         {
-            // TODO: Repopulate all rows.
+            int newCount = playerDataManager.AllCorePlayerDataCount;
+
+            rowsByPersistentId.Clear();
+            ArrList.AddRange(ref unusedRows, ref unusedRowsCount, rows, rowsCount);
+            if (newCount < rowsCount)
+                for (int i = 0; i < rowsCount - newCount; i++)
+                {
+                    // Disable the low index ones, the higher ones will be reused from the unusedRows "stack".
+                    PlayersBackendRow row = rows[i];
+                    row.gameObject.SetActive(false);
+                    row.transform.SetAsLastSibling();
+                }
+
+            CorePlayerData[] allCorePlayerData = playerDataManager.AllCorePlayerDataRaw;
+            int count = playerDataManager.AllCorePlayerDataCount;
+            for (int i = 0; i < count; i++)
+            {
+                CorePlayerData core = allCorePlayerData[i];
+                PlayersBackendRow row = CreateRowForPlayer(core);
+                rows[i] = row;
+                rowsByPersistentId.Add(core.persistentId, row);
+            }
+            rowsCount = newCount;
+
+            MergeSortAndReorder();
+        }
+
+        private PlayersBackendRow CreateRowForPlayer(CorePlayerData core)
+        {
+            PlayersBackendRow row = CreateRow();
+            RPPlayerData rpPlayerData = (RPPlayerData)core.customPlayerData[rpPlayerDataIndex];
+            PermissionsPlayerData permissionsPlayerData = (PermissionsPlayerData)core.customPlayerData[permissionsPlayerDataIndex];
+            row.rpPlayerData = rpPlayerData;
+            row.permissionsPlayerData = permissionsPlayerData;
+
+            string playerName = core.displayName;
+            string characterName = rpPlayerData.characterName;
+            string groupName = permissionsPlayerData.permissionGroup.groupName;
+
+            row.sortablePlayerName = playerName.ToLower();
+            row.sortableOverriddenDisplayName = rpPlayerData.PlayerDisplayName.ToLower();
+            row.sortableCharacterName = characterName.ToLower();
+            row.sortablePermissionGroupName = groupName.ToLower();
+
+            row.playerNameLabel.text = playerName;
+            row.overriddenDisplayNameField.text = rpPlayerData.overriddenDisplayName ?? "";
+            row.overriddenDisplayNameLabel.text = playerName;
+            row.characterNameField.text = characterName;
+            row.permissionGroupLabel.text = groupName;
+
+            row.gameObject.SetActive(true);
+            return row;
         }
 
         private PlayersBackendRow CreateRow()

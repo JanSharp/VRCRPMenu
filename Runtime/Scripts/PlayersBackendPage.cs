@@ -64,15 +64,34 @@ namespace JanSharp
         [PlayerDataEvent(PlayerDataEventType.OnPlayerDataCreated)]
         public void OnPlayerDataCreated()
         {
-            PlayersBackendRow row = CreateRowForPlayer(playerDataManager.PlayerDataForEvent);
-            InsertSortNewRow(row);
+            InsertSortNewRow(CreateRowForPlayer(playerDataManager.PlayerDataForEvent));
+        }
+
+        [PlayerDataEvent(PlayerDataEventType.OnPlayerDataWentOnline)]
+        public void OnPlayerDataWentOnline()
+        {
+            OnPlayerDataOfflineStateChanged(playerDataManager.PlayerDataForEvent);
+        }
+
+        [PlayerDataEvent(PlayerDataEventType.OnPlayerDataWentOffline)]
+        public void OnPlayerDataWentOffline()
+        {
+            OnPlayerDataOfflineStateChanged(playerDataManager.PlayerDataForEvent);
+        }
+
+        private void OnPlayerDataOfflineStateChanged(CorePlayerData core)
+        {
+            if (!rowsByPersistentId.TryGetValue(core.persistentId, out DataToken rowToken))
+                return; // Some system did something weird.
+            PlayersBackendRow row = (PlayersBackendRow)rowToken.Reference;
+            row.deleteButton.interactable = core.isOffline;
+            row.deleteLabel.interactable = core.isOffline;
         }
 
         [PlayerDataEvent(PlayerDataEventType.OnPlayerDataDeleted)]
         public void OnPlayerDataDeleted()
         {
-            CorePlayerData core = playerDataManager.PlayerDataForEvent;
-            if (!rowsByPersistentId.Remove(core.persistentId, out DataToken rowToken))
+            if (!rowsByPersistentId.Remove(playerDataManager.PlayerDataForEvent.persistentId, out DataToken rowToken))
             {
                 // Somebody could delete player data inside of OnPlayerDataImportFinished, but before
                 // our handler has ran, thus deleting player data which we are not yet aware of.
@@ -144,6 +163,8 @@ namespace JanSharp
             row.overriddenDisplayNameLabel.text = playerName;
             row.characterNameField.text = characterName;
             row.permissionGroupLabel.text = groupName;
+            row.deleteButton.interactable = core.isOffline;
+            row.deleteLabel.interactable = core.isOffline;
 
             row.gameObject.SetActive(true);
             return row;

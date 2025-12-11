@@ -868,6 +868,71 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   profileName: rect-stretch-for-image-filled
+--- !u!1 &2759337705102152836
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9064923313676339472}
+  - component: {fileID: 3781203327369505499}
+  m_Layer: 17
+  m_Name: button-delete-invisible
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &9064923313676339472
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2759337705102152836}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5701258784601458288}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3781203327369505499
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2759337705102152836}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1351dcbfeb109c05c80f32d82548d98e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  profileName: button-delete-invisible
+  interactable: 1
+  transition: 1
+  normalColor: delete-button-normal
+  highlightedColor: delete-button-highlighted
+  pressedColor: delete-button-pressed
+  selectedColor: delete-button-highlighted
+  disabledColor: delete-button-disabled
+  colorMultiplier: 1
+  fadeDuration: 0.1
+  highlightedSprite: 
+  pressedSprite: 
+  selectedSprite: 
+  disabledSprite: 
+  navigation:
+    m_Mode: 0
+    m_WrapAround: 0
+    m_SelectOnUp: {fileID: 0}
+    m_SelectOnDown: {fileID: 0}
+    m_SelectOnLeft: {fileID: 0}
+    m_SelectOnRight: {fileID: 0}
 --- !u!1 &2913163175436189408
 GameObject:
   m_ObjectHideFlags: 0
@@ -2454,7 +2519,7 @@ PrefabInstance:
     - target: {fileID: 2673433094827988154, guid: b30c0489bc1cef59baba23f87dd71436,
         type: 3}
       propertyPath: colors.Array.size
-      value: 22
+      value: 26
       objectReference: {fileID: 0}
     - target: {fileID: 2673433094827988154, guid: b30c0489bc1cef59baba23f87dd71436,
         type: 3}
@@ -2515,6 +2580,26 @@ PrefabInstance:
         type: 3}
       propertyPath: colors.Array.data[21].name
       value: row-background-even
+      objectReference: {fileID: 0}
+    - target: {fileID: 2673433094827988154, guid: b30c0489bc1cef59baba23f87dd71436,
+        type: 3}
+      propertyPath: colors.Array.data[22].name
+      value: delete-button-normal
+      objectReference: {fileID: 0}
+    - target: {fileID: 2673433094827988154, guid: b30c0489bc1cef59baba23f87dd71436,
+        type: 3}
+      propertyPath: colors.Array.data[23].name
+      value: delete-button-highlighted
+      objectReference: {fileID: 0}
+    - target: {fileID: 2673433094827988154, guid: b30c0489bc1cef59baba23f87dd71436,
+        type: 3}
+      propertyPath: colors.Array.data[24].name
+      value: delete-button-pressed
+      objectReference: {fileID: 0}
+    - target: {fileID: 2673433094827988154, guid: b30c0489bc1cef59baba23f87dd71436,
+        type: 3}
+      propertyPath: colors.Array.data[25].name
+      value: delete-button-disabled
       objectReference: {fileID: 0}
     - target: {fileID: 2673433094827988154, guid: b30c0489bc1cef59baba23f87dd71436,
         type: 3}
@@ -2709,6 +2794,36 @@ PrefabInstance:
     - target: {fileID: 2673433094827988154, guid: b30c0489bc1cef59baba23f87dd71436,
         type: 3}
       propertyPath: colors.Array.data[21].color.r
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2673433094827988154, guid: b30c0489bc1cef59baba23f87dd71436,
+        type: 3}
+      propertyPath: colors.Array.data[22].color.r
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2673433094827988154, guid: b30c0489bc1cef59baba23f87dd71436,
+        type: 3}
+      propertyPath: colors.Array.data[23].color.a
+      value: 0.101960786
+      objectReference: {fileID: 0}
+    - target: {fileID: 2673433094827988154, guid: b30c0489bc1cef59baba23f87dd71436,
+        type: 3}
+      propertyPath: colors.Array.data[23].color.r
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2673433094827988154, guid: b30c0489bc1cef59baba23f87dd71436,
+        type: 3}
+      propertyPath: colors.Array.data[24].color.a
+      value: 0.050980393
+      objectReference: {fileID: 0}
+    - target: {fileID: 2673433094827988154, guid: b30c0489bc1cef59baba23f87dd71436,
+        type: 3}
+      propertyPath: colors.Array.data[24].color.r
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2673433094827988154, guid: b30c0489bc1cef59baba23f87dd71436,
+        type: 3}
+      propertyPath: colors.Array.data[25].color.r
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2969904066046999728, guid: b30c0489bc1cef59baba23f87dd71436,
@@ -3020,6 +3135,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 1424849511793431671}
+    - targetCorrespondingSourceObject: {fileID: 9031575174301748137, guid: b30c0489bc1cef59baba23f87dd71436,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9064923313676339472}
     - targetCorrespondingSourceObject: {fileID: 6210519512940270441, guid: b30c0489bc1cef59baba23f87dd71436,
         type: 3}
       insertIndex: -1
@@ -3100,6 +3219,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 45115577ef41a5b4ca741ed302693907, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!4 &5701258784601458288 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 9031575174301748137, guid: b30c0489bc1cef59baba23f87dd71436,
+    type: 3}
+  m_PrefabInstance: {fileID: 3623261819218480601}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &6137668208908307660 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7450371994286080277, guid: b30c0489bc1cef59baba23f87dd71436,

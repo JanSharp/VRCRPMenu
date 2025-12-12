@@ -61,6 +61,8 @@ namespace JanSharp
         private PlayersBackendRow selectedRowForPermissionGroupEditing;
         private PlayersBackendPermissionGroupButton selectedPermissionGroupButton;
 
+        private bool isInitialized = false;
+
         private void Start()
         {
             currentSortOrderFunction = nameof(CompareRowPlayerNameAscending);
@@ -80,24 +82,23 @@ namespace JanSharp
         [PlayerDataEvent(PlayerDataEventType.OnPrePlayerDataManagerInit)]
         public void OnPrePlayerDataManagerInit()
         {
-            // TODO: set initialized flag
             FetchPlayerDataClassIndexes();
+            isInitialized = true;
         }
 
         [LockstepEvent(LockstepEventType.OnInit)]
         public void OnInit()
         {
-            // TODO: set different initialized flag?
             RebuildPermissionGroupButtons();
         }
 
         [LockstepEvent(LockstepEventType.OnClientBeginCatchUp)]
         public void OnClientBeginCatchUp()
         {
-            // TODO: set initialized flag
             FetchPlayerDataClassIndexes();
             RebuildRows();
             RebuildPermissionGroupButtons();
+            isInitialized = true;
         }
 
         [LockstepEvent(LockstepEventType.OnImportStart)]
@@ -124,6 +125,8 @@ namespace JanSharp
         [PlayerDataEvent(PlayerDataEventType.OnPlayerDataCreated)]
         public void OnPlayerDataCreated()
         {
+            if (!isInitialized)
+                return;
             PlayersBackendRow row = CreateRowForPlayer(playerDataManager.PlayerDataForEvent);
             rowsByPersistentId.Add(row.rpPlayerData.core.persistentId, row);
             InsertSortNewRow(row);
@@ -156,6 +159,8 @@ namespace JanSharp
         [PlayerDataEvent(PlayerDataEventType.OnPlayerDataDeleted)]
         public void OnPlayerDataDeleted()
         {
+            if (!isInitialized)
+                return;
             CorePlayerData core = playerDataManager.PlayerDataForEvent;
             if (core == playerDataAwaitingDeleteConfirmation)
                 menuManager.ClosePopup(confirmDeletePopup, doCallback: true);

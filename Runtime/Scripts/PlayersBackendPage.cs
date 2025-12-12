@@ -253,7 +253,6 @@ namespace JanSharp
         public void OnPermissionGroupClick(PlayersBackendRow row)
         {
             // TODO: Show permission group dropdown popup.
-            // TODO: Listen to group rename
         }
 
         [PermissionsEvent(PermissionsEventType.OnPlayerPermissionGroupChanged)]
@@ -276,6 +275,35 @@ namespace JanSharp
             // TODO: If the page is visible and by not moving the row it ends up no longer being sorted, disable
             // the sort order icon and set a flag to make it always pick default sort order when clicking a header.
             SortOne(row);
+        }
+
+        [PermissionsEvent(PermissionsEventType.OnPermissionGroupRenamed)]
+        public void OnPermissionGroupRenamed()
+        {
+            PermissionGroup renamedGroup = permissionManager.RenamedPermissionGroup;
+            string permissionGroupName = renamedGroup.groupName;
+            string sortablePermissionGroupName = permissionGroupName.ToLower();
+
+            int affectedCount = 0;
+            for (int i = 0; i < rowsCount; i++)
+            {
+                PlayersBackendRow row = rows[i];
+                if (row.permissionsPlayerData.permissionGroup != renamedGroup)
+                    continue;
+                affectedCount++;
+                row.sortablePermissionGroupName = sortablePermissionGroupName;
+                row.permissionGroupLabel.text = permissionGroupName;
+            }
+
+            if (affectedCount == 0)
+                return;
+            if (currentSortOrderFunction != nameof(CompareRowPermissionGroupAscending)
+                && currentSortOrderFunction != nameof(CompareRowPermissionGroupDescending))
+            {
+                return;
+            }
+            // TODO: Only sort if the page is not visible, when not sorting just unconditionally disable the sort icon.
+            SortAll();
         }
 
         public void OnDeleteClick(PlayersBackendRow row)

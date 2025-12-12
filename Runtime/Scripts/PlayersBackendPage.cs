@@ -65,6 +65,7 @@ namespace JanSharp
         public void OnClientBeginCatchUp()
         {
             FetchPlayerDataClassIndexes();
+            RebuildRows();
         }
 
         #region RowsManagement
@@ -129,6 +130,11 @@ namespace JanSharp
 
         [PlayerDataEvent(PlayerDataEventType.OnPlayerDataImportFinished)]
         public void OnPlayerDataImportFinished()
+        {
+            RebuildRows();
+        }
+
+        private void RebuildRows()
         {
             int newCount = playerDataManager.AllCorePlayerDataCount;
 

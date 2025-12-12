@@ -8,6 +8,7 @@ namespace JanSharp
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class PlayersBackendPage : UdonSharpBehaviour
     {
+        [HideInInspector][SerializeField][SingletonReference] private LockstepAPI lockstep;
         [HideInInspector][SerializeField][SingletonReference] private PlayersBackendManagerAPI playersBackendManager;
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
         [HideInInspector][SerializeField][SingletonReference] private PermissionManagerAPI permissionManager;
@@ -28,6 +29,12 @@ namespace JanSharp
         public Image sortPermissionGroupDescendingImage;
         public Transform popupsParent;
         public RectTransform confirmDeletePopup;
+        public RectTransform permissionGroupPopup;
+        public GameObject permissionGroupPrefab;
+        public Transform permissionGroupsParent;
+        public ScrollRect permissionGroupsScrollRect;
+        private float permissionGroupButtonHeight;
+        private float maxPermissionGroupsPopupHeight;
 
         /// <summary>
         /// <para><see cref="uint"/> persistentId => <see cref="PlayersBackendRow"/> row</para>
@@ -42,11 +49,26 @@ namespace JanSharp
 
         private CorePlayerData playerDataAwaitingDeleteConfirmation;
 
+        /// <summary>
+        /// <para><see cref="uint"/> permissionGroupId => <see cref="PlayersBackendPermissionGroupButton"/> button</para>
+        /// </summary>
+        private DataDictionary pgButtonsById = new DataDictionary();
+        private PlayersBackendPermissionGroupButton[] pgButtons = new PlayersBackendPermissionGroupButton[ArrList.MinCapacity];
+        private int pgButtonsCount = 0;
+        private PlayersBackendPermissionGroupButton[] unusedPGButtons = new PlayersBackendPermissionGroupButton[ArrList.MinCapacity];
+        private int unusedPGButtonsCount = 0;
+
+        private PlayersBackendRow selectedRowForPermissionGroupEditing;
+        private PlayersBackendPermissionGroupButton selectedPermissionGroupButton;
+
         private void Start()
         {
             currentSortOrderFunction = nameof(CompareRowPlayerNameAscending);
             currentSortOrderImage = sortPlayerNameAscendingImage;
             currentSortOrderImage.enabled = true;
+
+            permissionGroupButtonHeight = permissionGroupPrefab.GetComponent<RectTransform>().rect.height;
+            maxPermissionGroupsPopupHeight = permissionGroupPopup.sizeDelta.y;
         }
 
         private void FetchPlayerDataClassIndexes()
@@ -58,14 +80,43 @@ namespace JanSharp
         [PlayerDataEvent(PlayerDataEventType.OnPrePlayerDataManagerInit)]
         public void OnPrePlayerDataManagerInit()
         {
+            // TODO: set initialized flag
             FetchPlayerDataClassIndexes();
+        }
+
+        [LockstepEvent(LockstepEventType.OnInit)]
+        public void OnInit()
+        {
+            // TODO: set different initialized flag?
+            RebuildPermissionGroupButtons();
         }
 
         [LockstepEvent(LockstepEventType.OnClientBeginCatchUp)]
         public void OnClientBeginCatchUp()
         {
+            // TODO: set initialized flag
             FetchPlayerDataClassIndexes();
             RebuildRows();
+            RebuildPermissionGroupButtons();
+        }
+
+        [LockstepEvent(LockstepEventType.OnImportStart)]
+        public void OnImportStart()
+        {
+            EnsureClosedPopups();
+        }
+
+        private void EnsureClosedPopups()
+        {
+            if (playerDataAwaitingDeleteConfirmation != null)
+                menuManager.ClosePopup(confirmDeletePopup, doCallback: true);
+            EnsureClosedPermissionGroupPopup();
+        }
+
+        private void EnsureClosedPermissionGroupPopup()
+        {
+            if (selectedRowForPermissionGroupEditing != null)
+                menuManager.ClosePopup(permissionGroupPopup, doCallback: true);
         }
 
         #region RowsManagement
@@ -136,6 +187,8 @@ namespace JanSharp
 
         private void RebuildRows()
         {
+            EnsureClosedPopups();
+
             int newCount = playerDataManager.AllCorePlayerDataCount;
 
             rowsByPersistentId.Clear();
@@ -150,8 +203,7 @@ namespace JanSharp
                 }
 
             CorePlayerData[] allCorePlayerData = playerDataManager.AllCorePlayerDataRaw;
-            int count = playerDataManager.AllCorePlayerDataCount;
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < newCount; i++)
             {
                 CorePlayerData core = allCorePlayerData[i];
                 PlayersBackendRow row = CreateRowForPlayer(core);
@@ -270,9 +322,59 @@ namespace JanSharp
 
         #region PermissionGroups
 
+        private bool TryGetPermissionGroupButton(uint permissionGroupId, out PlayersBackendPermissionGroupButton button)
+        {
+            if (pgButtonsById.TryGetValue(permissionGroupId, out DataToken buttonToken))
+            {
+                button = (PlayersBackendPermissionGroupButton)buttonToken.Reference;
+                return true;
+            }
+            button = null;
+            return false;
+        }
+
         public void OnPermissionGroupClick(PlayersBackendRow row)
         {
-            // TODO: Show permission group dropdown popup.
+            if (lockstep.IsImporting)
+                return;
+            if (!TryGetPermissionGroupButton(row.permissionsPlayerData.permissionGroup.id, out selectedPermissionGroupButton))
+                return;
+            selectedPermissionGroupButton.selectedImage.enabled = true;
+            selectedRowForPermissionGroupEditing = row;
+            selectedRowForPermissionGroupEditing.activeRowHighlightImage.enabled = true;
+
+            permissionGroupPopup.SetParent(row.permissionGroupPopupLocation, worldPositionStays: false);
+            permissionGroupPopup.anchoredPosition = Vector2.zero;
+            Vector2 sizeDelta = permissionGroupPopup.sizeDelta;
+            sizeDelta.x = row.permissionGroupRect.rect.width;
+            permissionGroupPopup.sizeDelta = sizeDelta;
+            menuManager.ShowPopupAtCurrentPosition(
+                permissionGroupPopup,
+                this,
+                nameof(OnPermissionGroupPopupClosed));
+        }
+
+        public void OnPermissionGroupPopupClosed()
+        {
+            permissionGroupPopup.SetParent(popupsParent, worldPositionStays: false);
+            permissionGroupPopup.anchoredPosition = Vector2.zero;
+            selectedPermissionGroupButton.selectedImage.enabled = false;
+            selectedPermissionGroupButton = null;
+            selectedRowForPermissionGroupEditing.activeRowHighlightImage.enabled = false;
+            selectedRowForPermissionGroupEditing = null;
+        }
+
+        public void OnPermissionGroupPopupButtonClick(PlayersBackendPermissionGroupButton button)
+        {
+            // Lazy latency hiding.
+            // If the player ends up trying to edit the same player's permission group again before the IA
+            // actually runs it's going to show the "wrong" group (the one the player is still apart of in the
+            // game state), and it would only update once the IA runs.
+            SetPermissionGroupLabelText(selectedRowForPermissionGroupEditing, button.permissionGroup.groupName);
+            permissionManager.SendSetPlayerPermissionGroupIA(
+                selectedRowForPermissionGroupEditing.permissionsPlayerData.core,
+                button.permissionGroup);
+            menuManager.ClosePopup(permissionGroupPopup, doCallback: true);
         }
 
         [PermissionsEvent(PermissionsEventType.OnPlayerPermissionGroupChanged)]
@@ -282,9 +384,24 @@ namespace JanSharp
             if (!rowsByPersistentId.TryGetValue(permissionsPlayerData.core.persistentId, out DataToken rowToken))
                 return; // Some system did something weird.
             PlayersBackendRow row = (PlayersBackendRow)rowToken.Reference;
-            string permissionGroupName = permissionsPlayerData.permissionGroup.groupName;
-            row.sortablePermissionGroupName = permissionGroupName.ToLower();
-            row.permissionGroupLabel.text = permissionGroupName;
+            SetPermissionGroupLabelText(row, permissionsPlayerData.permissionGroup.groupName);
+
+            if (row != selectedRowForPermissionGroupEditing)
+                return;
+            selectedPermissionGroupButton.selectedImage.enabled = false;
+            if (!TryGetPermissionGroupButton(permissionsPlayerData.permissionGroup.id, out var button))
+                menuManager.ClosePopup(permissionGroupPopup, doCallback: true);
+            else
+            {
+                selectedPermissionGroupButton = button;
+                selectedPermissionGroupButton.selectedImage.enabled = true;
+            }
+        }
+
+        private void SetPermissionGroupLabelText(PlayersBackendRow row, string groupName)
+        {
+            row.sortablePermissionGroupName = groupName.ToLower();
+            row.permissionGroupLabel.text = groupName;
 
             if (currentSortOrderFunction != nameof(CompareRowPermissionGroupAscending)
                 && currentSortOrderFunction != nameof(CompareRowPermissionGroupDescending))
@@ -303,6 +420,9 @@ namespace JanSharp
             PermissionGroup renamedGroup = permissionManager.RenamedPermissionGroup;
             string permissionGroupName = renamedGroup.groupName;
             string sortablePermissionGroupName = permissionGroupName.ToLower();
+
+            if (TryGetPermissionGroupButton(renamedGroup.id, out var button))
+                UpdatePermissionGroupButtonLabel(button);
 
             int affectedCount = 0;
             for (int i = 0; i < rowsCount; i++)
@@ -326,12 +446,137 @@ namespace JanSharp
             SortAll();
         }
 
+        [PermissionsEvent(PermissionsEventType.OnPermissionGroupDuplicated)]
+        public void OnPermissionGroupDuplicated()
+        {
+            var group = permissionManager.CreatedPermissionGroup;
+            PlayersBackendPermissionGroupButton button = CreatePermissionGroupButton(group);
+            pgButtonsById.Add(group.id, button);
+            InsertSortPermissionGroupButton(button);
+            CalculatePermissionGroupsPopupHeight();
+        }
+
+        [PermissionsEvent(PermissionsEventType.OnPermissionGroupDeleted)]
+        public void OnPermissionGroupDeleted()
+        {
+            if (!TryGetPermissionGroupButton(permissionManager.DeletedPermissionGroup.id, out var button))
+                return;
+            button.gameObject.SetActive(false);
+            button.transform.SetAsLastSibling();
+            ArrList.Add(ref unusedPGButtons, ref unusedPGButtonsCount, button);
+            ArrList.Remove(ref pgButtons, ref pgButtonsCount, button);
+            CalculatePermissionGroupsPopupHeight();
+        }
+
+        // TODO: Maybe add a permission manager import finished event just like for player data.
+        [LockstepEvent(LockstepEventType.OnImportFinished)]
+        public void OnImportFinished()
+        {
+            RebuildPermissionGroupButtons();
+        }
+
+        private void RebuildPermissionGroupButtons()
+        {
+            EnsureClosedPermissionGroupPopup();
+
+            int newCount = permissionManager.PermissionGroupsCount;
+
+            pgButtonsById.Clear();
+            ArrList.AddRange(ref unusedPGButtons, ref unusedPGButtonsCount, pgButtons, pgButtonsCount);
+            if (newCount < pgButtonsCount)
+                for (int i = 0; i < pgButtonsCount - newCount; i++)
+                {
+                    // Disable the low index ones, the higher ones will be reused from the unusedRows "stack".
+                    PlayersBackendPermissionGroupButton button = pgButtons[i];
+                    button.gameObject.SetActive(false);
+                    button.transform.SetAsLastSibling();
+                }
+
+            ArrList.Clear(ref pgButtons, ref pgButtonsCount);
+
+            for (int i = 0; i < newCount; i++)
+            {
+                PermissionGroup group = permissionManager.GetPermissionGroup(i); // TODO: Maybe just expose the raw array, just like core player data.
+                PlayersBackendPermissionGroupButton button = CreatePermissionGroupButton(group);
+                InsertSortPermissionGroupButton(button);
+                pgButtonsById.Add(group.id, button);
+            }
+
+            CalculatePermissionGroupsPopupHeight();
+        }
+
+        private string GetPermissionGroupButtonSortableName(PermissionGroup group)
+        {
+            return group.isDefault ? "a" : "b" + group.groupName.ToLower();
+        }
+
+        private PlayersBackendPermissionGroupButton CreatePermissionGroupButton(PermissionGroup group)
+        {
+            PlayersBackendPermissionGroupButton button = CreatePermissionGroupButton();
+            button.permissionGroup = group;
+            button.sortablePermissionGroupName = GetPermissionGroupButtonSortableName(group);
+            button.groupNameLabel.text = group.groupName;
+
+            button.gameObject.SetActive(true);
+            return button;
+        }
+
+        private PlayersBackendPermissionGroupButton CreatePermissionGroupButton()
+        {
+            if (unusedPGButtonsCount != 0)
+                return ArrList.RemoveAt(ref unusedPGButtons, ref unusedPGButtonsCount, unusedPGButtonsCount - 1);
+            GameObject go = Instantiate(permissionGroupPrefab);
+            go.transform.SetParent(permissionGroupsParent, worldPositionStays: false);
+            return go.GetComponent<PlayersBackendPermissionGroupButton>();
+        }
+
+        private void UpdatePermissionGroupButtonLabel(PlayersBackendPermissionGroupButton button)
+        {
+            PermissionGroup group = button.permissionGroup;
+            button.sortablePermissionGroupName = GetPermissionGroupButtonSortableName(group);
+            button.groupNameLabel.text = group.groupName;
+            ArrList.Remove(ref pgButtons, ref pgButtonsCount, button);
+            button.transform.SetAsLastSibling();
+            InsertSortPermissionGroupButton(button);
+        }
+
+        private void InsertSortPermissionGroupButton(PlayersBackendPermissionGroupButton button)
+        {
+            if (pgButtonsCount == 0)
+            {
+                button.transform.SetSiblingIndex(1); // The prefab resides at 0.
+                ArrList.Add(ref pgButtons, ref pgButtonsCount, button);
+                return;
+            }
+            int index = pgButtonsCount; // Not -1 because the new row is not in the list yet.
+            do
+            {
+                if (pgButtons[index - 1].sortablePermissionGroupName.CompareTo(button.sortablePermissionGroupName) <= 0)
+                    break;
+                index--;
+            }
+            while (index > 0);
+            button.transform.SetSiblingIndex(index + 1); // +1 because the prefab resides at index 0.
+            ArrList.Insert(ref pgButtons, ref pgButtonsCount, button, index);
+        }
+
+        private void CalculatePermissionGroupsPopupHeight()
+        {
+            float desiredHeight = pgButtonsCount * permissionGroupButtonHeight;
+            Vector2 sizeDelta = permissionGroupPopup.sizeDelta;
+            sizeDelta.y = Mathf.Min(maxPermissionGroupsPopupHeight, desiredHeight);
+            permissionGroupPopup.sizeDelta = sizeDelta;
+            permissionGroupsScrollRect.vertical = desiredHeight > maxPermissionGroupsPopupHeight;
+        }
+
         #endregion
 
         #region Delete
 
         public void OnDeleteClick(PlayersBackendRow row)
         {
+            if (lockstep.IsImporting)
+                return;
             playerDataAwaitingDeleteConfirmation = row.rpPlayerData.core;
             confirmDeletePopup.SetParent(row.confirmDeletePopupLocation, worldPositionStays: false);
             confirmDeletePopup.anchoredPosition = Vector2.zero;
@@ -453,14 +698,16 @@ namespace JanSharp
                 return;
             }
             compareRight = row;
-            int index = rowsCount;
+            int index = rowsCount; // Not -1 because the new row is not in the list yet.
             do
             {
-                compareLeft = rows[--index];
+                compareLeft = rows[index - 1];
                 SendCustomEvent(currentSortOrderFunction);
+                if (leftSortsFirst)
+                    break;
+                index--;
             }
-            while (!leftSortsFirst);
-            index++; // The above loop overshoots by 1.
+            while (index > 0);
             row.transform.SetSiblingIndex(index + 1); // +1 because the prefab resides at index 0.
             ArrList.Insert(ref rows, ref rowsCount, row, index);
             for (int i = index; i < rowsCount; i++)

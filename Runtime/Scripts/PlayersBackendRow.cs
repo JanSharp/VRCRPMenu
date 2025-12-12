@@ -22,10 +22,13 @@ namespace JanSharp
         public TMP_InputField overriddenDisplayNameField;
         public TextMeshProUGUI overriddenDisplayNameLabel;
         public TMP_InputField characterNameField;
+        public RectTransform permissionGroupRect;
         public TextMeshProUGUI permissionGroupLabel;
+        public Transform permissionGroupPopupLocation;
         public Button deleteButton;
         public Selectable deleteLabel;
         public Transform confirmDeletePopupLocation;
+        public Image activeRowHighlightImage;
 
         public void SetIndex(int index)
         {

@@ -10,6 +10,7 @@ namespace JanSharp
     {
         [HideInInspector][SerializeField][SingletonReference] private PlayersBackendManagerAPI playersBackendManager;
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
+        [HideInInspector][SerializeField][SingletonReference] private PermissionManagerAPI permissionManager;
         [HideInInspector][SerializeField][SingletonReference] private MenuManager menuManager;
 
         private int rpPlayerDataIndex;
@@ -252,8 +253,29 @@ namespace JanSharp
         public void OnPermissionGroupClick(PlayersBackendRow row)
         {
             // TODO: Show permission group dropdown popup.
-            // TODO: Listen to player permission group changes
             // TODO: Listen to group rename
+        }
+
+        [PermissionsEvent(PermissionsEventType.OnPlayerPermissionGroupChanged)]
+        public void OnPlayerPermissionGroupChanged()
+        {
+            PermissionsPlayerData permissionsPlayerData = permissionManager.PlayerDataForEvent;
+            if (!rowsByPersistentId.TryGetValue(permissionsPlayerData.core.persistentId, out DataToken rowToken))
+                return; // Some system did something weird.
+            PlayersBackendRow row = (PlayersBackendRow)rowToken.Reference;
+            string permissionGroupName = permissionsPlayerData.permissionGroup.groupName;
+            row.sortablePermissionGroupName = permissionGroupName.ToLower();
+            row.permissionGroupLabel.text = permissionGroupName;
+
+            if (currentSortOrderFunction != nameof(CompareRowPermissionGroupAscending)
+                && currentSortOrderFunction != nameof(CompareRowPermissionGroupDescending))
+            {
+                return;
+            }
+            // TODO: Only sort if the page is not visible.
+            // TODO: If the page is visible and by not moving the row it ends up no longer being sorted, disable
+            // the sort order icon and set a flag to make it always pick default sort order when clicking a header.
+            SortOne(row);
         }
 
         public void OnDeleteClick(PlayersBackendRow row)

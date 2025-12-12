@@ -12,6 +12,14 @@ namespace JanSharp
         /// <para>Game state safe.</para>
         /// </summary>
         OnRPPlayerDataOverriddenDisplayNameChanged,
+        /// <summary>
+        /// <para>Use <see cref="PlayersBackendManagerAPI.RPPlayerDataForEvent"/> to get the player data for
+        /// which the <see cref="RPPlayerData.characterName"/> has been changed.</para>
+        /// <para>Use <see cref="PlayersBackendManagerAPI.PreviousCharacterName"/> to get the previous value
+        /// of <see cref="RPPlayerData.characterName"/> before the change.</para>
+        /// <para>Game state safe.</para>
+        /// </summary>
+        OnRPPlayerDataCharacterNameChanged,
     }
 
     [System.AttributeUsage(System.AttributeTargets.Method, Inherited = true, AllowMultiple = false)]
@@ -37,10 +45,13 @@ namespace JanSharp
     {
         public abstract void SendSetOverriddenDisplayNameIA(RPPlayerData rpPlayerData, string overriddenDisplayName);
         public abstract void SetOverriddenDisplayNameInGS(RPPlayerData rpPlayerData, string overriddenDisplayName);
+        public abstract void SendSetCharacterNameIA(RPPlayerData rpPlayerData, string characterName);
+        public abstract void SetCharacterNameInGS(RPPlayerData rpPlayerData, string characterName);
 
         /// <summary>
         /// <para>Usable inside of
-        /// <see cref="PlayersBackendEventType.OnRPPlayerDataOverriddenDisplayNameChanged"/>.</para>
+        /// <see cref="PlayersBackendEventType.OnRPPlayerDataOverriddenDisplayNameChanged"/> and
+        /// <see cref="PlayersBackendEventType.OnRPPlayerDataCharacterNameChanged"/>.</para>
         /// <para>Game state safe.</para>
         /// </summary>
         public abstract RPPlayerData RPPlayerDataForEvent { get; }
@@ -50,5 +61,11 @@ namespace JanSharp
         /// <para>Game state safe.</para>
         /// </summary>
         public abstract string PreviousOverriddenDisplayName { get; }
+        /// <summary>
+        /// <para>Usable inside of
+        /// <see cref="PlayersBackendEventType.OnRPPlayerDataCharacterNameChanged"/>.</para>
+        /// <para>Game state safe.</para>
+        /// </summary>
+        public abstract string PreviousCharacterName { get; }
     }
 }

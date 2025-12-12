@@ -223,7 +223,30 @@ namespace JanSharp
 
         public void OnCharacterNameChanged(PlayersBackendRow row)
         {
-            // TODO: Send input action.
+            string inputText = row.characterNameField.text.Trim();
+            playersBackendManager.SendSetCharacterNameIA(row.rpPlayerData, inputText);
+        }
+
+        [PlayersBackendEvent(PlayersBackendEventType.OnRPPlayerDataCharacterNameChanged)]
+        public void OnRPPlayerDataCharacterNameChanged()
+        {
+            RPPlayerData rpPlayerData = playersBackendManager.RPPlayerDataForEvent;
+            if (!rowsByPersistentId.TryGetValue(rpPlayerData.core.persistentId, out DataToken rowToken))
+                return; // Some system did something weird.
+            PlayersBackendRow row = (PlayersBackendRow)rowToken.Reference;
+            string characterName = rpPlayerData.characterName;
+            row.sortableCharacterName = characterName.ToLower();
+            row.characterNameField.SetTextWithoutNotify(characterName);
+
+            if (currentSortOrderFunction != nameof(CompareRowCharacterNameAscending)
+                && currentSortOrderFunction != nameof(CompareRowCharacterNameDescending))
+            {
+                return;
+            }
+            // TODO: Only sort if the page is not visible.
+            // TODO: If the page is visible and by not moving the row it ends up no longer being sorted, disable
+            // the sort order icon and set a flag to make it always pick default sort order when clicking a header.
+            SortOne(row);
         }
 
         public void OnPermissionGroupClick(PlayersBackendRow row)

@@ -68,14 +68,49 @@ namespace JanSharp.Internal
             RaiseOnRPPlayerDataOverriddenDisplayNameChanged(rpPlayerData, prev);
         }
 
+        public override void SendSetCharacterNameIA(RPPlayerData rpPlayerData, string characterName)
+        {
+            if (characterName != null) // Just reducing network data, not like it makes literally any difference.
+                characterName = characterName.Trim();
+            lockstep.WriteSmallUInt(rpPlayerData.core.persistentId);
+            lockstep.WriteString(characterName);
+            lockstep.SendInputAction(setCharacterNameIAId);
+        }
+
+        [HideInInspector][SerializeField] private uint setCharacterNameIAId;
+        [LockstepInputAction(nameof(setCharacterNameIAId))]
+        public void OnSetCharacterNameIA()
+        {
+            uint persistentId = lockstep.ReadSmallUInt();
+            if (!playerDataManager.TryGetCorePlayerDataForPersistentId(persistentId, out CorePlayerData core))
+                return;
+            string characterName = lockstep.ReadString();
+            SetCharacterNameInGS((RPPlayerData)core.customPlayerData[rpPlayerDataIndex], characterName);
+        }
+
+        public override void SetCharacterNameInGS(RPPlayerData rpPlayerData, string characterName)
+        {
+            if (rpPlayerData.core.isDeleted) // Never the case when coming from OnSetCharacterNameIA.
+                return;
+            characterName = characterName == null ? "" : characterName.Trim();
+            string prev = rpPlayerData.characterName;
+            if (prev == characterName)
+                return;
+            rpPlayerData.characterName = characterName;
+            RaiseOnRPPlayerDataCharacterNameChanged(rpPlayerData, prev);
+        }
+
         #region EventDispatcher
 
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onRPPlayerDataOverriddenDisplayNameChangedListeners;
+        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onRPPlayerDataCharacterNameChangedListeners;
 
         private RPPlayerData rpPlayerDataForEvent;
         public override RPPlayerData RPPlayerDataForEvent => rpPlayerDataForEvent;
         private string previousOverriddenDisplayName;
         public override string PreviousOverriddenDisplayName => previousOverriddenDisplayName;
+        private string previousCharacterName;
+        public override string PreviousCharacterName => previousCharacterName;
 
         private void RaiseOnRPPlayerDataOverriddenDisplayNameChanged(RPPlayerData rpPlayerDataForEvent, string previousOverriddenDisplayName)
         {
@@ -85,6 +120,16 @@ namespace JanSharp.Internal
             JanSharp.CustomRaisedEvents.Raise(ref onRPPlayerDataOverriddenDisplayNameChangedListeners, nameof(PlayersBackendEventType.OnRPPlayerDataOverriddenDisplayNameChanged));
             this.rpPlayerDataForEvent = null; // To prevent misuse of the API.
             this.previousOverriddenDisplayName = null; // To prevent misuse of the API.
+        }
+
+        private void RaiseOnRPPlayerDataCharacterNameChanged(RPPlayerData rpPlayerDataForEvent, string previousCharacterName)
+        {
+            this.rpPlayerDataForEvent = rpPlayerDataForEvent;
+            this.previousCharacterName = previousCharacterName;
+            // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
+            JanSharp.CustomRaisedEvents.Raise(ref onRPPlayerDataCharacterNameChangedListeners, nameof(PlayersBackendEventType.OnRPPlayerDataCharacterNameChanged));
+            this.rpPlayerDataForEvent = null; // To prevent misuse of the API.
+            this.previousCharacterName = null; // To prevent misuse of the API.
         }
 
         #endregion

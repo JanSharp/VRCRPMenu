@@ -69,7 +69,9 @@ namespace JanSharp
         [PlayerDataEvent(PlayerDataEventType.OnPlayerDataCreated)]
         public void OnPlayerDataCreated()
         {
-            InsertSortNewRow(CreateRowForPlayer(playerDataManager.PlayerDataForEvent));
+            var row = CreateRowForPlayer(playerDataManager.PlayerDataForEvent);
+            rowsByPersistentId.Add(row, row.rpPlayerData.core.persistentId);
+            InsertSortNewRow(row);
         }
 
         [PlayerDataEvent(PlayerDataEventType.OnPlayerDataWentOnline)]
@@ -149,7 +151,7 @@ namespace JanSharp
             }
             rowsCount = newCount;
 
-            MergeSortAndReorder();
+            SortAll();
         }
 
         private PlayersBackendRow CreateRowForPlayer(CorePlayerData core)
@@ -170,9 +172,9 @@ namespace JanSharp
             row.sortablePermissionGroupName = groupName.ToLower();
 
             row.playerNameLabel.text = playerName;
-            row.overriddenDisplayNameField.text = rpPlayerData.overriddenDisplayName ?? "";
+            row.overriddenDisplayNameField.SetTextWithoutNotify(rpPlayerData.overriddenDisplayName ?? "");
             row.overriddenDisplayNameLabel.text = playerName;
-            row.characterNameField.text = characterName;
+            row.characterNameField.SetTextWithoutNotify(characterName);
             row.permissionGroupLabel.text = groupName;
             row.deleteButton.interactable = core.isOffline;
             row.deleteLabel.interactable = core.isOffline;
@@ -190,33 +192,33 @@ namespace JanSharp
             return go.GetComponent<PlayersBackendRow>();
         }
 
-        private void InsertSortNewRow(PlayersBackendRow row)
-        {
-            rowsByPersistentId.Add(row, row.rpPlayerData.core.persistentId);
-            if (rowsCount == 0)
-            {
-                ArrList.Add(ref rows, ref rowsCount, row);
-                row.SetIndex(0);
-                return;
-            }
-            compareRight = row;
-            int index = rowsCount;
-            do
-            {
-                compareLeft = rows[--index];
-                SendCustomEvent(currentSortOrderFunction);
-            }
-            while (!leftSortsFirst);
-            index++; // The above loop overshoots by 1.
-            row.transform.SetSiblingIndex(index + 1); // +1 because the prefab resides at index 0.
-            ArrList.Insert(ref rows, ref rowsCount, row, index);
-            for (int i = index; i < rowsCount; i++)
-                rows[i].SetIndex(i);
-        }
-
         public void OnOverriddenDisplayNameChanged(PlayersBackendRow row)
         {
-            // TODO: Send input action.
+            string inputText = row.overriddenDisplayNameField.text.Trim();
+            if (inputText == "")
+                inputText = null;
+            playersBackendManager.SendSetOverriddenDisplayNameIA(row.rpPlayerData, inputText);
+        }
+
+        [PlayersBackendEvent(PlayersBackendEventType.OnRPPlayerDataOverriddenDisplayNameChanged)]
+        public void OnRPPlayerDataOverriddenDisplayNameChanged()
+        {
+            RPPlayerData rpPlayerData = playersBackendManager.RPPlayerDataForEvent;
+            if (!rowsByPersistentId.TryGetValue(rpPlayerData.core.persistentId, out DataToken rowToken))
+                return; // Some system did something weird.
+            PlayersBackendRow row = (PlayersBackendRow)rowToken.Reference;
+            row.sortableOverriddenDisplayName = rpPlayerData.PlayerDisplayName.ToLower();
+            row.overriddenDisplayNameField.SetTextWithoutNotify(rpPlayerData.overriddenDisplayName);
+
+            if (currentSortOrderFunction != nameof(CompareRowOverriddenDisplayNameAscending)
+                && currentSortOrderFunction != nameof(CompareRowOverriddenDisplayNameDescending))
+            {
+                return;
+            }
+            // TODO: Only sort if the page is not visible.
+            // TODO: If the page is visible and by not moving the row it ends up no longer being sorted, disable
+            // the sort order icon and set a flag to make it always pick default sort order when clicking a header.
+            SortOne(row);
         }
 
         public void OnCharacterNameChanged(PlayersBackendRow row)
@@ -227,6 +229,8 @@ namespace JanSharp
         public void OnPermissionGroupClick(PlayersBackendRow row)
         {
             // TODO: Show permission group dropdown popup.
+            // TODO: Listen to player permission group changes
+            // TODO: Listen to group rename
         }
 
         public void OnDeleteClick(PlayersBackendRow row)
@@ -278,7 +282,7 @@ namespace JanSharp
                 currentSortOrderImage = sortPlayerNameAscendingImage;
             }
             currentSortOrderImage.enabled = true;
-            MergeSortAndReorder();
+            SortAll();
         }
 
         public void OnOverriddenDisplayNameSortHeaderClick()
@@ -295,7 +299,7 @@ namespace JanSharp
                 currentSortOrderImage = sortOverriddenDisplayNameAscendingImage;
             }
             currentSortOrderImage.enabled = true;
-            MergeSortAndReorder();
+            SortAll();
         }
 
         public void OnCharacterNameSortHeaderClick()
@@ -312,7 +316,7 @@ namespace JanSharp
                 currentSortOrderImage = sortCharacterNameAscendingImage;
             }
             currentSortOrderImage.enabled = true;
-            MergeSortAndReorder();
+            SortAll();
         }
 
         public void OnPermissionGroupSortHeaderClick()
@@ -329,10 +333,90 @@ namespace JanSharp
                 currentSortOrderImage = sortPermissionGroupAscendingImage;
             }
             currentSortOrderImage.enabled = true;
-            MergeSortAndReorder();
+            SortAll();
         }
 
-        private void MergeSortAndReorder()
+        #endregion
+
+        #region SortAPI
+
+        /// <summary>
+        /// <para>Adds <paramref name="row"/> to <see cref="rows"/>.</para>
+        /// </summary>
+        /// <param name="row"></param>
+        private void InsertSortNewRow(PlayersBackendRow row)
+        {
+            if (rowsCount == 0)
+            {
+                row.transform.SetSiblingIndex(1); // The prefab resides at 0.
+                ArrList.Add(ref rows, ref rowsCount, row);
+                row.SetIndex(0);
+                return;
+            }
+            compareRight = row;
+            int index = rowsCount;
+            do
+            {
+                compareLeft = rows[--index];
+                SendCustomEvent(currentSortOrderFunction);
+            }
+            while (!leftSortsFirst);
+            index++; // The above loop overshoots by 1.
+            row.transform.SetSiblingIndex(index + 1); // +1 because the prefab resides at index 0.
+            ArrList.Insert(ref rows, ref rowsCount, row, index);
+            for (int i = index; i < rowsCount; i++)
+                rows[i].SetIndex(i);
+        }
+
+        /// <summary>
+        /// <para><paramref name="row"/> must already be in <see cref="rows"/>.</para>
+        /// </summary>
+        /// <param name="row"></param>
+        private void SortOne(PlayersBackendRow row)
+        {
+            int index = row.index;
+            int initialIndex = index;
+
+            while (index > 0) // Try move left.
+            {
+                compareLeft = rows[index - 1];
+                compareRight = rows[index];
+                SendCustomEvent(currentSortOrderFunction);
+                if (leftSortsFirst)
+                    break;
+                rows[index] = compareLeft;
+                compareLeft.SetIndex(index);
+                index--;
+            }
+            if (index != initialIndex)
+            {
+                row.transform.SetSiblingIndex(index + 1); // +1 because the prefab resides at index 0.
+                rows[index] = row;
+                row.SetIndex(index);
+                return;
+            }
+
+            while (index < rowsCount - 1) // Try move right.
+            {
+                compareLeft = rows[index];
+                compareRight = rows[index + 1];
+                SendCustomEvent(currentSortOrderFunction);
+                if (leftSortsFirst)
+                    break;
+                rows[index] = compareRight;
+                compareRight.SetIndex(index);
+                index++;
+            }
+            if (index != initialIndex)
+            {
+                row.transform.SetSiblingIndex(index + 1); // +1 because the prefab resides at index 0.
+                rows[index] = row;
+                row.SetIndex(index);
+                return;
+            }
+        }
+
+        private void SortAll()
         {
             MergeSort(currentSortOrderFunction);
             for (int i = 0; i < rowsCount; i++)

@@ -10,6 +10,7 @@ namespace JanSharp
     {
         [HideInInspector][SerializeField][SingletonReference] private PlayersBackendManagerAPI playersBackendManager;
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
+        [HideInInspector][SerializeField][SingletonReference] private MenuManager menuManager;
 
         private int rpPlayerDataIndex;
         private int permissionsPlayerDataIndex;
@@ -24,6 +25,8 @@ namespace JanSharp
         public Image sortCharacterNameDescendingImage;
         public Image sortPermissionGroupAscendingImage;
         public Image sortPermissionGroupDescendingImage;
+        public Transform popupsParent;
+        public RectTransform confirmDeletePopup;
 
         /// <summary>
         /// <para><see cref="uint"/> persistentId => <see cref="PlayersBackendRow"/> row</para>
@@ -35,6 +38,8 @@ namespace JanSharp
         private int unusedRowsCount = 0;
         private string currentSortOrderFunction;
         private Image currentSortOrderImage;
+
+        private CorePlayerData playerDataAwaitingDeleteConfirmation;
 
         private void Start()
         {
@@ -70,7 +75,10 @@ namespace JanSharp
         [PlayerDataEvent(PlayerDataEventType.OnPlayerDataWentOnline)]
         public void OnPlayerDataWentOnline()
         {
-            OnPlayerDataOfflineStateChanged(playerDataManager.PlayerDataForEvent);
+            CorePlayerData core = playerDataManager.PlayerDataForEvent;
+            OnPlayerDataOfflineStateChanged(core);
+            if (core == playerDataAwaitingDeleteConfirmation)
+                menuManager.ClosePopup(confirmDeletePopup, doCallback: true);
         }
 
         [PlayerDataEvent(PlayerDataEventType.OnPlayerDataWentOffline)]
@@ -91,7 +99,10 @@ namespace JanSharp
         [PlayerDataEvent(PlayerDataEventType.OnPlayerDataDeleted)]
         public void OnPlayerDataDeleted()
         {
-            if (!rowsByPersistentId.Remove(playerDataManager.PlayerDataForEvent.persistentId, out DataToken rowToken))
+            CorePlayerData core = playerDataManager.PlayerDataForEvent;
+            if (core == playerDataAwaitingDeleteConfirmation)
+                menuManager.ClosePopup(confirmDeletePopup, doCallback: true);
+            if (!rowsByPersistentId.Remove(core.persistentId, out DataToken rowToken))
             {
                 // Somebody could delete player data inside of OnPlayerDataImportFinished, but before
                 // our handler has ran, thus deleting player data which we are not yet aware of.
@@ -220,7 +231,30 @@ namespace JanSharp
 
         public void OnDeleteClick(PlayersBackendRow row)
         {
-            // TODO: Show confirmation popup.
+            playerDataAwaitingDeleteConfirmation = row.rpPlayerData.core;
+            confirmDeletePopup.SetParent(row.confirmDeletePopupLocation, worldPositionStays: false);
+            confirmDeletePopup.anchoredPosition = Vector2.zero;
+            menuManager.ShowPopupAtCurrentPosition(
+                confirmDeletePopup,
+                this,
+                nameof(OnConfirmDeletePopupClosed),
+                minDistanceFromPageEdge: 0f);
+        }
+
+        public void OnConfirmDeletePopupClosed()
+        {
+            confirmDeletePopup.SetParent(popupsParent, worldPositionStays: false);
+            confirmDeletePopup.anchoredPosition = Vector2.zero;
+            playerDataAwaitingDeleteConfirmation = null;
+        }
+
+        public void OnConfirmDeleteClick()
+        {
+            CorePlayerData toDelete = playerDataAwaitingDeleteConfirmation;
+            menuManager.ClosePopup(confirmDeletePopup, doCallback: true); // Clears rowAwaitingDeleteConfirmation.
+            if (toDelete == null || toDelete.isDeleted) // Shouldn't really be possible but just to be sure.
+                return;
+            playerDataManager.SendDeleteOfflinePlayerDataIA(toDelete);
         }
 
         #region SortHeaders

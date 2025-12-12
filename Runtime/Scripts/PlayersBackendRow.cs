@@ -1,5 +1,6 @@
 ﻿using TMPro;
 using UdonSharp;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace JanSharp
@@ -24,6 +25,7 @@ namespace JanSharp
         public TextMeshProUGUI permissionGroupLabel;
         public Button deleteButton;
         public Selectable deleteLabel;
+        public Transform confirmDeletePopupLocation;
 
         public void SetIndex(int index)
         {

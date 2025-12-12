@@ -73,8 +73,8 @@ namespace JanSharp
         [PlayerDataEvent(PlayerDataEventType.OnPlayerDataCreated)]
         public void OnPlayerDataCreated()
         {
-            var row = CreateRowForPlayer(playerDataManager.PlayerDataForEvent);
-            rowsByPersistentId.Add(row, row.rpPlayerData.core.persistentId);
+            PlayersBackendRow row = CreateRowForPlayer(playerDataManager.PlayerDataForEvent);
+            rowsByPersistentId.Add(row.rpPlayerData.core.persistentId, row);
             InsertSortNewRow(row);
         }
 

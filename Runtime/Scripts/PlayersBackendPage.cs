@@ -6,7 +6,7 @@ using VRC.SDK3.Data;
 namespace JanSharp
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-    public class PlayersBackendPage : UdonSharpBehaviour
+    public class PlayersBackendPage : PermissionResolver
     {
         [HideInInspector][SerializeField][SingletonReference] private LockstepAPI lockstep;
         [HideInInspector][SerializeField][SingletonReference] private PlayersBackendManagerAPI playersBackendManager;
@@ -35,6 +35,22 @@ namespace JanSharp
         public ScrollRect permissionGroupsScrollRect;
         private float permissionGroupButtonHeight;
         private float maxPermissionGroupsPopupHeight;
+
+        [PermissionDefinitionReference(nameof(editDisplayNamePermissionDef))]
+        public string editDisplayNamePermissionAsset; // A guid.
+        [HideInInspector][SerializeField] private PermissionDefinition editDisplayNamePermissionDef;
+
+        [PermissionDefinitionReference(nameof(editCharacterNamePermissionDef))]
+        public string editCharacterNamePermissionAsset; // A guid.
+        [HideInInspector][SerializeField] private PermissionDefinition editCharacterNamePermissionDef;
+
+        [PermissionDefinitionReference(nameof(editPermissionGroupPermissionDef))]
+        public string editPermissionGroupPermissionAsset; // A guid.
+        [HideInInspector][SerializeField] private PermissionDefinition editPermissionGroupPermissionDef;
+
+        [PermissionDefinitionReference(nameof(deleteOfflinePlayerDataPermissionDef))]
+        public string deleteOfflinePlayerDataPermissionAsset; // A guid.
+        [HideInInspector][SerializeField] private PermissionDefinition deleteOfflinePlayerDataPermissionDef;
 
         /// <summary>
         /// <para><see cref="uint"/> persistentId => <see cref="PlayersBackendRow"/> row</para>
@@ -109,9 +125,14 @@ namespace JanSharp
 
         private void EnsureClosedPopups()
         {
+            EnsureClosedConfirmDeletePopup();
+            EnsureClosedPermissionGroupPopup();
+        }
+
+        private void EnsureClosedConfirmDeletePopup()
+        {
             if (playerDataAwaitingDeleteConfirmation != null)
                 menuManager.ClosePopup(confirmDeletePopup, doCallback: true);
-            EnsureClosedPermissionGroupPopup();
         }
 
         private void EnsureClosedPermissionGroupPopup()
@@ -119,6 +140,37 @@ namespace JanSharp
             if (selectedRowForPermissionGroupEditing != null)
                 menuManager.ClosePopup(permissionGroupPopup, doCallback: true);
         }
+
+        #region PermissionResolution
+
+        public override void InitializeInstantiated() { }
+
+        public override void Resolve()
+        {
+            if (!editDisplayNamePermissionDef.valueForLocalPlayer
+                && (currentSortOrderFunction == nameof(CompareRowOverriddenDisplayNameAscending)
+                    || currentSortOrderFunction == nameof(CompareRowOverriddenDisplayNameDescending))
+                || !editCharacterNamePermissionDef.valueForLocalPlayer
+                && (currentSortOrderFunction == nameof(CompareRowCharacterNameAscending)
+                    || currentSortOrderFunction == nameof(CompareRowCharacterNameDescending))
+                || !editPermissionGroupPermissionDef.valueForLocalPlayer
+                && (currentSortOrderFunction == nameof(CompareRowPermissionGroupAscending)
+                    || currentSortOrderFunction == nameof(CompareRowPermissionGroupDescending)))
+            {
+                currentSortOrderFunction = nameof(CompareRowPlayerNameAscending);
+                currentSortOrderImage.enabled = false;
+                currentSortOrderImage = sortPlayerNameAscendingImage;
+                currentSortOrderImage.enabled = true;
+                SortAll();
+            }
+
+            if (!editPermissionGroupPermissionDef.valueForLocalPlayer)
+                EnsureClosedPermissionGroupPopup();
+            if (!deleteOfflinePlayerDataPermissionDef.valueForLocalPlayer)
+                EnsureClosedConfirmDeletePopup();
+        }
+
+        #endregion
 
         #region RowsManagement
 

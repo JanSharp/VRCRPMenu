@@ -67,6 +67,8 @@ namespace JanSharp
             FetchPlayerDataClassIndexes();
         }
 
+        #region RowsManagement
+
         [PlayerDataEvent(PlayerDataEventType.OnPlayerDataCreated)]
         public void OnPlayerDataCreated()
         {
@@ -193,6 +195,10 @@ namespace JanSharp
             return go.GetComponent<PlayersBackendRow>();
         }
 
+        #endregion
+
+        #region OverriddenDisplayName
+
         public void OnOverriddenDisplayNameChanged(PlayersBackendRow row)
         {
             string inputText = row.overriddenDisplayNameField.text.Trim();
@@ -222,6 +228,10 @@ namespace JanSharp
             SortOne(row);
         }
 
+        #endregion
+
+        #region CharacterName
+
         public void OnCharacterNameChanged(PlayersBackendRow row)
         {
             string inputText = row.characterNameField.text.Trim();
@@ -249,6 +259,10 @@ namespace JanSharp
             // the sort order icon and set a flag to make it always pick default sort order when clicking a header.
             SortOne(row);
         }
+
+        #endregion
+
+        #region PermissionGroups
 
         public void OnPermissionGroupClick(PlayersBackendRow row)
         {
@@ -306,6 +320,10 @@ namespace JanSharp
             SortAll();
         }
 
+        #endregion
+
+        #region Delete
+
         public void OnDeleteClick(PlayersBackendRow row)
         {
             playerDataAwaitingDeleteConfirmation = row.rpPlayerData.core;
@@ -333,6 +351,8 @@ namespace JanSharp
                 return;
             playerDataManager.SendDeleteOfflinePlayerDataIA(toDelete);
         }
+
+        #endregion
 
         #region SortHeaders
 

@@ -319,7 +319,9 @@ namespace JanSharp
                 return ArrList.RemoveAt(ref unusedRows, ref unusedRowsCount, unusedRowsCount - 1);
             GameObject go = Instantiate(rowPrefab);
             go.transform.SetParent(rowsParent, worldPositionStays: false);
-            return go.GetComponent<PlayersBackendRow>();
+            PlayersBackendRow row = go.GetComponent<PlayersBackendRow>();
+            row.activeRowHighlightImage.CrossFadeAlpha(0f, 0f, ignoreTimeScale: true);
+            return row;
         }
 
         #endregion
@@ -430,7 +432,7 @@ namespace JanSharp
                 return;
             selectedPermissionGroupButton.selectedImage.enabled = true;
             selectedRowForPermissionGroupEditing = row;
-            selectedRowForPermissionGroupEditing.activeRowHighlightImage.enabled = true;
+            selectedRowForPermissionGroupEditing.activeRowHighlightImage.CrossFadeAlpha(1f, 0.1f, ignoreTimeScale: true);
 
             permissionGroupPopup.SetParent(row.permissionGroupPopupLocation, worldPositionStays: false);
             permissionGroupPopup.anchoredPosition = Vector2.zero;
@@ -449,7 +451,7 @@ namespace JanSharp
             permissionGroupPopup.anchoredPosition = Vector2.zero;
             selectedPermissionGroupButton.selectedImage.enabled = false;
             selectedPermissionGroupButton = null;
-            selectedRowForPermissionGroupEditing.activeRowHighlightImage.enabled = false;
+            selectedRowForPermissionGroupEditing.activeRowHighlightImage.CrossFadeAlpha(0f, 0.1f, ignoreTimeScale: true);
             selectedRowForPermissionGroupEditing = null;
         }
 

@@ -67,6 +67,7 @@ namespace JanSharp
         private int unusedRowsCount = 0;
         private string currentSortOrderFunction;
         private Image currentSortOrderImage;
+        private bool someRowsAreOutOfSortOrder;
 
         private CorePlayerData playerDataAwaitingDeleteConfirmation;
 
@@ -85,12 +86,16 @@ namespace JanSharp
         private uint localPlayerId;
         private bool isInitialized = false;
 
+        // TODO: Use the yet to be implemented [FindInParents] attribute to get the PageRoot this script is in rather than hard coding the internal name.
+        public bool PageIsVisible => menuManager.IsMenuOpen && menuManager.ActivePageInternalName == "rp-menu.players-backend";
+
         private void Start()
         {
             localPlayerId = (uint)Networking.LocalPlayer.playerId;
             currentSortOrderFunction = nameof(CompareRowPlayerNameAscending);
             currentSortOrderImage = sortPlayerNameAscendingImage;
             currentSortOrderImage.enabled = true;
+            someRowsAreOutOfSortOrder = false;
 
             permissionGroupButtonHeight = permissionGroupPrefab.GetComponent<RectTransform>().rect.height;
             maxPermissionGroupsPopupHeight = permissionGroupPopup.sizeDelta.y;
@@ -360,15 +365,11 @@ namespace JanSharp
             row.sortableOverriddenDisplayName = rpPlayerData.PlayerDisplayName.ToLower();
             row.overriddenDisplayNameField.SetTextWithoutNotify(rpPlayerData.overriddenDisplayName);
 
-            if (currentSortOrderFunction != nameof(CompareRowOverriddenDisplayNameAscending)
-                && currentSortOrderFunction != nameof(CompareRowOverriddenDisplayNameDescending))
+            if (currentSortOrderFunction == nameof(CompareRowOverriddenDisplayNameAscending)
+                || currentSortOrderFunction == nameof(CompareRowOverriddenDisplayNameDescending))
             {
-                return;
+                UpdateSortPositionDueToValueChange(row);
             }
-            // TODO: Only sort if the page is not visible.
-            // TODO: If the page is visible and by not moving the row it ends up no longer being sorted, disable
-            // the sort order icon and set a flag to make it always pick default sort order when clicking a header.
-            SortOne(row);
         }
 
         #endregion
@@ -402,15 +403,11 @@ namespace JanSharp
             row.sortableCharacterName = characterName.ToLower();
             row.characterNameField.SetTextWithoutNotify(characterName);
 
-            if (currentSortOrderFunction != nameof(CompareRowCharacterNameAscending)
-                && currentSortOrderFunction != nameof(CompareRowCharacterNameDescending))
+            if (currentSortOrderFunction == nameof(CompareRowCharacterNameAscending)
+                || currentSortOrderFunction == nameof(CompareRowCharacterNameDescending))
             {
-                return;
+                UpdateSortPositionDueToValueChange(row);
             }
-            // TODO: Only sort if the page is not visible.
-            // TODO: If the page is visible and by not moving the row it ends up no longer being sorted, disable
-            // the sort order icon and set a flag to make it always pick default sort order when clicking a header.
-            SortOne(row);
         }
 
         #endregion
@@ -512,15 +509,11 @@ namespace JanSharp
 
         private void PotentiallySortChangedPermissionGroupRow(PlayersBackendRow row)
         {
-            if (currentSortOrderFunction != nameof(CompareRowPermissionGroupAscending)
-                && currentSortOrderFunction != nameof(CompareRowPermissionGroupDescending))
+            if (currentSortOrderFunction == nameof(CompareRowPermissionGroupAscending)
+                || currentSortOrderFunction == nameof(CompareRowPermissionGroupDescending))
             {
-                return;
+                UpdateSortPositionDueToValueChange(row);
             }
-            // TODO: Only sort if the page is not visible.
-            // TODO: If the page is visible and by not moving the row it ends up no longer being sorted, disable
-            // the sort order icon and set a flag to make it always pick default sort order when clicking a header.
-            SortOne(row);
         }
 
         [PermissionsEvent(PermissionsEventType.OnPermissionGroupRenamed)]
@@ -544,15 +537,12 @@ namespace JanSharp
                 row.permissionGroupLabel.text = permissionGroupName;
             }
 
-            if (affectedCount == 0)
-                return;
-            if (currentSortOrderFunction != nameof(CompareRowPermissionGroupAscending)
-                && currentSortOrderFunction != nameof(CompareRowPermissionGroupDescending))
+            if (affectedCount != 0
+                && (currentSortOrderFunction == nameof(CompareRowPermissionGroupAscending)
+                    || currentSortOrderFunction == nameof(CompareRowPermissionGroupDescending)))
             {
-                return;
+                UpdateSortPositionsDueToMultipleValueChanges();
             }
-            // TODO: Only sort if the page is not visible, when not sorting just unconditionally disable the sort icon.
-            SortAll();
         }
 
         [PermissionsEvent(PermissionsEventType.OnPermissionGroupDuplicated)]
@@ -726,7 +716,7 @@ namespace JanSharp
         public void OnPlayerNameSortHeaderClick()
         {
             currentSortOrderImage.enabled = false;
-            if (currentSortOrderFunction == nameof(CompareRowPlayerNameAscending))
+            if (!someRowsAreOutOfSortOrder && currentSortOrderFunction == nameof(CompareRowPlayerNameAscending))
             {
                 currentSortOrderFunction = nameof(CompareRowPlayerNameDescending);
                 currentSortOrderImage = sortPlayerNameDescendingImage;
@@ -743,7 +733,7 @@ namespace JanSharp
         public void OnOverriddenDisplayNameSortHeaderClick()
         {
             currentSortOrderImage.enabled = false;
-            if (currentSortOrderFunction == nameof(CompareRowOverriddenDisplayNameAscending))
+            if (!someRowsAreOutOfSortOrder && currentSortOrderFunction == nameof(CompareRowOverriddenDisplayNameAscending))
             {
                 currentSortOrderFunction = nameof(CompareRowOverriddenDisplayNameDescending);
                 currentSortOrderImage = sortOverriddenDisplayNameDescendingImage;
@@ -760,7 +750,7 @@ namespace JanSharp
         public void OnCharacterNameSortHeaderClick()
         {
             currentSortOrderImage.enabled = false;
-            if (currentSortOrderFunction == nameof(CompareRowCharacterNameAscending))
+            if (!someRowsAreOutOfSortOrder && currentSortOrderFunction == nameof(CompareRowCharacterNameAscending))
             {
                 currentSortOrderFunction = nameof(CompareRowCharacterNameDescending);
                 currentSortOrderImage = sortCharacterNameDescendingImage;
@@ -777,7 +767,7 @@ namespace JanSharp
         public void OnPermissionGroupSortHeaderClick()
         {
             currentSortOrderImage.enabled = false;
-            if (currentSortOrderFunction == nameof(CompareRowPermissionGroupAscending))
+            if (!someRowsAreOutOfSortOrder && currentSortOrderFunction == nameof(CompareRowPermissionGroupAscending))
             {
                 currentSortOrderFunction = nameof(CompareRowPermissionGroupDescending);
                 currentSortOrderImage = sortPermissionGroupDescendingImage;
@@ -823,6 +813,57 @@ namespace JanSharp
             ArrList.Insert(ref rows, ref rowsCount, row, index);
             for (int i = index; i < rowsCount; i++)
                 rows[i].index = i;
+        }
+
+        private void UpdateSortPositionDueToValueChange(PlayersBackendRow row)
+        {
+            if (!PageIsVisible)
+            {
+                SortOne(row);
+                return;
+            }
+            if (someRowsAreOutOfSortOrder || IsInSortedPosition(row))
+                return;
+            MarkAsSomeRowsNoLongerBeingInSortOrder();
+        }
+
+        private void UpdateSortPositionsDueToMultipleValueChanges()
+        {
+            if (!PageIsVisible)
+                SortAll();
+            else
+                MarkAsSomeRowsNoLongerBeingInSortOrder();
+        }
+
+        private void MarkAsSomeRowsNoLongerBeingInSortOrder()
+        {
+            currentSortOrderImage.enabled = false;
+            someRowsAreOutOfSortOrder = true;
+        }
+
+        private bool IsInSortedPosition(PlayersBackendRow row)
+        {
+            int index = row.index;
+
+            if (index > 0) // Check if it would move left.
+            {
+                compareLeft = rows[index - 1];
+                compareRight = row;
+                SendCustomEvent(currentSortOrderFunction);
+                if (!leftSortsFirst)
+                    return false;
+            }
+
+            if (index < rowsCount - 1) // Check if it would move right.
+            {
+                compareLeft = row;
+                compareRight = rows[index + 1];
+                SendCustomEvent(currentSortOrderFunction);
+                if (!leftSortsFirst)
+                    return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -882,6 +923,7 @@ namespace JanSharp
                 row.index = i;
                 row.transform.SetSiblingIndex(rowSiblingIndexBaseOffset + i);
             }
+            someRowsAreOutOfSortOrder = false;
         }
 
         #endregion

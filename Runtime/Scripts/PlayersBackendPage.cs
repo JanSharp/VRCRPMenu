@@ -14,6 +14,7 @@ namespace JanSharp
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
         [HideInInspector][SerializeField][SingletonReference] private PermissionManagerAPI permissionManager;
         [HideInInspector][SerializeField][SingletonReference] private MenuManagerAPI menuManager;
+        [HideInInspector][SerializeField][FindInParent] private MenuPageRoot menuPageRoot;
 
         private int rpPlayerDataIndex;
         private int permissionsPlayerDataIndex;
@@ -86,8 +87,7 @@ namespace JanSharp
         private uint localPlayerId;
         private bool isInitialized = false;
 
-        // TODO: Use the yet to be implemented [FindInParents] attribute to get the PageRoot this script is in rather than hard coding the internal name.
-        public bool PageIsVisible => menuManager.IsMenuOpen && menuManager.ActivePageInternalName == "rp-menu.players-backend";
+        public bool PageIsVisible => menuManager.IsMenuOpen && menuManager.ActivePageInternalName == menuPageRoot.PageInternalName;
 
         private void Start()
         {

@@ -593,9 +593,10 @@ namespace JanSharp
 
             ArrList.Clear(ref pgButtons, ref pgButtonsCount);
 
+            PermissionGroup[] permissionGroups = permissionManager.PermissionGroupsRaw;
             for (int i = 0; i < newCount; i++)
             {
-                PermissionGroup group = permissionManager.GetPermissionGroup(i); // TODO: Maybe just expose the raw array, just like core player data.
+                PermissionGroup group = permissionGroups[i];
                 PlayersBackendPermissionGroupButton button = CreatePermissionGroupButton(group);
                 InsertSortPermissionGroupButton(button);
                 pgButtonsById.Add(group.id, button);

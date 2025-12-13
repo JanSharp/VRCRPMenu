@@ -10,8 +10,25 @@ namespace JanSharp.Internal
     {
         [HideInInspector][SerializeField][SingletonReference] private LockstepAPI lockstep;
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
+        [HideInInspector][SerializeField][SingletonReference] private PermissionManagerAPI permissionManager;
 
         private int rpPlayerDataIndex;
+
+        [PermissionDefinitionReference(nameof(editDisplayNamePermissionDef))]
+        public string editDisplayNamePermissionAsset; // A guid.
+        [HideInInspector][SerializeField] private PermissionDefinition editDisplayNamePermissionDef;
+
+        [PermissionDefinitionReference(nameof(editCharacterNamePermissionDef))]
+        public string editCharacterNamePermissionAsset; // A guid.
+        [HideInInspector][SerializeField] private PermissionDefinition editCharacterNamePermissionDef;
+
+        [PermissionDefinitionReference(nameof(editPermissionGroupPermissionDef))]
+        public string editPermissionGroupPermissionAsset; // A guid.
+        [HideInInspector][SerializeField] private PermissionDefinition editPermissionGroupPermissionDef;
+
+        [PermissionDefinitionReference(nameof(deleteOfflinePlayerDataPermissionDef))]
+        public string deleteOfflinePlayerDataPermissionAsset; // A guid.
+        [HideInInspector][SerializeField] private PermissionDefinition deleteOfflinePlayerDataPermissionDef;
 
         private void Start()
         {
@@ -35,6 +52,17 @@ namespace JanSharp.Internal
             FetchPlayerDataClassIndex();
         }
 
+        private bool TryGetRPPlayerData(uint persistentId, out RPPlayerData rpPlayerData)
+        {
+            if (playerDataManager.TryGetCorePlayerDataForPersistentId(persistentId, out CorePlayerData core))
+            {
+                rpPlayerData = (RPPlayerData)core.customPlayerData[rpPlayerDataIndex];
+                return true;
+            }
+            rpPlayerData = null;
+            return false;
+        }
+
         public override void SendSetOverriddenDisplayNameIA(RPPlayerData rpPlayerData, string overriddenDisplayName)
         {
             if (overriddenDisplayName != null)
@@ -49,10 +77,14 @@ namespace JanSharp.Internal
         public void OnSetOverriddenDisplayNameIA()
         {
             uint persistentId = lockstep.ReadSmallUInt();
-            if (!playerDataManager.TryGetCorePlayerDataForPersistentId(persistentId, out CorePlayerData core))
-                return;
             string overriddenDisplayName = lockstep.ReadString();
-            SetOverriddenDisplayNameInGS((RPPlayerData)core.customPlayerData[rpPlayerDataIndex], overriddenDisplayName);
+            if (!TryGetRPPlayerData(persistentId, out RPPlayerData rpPlayerData))
+                return;
+
+            if (permissionManager.PlayerHasPermission(playerDataManager.SendingPlayerData, editDisplayNamePermissionDef))
+                SetOverriddenDisplayNameInGS(rpPlayerData, overriddenDisplayName);
+            else
+                RaiseOnRPPlayerDataOverriddenDisplayNameChangeDenied(rpPlayerData);
         }
 
         public override void SetOverriddenDisplayNameInGS(RPPlayerData rpPlayerData, string overriddenDisplayName)
@@ -82,10 +114,14 @@ namespace JanSharp.Internal
         public void OnSetCharacterNameIA()
         {
             uint persistentId = lockstep.ReadSmallUInt();
-            if (!playerDataManager.TryGetCorePlayerDataForPersistentId(persistentId, out CorePlayerData core))
-                return;
             string characterName = lockstep.ReadString();
-            SetCharacterNameInGS((RPPlayerData)core.customPlayerData[rpPlayerDataIndex], characterName);
+            if (!TryGetRPPlayerData(persistentId, out RPPlayerData rpPlayerData))
+                return;
+
+            if (permissionManager.PlayerHasPermission(playerDataManager.SendingPlayerData, editCharacterNamePermissionDef))
+                SetCharacterNameInGS(rpPlayerData, characterName);
+            else
+                RaiseOnRPPlayerDataCharacterNameChangeDenied(rpPlayerData);
         }
 
         public override void SetCharacterNameInGS(RPPlayerData rpPlayerData, string characterName)
@@ -100,10 +136,62 @@ namespace JanSharp.Internal
             RaiseOnRPPlayerDataCharacterNameChanged(rpPlayerData, prev);
         }
 
+        public override void SendSetPlayerPermissionGroupIA(CorePlayerData corePlayerData, PermissionGroup group)
+        {
+            lockstep.WriteSmallUInt(corePlayerData.persistentId); // playerId would not work for offline players.
+            lockstep.WriteSmallUInt(group.id);
+            lockstep.SendInputAction(setPlayerPermissionGroupIAId);
+        }
+
+        [HideInInspector][SerializeField] private uint setPlayerPermissionGroupIAId;
+        [LockstepInputAction(nameof(setPlayerPermissionGroupIAId))]
+        public void OnSetPlayerPermissionGroupIA()
+        {
+            uint persistentId = lockstep.ReadSmallUInt();
+            if (!permissionManager.PlayerHasPermission(playerDataManager.SendingPlayerData, editPermissionGroupPermissionDef))
+            {
+                RaiseOnPlayerPermissionGroupChangeDenied(persistentId);
+                return;
+            }
+            if (!playerDataManager.TryGetCorePlayerDataForPersistentId(persistentId, out CorePlayerData corePlayerData))
+                return;
+            uint groupId = lockstep.ReadSmallUInt();
+            if (!permissionManager.TryGetPermissionGroup(groupId, out PermissionGroup group))
+                return;
+            permissionManager.SetPlayerPermissionGroupInGS(corePlayerData, group);
+        }
+
+        public override void SendDeleteOfflinePlayerDataIA(CorePlayerData corePlayerData)
+        {
+            if (!corePlayerData.isOffline)
+                return;
+            lockstep.WriteSmallUInt(corePlayerData.persistentId);
+            lockstep.SendInputAction(deleteOfflinePlayerDataIAId);
+        }
+
+        [HideInInspector][SerializeField] private uint deleteOfflinePlayerDataIAId;
+        [LockstepInputAction(nameof(deleteOfflinePlayerDataIAId))]
+        public void OnDeleteOfflinePlayerDataIA()
+        {
+            uint persistentId = lockstep.ReadSmallUInt();
+            if (!permissionManager.PlayerHasPermission(playerDataManager.SendingPlayerData, deleteOfflinePlayerDataPermissionDef))
+            {
+                RaiseOnDeleteOfflinePlayerDataDenied(persistentId);
+                return;
+            }
+            if (!playerDataManager.TryGetCorePlayerDataForPersistentId(persistentId, out CorePlayerData corePlayerData))
+                return;
+            playerDataManager.DeleteOfflinePlayerDataInGS(corePlayerData);
+        }
+
         #region EventDispatcher
 
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onRPPlayerDataOverriddenDisplayNameChangedListeners;
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onRPPlayerDataCharacterNameChangedListeners;
+        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onRPPlayerDataOverriddenDisplayNameChangeDeniedListeners;
+        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onRPPlayerDataCharacterNameChangeDeniedListeners;
+        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onPlayerPermissionGroupChangeDeniedListeners;
+        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onDeleteOfflinePlayerDataDeniedListeners;
 
         private RPPlayerData rpPlayerDataForEvent;
         public override RPPlayerData RPPlayerDataForEvent => rpPlayerDataForEvent;
@@ -111,6 +199,9 @@ namespace JanSharp.Internal
         public override string PreviousOverriddenDisplayName => previousOverriddenDisplayName;
         private string previousCharacterName;
         public override string PreviousCharacterName => previousCharacterName;
+
+        private uint persistentIdAttemptedToBeAffected;
+        public override uint PersistentIdAttemptedToBeAffected => persistentIdAttemptedToBeAffected;
 
         private void RaiseOnRPPlayerDataOverriddenDisplayNameChanged(RPPlayerData rpPlayerDataForEvent, string previousOverriddenDisplayName)
         {
@@ -130,6 +221,38 @@ namespace JanSharp.Internal
             JanSharp.CustomRaisedEvents.Raise(ref onRPPlayerDataCharacterNameChangedListeners, nameof(PlayersBackendEventType.OnRPPlayerDataCharacterNameChanged));
             this.rpPlayerDataForEvent = null; // To prevent misuse of the API.
             this.previousCharacterName = null; // To prevent misuse of the API.
+        }
+
+        private void RaiseOnRPPlayerDataOverriddenDisplayNameChangeDenied(RPPlayerData rpPlayerDataForEvent)
+        {
+            this.rpPlayerDataForEvent = rpPlayerDataForEvent;
+            // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
+            JanSharp.CustomRaisedEvents.Raise(ref onRPPlayerDataOverriddenDisplayNameChangeDeniedListeners, nameof(PlayersBackendEventType.OnRPPlayerDataOverriddenDisplayNameChangeDenied));
+            this.rpPlayerDataForEvent = null; // To prevent misuse of the API.
+        }
+
+        private void RaiseOnRPPlayerDataCharacterNameChangeDenied(RPPlayerData rpPlayerDataForEvent)
+        {
+            this.rpPlayerDataForEvent = rpPlayerDataForEvent;
+            // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
+            JanSharp.CustomRaisedEvents.Raise(ref onRPPlayerDataCharacterNameChangeDeniedListeners, nameof(PlayersBackendEventType.OnRPPlayerDataCharacterNameChangeDenied));
+            this.rpPlayerDataForEvent = null; // To prevent misuse of the API.
+        }
+
+        private void RaiseOnPlayerPermissionGroupChangeDenied(uint persistentIdAttemptedToBeAffected)
+        {
+            this.persistentIdAttemptedToBeAffected = persistentIdAttemptedToBeAffected;
+            // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
+            JanSharp.CustomRaisedEvents.Raise(ref onPlayerPermissionGroupChangeDeniedListeners, nameof(PlayersBackendEventType.OnPlayerPermissionGroupChangeDenied));
+            this.persistentIdAttemptedToBeAffected = 0u; // To prevent misuse of the API.
+        }
+
+        private void RaiseOnDeleteOfflinePlayerDataDenied(uint persistentIdAttemptedToBeAffected)
+        {
+            this.persistentIdAttemptedToBeAffected = persistentIdAttemptedToBeAffected;
+            // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
+            JanSharp.CustomRaisedEvents.Raise(ref onDeleteOfflinePlayerDataDeniedListeners, nameof(PlayersBackendEventType.OnDeleteOfflinePlayerDataDenied));
+            this.persistentIdAttemptedToBeAffected = 0u; // To prevent misuse of the API.
         }
 
         #endregion

@@ -2,6 +2,7 @@ using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
 using VRC.SDK3.Data;
+using VRC.SDKBase;
 
 namespace JanSharp
 {
@@ -77,10 +78,12 @@ namespace JanSharp
         private PlayersBackendRow selectedRowForPermissionGroupEditing;
         private PlayersBackendPermissionGroupButton selectedPermissionGroupButton;
 
+        private uint localPlayerId;
         private bool isInitialized = false;
 
         private void Start()
         {
+            localPlayerId = (uint)Networking.LocalPlayer.playerId;
             currentSortOrderFunction = nameof(CompareRowPlayerNameAscending);
             currentSortOrderImage = sortPlayerNameAscendingImage;
             currentSortOrderImage.enabled = true;
@@ -174,6 +177,17 @@ namespace JanSharp
 
         #region RowsManagement
 
+        private bool TryGetRow(uint persistentId, out PlayersBackendRow row)
+        {
+            if (rowsByPersistentId.TryGetValue(persistentId, out DataToken rowToken))
+            {
+                row = (PlayersBackendRow)rowToken.Reference;
+                return true;
+            }
+            row = null;
+            return false;
+        }
+
         [PlayerDataEvent(PlayerDataEventType.OnPlayerDataCreated)]
         public void OnPlayerDataCreated()
         {
@@ -201,9 +215,8 @@ namespace JanSharp
 
         private void OnPlayerDataOfflineStateChanged(CorePlayerData core)
         {
-            if (!rowsByPersistentId.TryGetValue(core.persistentId, out DataToken rowToken))
+            if (!TryGetRow(core.persistentId, out PlayersBackendRow row))
                 return; // Some system did something weird.
-            PlayersBackendRow row = (PlayersBackendRow)rowToken.Reference;
             row.deleteButton.interactable = core.isOffline;
             row.deleteLabel.interactable = core.isOffline;
         }
@@ -216,7 +229,7 @@ namespace JanSharp
             CorePlayerData core = playerDataManager.PlayerDataForEvent;
             if (core == playerDataAwaitingDeleteConfirmation)
                 menuManager.ClosePopup(confirmDeletePopup, doCallback: true);
-            if (!rowsByPersistentId.Remove(core.persistentId, out DataToken rowToken))
+            if (!TryGetRow(core.persistentId, out PlayersBackendRow row))
             {
                 // Somebody could delete player data inside of OnPlayerDataImportFinished, but before
                 // our handler has ran, thus deleting player data which we are not yet aware of.
@@ -226,7 +239,6 @@ namespace JanSharp
                 // (Once the API to create offline player data exists.)
                 return;
             }
-            PlayersBackendRow row = (PlayersBackendRow)rowToken.Reference;
             row.gameObject.SetActive(false);
             row.transform.SetAsLastSibling();
             ArrList.Add(ref unusedRows, ref unusedRowsCount, row);
@@ -322,13 +334,23 @@ namespace JanSharp
             playersBackendManager.SendSetOverriddenDisplayNameIA(row.rpPlayerData, inputText);
         }
 
+        [PlayersBackendEvent(PlayersBackendEventType.OnRPPlayerDataOverriddenDisplayNameChangeDenied)]
+        public void OnRPPlayerDataOverriddenDisplayNameChangeDenied()
+        {
+            if (lockstep.SendingPlayerId != localPlayerId)
+                return; // Only the sending player has to reset their latency state back to game state.
+            RPPlayerData rpPlayerData = playersBackendManager.RPPlayerDataForEvent;
+            if (!TryGetRow(rpPlayerData.core.persistentId, out PlayersBackendRow row))
+                return; // Some system did something weird.
+            row.overriddenDisplayNameField.SetTextWithoutNotify(rpPlayerData.overriddenDisplayName);
+        }
+
         [PlayersBackendEvent(PlayersBackendEventType.OnRPPlayerDataOverriddenDisplayNameChanged)]
         public void OnRPPlayerDataOverriddenDisplayNameChanged()
         {
             RPPlayerData rpPlayerData = playersBackendManager.RPPlayerDataForEvent;
-            if (!rowsByPersistentId.TryGetValue(rpPlayerData.core.persistentId, out DataToken rowToken))
+            if (!TryGetRow(rpPlayerData.core.persistentId, out PlayersBackendRow row))
                 return; // Some system did something weird.
-            PlayersBackendRow row = (PlayersBackendRow)rowToken.Reference;
             row.sortableOverriddenDisplayName = rpPlayerData.PlayerDisplayName.ToLower();
             row.overriddenDisplayNameField.SetTextWithoutNotify(rpPlayerData.overriddenDisplayName);
 
@@ -353,13 +375,23 @@ namespace JanSharp
             playersBackendManager.SendSetCharacterNameIA(row.rpPlayerData, inputText);
         }
 
+        [PlayersBackendEvent(PlayersBackendEventType.OnRPPlayerDataCharacterNameChangeDenied)]
+        public void OnRPPlayerDataCharacterNameChangeDenied()
+        {
+            if (lockstep.SendingPlayerId != localPlayerId)
+                return; // Only the sending player has to reset their latency state back to game state.
+            RPPlayerData rpPlayerData = playersBackendManager.RPPlayerDataForEvent;
+            if (!TryGetRow(rpPlayerData.core.persistentId, out PlayersBackendRow row))
+                return; // Some system did something weird.
+            row.characterNameField.SetTextWithoutNotify(rpPlayerData.characterName);
+        }
+
         [PlayersBackendEvent(PlayersBackendEventType.OnRPPlayerDataCharacterNameChanged)]
         public void OnRPPlayerDataCharacterNameChanged()
         {
             RPPlayerData rpPlayerData = playersBackendManager.RPPlayerDataForEvent;
-            if (!rowsByPersistentId.TryGetValue(rpPlayerData.core.persistentId, out DataToken rowToken))
+            if (!TryGetRow(rpPlayerData.core.persistentId, out PlayersBackendRow row))
                 return; // Some system did something weird.
-            PlayersBackendRow row = (PlayersBackendRow)rowToken.Reference;
             string characterName = rpPlayerData.characterName;
             row.sortableCharacterName = characterName.ToLower();
             row.characterNameField.SetTextWithoutNotify(characterName);
@@ -428,20 +460,31 @@ namespace JanSharp
             // actually runs it's going to show the "wrong" group (the one the player is still apart of in the
             // game state), and it would only update once the IA runs.
             SetPermissionGroupLabelText(selectedRowForPermissionGroupEditing, button.permissionGroup.groupName);
-            permissionManager.SendSetPlayerPermissionGroupIA(
+            playersBackendManager.SendSetPlayerPermissionGroupIA(
                 selectedRowForPermissionGroupEditing.permissionsPlayerData.core,
                 button.permissionGroup);
             menuManager.ClosePopup(permissionGroupPopup, doCallback: true);
+        }
+
+        [PlayersBackendEvent(PlayersBackendEventType.OnPlayerPermissionGroupChangeDenied)]
+        public void OnPlayerPermissionGroupChangeDenied()
+        {
+            if (lockstep.SendingPlayerId != localPlayerId)
+                return; // Only the sending player has to reset their latency state back to game state.
+            PermissionsPlayerData permissionsPlayerData = permissionManager.PlayerDataForEvent;
+            if (!TryGetRow(permissionsPlayerData.core.persistentId, out PlayersBackendRow row))
+                return; // Some system did something weird.
+            SetPermissionGroupLabelText(row, permissionsPlayerData.permissionGroup.groupName);
         }
 
         [PermissionsEvent(PermissionsEventType.OnPlayerPermissionGroupChanged)]
         public void OnPlayerPermissionGroupChanged()
         {
             PermissionsPlayerData permissionsPlayerData = permissionManager.PlayerDataForEvent;
-            if (!rowsByPersistentId.TryGetValue(permissionsPlayerData.core.persistentId, out DataToken rowToken))
+            if (!TryGetRow(permissionsPlayerData.core.persistentId, out PlayersBackendRow row))
                 return; // Some system did something weird.
-            PlayersBackendRow row = (PlayersBackendRow)rowToken.Reference;
             SetPermissionGroupLabelText(row, permissionsPlayerData.permissionGroup.groupName);
+            PotentiallySortChangedPermissionGroupRow(row);
 
             if (row != selectedRowForPermissionGroupEditing)
                 return;
@@ -459,7 +502,10 @@ namespace JanSharp
         {
             row.sortablePermissionGroupName = groupName.ToLower();
             row.permissionGroupLabel.text = groupName;
+        }
 
+        private void PotentiallySortChangedPermissionGroupRow(PlayersBackendRow row)
+        {
             if (currentSortOrderFunction != nameof(CompareRowPermissionGroupAscending)
                 && currentSortOrderFunction != nameof(CompareRowPermissionGroupDescending))
             {
@@ -657,7 +703,9 @@ namespace JanSharp
             menuManager.ClosePopup(confirmDeletePopup, doCallback: true); // Clears rowAwaitingDeleteConfirmation.
             if (toDelete == null || toDelete.isDeleted) // Shouldn't really be possible but just to be sure.
                 return;
-            playerDataManager.SendDeleteOfflinePlayerDataIA(toDelete);
+            playersBackendManager.SendDeleteOfflinePlayerDataIA(toDelete);
+            // Don't need to listen to the denied event because row deletion is not latency hidden.
+            // Thank goodness.
         }
 
         #endregion

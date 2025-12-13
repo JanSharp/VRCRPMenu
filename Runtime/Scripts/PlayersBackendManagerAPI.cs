@@ -20,6 +20,38 @@ namespace JanSharp
         /// <para>Game state safe.</para>
         /// </summary>
         OnRPPlayerDataCharacterNameChanged,
+        /// <summary>
+        /// <para>Use <see cref="PlayersBackendManagerAPI.RPPlayerDataForEvent"/> to get the player data for
+        /// which the <see cref="RPPlayerData.overriddenDisplayName"/> was attempted to be changed.</para>
+        /// <para>Runs inside of an input action, making API properties for input actions from lockstep or
+        /// other systems available.</para>
+        /// <para>Game state safe.</para>
+        /// </summary>
+        OnRPPlayerDataOverriddenDisplayNameChangeDenied,
+        /// <summary>
+        /// <para>Use <see cref="PlayersBackendManagerAPI.RPPlayerDataForEvent"/> to get the player data for
+        /// which the <see cref="RPPlayerData.characterName"/> was attempted to be changed.</para>
+        /// <para>Runs inside of an input action, making API properties for input actions from lockstep or
+        /// other systems available.</para>
+        /// <para>Game state safe.</para>
+        /// </summary>
+        OnRPPlayerDataCharacterNameChangeDenied,
+        /// <summary>
+        /// <para>Use <see cref="PlayersBackendManagerAPI.PersistentIdAttemptedToBeAffected"/> to get the
+        /// player which was attempted to have their permission group changed.</para>
+        /// <para>Runs inside of an input action, making API properties for input actions from lockstep or
+        /// other systems available.</para>
+        /// <para>Game state safe.</para>
+        /// </summary>
+        OnPlayerPermissionGroupChangeDenied,
+        /// <summary>
+        /// <para>Use <see cref="PlayersBackendManagerAPI.PersistentIdAttemptedToBeAffected"/> to get the
+        /// player which was attempted to be deleted.</para>
+        /// <para>Runs inside of an input action, making API properties for input actions from lockstep or
+        /// other systems available.</para>
+        /// <para>Game state safe.</para>
+        /// </summary>
+        OnDeleteOfflinePlayerDataDenied,
     }
 
     [System.AttributeUsage(System.AttributeTargets.Method, Inherited = true, AllowMultiple = false)]
@@ -49,9 +81,28 @@ namespace JanSharp
         public abstract void SetCharacterNameInGS(RPPlayerData rpPlayerData, string characterName);
 
         /// <summary>
+        /// <para>Effectively the same as
+        /// <see cref="PermissionManagerAPI.SendSetPlayerPermissionGroupIA(CorePlayerData, PermissionGroup)"/>
+        /// except that it raises <see cref="PlayersBackendEventType.OnPlayerPermissionGroupChangeDenied"/>
+        /// instead if the sending player lacks permission to do so.</para>
+        /// </summary>
+        /// <param name="corePlayerData"></param>
+        /// <param name="group"></param>
+        public abstract void SendSetPlayerPermissionGroupIA(CorePlayerData corePlayerData, PermissionGroup group);
+        /// <summary>
+        /// <para>Effectively the same as
+        /// <see cref="PlayerDataManagerAPI.SendDeleteOfflinePlayerDataIA(CorePlayerData)"/> except that it
+        /// raises <see cref="PlayersBackendEventType.OnDeleteOfflinePlayerDataDenied"/> instead if the
+        /// sending player lacks permission to do so.</para>
+        /// </summary>
+        /// <param name="corePlayerData"></param>
+        public abstract void SendDeleteOfflinePlayerDataIA(CorePlayerData corePlayerData);
+
+        /// <summary>
         /// <para>Usable inside of
         /// <see cref="PlayersBackendEventType.OnRPPlayerDataOverriddenDisplayNameChanged"/> and
-        /// <see cref="PlayersBackendEventType.OnRPPlayerDataCharacterNameChanged"/>.</para>
+        /// <see cref="PlayersBackendEventType.OnRPPlayerDataCharacterNameChanged"/> and their denied
+        /// variants.</para>
         /// <para>Game state safe.</para>
         /// </summary>
         public abstract RPPlayerData RPPlayerDataForEvent { get; }
@@ -67,5 +118,13 @@ namespace JanSharp
         /// <para>Game state safe.</para>
         /// </summary>
         public abstract string PreviousCharacterName { get; }
+
+        /// <summary>
+        /// <para>Usable inside of
+        /// <see cref="PlayersBackendEventType.OnPlayerPermissionGroupChangeDenied"/> and
+        /// <see cref="PlayersBackendEventType.OnDeleteOfflinePlayerDataDenied"/>.</para>
+        /// <para>Game state safe.</para>
+        /// </summary>
+        public abstract uint PersistentIdAttemptedToBeAffected { get; }
     }
 }

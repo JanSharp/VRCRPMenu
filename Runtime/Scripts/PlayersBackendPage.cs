@@ -567,9 +567,8 @@ namespace JanSharp
             CalculatePermissionGroupsPopupHeight();
         }
 
-        // TODO: Maybe add a permission manager import finished event just like for player data.
-        [LockstepEvent(LockstepEventType.OnImportFinished)]
-        public void OnImportFinished()
+        [PermissionsEvent(PermissionsEventType.OnPermissionManagerImportFinished)]
+        public void OnPermissionManagerImportFinished()
         {
             RebuildPermissionGroupButtons();
         }

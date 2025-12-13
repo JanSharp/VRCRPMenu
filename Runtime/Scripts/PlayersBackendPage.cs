@@ -20,6 +20,8 @@ namespace JanSharp
 
         public GameObject rowPrefab;
         public Transform rowsParent;
+        [Min(0)]
+        public int rowSiblingIndexBaseOffset;
         public Image sortPlayerNameAscendingImage;
         public Image sortPlayerNameDescendingImage;
         public Image sortOverriddenDisplayNameAscendingImage;
@@ -33,6 +35,8 @@ namespace JanSharp
         public RectTransform permissionGroupPopup;
         public GameObject permissionGroupPrefab;
         public Transform permissionGroupsParent;
+        [Min(0)]
+        public int permissionGroupButtonSiblingIndexBaseOffset;
         public ScrollRect permissionGroupsScrollRect;
         private float permissionGroupButtonHeight;
         private float maxPermissionGroupsPopupHeight;
@@ -244,15 +248,8 @@ namespace JanSharp
             ArrList.Add(ref unusedRows, ref unusedRowsCount, row);
             int index = row.index;
             ArrList.RemoveAt(ref rows, ref rowsCount, index);
-            bool indexIsOdd = (index % 2) == 0; // index is 0 based.
             for (int i = index; i < rowsCount; i++)
-            {
-                row = rows[i];
-                row.index = i;
-                row.oddRowImage.enabled = indexIsOdd;
-                indexIsOdd = !indexIsOdd;
-                row.evenRowImage.enabled = indexIsOdd;
-            }
+                rows[i].index = i;
         }
 
         [PlayerDataEvent(PlayerDataEventType.OnPlayerDataImportFinished)]
@@ -656,7 +653,7 @@ namespace JanSharp
         {
             if (pgButtonsCount == 0)
             {
-                button.transform.SetSiblingIndex(1); // The prefab resides at 0.
+                button.transform.SetSiblingIndex(permissionGroupButtonSiblingIndexBaseOffset);
                 ArrList.Add(ref pgButtons, ref pgButtonsCount, button);
                 return;
             }
@@ -668,7 +665,7 @@ namespace JanSharp
                 index--;
             }
             while (index > 0);
-            button.transform.SetSiblingIndex(index + 1); // +1 because the prefab resides at index 0.
+            button.transform.SetSiblingIndex(permissionGroupButtonSiblingIndexBaseOffset + index);
             ArrList.Insert(ref pgButtons, ref pgButtonsCount, button, index);
         }
 
@@ -806,11 +803,9 @@ namespace JanSharp
         {
             if (rowsCount == 0)
             {
-                row.transform.SetSiblingIndex(1); // The prefab resides at 0.
+                row.transform.SetSiblingIndex(rowSiblingIndexBaseOffset);
                 ArrList.Add(ref rows, ref rowsCount, row);
                 row.index = 0;
-                row.oddRowImage.enabled = true;
-                row.evenRowImage.enabled = false;
                 return;
             }
             compareRight = row;
@@ -824,17 +819,10 @@ namespace JanSharp
                 index--;
             }
             while (index > 0);
-            row.transform.SetSiblingIndex(index + 1); // +1 because the prefab resides at index 0.
+            row.transform.SetSiblingIndex(rowSiblingIndexBaseOffset + index);
             ArrList.Insert(ref rows, ref rowsCount, row, index);
-            bool indexIsOdd = (index % 2) == 0; // index is 0 based.
             for (int i = index; i < rowsCount; i++)
-            {
-                row = rows[i];
-                row.index = i;
-                row.oddRowImage.enabled = indexIsOdd;
-                indexIsOdd = !indexIsOdd;
-                row.evenRowImage.enabled = indexIsOdd;
-            }
+                rows[i].index = i;
         }
 
         /// <summary>
@@ -845,7 +833,6 @@ namespace JanSharp
         {
             int index = row.index;
             int initialIndex = index;
-            bool indexIsOdd = (index % 2) == 0; // index is 0 based.
 
             while (index > 0) // Try move left.
             {
@@ -856,18 +843,13 @@ namespace JanSharp
                     break;
                 rows[index] = compareLeft;
                 compareLeft.index = index;
-                compareLeft.oddRowImage.enabled = indexIsOdd;
-                indexIsOdd = !indexIsOdd;
-                compareLeft.evenRowImage.enabled = indexIsOdd;
                 index--;
             }
             if (index != initialIndex)
             {
-                row.transform.SetSiblingIndex(index + 1); // +1 because the prefab resides at index 0.
+                row.transform.SetSiblingIndex(rowSiblingIndexBaseOffset + index);
                 rows[index] = row;
                 row.index = index;
-                row.oddRowImage.enabled = indexIsOdd;
-                row.evenRowImage.enabled = !indexIsOdd;
                 return;
             }
 
@@ -880,18 +862,13 @@ namespace JanSharp
                     break;
                 rows[index] = compareRight;
                 compareRight.index = index;
-                compareRight.oddRowImage.enabled = indexIsOdd;
-                indexIsOdd = !indexIsOdd;
-                compareRight.evenRowImage.enabled = indexIsOdd;
                 index++;
             }
             if (index != initialIndex)
             {
-                row.transform.SetSiblingIndex(index + 1); // +1 because the prefab resides at index 0.
+                row.transform.SetSiblingIndex(rowSiblingIndexBaseOffset + index);
                 rows[index] = row;
                 row.index = index;
-                row.oddRowImage.enabled = indexIsOdd;
-                row.evenRowImage.enabled = !indexIsOdd;
                 return;
             }
         }
@@ -899,15 +876,11 @@ namespace JanSharp
         private void SortAll()
         {
             MergeSort(currentSortOrderFunction);
-            bool indexIsOdd = true; // index is 0 based.
             for (int i = 0; i < rowsCount; i++)
             {
                 PlayersBackendRow row = rows[i];
                 row.index = i;
-                row.oddRowImage.enabled = indexIsOdd;
-                indexIsOdd = !indexIsOdd;
-                row.evenRowImage.enabled = indexIsOdd;
-                row.transform.SetSiblingIndex(i + 1); // +1 because the prefab resides at index 0.
+                row.transform.SetSiblingIndex(rowSiblingIndexBaseOffset + i);
             }
         }
 

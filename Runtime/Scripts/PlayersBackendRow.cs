@@ -30,14 +30,6 @@ namespace JanSharp
         public Transform confirmDeletePopupLocation;
         public Image activeRowHighlightImage;
 
-        public void SetIndex(int index)
-        {
-            this.index = index;
-            bool isOdd = (index % 2) == 0; // index is 0 based.
-            oddRowImage.enabled = isOdd;
-            evenRowImage.enabled = !isOdd;
-        }
-
         public void OnOverriddenDisplayNameChanged() => page.OnOverriddenDisplayNameChanged(this);
         public void OnCharacterNameChanged() => page.OnCharacterNameChanged(this);
         public void OnPermissionGroupClick() => page.OnPermissionGroupClick(this);

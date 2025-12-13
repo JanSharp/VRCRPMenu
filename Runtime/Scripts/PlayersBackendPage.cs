@@ -244,8 +244,15 @@ namespace JanSharp
             ArrList.Add(ref unusedRows, ref unusedRowsCount, row);
             int index = row.index;
             ArrList.RemoveAt(ref rows, ref rowsCount, index);
+            bool indexIsOdd = (index % 2) == 0; // index is 0 based.
             for (int i = index; i < rowsCount; i++)
-                rows[i].SetIndex(i);
+            {
+                row = rows[i];
+                row.index = i;
+                row.oddRowImage.enabled = indexIsOdd;
+                indexIsOdd = !indexIsOdd;
+                row.evenRowImage.enabled = indexIsOdd;
+            }
         }
 
         [PlayerDataEvent(PlayerDataEventType.OnPlayerDataImportFinished)]
@@ -801,7 +808,9 @@ namespace JanSharp
             {
                 row.transform.SetSiblingIndex(1); // The prefab resides at 0.
                 ArrList.Add(ref rows, ref rowsCount, row);
-                row.SetIndex(0);
+                row.index = 0;
+                row.oddRowImage.enabled = true;
+                row.evenRowImage.enabled = false;
                 return;
             }
             compareRight = row;
@@ -817,8 +826,15 @@ namespace JanSharp
             while (index > 0);
             row.transform.SetSiblingIndex(index + 1); // +1 because the prefab resides at index 0.
             ArrList.Insert(ref rows, ref rowsCount, row, index);
+            bool indexIsOdd = (index % 2) == 0; // index is 0 based.
             for (int i = index; i < rowsCount; i++)
-                rows[i].SetIndex(i);
+            {
+                row = rows[i];
+                row.index = i;
+                row.oddRowImage.enabled = indexIsOdd;
+                indexIsOdd = !indexIsOdd;
+                row.evenRowImage.enabled = indexIsOdd;
+            }
         }
 
         /// <summary>
@@ -829,6 +845,7 @@ namespace JanSharp
         {
             int index = row.index;
             int initialIndex = index;
+            bool indexIsOdd = (index % 2) == 0; // index is 0 based.
 
             while (index > 0) // Try move left.
             {
@@ -838,14 +855,19 @@ namespace JanSharp
                 if (leftSortsFirst)
                     break;
                 rows[index] = compareLeft;
-                compareLeft.SetIndex(index);
+                compareLeft.index = index;
+                compareLeft.oddRowImage.enabled = indexIsOdd;
+                indexIsOdd = !indexIsOdd;
+                compareLeft.evenRowImage.enabled = indexIsOdd;
                 index--;
             }
             if (index != initialIndex)
             {
                 row.transform.SetSiblingIndex(index + 1); // +1 because the prefab resides at index 0.
                 rows[index] = row;
-                row.SetIndex(index);
+                row.index = index;
+                row.oddRowImage.enabled = indexIsOdd;
+                row.evenRowImage.enabled = !indexIsOdd;
                 return;
             }
 
@@ -857,14 +879,19 @@ namespace JanSharp
                 if (leftSortsFirst)
                     break;
                 rows[index] = compareRight;
-                compareRight.SetIndex(index);
+                compareRight.index = index;
+                compareRight.oddRowImage.enabled = indexIsOdd;
+                indexIsOdd = !indexIsOdd;
+                compareRight.evenRowImage.enabled = indexIsOdd;
                 index++;
             }
             if (index != initialIndex)
             {
                 row.transform.SetSiblingIndex(index + 1); // +1 because the prefab resides at index 0.
                 rows[index] = row;
-                row.SetIndex(index);
+                row.index = index;
+                row.oddRowImage.enabled = indexIsOdd;
+                row.evenRowImage.enabled = !indexIsOdd;
                 return;
             }
         }
@@ -872,10 +899,14 @@ namespace JanSharp
         private void SortAll()
         {
             MergeSort(currentSortOrderFunction);
+            bool indexIsOdd = true; // index is 0 based.
             for (int i = 0; i < rowsCount; i++)
             {
-                var row = rows[i];
-                row.SetIndex(i);
+                PlayersBackendRow row = rows[i];
+                row.index = i;
+                row.oddRowImage.enabled = indexIsOdd;
+                indexIsOdd = !indexIsOdd;
+                row.evenRowImage.enabled = indexIsOdd;
                 row.transform.SetSiblingIndex(i + 1); // +1 because the prefab resides at index 0.
             }
         }

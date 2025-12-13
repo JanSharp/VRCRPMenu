@@ -13,7 +13,7 @@ namespace JanSharp
         [HideInInspector][SerializeField][SingletonReference] private PlayersBackendManagerAPI playersBackendManager;
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
         [HideInInspector][SerializeField][SingletonReference] private PermissionManagerAPI permissionManager;
-        [HideInInspector][SerializeField][SingletonReference] private MenuManager menuManager;
+        [HideInInspector][SerializeField][SingletonReference] private MenuManagerAPI menuManager;
 
         private int rpPlayerDataIndex;
         private int permissionsPlayerDataIndex;

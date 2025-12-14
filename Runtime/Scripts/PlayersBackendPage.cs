@@ -280,6 +280,7 @@ namespace JanSharp
                     row.transform.SetAsLastSibling();
                 }
 
+            ArrList.EnsureCapacity(ref rows, newCount);
             CorePlayerData[] allCorePlayerData = playerDataManager.AllCorePlayerDataRaw;
             for (int i = 0; i < newCount; i++)
             {
@@ -591,6 +592,7 @@ namespace JanSharp
                 }
 
             ArrList.Clear(ref pgButtons, ref pgButtonsCount);
+            ArrList.EnsureCapacity(ref pgButtons, newCount);
 
             PermissionGroup[] permissionGroups = permissionManager.PermissionGroupsRaw;
             for (int i = 0; i < newCount; i++)

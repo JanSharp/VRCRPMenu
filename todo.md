@@ -8,12 +8,17 @@
 - [ ] Should there be an indicator for when a player is online or offline in the backend page outside of the delete button being greyed out?
 - [x] Check permissions for all interactions in the players backend manager, when running the IAs. Raise events in case an action got ignored so external latency states can be reset
 - [ ] reduce the amount of raycast targets
-- [ ] experiment with sub canvases? but idk how they would even help with scrolling requiring layout changes? Unless the entire content can be a sub canvas? Experiment.
-- [ ] switch showing and hiding of pages as well as the whole menu to disabling objects
-- [ ] genuinely consider making custom layout elements... why the actual hell is that something I have to consider? Like how. I just don't understand how Unity's components can be so terrible. Or are they? Apparently I cannot trust whatever people say on the internet about UI's anyway because Canvas Groups most certainly have measurable - noticeable even - performance impact when used to disable and hide UI. But if layout groups really are using GetComponent every time, and I can actually look at source code, probably, to double check that myself, then yea actually horrifying
+- [x] experiment with sub canvases? but idk how they would even help with scrolling requiring layout changes? Unless the entire content can be a sub canvas? Experiment. - See [ui-performance](ui-performance.md)
+- [x] genuinely consider making custom layout elements... why the actual hell is that something I have to consider? Like how. I just don't understand how Unity's components can be so terrible. Or are they? Apparently I cannot trust whatever people say on the internet about UI's anyway because Canvas Groups most certainly have measurable - noticeable even - performance impact when used to disable and hide UI. But if layout groups really are using GetComponent every time, and I can actually look at source code, probably, to double check that myself, then yea actually horrifying
+  - Don't. At most make "build time layout groups" for any static layout. They only affect performance when layout elements have to mark layout systems as dirty, which is primarily only problematic when enabling or disabling large hierarchies. Only bother optimizing this if there are noticeable and bothersome lag spikes
 - [ ] test having 89 players and then importing the 4 players again, idk how 2 out of 4 of the show by permission resolvers ended up not working for just 1 row in that case. very random
 - [ ] most likely remove all of the show by permission scripts from the rows and instead have the page script handle the enabling and disabling. It's just all around more performant that way, both creation of rows as well as changing permissions
 - [ ] experiment with enabling and disabling elements as you scroll through the list, only having the visible ones enabled basically
+- [x] ~~do not use auto size unless necessary~~ sure, but don't fret it too much. It would only reduce lag spikes such as when changing permissions, outside of that it hardly matters which causes layout rebuilds which changes the size of text rects which make text rebuild
+- [ ] could disable all Caret game objects as they are useless in VRChat and just eat cull performance
+  - find them after instantiating a row, since they get created OnEnable and don't exist at build time (or scene load generically)
+- [x] test if disabling the root canvas stops all performance drain including moving - it does not, culling cost persists
+- [x] test if moving causes layout set dirty calls made by images and text (graphics) - it does not
 
 - [ ] How to truly prevent locking yourself out of permissions to edit permissions
   - editing the permission values themselves could lock you out

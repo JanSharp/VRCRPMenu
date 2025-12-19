@@ -7,7 +7,7 @@
 - [ ] Maybe actually just disable (make non interactable) the 3 columns that are tied to permissions in the players backend page rather than hiding them, except for the delete column that would go hidden
 - [ ] Should there be an indicator for when a player is online or offline in the backend page outside of the delete button being greyed out?
 - [x] Check permissions for all interactions in the players backend manager, when running the IAs. Raise events in case an action got ignored so external latency states can be reset
-- [ ] reduce the amount of raycast targets
+- [x] reduce the amount of raycast targets
 - [x] experiment with sub canvases? but idk how they would even help with scrolling requiring layout changes? Unless the entire content can be a sub canvas? Experiment. - See [ui-performance](ui-performance.md)
 - [x] genuinely consider making custom layout elements... why the actual hell is that something I have to consider? Like how. I just don't understand how Unity's components can be so terrible. Or are they? Apparently I cannot trust whatever people say on the internet about UI's anyway because Canvas Groups most certainly have measurable - noticeable even - performance impact when used to disable and hide UI. But if layout groups really are using GetComponent every time, and I can actually look at source code, probably, to double check that myself, then yea actually horrifying
   - Don't. At most make "build time layout groups" for any static layout. They only affect performance when layout elements have to mark layout systems as dirty, which is primarily only problematic when enabling or disabling large hierarchies. Only bother optimizing this if there are noticeable and bothersome lag spikes
@@ -19,6 +19,7 @@
   - find them after instantiating a row, since they get created OnEnable and don't exist at build time (or scene load generically)
 - [x] test if disabling the root canvas stops all performance drain including moving - it does not, culling cost persists
 - [x] test if moving causes layout set dirty calls made by images and text (graphics) - it does not
+- [ ] clamp the velocity of the scroll rect, even though it only matters for desktop since in VR it's constantly rebuilding batches anyway
 
 - [ ] How to truly prevent locking yourself out of permissions to edit permissions
   - editing the permission values themselves could lock you out

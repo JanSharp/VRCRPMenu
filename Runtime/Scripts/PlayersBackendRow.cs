@@ -21,7 +21,9 @@ namespace JanSharp
         public TextMeshProUGUI playerNameLabel;
         public TMP_InputField overriddenDisplayNameField;
         public TextMeshProUGUI overriddenDisplayNameLabel;
+        public Transform overriddenDisplayNameCaretParent;
         public TMP_InputField characterNameField;
+        public Transform characterNameCaretParent;
         public RectTransform permissionGroupRect;
         public TextMeshProUGUI permissionGroupLabel;
         public Transform permissionGroupPopupLocation;
@@ -38,5 +40,25 @@ namespace JanSharp
         public void OnCharacterNameChanged() => page.OnCharacterNameChanged(this);
         public void OnPermissionGroupClick() => page.OnPermissionGroupClick(this);
         public void OnDeleteClick() => page.OnDeleteClick(this);
+
+        private void Start()
+        {
+            SendCustomEvent(nameof(StartDelayed));
+        }
+
+        public void StartDelayed()
+        {
+            DeactivateCaret(overriddenDisplayNameCaretParent);
+            DeactivateCaret(characterNameCaretParent);
+        }
+
+        private void DeactivateCaret(Transform parent)
+        {
+            if (parent.childCount == 0)
+                return;
+            Transform caret = parent.GetChild(0);
+            if (caret.name == "Caret")
+                caret.gameObject.SetActive(false);
+        }
     }
 }

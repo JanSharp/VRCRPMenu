@@ -16,7 +16,7 @@
 - [x] most likely remove all of the show by permission scripts from the rows and instead have the page script handle the enabling and disabling. It's just all around more performant that way, both creation of rows as well as changing permissions
 - [x] experiment with enabling and disabling elements as you scroll through the list, only having the visible ones enabled basically
 - [x] ~~do not use auto size unless necessary~~ sure, but don't fret it too much. It would only reduce lag spikes such as when changing permissions, outside of that it hardly matters which causes layout rebuilds which changes the size of text rects which make text rebuild
-- [ ] could disable all Caret game objects as they are useless in VRChat and just eat cull performance
+- [x] could disable all Caret game objects as they are useless in VRChat and just eat cull performance
   - find them after instantiating a row, since they get created OnEnable and don't exist at build time (or scene load generically)
 - [x] test if disabling the root canvas stops all performance drain including moving - it does not, culling cost persists
 - [x] test if moving causes layout set dirty calls made by images and text (graphics) - it does not

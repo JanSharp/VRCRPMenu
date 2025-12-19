@@ -21,9 +21,8 @@ namespace JanSharp
 
         public GameObject rowPrefab;
         public PlayersBackendRow rowPrefabScript;
-        public Transform rowsParent;
-        public RectTransform rowsViewport;
         public RectTransform rowsContent;
+        public RectTransform rowsViewport;
         private float rowHeight;
         private float negativeRowHeight;
         private float currentRowsContentHeight;
@@ -369,7 +368,7 @@ namespace JanSharp
             if (unusedRowsCount != 0)
                 return ArrList.RemoveAt(ref unusedRows, ref unusedRowsCount, unusedRowsCount - 1);
             GameObject go = Instantiate(rowPrefab);
-            go.transform.SetParent(rowsParent, worldPositionStays: false);
+            go.transform.SetParent(rowsContent, worldPositionStays: false);
             PlayersBackendRow row = go.GetComponent<PlayersBackendRow>();
             row.activeRowHighlightImage.CrossFadeAlpha(0f, 0f, ignoreTimeScale: true);
             return row;

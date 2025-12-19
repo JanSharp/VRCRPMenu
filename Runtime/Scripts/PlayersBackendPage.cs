@@ -20,6 +20,7 @@ namespace JanSharp
         private int permissionsPlayerDataIndex;
 
         public GameObject rowPrefab;
+        public PlayersBackendRow rowPrefabScript;
         public Transform rowsParent;
         [Min(0)]
         public int rowSiblingIndexBaseOffset;
@@ -160,13 +161,18 @@ namespace JanSharp
 
         public override void Resolve()
         {
-            if (!editDisplayNamePermissionDef.valueForLocalPlayer
+            bool displayNameValue = editDisplayNamePermissionDef.valueForLocalPlayer;
+            bool characterNameValue = editCharacterNamePermissionDef.valueForLocalPlayer;
+            bool permissionGroupValue = editPermissionGroupPermissionDef.valueForLocalPlayer;
+            bool deleteValue = deleteOfflinePlayerDataPermissionDef.valueForLocalPlayer;
+
+            if (!displayNameValue
                 && (currentSortOrderFunction == nameof(CompareRowOverriddenDisplayNameAscending)
                     || currentSortOrderFunction == nameof(CompareRowOverriddenDisplayNameDescending))
-                || !editCharacterNamePermissionDef.valueForLocalPlayer
+                || !characterNameValue
                 && (currentSortOrderFunction == nameof(CompareRowCharacterNameAscending)
                     || currentSortOrderFunction == nameof(CompareRowCharacterNameDescending))
-                || !editPermissionGroupPermissionDef.valueForLocalPlayer
+                || !permissionGroupValue
                 && (currentSortOrderFunction == nameof(CompareRowPermissionGroupAscending)
                     || currentSortOrderFunction == nameof(CompareRowPermissionGroupDescending)))
             {
@@ -177,10 +183,34 @@ namespace JanSharp
                 SortAll();
             }
 
-            if (!editPermissionGroupPermissionDef.valueForLocalPlayer)
+            if (!permissionGroupValue)
                 EnsureClosedPermissionGroupPopup();
-            if (!deleteOfflinePlayerDataPermissionDef.valueForLocalPlayer)
+            if (!deleteValue)
                 EnsureClosedConfirmDeletePopup();
+
+            bool displayNameChanged = rowPrefabScript.overriddenDisplayNameRoot.activeSelf != displayNameValue;
+            bool characterNameChanged = rowPrefabScript.characterNameRoot.activeSelf != characterNameValue;
+            bool permissionGroupChanged = rowPrefabScript.permissionGroupRoot.activeSelf != permissionGroupValue;
+            bool deleteChanged = rowPrefabScript.deleteRoot.activeSelf != deleteValue;
+            rowPrefabScript.overriddenDisplayNameRoot.SetActive(displayNameValue);
+            rowPrefabScript.characterNameRoot.SetActive(characterNameValue);
+            rowPrefabScript.permissionGroupRoot.SetActive(permissionGroupValue);
+            rowPrefabScript.deleteRoot.SetActive(deleteValue);
+
+            for (int i = 0; i < rowsCount; i++)
+            {
+                // I'm thinking that in any case where 2 permissions changed it is faster to do all 4 ifs
+                // every loop, because I have heard that Udon arrays are slow. But it's just a guess.
+                PlayersBackendRow row = rows[i];
+                if (displayNameChanged)
+                    row.overriddenDisplayNameRoot.SetActive(displayNameValue);
+                if (characterNameChanged)
+                    row.characterNameRoot.SetActive(characterNameValue);
+                if (permissionGroupChanged)
+                    row.permissionGroupRoot.SetActive(permissionGroupValue);
+                if (deleteChanged)
+                    row.deleteRoot.SetActive(deleteValue);
+            }
         }
 
         #endregion

@@ -27,6 +27,10 @@ namespace JanSharp
         public Selectable deleteLabel;
         public Transform confirmDeletePopupLocation;
         public Image activeRowHighlightImage;
+        public GameObject overriddenDisplayNameRoot;
+        public GameObject characterNameRoot;
+        public GameObject permissionGroupRoot;
+        public GameObject deleteRoot;
 
         public void OnOverriddenDisplayNameChanged() => page.OnOverriddenDisplayNameChanged(this);
         public void OnCharacterNameChanged() => page.OnCharacterNameChanged(this);

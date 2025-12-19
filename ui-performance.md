@@ -6,7 +6,8 @@
 - canvases always render everything as transparent, even if it is opaque no alpha. Be mindful of overdraw, there's a debug overlay. Yellow means bad
 - disabling pixel perfect on a sub canvas is supposed to make building batches faster. I see literally no difference.
 - text mesh pro auto size is expensive, but only on when building the text. It does not affect batch build times
-  - though making all text rebuild with 80 (so over 500 texts) players backend rows, I don't think I should care all that much:
+  - unfortunately it rebuilds text when an object gets enabled even when the text did not change since the last time it was active
+  - though making all text rebuild with 80 (so over 500 texts) players backend rows, I don't think I should care all that much?
     - with auto size: 60 ms
     - without auto size: 13 ms
 - scrolling in a scroll rect does not cause the layout elements to dirty their layout groups, however it does dirty the canvas, causing batches to be built

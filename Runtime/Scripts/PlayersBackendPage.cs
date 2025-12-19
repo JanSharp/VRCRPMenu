@@ -29,6 +29,10 @@ namespace JanSharp
         private float currentRowsContentHeight;
         private int prevFirstVisibleRowIndex = 0;
         private int prevFirstInvisibleRowIndex = 0;
+        public ScrollRect rowsScrollRect;
+        [Min(0f)]
+        [Tooltip("Units per second, so kind of like pixels per second.")]
+        public float minScrollRectVelocity;
         public Image sortPlayerNameAscendingImage;
         public Image sortPlayerNameDescendingImage;
         public Image sortOverriddenDisplayNameAscendingImage;
@@ -112,6 +116,8 @@ namespace JanSharp
 
         private void Update()
         {
+            if (Mathf.Abs(rowsScrollRect.velocity.y) < minScrollRectVelocity)
+                rowsScrollRect.velocity = Vector2.zero;
             ShowOnlyRowsVisibleInViewport();
         }
 

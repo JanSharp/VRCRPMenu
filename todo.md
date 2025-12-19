@@ -20,7 +20,7 @@
   - find them after instantiating a row, since they get created OnEnable and don't exist at build time (or scene load generically)
 - [x] test if disabling the root canvas stops all performance drain including moving - it does not, culling cost persists
 - [x] test if moving causes layout set dirty calls made by images and text (graphics) - it does not
-- [ ] clamp the velocity of the scroll rect, even though it only matters for desktop since in VR it's constantly rebuilding batches anyway
+- [x] clamp the velocity of the scroll rect, even though it only matters for desktop since in VR it's constantly rebuilding batches anyway
 
 - [ ] How to truly prevent locking yourself out of permissions to edit permissions
   - editing the permission values themselves could lock you out

@@ -13,7 +13,7 @@ namespace JanSharp
         [HideInInspector][SerializeField][SingletonReference] private PlayersBackendManagerAPI playersBackendManager;
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
         [HideInInspector][SerializeField][SingletonReference] private PermissionManagerAPI permissionManager;
-        [HideInInspector][SerializeField][SingletonReference] private MenuManagerAPI menuManager;
+        [HideInInspector][SerializeField][FindInParent] private MenuManagerAPI menuManager;
         [HideInInspector][SerializeField][FindInParent] private MenuPageRoot menuPageRoot;
 
         private int rpPlayerDataIndex;
@@ -89,7 +89,8 @@ namespace JanSharp
 
         public bool PageIsVisible => menuManager.IsMenuOpen && menuManager.ActivePageInternalName == menuPageRoot.PageInternalName;
 
-        private void Start()
+        [MenuManagerEvent(MenuManagerEventType.OnMenuManagerStart)]
+        public void OnMenuManagerStart()
         {
             localPlayerId = (uint)Networking.LocalPlayer.playerId;
             currentSortOrderFunction = nameof(CompareRowPlayerNameAscending);

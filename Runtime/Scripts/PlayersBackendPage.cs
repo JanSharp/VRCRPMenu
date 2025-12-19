@@ -98,7 +98,7 @@ namespace JanSharp
             currentSortOrderImage.enabled = true;
             someRowsAreOutOfSortOrder = false;
 
-            permissionGroupButtonHeight = permissionGroupPrefab.GetComponent<RectTransform>().rect.height;
+            permissionGroupButtonHeight = permissionGroupPrefab.GetComponent<LayoutElement>().preferredHeight;
             maxPermissionGroupsPopupHeight = permissionGroupPopup.sizeDelta.y;
         }
 

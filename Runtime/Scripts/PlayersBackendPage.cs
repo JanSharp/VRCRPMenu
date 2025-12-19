@@ -113,13 +113,6 @@ namespace JanSharp
             maxPermissionGroupsPopupHeight = permissionGroupPopup.sizeDelta.y;
         }
 
-        private void Update()
-        {
-            if (Mathf.Abs(rowsScrollRect.velocity.y) < minScrollRectVelocity)
-                rowsScrollRect.velocity = Vector2.zero;
-            ShowOnlyRowsVisibleInViewport();
-        }
-
         private void FetchPlayerDataClassIndexes()
         {
             rpPlayerDataIndex = playerDataManager.GetPlayerDataClassNameIndex<RPPlayerData>(nameof(RPPlayerData));
@@ -137,13 +130,16 @@ namespace JanSharp
         public void OnInit()
         {
             RebuildPermissionGroupButtons();
+            // Ensure this runs at some point during initialization at least once, in case the scroll rect
+            // does not raise its value changed event the first time the page gets opened.
+            ShowOnlyRowsVisibleInViewport();
         }
 
         [LockstepEvent(LockstepEventType.OnClientBeginCatchUp)]
         public void OnClientBeginCatchUp()
         {
             FetchPlayerDataClassIndexes();
-            RebuildRows();
+            RebuildRows(); // Runs ShowOnlyRowsVisibleInViewport, do not need to call it manually here.
             RebuildPermissionGroupButtons();
             isInitialized = true;
         }
@@ -372,6 +368,13 @@ namespace JanSharp
             PlayersBackendRow row = go.GetComponent<PlayersBackendRow>();
             row.activeRowHighlightImage.CrossFadeAlpha(0f, 0f, ignoreTimeScale: true);
             return row;
+        }
+
+        public void OnRowsScrollRectValueChanged()
+        {
+            if (Mathf.Abs(rowsScrollRect.velocity.y) < minScrollRectVelocity)
+                rowsScrollRect.velocity = Vector2.zero;
+            ShowOnlyRowsVisibleInViewport();
         }
 
         private void HideAllCurrentlyVisibleRows()

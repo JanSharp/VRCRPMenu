@@ -14,7 +14,7 @@
 - [x] test having 89 players and then importing the 4 players again, idk how 2 out of 4 of the show by permission resolvers ended up not working for just 1 row in that case. very random
   - I tried, could not reproduce. And it won't matter for this case again once all of those scripts got removed in favor of the page script handling all of the enabling and disabling
 - [x] most likely remove all of the show by permission scripts from the rows and instead have the page script handle the enabling and disabling. It's just all around more performant that way, both creation of rows as well as changing permissions
-- [ ] experiment with enabling and disabling elements as you scroll through the list, only having the visible ones enabled basically
+- [x] experiment with enabling and disabling elements as you scroll through the list, only having the visible ones enabled basically
 - [x] ~~do not use auto size unless necessary~~ sure, but don't fret it too much. It would only reduce lag spikes such as when changing permissions, outside of that it hardly matters which causes layout rebuilds which changes the size of text rects which make text rebuild
 - [ ] could disable all Caret game objects as they are useless in VRChat and just eat cull performance
   - find them after instantiating a row, since they get created OnEnable and don't exist at build time (or scene load generically)

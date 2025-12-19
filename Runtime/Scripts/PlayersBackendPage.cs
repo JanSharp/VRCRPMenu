@@ -26,6 +26,9 @@ namespace JanSharp
         public RectTransform rowsContent;
         private float rowHeight;
         private float negativeRowHeight;
+        private float currentRowsContentHeight;
+        private int prevFirstVisibleRowIndex = 0;
+        private int prevFirstInvisibleRowIndex = 0;
         public Image sortPlayerNameAscendingImage;
         public Image sortPlayerNameDescendingImage;
         public Image sortOverriddenDisplayNameAscendingImage;
@@ -105,6 +108,11 @@ namespace JanSharp
             negativeRowHeight = -rowHeight;
             permissionGroupButtonHeight = permissionGroupPrefab.GetComponent<LayoutElement>().preferredHeight;
             maxPermissionGroupsPopupHeight = permissionGroupPopup.sizeDelta.y;
+        }
+
+        private void Update()
+        {
+            ShowOnlyRowsVisibleInViewport();
         }
 
         private void FetchPlayerDataClassIndexes()
@@ -283,16 +291,12 @@ namespace JanSharp
                 // (Once the API to create offline player data exists.)
                 return;
             }
-            row.gameObject.SetActive(false);
+            row.rowGo.SetActive(false);
             ArrList.Add(ref unusedRows, ref unusedRowsCount, row);
             int index = row.index;
             ArrList.RemoveAt(ref rows, ref rowsCount, index);
             for (int i = index; i < rowsCount; i++)
-            {
-                row = rows[i];
-                row.index = i;
-                row.rowRect.anchoredPosition = new Vector2(0f, i * negativeRowHeight);
-            }
+                SetRowIndex(rows[i], i);
         }
 
         [PlayerDataEvent(PlayerDataEventType.OnPlayerDataImportFinished)]
@@ -305,20 +309,14 @@ namespace JanSharp
         {
             EnsureClosedPopups();
 
-            int newCount = playerDataManager.AllCorePlayerDataCount;
-
+            HideAllCurrentlyVisibleRows();
             rowsByPersistentId.Clear();
             ArrList.AddRange(ref unusedRows, ref unusedRowsCount, rows, rowsCount);
-            if (newCount < rowsCount)
-                for (int i = 0; i < rowsCount - newCount; i++)
-                {
-                    // Disable the low index ones, the higher ones will be reused from the unusedRows "stack".
-                    rows[i].gameObject.SetActive(false);
-                }
 
-            rowsCount = newCount;
+            rowsCount = playerDataManager.AllCorePlayerDataCount;
             ArrList.EnsureCapacity(ref rows, rowsCount);
-            rowsContent.sizeDelta = new Vector2(0f, rowsCount * rowHeight);
+            currentRowsContentHeight = rowsCount * rowHeight;
+            rowsContent.sizeDelta = new Vector2(0f, currentRowsContentHeight);
 
             CorePlayerData[] allCorePlayerData = playerDataManager.AllCorePlayerDataRaw;
             for (int i = 0; i < rowsCount; i++)
@@ -357,7 +355,6 @@ namespace JanSharp
             row.deleteButton.interactable = core.isOffline;
             row.deleteLabel.interactable = core.isOffline;
 
-            row.gameObject.SetActive(true);
             return row;
         }
 
@@ -370,6 +367,69 @@ namespace JanSharp
             PlayersBackendRow row = go.GetComponent<PlayersBackendRow>();
             row.activeRowHighlightImage.CrossFadeAlpha(0f, 0f, ignoreTimeScale: true);
             return row;
+        }
+
+        private void HideAllCurrentlyVisibleRows()
+        {
+            for (int i = prevFirstVisibleRowIndex; i < prevFirstInvisibleRowIndex; i++)
+                rows[i].rowGo.SetActive(false);
+            prevFirstVisibleRowIndex = 0;
+            prevFirstInvisibleRowIndex = 0;
+        }
+
+        private void ShowOnlyRowsVisibleInViewport()
+        {
+            // Always recalculate in order to support the size changing at runtime. Even though at the time of
+            // writing this with the current page setup it is static, things might change, people might use it
+            // differently.
+            float viewportHeight = rowsViewport.rect.height;
+            int visibleCount = Mathf.CeilToInt(viewportHeight / rowHeight) + 1;
+            float position = rowsContent.anchoredPosition.y;
+            int firstVisibleIndex = Mathf.FloorToInt(position / rowHeight);
+            int firstInvisibleIndex = firstVisibleIndex + visibleCount;
+
+            if (firstVisibleIndex < 0)
+                firstVisibleIndex = 0;
+            if (firstInvisibleIndex > rowsCount)
+                firstInvisibleIndex = rowsCount;
+
+            if (firstInvisibleIndex <= prevFirstVisibleRowIndex // New range is entirely below, no overlap.
+                    || firstVisibleIndex >= prevFirstInvisibleRowIndex) // New range is entirely above, no overlap.
+            {
+                for (int i = prevFirstVisibleRowIndex; i < prevFirstInvisibleRowIndex; i++)
+                    rows[i].rowGo.SetActive(false);
+                for (int i = firstVisibleIndex; i < firstInvisibleIndex; i++)
+                    rows[i].rowGo.SetActive(true);
+                prevFirstVisibleRowIndex = firstVisibleIndex;
+                prevFirstInvisibleRowIndex = firstInvisibleIndex;
+                return;
+            }
+            // There is overlap.
+            // The logic below handles prev and new ranges being of different sizes (visible counts).
+
+            if (prevFirstVisibleRowIndex < firstVisibleIndex)
+                for (int i = prevFirstVisibleRowIndex; i < firstVisibleIndex; i++)
+                    rows[i].rowGo.SetActive(false);
+            else
+                for (int i = firstVisibleIndex; i < prevFirstVisibleRowIndex; i++)
+                    rows[i].rowGo.SetActive(true);
+
+            if (prevFirstInvisibleRowIndex < firstInvisibleIndex)
+                for (int i = prevFirstInvisibleRowIndex; i < firstInvisibleIndex; i++)
+                    rows[i].rowGo.SetActive(true);
+            else
+                for (int i = firstInvisibleIndex; i < prevFirstInvisibleRowIndex; i++)
+                    rows[i].rowGo.SetActive(false);
+
+            prevFirstVisibleRowIndex = firstVisibleIndex;
+            prevFirstInvisibleRowIndex = firstInvisibleIndex;
+        }
+
+        private void SetRowIndex(PlayersBackendRow row, int index)
+        {
+            row.index = index;
+            row.rowRect.anchoredPosition = new Vector2(0f, index * negativeRowHeight);
+            row.rowGo.SetActive(prevFirstVisibleRowIndex <= index && index < prevFirstInvisibleRowIndex);
         }
 
         #endregion
@@ -834,9 +894,9 @@ namespace JanSharp
             if (rowsCount == 0)
             {
                 ArrList.Add(ref rows, ref rowsCount, row);
-                rowsContent.sizeDelta = new Vector2(0f, rowsCount * rowHeight);
-                row.index = 0;
-                row.rowRect.anchoredPosition = Vector2.zero;
+                currentRowsContentHeight = rowsCount * rowHeight;
+                rowsContent.sizeDelta = new Vector2(0f, currentRowsContentHeight);
+                SetRowIndex(row, 0);
                 return;
             }
             compareRight = row;
@@ -851,13 +911,10 @@ namespace JanSharp
             }
             while (index > 0);
             ArrList.Insert(ref rows, ref rowsCount, row, index);
-            rowsContent.sizeDelta = new Vector2(0f, rowsCount * rowHeight);
+            currentRowsContentHeight = rowsCount * rowHeight;
+            rowsContent.sizeDelta = new Vector2(0f, currentRowsContentHeight);
             for (int i = index; i < rowsCount; i++)
-            {
-                row = rows[i];
-                row.index = i;
-                row.rowRect.anchoredPosition = new Vector2(0f, i * negativeRowHeight);
-            }
+                SetRowIndex(rows[i], i);
         }
 
         private void UpdateSortPositionDueToValueChange(PlayersBackendRow row)
@@ -928,15 +985,13 @@ namespace JanSharp
                 if (leftSortsFirst)
                     break;
                 rows[index] = compareLeft;
-                compareLeft.index = index;
-                compareLeft.rowRect.anchoredPosition = new Vector2(0f, index * negativeRowHeight);
+                SetRowIndex(compareLeft, index);
                 index--;
             }
             if (index != initialIndex)
             {
                 rows[index] = row;
-                row.index = index;
-                row.rowRect.anchoredPosition = new Vector2(0f, index * negativeRowHeight);
+                SetRowIndex(row, index);
                 return;
             }
 
@@ -948,29 +1003,25 @@ namespace JanSharp
                 if (leftSortsFirst)
                     break;
                 rows[index] = compareRight;
-                compareRight.index = index;
-                compareRight.rowRect.anchoredPosition = new Vector2(0f, index * negativeRowHeight);
+                SetRowIndex(compareRight, index);
                 index++;
             }
             if (index != initialIndex)
             {
                 rows[index] = row;
-                row.index = index;
-                row.rowRect.anchoredPosition = new Vector2(0f, index * negativeRowHeight);
+                SetRowIndex(row, index);
                 return;
             }
         }
 
         private void SortAll()
         {
+            HideAllCurrentlyVisibleRows();
             MergeSort(currentSortOrderFunction);
             for (int i = 0; i < rowsCount; i++)
-            {
-                PlayersBackendRow row = rows[i];
-                row.index = i;
-                row.rowRect.anchoredPosition = new Vector2(0f, i * negativeRowHeight);
-            }
+                SetRowIndex(rows[i], i);
             someRowsAreOutOfSortOrder = false;
+            ShowOnlyRowsVisibleInViewport();
         }
 
         #endregion

@@ -22,8 +22,10 @@ namespace JanSharp
         public GameObject rowPrefab;
         public PlayersBackendRow rowPrefabScript;
         public Transform rowsParent;
-        [Min(0)]
-        public int rowSiblingIndexBaseOffset;
+        public RectTransform rowsViewport;
+        public RectTransform rowsContent;
+        private float rowHeight;
+        private float negativeRowHeight;
         public Image sortPlayerNameAscendingImage;
         public Image sortPlayerNameDescendingImage;
         public Image sortOverriddenDisplayNameAscendingImage;
@@ -99,6 +101,8 @@ namespace JanSharp
             currentSortOrderImage.enabled = true;
             someRowsAreOutOfSortOrder = false;
 
+            rowHeight = rowPrefabScript.rowRect.sizeDelta.y;
+            negativeRowHeight = -rowHeight;
             permissionGroupButtonHeight = permissionGroupPrefab.GetComponent<LayoutElement>().preferredHeight;
             maxPermissionGroupsPopupHeight = permissionGroupPopup.sizeDelta.y;
         }
@@ -280,12 +284,15 @@ namespace JanSharp
                 return;
             }
             row.gameObject.SetActive(false);
-            row.transform.SetAsLastSibling();
             ArrList.Add(ref unusedRows, ref unusedRowsCount, row);
             int index = row.index;
             ArrList.RemoveAt(ref rows, ref rowsCount, index);
             for (int i = index; i < rowsCount; i++)
-                rows[i].index = i;
+            {
+                row = rows[i];
+                row.index = i;
+                row.rowRect.anchoredPosition = new Vector2(0f, i * negativeRowHeight);
+            }
         }
 
         [PlayerDataEvent(PlayerDataEventType.OnPlayerDataImportFinished)]
@@ -306,21 +313,21 @@ namespace JanSharp
                 for (int i = 0; i < rowsCount - newCount; i++)
                 {
                     // Disable the low index ones, the higher ones will be reused from the unusedRows "stack".
-                    PlayersBackendRow row = rows[i];
-                    row.gameObject.SetActive(false);
-                    row.transform.SetAsLastSibling();
+                    rows[i].gameObject.SetActive(false);
                 }
 
-            ArrList.EnsureCapacity(ref rows, newCount);
+            rowsCount = newCount;
+            ArrList.EnsureCapacity(ref rows, rowsCount);
+            rowsContent.sizeDelta = new Vector2(0f, rowsCount * rowHeight);
+
             CorePlayerData[] allCorePlayerData = playerDataManager.AllCorePlayerDataRaw;
-            for (int i = 0; i < newCount; i++)
+            for (int i = 0; i < rowsCount; i++)
             {
                 CorePlayerData core = allCorePlayerData[i];
                 PlayersBackendRow row = CreateRowForPlayer(core);
                 rows[i] = row;
                 rowsByPersistentId.Add(core.persistentId, row);
             }
-            rowsCount = newCount;
 
             SortAll();
         }
@@ -826,9 +833,10 @@ namespace JanSharp
         {
             if (rowsCount == 0)
             {
-                row.transform.SetSiblingIndex(rowSiblingIndexBaseOffset);
                 ArrList.Add(ref rows, ref rowsCount, row);
+                rowsContent.sizeDelta = new Vector2(0f, rowsCount * rowHeight);
                 row.index = 0;
+                row.rowRect.anchoredPosition = Vector2.zero;
                 return;
             }
             compareRight = row;
@@ -842,10 +850,14 @@ namespace JanSharp
                 index--;
             }
             while (index > 0);
-            row.transform.SetSiblingIndex(rowSiblingIndexBaseOffset + index);
             ArrList.Insert(ref rows, ref rowsCount, row, index);
+            rowsContent.sizeDelta = new Vector2(0f, rowsCount * rowHeight);
             for (int i = index; i < rowsCount; i++)
-                rows[i].index = i;
+            {
+                row = rows[i];
+                row.index = i;
+                row.rowRect.anchoredPosition = new Vector2(0f, i * negativeRowHeight);
+            }
         }
 
         private void UpdateSortPositionDueToValueChange(PlayersBackendRow row)
@@ -908,41 +920,43 @@ namespace JanSharp
             int index = row.index;
             int initialIndex = index;
 
+            compareRight = row;
             while (index > 0) // Try move left.
             {
                 compareLeft = rows[index - 1];
-                compareRight = rows[index];
                 SendCustomEvent(currentSortOrderFunction);
                 if (leftSortsFirst)
                     break;
                 rows[index] = compareLeft;
                 compareLeft.index = index;
+                compareLeft.rowRect.anchoredPosition = new Vector2(0f, index * negativeRowHeight);
                 index--;
             }
             if (index != initialIndex)
             {
-                row.transform.SetSiblingIndex(rowSiblingIndexBaseOffset + index);
                 rows[index] = row;
                 row.index = index;
+                row.rowRect.anchoredPosition = new Vector2(0f, index * negativeRowHeight);
                 return;
             }
 
+            compareLeft = row;
             while (index < rowsCount - 1) // Try move right.
             {
-                compareLeft = rows[index];
                 compareRight = rows[index + 1];
                 SendCustomEvent(currentSortOrderFunction);
                 if (leftSortsFirst)
                     break;
                 rows[index] = compareRight;
                 compareRight.index = index;
+                compareRight.rowRect.anchoredPosition = new Vector2(0f, index * negativeRowHeight);
                 index++;
             }
             if (index != initialIndex)
             {
-                row.transform.SetSiblingIndex(rowSiblingIndexBaseOffset + index);
                 rows[index] = row;
                 row.index = index;
+                row.rowRect.anchoredPosition = new Vector2(0f, index * negativeRowHeight);
                 return;
             }
         }
@@ -954,7 +968,7 @@ namespace JanSharp
             {
                 PlayersBackendRow row = rows[i];
                 row.index = i;
-                row.transform.SetSiblingIndex(rowSiblingIndexBaseOffset + i);
+                row.rowRect.anchoredPosition = new Vector2(0f, i * negativeRowHeight);
             }
             someRowsAreOutOfSortOrder = false;
         }

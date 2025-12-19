@@ -16,6 +16,7 @@ namespace JanSharp
         [System.NonSerialized] public RPPlayerData rpPlayerData;
         [System.NonSerialized] public PermissionsPlayerData permissionsPlayerData;
         public PlayersBackendPage page;
+        public RectTransform rowRect;
         public TextMeshProUGUI playerNameLabel;
         public TMP_InputField overriddenDisplayNameField;
         public TextMeshProUGUI overriddenDisplayNameLabel;

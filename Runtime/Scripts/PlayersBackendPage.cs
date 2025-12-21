@@ -98,6 +98,20 @@ namespace JanSharp
 
         public bool PageIsVisible => menuManager.IsMenuOpen && menuManager.ActivePageInternalName == menuPageRoot.PageInternalName;
 
+        private int suspendedIndexInArray = 0;
+        private System.Diagnostics.Stopwatch suspensionSw = new System.Diagnostics.Stopwatch();
+        private const long MaxWorkMSPerFrame = 10L;
+
+        private bool LogicIsRunningLong()
+        {
+            if (suspensionSw.ElapsedMilliseconds >= MaxWorkMSPerFrame)
+            {
+                lockstep.FlagToContinueNextFrame();
+                return true;
+            }
+            return false;
+        }
+
         [MenuManagerEvent(MenuManagerEventType.OnMenuManagerStart)]
         public void OnMenuManagerStart()
         {
@@ -138,8 +152,11 @@ namespace JanSharp
         [LockstepEvent(LockstepEventType.OnClientBeginCatchUp)]
         public void OnClientBeginCatchUp()
         {
-            FetchPlayerDataClassIndexes();
+            if (!lockstep.IsContinuationFromPrevFrame)
+                FetchPlayerDataClassIndexes();
             RebuildRows(); // Runs ShowOnlyRowsVisibleInViewport, do not need to call it manually here.
+            if (lockstep.FlaggedToContinueNextFrame)
+                return;
             RebuildPermissionGroupButtons();
             isInitialized = true;
         }
@@ -148,6 +165,24 @@ namespace JanSharp
         public void OnImportStart()
         {
             EnsureClosedPopups();
+        }
+
+        [LockstepEvent(LockstepEventType.OnImportFinished)]
+        public void OnImportFinished()
+        {
+            if (playerDataManager.IsPartOfCurrentImport)
+            {
+                RebuildRows();
+                if (lockstep.FlaggedToContinueNextFrame)
+                    return;
+            }
+
+            if (permissionManager.IsPartOfCurrentImport)
+            {
+                RebuildPermissionGroupButtons();
+                // Permission groups depend on player data, therefore there is no need to check if updating
+                // the permission group for each player is necessary, as all the rows have been rebuilt anyway.
+            }
         }
 
         private void EnsureClosedPopups()
@@ -284,7 +319,7 @@ namespace JanSharp
                 menuManager.ClosePopup(confirmDeletePopup, doCallback: true);
             if (!TryGetRow(core.persistentId, out PlayersBackendRow row))
             {
-                // Somebody could delete player data inside of OnPlayerDataImportFinished, but before
+                // Somebody could delete player data inside of OnImportFinished, but before
                 // our handler has ran, thus deleting player data which we are not yet aware of.
                 // The rows are about to be rebuilt in that case, so just ignore.
                 // Or somebody could create offline player data and somebody decides to delete it in the
@@ -300,33 +335,35 @@ namespace JanSharp
                 SetRowIndex(rows[i], i);
         }
 
-        [PlayerDataEvent(PlayerDataEventType.OnPlayerDataImportFinished)]
-        public void OnPlayerDataImportFinished()
-        {
-            RebuildRows();
-        }
-
         private void RebuildRows()
         {
-            EnsureClosedPopups();
-
-            HideAllCurrentlyVisibleRows();
-            rowsByPersistentId.Clear();
-            ArrList.AddRange(ref unusedRows, ref unusedRowsCount, rows, rowsCount);
-
-            rowsCount = playerDataManager.AllCorePlayerDataCount;
-            ArrList.EnsureCapacity(ref rows, rowsCount);
-            currentRowsContentHeight = rowsCount * rowHeight;
-            rowsContent.sizeDelta = new Vector2(0f, currentRowsContentHeight);
-
-            CorePlayerData[] allCorePlayerData = playerDataManager.AllCorePlayerDataRaw;
-            for (int i = 0; i < rowsCount; i++)
+            if (!lockstep.IsContinuationFromPrevFrame)
             {
-                CorePlayerData core = allCorePlayerData[i];
-                PlayersBackendRow row = CreateRowForPlayer(core);
-                rows[i] = row;
-                rowsByPersistentId.Add(core.persistentId, row);
+                EnsureClosedPopups();
+
+                HideAllCurrentlyVisibleRows();
+                rowsByPersistentId.Clear();
+                ArrList.AddRange(ref unusedRows, ref unusedRowsCount, rows, rowsCount);
+
+                rowsCount = playerDataManager.AllCorePlayerDataCount;
+                ArrList.EnsureCapacity(ref rows, rowsCount);
+                currentRowsContentHeight = rowsCount * rowHeight;
+                rowsContent.sizeDelta = new Vector2(0f, currentRowsContentHeight);
             }
+
+            suspensionSw.Restart();
+            CorePlayerData[] allCorePlayerData = playerDataManager.AllCorePlayerDataRaw;
+            while (suspendedIndexInArray < rowsCount)
+            {
+                if (LogicIsRunningLong())
+                    return;
+                CorePlayerData core = allCorePlayerData[suspendedIndexInArray];
+                PlayersBackendRow row = CreateRowForPlayer(core);
+                rows[suspendedIndexInArray] = row;
+                rowsByPersistentId.Add(core.persistentId, row);
+                suspendedIndexInArray++;
+            }
+            suspendedIndexInArray = 0;
 
             SortAll();
         }
@@ -672,12 +709,6 @@ namespace JanSharp
             ArrList.Add(ref unusedPGButtons, ref unusedPGButtonsCount, button);
             ArrList.Remove(ref pgButtons, ref pgButtonsCount, button);
             CalculatePermissionGroupsPopupHeight();
-        }
-
-        [PermissionsEvent(PermissionsEventType.OnPermissionManagerImportFinished)]
-        public void OnPermissionManagerImportFinished()
-        {
-            RebuildPermissionGroupButtons();
         }
 
         private void RebuildPermissionGroupButtons()

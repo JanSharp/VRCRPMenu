@@ -22,6 +22,8 @@
 - [x] test if moving causes layout set dirty calls made by images and text (graphics) - it does not
 - [x] clamp the velocity of the scroll rect, even though it only matters for desktop since in VR it's constantly rebuilding batches anyway
 - [ ] highlight the row that is about to be deleted behind the popup
+- [ ] auto delete old read GM requests
+- [ ] respect permissions in GM requests manager
 
 - [ ] How to truly prevent locking yourself out of permissions to edit permissions
   - editing the permission values themselves could lock you out

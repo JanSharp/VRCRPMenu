@@ -773,6 +773,24 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &213005594 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4704408185027925334, guid: c1a26f964e70d51e3a4af28632b3910f,
+    type: 3}
+  m_PrefabInstance: {fileID: 2513727047246078096}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &213005604 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5119293139754722272, guid: c1a26f964e70d51e3a4af28632b3910f,
+    type: 3}
+  m_PrefabInstance: {fileID: 2513727047246078096}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 213005594}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 910427d32de5308cf85dacab0f4d5f7c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &269878733 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6332741992913732668, guid: 68719f137fd46f4b883c0625aa79d6b4,
@@ -1614,11 +1632,11 @@ MonoBehaviour:
   displayName: Request GM
   defaultValue: 1
   resolvers:
+  - {fileID: 1612604291}
   - {fileID: 2513727047246078115}
   - {fileID: 0}
   - {fileID: 0}
-  - {fileID: 0}
-  resolversCount: 1
+  resolversCount: 2
 --- !u!114 &446681572
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -1798,17 +1816,17 @@ PrefabInstance:
         type: 3}
       propertyPath: onInitListeners.Array.data[1]
       value: 
-      objectReference: {fileID: 2513727047246078099}
+      objectReference: {fileID: 985387470}
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
       propertyPath: onInitListeners.Array.data[2]
       value: 
-      objectReference: {fileID: 985387470}
+      objectReference: {fileID: 2012572076}
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
       propertyPath: onInitListeners.Array.data[3]
       value: 
-      objectReference: {fileID: 2012572076}
+      objectReference: {fileID: 2513727047246078099}
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
       propertyPath: onInitListeners.Array.data[4]
@@ -1863,17 +1881,17 @@ PrefabInstance:
         type: 3}
       propertyPath: onImportStartListeners.Array.data[0]
       value: 
-      objectReference: {fileID: 2513727047246078099}
+      objectReference: {fileID: 985387470}
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
       propertyPath: onImportStartListeners.Array.data[1]
       value: 
-      objectReference: {fileID: 985387470}
+      objectReference: {fileID: 1838584613}
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
       propertyPath: onImportStartListeners.Array.data[2]
       value: 
-      objectReference: {fileID: 1838584613}
+      objectReference: {fileID: 2513727047246078099}
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
       propertyPath: onImportStartListeners.Array.data[3]
@@ -1923,17 +1941,17 @@ PrefabInstance:
         type: 3}
       propertyPath: onImportFinishedListeners.Array.data[1]
       value: 
-      objectReference: {fileID: 2513727047246078099}
+      objectReference: {fileID: 985387470}
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
       propertyPath: onImportFinishedListeners.Array.data[2]
       value: 
-      objectReference: {fileID: 985387470}
+      objectReference: {fileID: 2012572076}
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
       propertyPath: onImportFinishedListeners.Array.data[3]
       value: 
-      objectReference: {fileID: 2012572076}
+      objectReference: {fileID: 2513727047246078099}
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
       propertyPath: onImportFinishedListeners.Array.data[4]
@@ -2263,32 +2281,32 @@ PrefabInstance:
         type: 3}
       propertyPath: onClientBeginCatchUpListeners.Array.data[0]
       value: 
-      objectReference: {fileID: 2513727047246078099}
+      objectReference: {fileID: 63223592}
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
       propertyPath: onClientBeginCatchUpListeners.Array.data[1]
       value: 
-      objectReference: {fileID: 63223592}
+      objectReference: {fileID: 985387470}
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
       propertyPath: onClientBeginCatchUpListeners.Array.data[2]
       value: 
-      objectReference: {fileID: 985387470}
+      objectReference: {fileID: 1693488291}
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
       propertyPath: onClientBeginCatchUpListeners.Array.data[3]
       value: 
-      objectReference: {fileID: 1693488291}
+      objectReference: {fileID: 1838584613}
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
       propertyPath: onClientBeginCatchUpListeners.Array.data[4]
       value: 
-      objectReference: {fileID: 1838584613}
+      objectReference: {fileID: 2012572076}
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
       propertyPath: onClientBeginCatchUpListeners.Array.data[5]
       value: 
-      objectReference: {fileID: 2012572076}
+      objectReference: {fileID: 2513727047246078099}
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
       propertyPath: onClientBeginCatchUpListeners.Array.data[6]
@@ -3280,11 +3298,11 @@ MonoBehaviour:
   displayName: Request GM Urgently
   defaultValue: 1
   resolvers:
+  - {fileID: 213005604}
   - {fileID: 2513727047246078115}
   - {fileID: 0}
   - {fileID: 0}
-  - {fileID: 0}
-  resolversCount: 1
+  resolversCount: 2
 --- !u!1 &663764131
 GameObject:
   m_ObjectHideFlags: 0
@@ -4110,6 +4128,12 @@ PrefabInstance:
       addedObject: {fileID: 1779516206}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4fde516c38225afdf98eec7b044ed853, type: 3}
+--- !u!1 &705845224 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7701466738009528423, guid: aca293a2ce8a1e4949c0f92d3782d268,
+    type: 3}
+  m_PrefabInstance: {fileID: 4159640923015325489}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &726999236 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8634993545961353937, guid: 0c974bef0ebc228e7ae9a3818dcca853,
@@ -6537,6 +6561,12 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 1717781446}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1193003378 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8000968204997692293, guid: aca293a2ce8a1e4949c0f92d3782d268,
+    type: 3}
+  m_PrefabInstance: {fileID: 4159640923015325489}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1213974410
 GameObject:
   m_ObjectHideFlags: 0
@@ -7953,12 +7983,12 @@ PrefabInstance:
         type: 3}
       propertyPath: onPlayerDataCreatedListeners.Array.data[0]
       value: 
-      objectReference: {fileID: 2513727047246078099}
+      objectReference: {fileID: 2012572076}
     - target: {fileID: 733954666466056520, guid: 28a5e083347ce2753aa92dfda01bef32,
         type: 3}
       propertyPath: onPlayerDataCreatedListeners.Array.data[1]
       value: 
-      objectReference: {fileID: 2012572076}
+      objectReference: {fileID: 2513727047246078099}
     - target: {fileID: 733954666466056520, guid: 28a5e083347ce2753aa92dfda01bef32,
         type: 3}
       propertyPath: onPlayerDataCreatedListeners.Array.data[2]
@@ -7968,12 +7998,12 @@ PrefabInstance:
         type: 3}
       propertyPath: onPlayerDataDeletedListeners.Array.data[0]
       value: 
-      objectReference: {fileID: 2513727047246078099}
+      objectReference: {fileID: 2012572076}
     - target: {fileID: 733954666466056520, guid: 28a5e083347ce2753aa92dfda01bef32,
         type: 3}
       propertyPath: onPlayerDataDeletedListeners.Array.data[1]
       value: 
-      objectReference: {fileID: 2012572076}
+      objectReference: {fileID: 2513727047246078099}
     - target: {fileID: 733954666466056520, guid: 28a5e083347ce2753aa92dfda01bef32,
         type: 3}
       propertyPath: onPlayerDataDeletedListeners.Array.data[2]
@@ -8058,17 +8088,17 @@ PrefabInstance:
         type: 3}
       propertyPath: onPrePlayerDataManagerInitListeners.Array.data[0]
       value: 
-      objectReference: {fileID: 2513727047246078099}
+      objectReference: {fileID: 63223592}
     - target: {fileID: 733954666466056520, guid: 28a5e083347ce2753aa92dfda01bef32,
         type: 3}
       propertyPath: onPrePlayerDataManagerInitListeners.Array.data[1]
       value: 
-      objectReference: {fileID: 63223592}
+      objectReference: {fileID: 1693488291}
     - target: {fileID: 733954666466056520, guid: 28a5e083347ce2753aa92dfda01bef32,
         type: 3}
       propertyPath: onPrePlayerDataManagerInitListeners.Array.data[2]
       value: 
-      objectReference: {fileID: 1693488291}
+      objectReference: {fileID: 2513727047246078099}
     - target: {fileID: 733954666466056520, guid: 28a5e083347ce2753aa92dfda01bef32,
         type: 3}
       propertyPath: onPrePlayerDataManagerInitListeners.Array.data[3]
@@ -9341,6 +9371,24 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &1612604290 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4945329871461664436, guid: c1a26f964e70d51e3a4af28632b3910f,
+    type: 3}
+  m_PrefabInstance: {fileID: 2513727047246078096}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1612604291 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2811393197742726115, guid: c1a26f964e70d51e3a4af28632b3910f,
+    type: 3}
+  m_PrefabInstance: {fileID: 2513727047246078096}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1612604290}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 910427d32de5308cf85dacab0f4d5f7c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1629783756
 GameObject:
   m_ObjectHideFlags: 0
@@ -9826,12 +9874,12 @@ PrefabInstance:
         type: 3}
       propertyPath: onPermissionGroupDeletedListeners.Array.data[0]
       value: 
-      objectReference: {fileID: 2513727047246078099}
+      objectReference: {fileID: 2012572076}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: onPermissionGroupDeletedListeners.Array.data[1]
       value: 
-      objectReference: {fileID: 2012572076}
+      objectReference: {fileID: 2513727047246078099}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: onPermissionGroupDeletedListeners.Array.data[2]
@@ -9846,12 +9894,12 @@ PrefabInstance:
         type: 3}
       propertyPath: onPermissionGroupRenamedListeners.Array.data[0]
       value: 
-      objectReference: {fileID: 2513727047246078099}
+      objectReference: {fileID: 2012572076}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: onPermissionGroupRenamedListeners.Array.data[1]
       value: 
-      objectReference: {fileID: 2012572076}
+      objectReference: {fileID: 2513727047246078099}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: onPermissionGroupRenamedListeners.Array.data[2]
@@ -9865,18 +9913,18 @@ PrefabInstance:
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.size
-      value: 8
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: onPermissionGroupDuplicatedListeners.Array.data[0]
       value: 
-      objectReference: {fileID: 2513727047246078099}
+      objectReference: {fileID: 2012572076}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: onPermissionGroupDuplicatedListeners.Array.data[1]
       value: 
-      objectReference: {fileID: 2012572076}
+      objectReference: {fileID: 2513727047246078099}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: onPermissionGroupDuplicatedListeners.Array.data[2]
@@ -9891,52 +9939,52 @@ PrefabInstance:
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[0]
       value: 
-      objectReference: {fileID: 2513727047246078102}
+      objectReference: {fileID: 213005604}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[1]
       value: 
-      objectReference: {fileID: 2513727047246078105}
+      objectReference: {fileID: 1612604291}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[2]
       value: 
-      objectReference: {fileID: 2513727047246078107}
+      objectReference: {fileID: 2513727047246078099}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[3]
       value: 
-      objectReference: {fileID: 2513727047246078109}
+      objectReference: {fileID: 2513727047246078100}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[4]
       value: 
-      objectReference: {fileID: 2513727047246078100}
+      objectReference: {fileID: 2513727047246078102}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[5]
       value: 
-      objectReference: {fileID: 2513727047246078099}
+      objectReference: {fileID: 2513727047246078105}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[6]
       value: 
-      objectReference: {fileID: 2513727047246078110}
+      objectReference: {fileID: 2513727047246078107}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[7]
       value: 
-      objectReference: {fileID: 2513727047246078115}
+      objectReference: {fileID: 2513727047246078109}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[8]
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 2513727047246078110}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[9]
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 2513727047246078115}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: onPermissionManagerImportFinishedListeners.Array.size
@@ -9946,12 +9994,12 @@ PrefabInstance:
         type: 3}
       propertyPath: onPlayerPermissionGroupChangedListeners.Array.data[0]
       value: 
-      objectReference: {fileID: 2513727047246078099}
+      objectReference: {fileID: 2012572076}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: onPlayerPermissionGroupChangedListeners.Array.data[1]
       value: 
-      objectReference: {fileID: 2012572076}
+      objectReference: {fileID: 2513727047246078099}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: onPlayerPermissionGroupChangedListeners.Array.data[2]
@@ -11007,18 +11055,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5cf65e61848113358b2620efe9eee76d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1838584615 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 2572595485415986399, guid: c1a26f964e70d51e3a4af28632b3910f,
-    type: 3}
-  m_PrefabInstance: {fileID: 2513727047246078096}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1838584610}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 45115577ef41a5b4ca741ed302693907, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1854110079
 GameObject:
   m_ObjectHideFlags: 0
@@ -11191,7 +11227,7 @@ PrefabInstance:
     - target: {fileID: 6759095419728963412, guid: 8894fa7e4588a5c4fab98453e558847d,
         type: 3}
       propertyPath: NetworkIDs.Array.size
-      value: 110
+      value: 114
       objectReference: {fileID: 0}
     - target: {fileID: 6759095419728963412, guid: 8894fa7e4588a5c4fab98453e558847d,
         type: 3}
@@ -11756,22 +11792,22 @@ PrefabInstance:
     - target: {fileID: 6759095419728963412, guid: 8894fa7e4588a5c4fab98453e558847d,
         type: 3}
       propertyPath: NetworkIDs.Array.data[110].ID
-      value: 131
+      value: 138
       objectReference: {fileID: 0}
     - target: {fileID: 6759095419728963412, guid: 8894fa7e4588a5c4fab98453e558847d,
         type: 3}
       propertyPath: NetworkIDs.Array.data[111].ID
-      value: 132
+      value: 139
       objectReference: {fileID: 0}
     - target: {fileID: 6759095419728963412, guid: 8894fa7e4588a5c4fab98453e558847d,
         type: 3}
       propertyPath: NetworkIDs.Array.data[112].ID
-      value: 133
+      value: 140
       objectReference: {fileID: 0}
     - target: {fileID: 6759095419728963412, guid: 8894fa7e4588a5c4fab98453e558847d,
         type: 3}
       propertyPath: NetworkIDs.Array.data[113].ID
-      value: 134
+      value: 141
       objectReference: {fileID: 0}
     - target: {fileID: 6759095419728963412, guid: 8894fa7e4588a5c4fab98453e558847d,
         type: 3}
@@ -12812,22 +12848,22 @@ PrefabInstance:
         type: 3}
       propertyPath: NetworkIDs.Array.data[110].gameObject
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 705845224}
     - target: {fileID: 6759095419728963412, guid: 8894fa7e4588a5c4fab98453e558847d,
         type: 3}
       propertyPath: NetworkIDs.Array.data[111].gameObject
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1193003378}
     - target: {fileID: 6759095419728963412, guid: 8894fa7e4588a5c4fab98453e558847d,
         type: 3}
       propertyPath: NetworkIDs.Array.data[112].gameObject
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1612604290}
     - target: {fileID: 6759095419728963412, guid: 8894fa7e4588a5c4fab98453e558847d,
         type: 3}
       propertyPath: NetworkIDs.Array.data[113].gameObject
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 213005594}
     - target: {fileID: 6759095419728963412, guid: 8894fa7e4588a5c4fab98453e558847d,
         type: 3}
       propertyPath: NetworkIDs.Array.data[114].gameObject
@@ -15592,6 +15628,27 @@ PrefabInstance:
       propertyPath: serializedProgramAsset
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 2811393197742726115, guid: c1a26f964e70d51e3a4af28632b3910f,
+        type: 3}
+      propertyPath: permissionManager
+      value: 
+      objectReference: {fileID: 1693488291}
+    - target: {fileID: 2811393197742726115, guid: c1a26f964e70d51e3a4af28632b3910f,
+        type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 2811393197742726115, guid: c1a26f964e70d51e3a4af28632b3910f,
+        type: 3}
+    - target: {fileID: 2811393197742726115, guid: c1a26f964e70d51e3a4af28632b3910f,
+        type: 3}
+      propertyPath: permissionDefs.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2811393197742726115, guid: c1a26f964e70d51e3a4af28632b3910f,
+        type: 3}
+      propertyPath: permissionDefs.Array.data[0]
+      value: 
+      objectReference: {fileID: 446681571}
     - target: {fileID: 2848869567551738822, guid: c1a26f964e70d51e3a4af28632b3910f,
         type: 3}
       propertyPath: menuPageRoot
@@ -15903,6 +15960,27 @@ PrefabInstance:
       propertyPath: permissionDefs.Array.data[3]
       value: 
       objectReference: {fileID: 1788691945}
+    - target: {fileID: 5119293139754722272, guid: c1a26f964e70d51e3a4af28632b3910f,
+        type: 3}
+      propertyPath: permissionManager
+      value: 
+      objectReference: {fileID: 1693488291}
+    - target: {fileID: 5119293139754722272, guid: c1a26f964e70d51e3a4af28632b3910f,
+        type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 5119293139754722272, guid: c1a26f964e70d51e3a4af28632b3910f,
+        type: 3}
+    - target: {fileID: 5119293139754722272, guid: c1a26f964e70d51e3a4af28632b3910f,
+        type: 3}
+      propertyPath: permissionDefs.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5119293139754722272, guid: c1a26f964e70d51e3a4af28632b3910f,
+        type: 3}
+      propertyPath: permissionDefs.Array.data[0]
+      value: 
+      objectReference: {fileID: 662614081}
     - target: {fileID: 5147296648391600538, guid: c1a26f964e70d51e3a4af28632b3910f,
         type: 3}
       propertyPath: _syncMethod
@@ -16137,6 +16215,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7165935432317309280, guid: c1a26f964e70d51e3a4af28632b3910f,
+        type: 3}
+      propertyPath: _syncMethod
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7314366573623707170, guid: c1a26f964e70d51e3a4af28632b3910f,
         type: 3}
       propertyPath: serializationData.Prefab
@@ -16226,6 +16309,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: RPMenu
+      objectReference: {fileID: 0}
+    - target: {fileID: 8179080559155416971, guid: c1a26f964e70d51e3a4af28632b3910f,
+        type: 3}
+      propertyPath: _syncMethod
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8329658152387148577, guid: c1a26f964e70d51e3a4af28632b3910f,
         type: 3}
@@ -17051,6 +17139,12 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 471971976987404090, guid: aca293a2ce8a1e4949c0f92d3782d268,
         type: 3}
+    - target: {fileID: 667763474011850032, guid: aca293a2ce8a1e4949c0f92d3782d268,
+        type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 667763474011850032, guid: aca293a2ce8a1e4949c0f92d3782d268,
+        type: 3}
     - target: {fileID: 1602158379028550843, guid: aca293a2ce8a1e4949c0f92d3782d268,
         type: 3}
       propertyPath: m_AnchorMax.y
@@ -17116,11 +17210,6 @@ PrefabInstance:
       propertyPath: m_Group
       value: 
       objectReference: {fileID: 748730987}
-    - target: {fileID: 2069371953344010746, guid: aca293a2ce8a1e4949c0f92d3782d268,
-        type: 3}
-      propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Target
-      value: 
-      objectReference: {fileID: 1838584615}
     - target: {fileID: 3519709254822626358, guid: aca293a2ce8a1e4949c0f92d3782d268,
         type: 3}
       propertyPath: m_SizeDelta.y
@@ -17161,6 +17250,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5562728596826099635, guid: aca293a2ce8a1e4949c0f92d3782d268,
+        type: 3}
+      propertyPath: _syncMethod
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6006356676135199759, guid: aca293a2ce8a1e4949c0f92d3782d268,
         type: 3}
@@ -17312,6 +17406,11 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6899974292248826200, guid: aca293a2ce8a1e4949c0f92d3782d268,
+        type: 3}
+      propertyPath: _syncMethod
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7069978784139220571, guid: aca293a2ce8a1e4949c0f92d3782d268,
         type: 3}
       propertyPath: m_AnchorMax.y
@@ -17342,6 +17441,12 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7587208147240893747, guid: aca293a2ce8a1e4949c0f92d3782d268,
+        type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 7587208147240893747, guid: aca293a2ce8a1e4949c0f92d3782d268,
+        type: 3}
     - target: {fileID: 8372329039973583759, guid: aca293a2ce8a1e4949c0f92d3782d268,
         type: 3}
       propertyPath: m_AnchorMax.y
@@ -17437,11 +17542,6 @@ PrefabInstance:
       propertyPath: m_Group
       value: 
       objectReference: {fileID: 748730987}
-    - target: {fileID: 9155533249622361103, guid: aca293a2ce8a1e4949c0f92d3782d268,
-        type: 3}
-      propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Target
-      value: 
-      objectReference: {fileID: 1838584615}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

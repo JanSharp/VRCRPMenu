@@ -6,7 +6,7 @@ using UnityEngine.UI;
 namespace JanSharp
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-    public class GMRequestButton : UdonSharpBehaviour
+    public class GMRequestButton : PermissionResolver
     {
         [HideInInspector][SerializeField][SingletonReference] private GMRequestsManagerAPI requestsManager;
 
@@ -16,11 +16,23 @@ namespace JanSharp
         public string offText;
         public string onText;
 
+        [PermissionDefinitionReference(nameof(associatedRequestPermissionDef))]
+        public string associatedRequestPermissionAsset; // A guid.
+        [HideInInspector][SerializeField] private PermissionDefinition associatedRequestPermissionDef;
+
         // TODO: Check for requests in OnClientBeginCatchup.
 
         private GMRequest activeLocalRequest;
         private bool ActiveRequestMatchesType => activeLocalRequest != null
             && activeLocalRequest.latencyRequestType == requestType;
+
+        public override void InitializeInstantiated() { }
+
+        public override void Resolve()
+        {
+            if (!associatedRequestPermissionDef.valueForLocalPlayer)
+                toggle.isOn = false;
+        }
 
         public void OnValueChanged()
         {
@@ -87,6 +99,8 @@ namespace JanSharp
         public void OnGMRequestChanged() => OnGMRequestsEvent();
         [GMRequestsEvent(GMRequestsEventType.OnGMRequestDeletedInLatency)]
         public void OnGMRequestDeletedInLatency() => OnGMRequestsEvent();
+        [GMRequestsEvent(GMRequestsEventType.OnGMRequestUnDeletedInLatency)]
+        public void OnGMRequestUnDeletedInLatency() => OnGMRequestsEvent();
         [GMRequestsEvent(GMRequestsEventType.OnGMRequestDeleted)]
         public void OnGMRequestDeleted() => OnGMRequestsEvent();
     }

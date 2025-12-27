@@ -28,6 +28,13 @@ namespace JanSharp
         /// </summary>
         OnGMRequestDeletedInLatency,
         /// <summary>
+        /// <para>Raised when a delete attempt was made, <see cref="OnGMRequestDeletedInLatency"/> got raised,
+        /// but turns out the player did not have delete permission.</para>
+        /// <para>Use <see cref="GMRequestsManagerAPI.RequestForEvent"/>.</para>
+        /// <para>Not game state safe.</para>
+        /// </summary>
+        OnGMRequestUnDeletedInLatency,
+        /// <summary>
         /// <para>Use <see cref="GMRequestsManagerAPI.RequestForEvent"/>.</para>
         /// <para>Game state safe.</para>
         /// </summary>

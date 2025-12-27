@@ -20,6 +20,7 @@ namespace JanSharp.Internal
 
         [HideInInspector][SerializeField][SingletonReference] private WannaBeClassesManager wannaBeClasses;
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
+        [HideInInspector][SerializeField][SingletonReference] private PermissionManagerAPI permissionManager;
 
         #region LatencyState
         /// <summary>
@@ -41,6 +42,52 @@ namespace JanSharp.Internal
         /// <para><c>0u</c> is an invalid id.</para>
         /// </summary>
         private uint nextRequestId = 1u;
+        #endregion
+
+        #region Permissions
+
+        [PermissionDefinitionReference(nameof(requestGMPermissionDef))]
+        public string requestGMPermissionAsset; // A guid.
+        [HideInInspector][SerializeField] private PermissionDefinition requestGMPermissionDef;
+
+        [PermissionDefinitionReference(nameof(requestGMUrgentlyPermissionDef))]
+        public string requestGMUrgentlyPermissionAsset; // A guid.
+        [HideInInspector][SerializeField] private PermissionDefinition requestGMUrgentlyPermissionDef;
+
+        [PermissionDefinitionReference(nameof(viewAndEditGMRequestsPermissionDef))]
+        public string viewAndEditGMRequestsPermissionAsset; // A guid.
+        [HideInInspector][SerializeField] private PermissionDefinition viewAndEditGMRequestsPermissionDef;
+
+        private bool HasCreatePermission(CorePlayerData actingPlayer, CorePlayerData requestingPlayer, GMRequestType requestType)
+        {
+            if (actingPlayer != requestingPlayer)
+                return false;
+            switch (requestType)
+            {
+                case GMRequestType.Regular:
+                    return permissionManager.PlayerHasPermission(actingPlayer, requestGMPermissionDef);
+                case GMRequestType.Urgent:
+                    return permissionManager.PlayerHasPermission(actingPlayer, requestGMUrgentlyPermissionDef);
+                default:
+                    return false;
+            }
+        }
+
+        private bool HasSetRequestTypePermission(CorePlayerData actingPlayer, CorePlayerData requestingPlayer, GMRequestType requestType)
+        {
+            return HasCreatePermission(actingPlayer, requestingPlayer, requestType);
+        }
+
+        private bool HasEditPermission(CorePlayerData actingPlayer)
+        {
+            return permissionManager.PlayerHasPermission(actingPlayer, viewAndEditGMRequestsPermissionDef);
+        }
+
+        private bool HasDeletePermission(CorePlayerData actingPlayer, GMRequest request)
+        {
+            return request.requestingPlayer == null || request.requestingPlayer == actingPlayer;
+        }
+
         #endregion
 
         private uint localPlayerId;
@@ -88,6 +135,7 @@ namespace JanSharp.Internal
         {
             GMRequestType requestType = (GMRequestType)lockstep.ReadByte();
             CorePlayerData requestingPlayer = playerDataManager.ReadCorePlayerDataRef();
+            bool hasPermission = HasCreatePermission(playerDataManager.SendingPlayerData, requestingPlayer, requestType);
 
             GMRequest request;
 
@@ -95,10 +143,20 @@ namespace JanSharp.Internal
             if (requestsByUniqueId.TryGetValue(uniqueId, out DataToken requestToken))
             {
                 request = (GMRequest)requestToken.Reference;
+                if (!hasPermission)
+                {
+                    request.latencyIsDeleted = true;
+                    requestsByUniqueId.Remove(uniqueId);
+                    RaiseOnGMRequestDeletedInLatency(request);
+                    request.DecrementRefsCount();
+                    return;
+                }
                 request.isLatency = false;
             }
             else
             {
+                if (!hasPermission)
+                    return;
                 request = CreateNewGMRequestInst();
                 request.uniqueId = uniqueId;
                 request.latencyRequestType = requestType;
@@ -134,8 +192,18 @@ namespace JanSharp.Internal
             GMRequest request = ReadGMRequestRef();
             if (request == null)
                 return;
+            GMRequestType requestType = (GMRequestType)lockstep.ReadByte();
+            if (!HasSetRequestTypePermission(playerDataManager.SendingPlayerData, request.requestingPlayer, requestType))
+            {
+                if (request.latencyHiddenUniqueIds.Count == 0)
+                    return;
+                request.latencyHiddenUniqueIds.Clear(); // Latency state has predicted incorrectly.
+                request.latencyRequestType = request.requestType;
+                RaiseOnGMRequestChangedInLatency(request);
+                return;
+            }
             request.isRead = true;
-            request.requestType = (GMRequestType)lockstep.ReadByte();
+            request.requestType = requestType;
             if (request.latencyHiddenUniqueIds.Remove(lockstep.SendingUniqueId))
             {
                 RaiseOnGMRequestChanged(request);
@@ -158,12 +226,27 @@ namespace JanSharp.Internal
             RaiseOnGMRequestChangedInLatency(request);
         }
 
+        private bool ResetIsReadIfMissingPermission(CorePlayerData actingPlayer, GMRequest request)
+        {
+            if (HasEditPermission(actingPlayer))
+                return false;
+            if (request.latencyHiddenUniqueIds.Count == 0)
+                return true;
+            request.latencyHiddenUniqueIds.Clear(); // Latency state has predicted incorrectly.
+            request.latencyIsRead = request.isRead;
+            request.latencyRespondingPlayer = request.respondingPlayer;
+            RaiseOnGMRequestChangedInLatency(request);
+            return true;
+        }
+
         [HideInInspector][SerializeField] private uint markReadIAId;
         [LockstepInputAction(nameof(markReadIAId))]
         public void OnMarkReadIA()
         {
             GMRequest request = ReadGMRequestRef();
             if (request == null)
+                return;
+            if (ResetIsReadIfMissingPermission(playerDataManager.SendingPlayerData, request))
                 return;
             request.isRead = true;
             request.respondingPlayer = playerDataManager.ReadCorePlayerDataRef();
@@ -196,6 +279,8 @@ namespace JanSharp.Internal
             GMRequest request = ReadGMRequestRef();
             if (request == null)
                 return;
+            if (ResetIsReadIfMissingPermission(playerDataManager.SendingPlayerData, request))
+                return;
             request.isRead = false;
             request.respondingPlayer = null;
             if (request.latencyHiddenUniqueIds.Remove(lockstep.SendingUniqueId))
@@ -226,6 +311,14 @@ namespace JanSharp.Internal
             GMRequest request = ReadGMRequestRef();
             if (request == null)
                 return;
+            if (!HasDeletePermission(playerDataManager.SendingPlayerData, request))
+            {
+                if (!request.latencyIsDeleted)
+                    return;
+                request.latencyIsDeleted = false;
+                RaiseOnGMRequestUnDeletedInLatency(request);
+                return;
+            }
             request.isDeleted = false;
             request.latencyIsDeleted = true;
             request.latencyHiddenUniqueIds.Clear();
@@ -363,6 +456,7 @@ namespace JanSharp.Internal
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onGMRequestChangedInLatencyListeners;
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onGMRequestChangedListeners;
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onGMRequestDeletedInLatencyListeners;
+        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onGMRequestUnDeletedInLatencyListeners;
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onGMRequestDeletedListeners;
 
         private GMRequest requestForEvent;
@@ -405,6 +499,14 @@ namespace JanSharp.Internal
             this.requestForEvent = requestForEvent;
             // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
             JanSharp.CustomRaisedEvents.Raise(ref onGMRequestDeletedInLatencyListeners, nameof(GMRequestsEventType.OnGMRequestDeletedInLatency));
+            this.requestForEvent = null; // To prevent misuse of the API.
+        }
+
+        private void RaiseOnGMRequestUnDeletedInLatency(GMRequest requestForEvent)
+        {
+            this.requestForEvent = requestForEvent;
+            // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
+            JanSharp.CustomRaisedEvents.Raise(ref onGMRequestUnDeletedInLatencyListeners, nameof(GMRequestsEventType.OnGMRequestUnDeletedInLatency));
             this.requestForEvent = null; // To prevent misuse of the API.
         }
 

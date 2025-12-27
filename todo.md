@@ -23,7 +23,10 @@
 - [x] clamp the velocity of the scroll rect, even though it only matters for desktop since in VR it's constantly rebuilding batches anyway
 - [ ] highlight the row that is about to be deleted behind the popup
 - [ ] auto delete old read GM requests
-- [ ] respect permissions in GM requests manager
+- [x] respect permissions in GM requests manager
+- [ ] maybe do raise the latency events alongside the game state events in GM requests manager, making listing to just latency events inform a script about all actions taken, without needing to listen to the game state events too
+- [ ] move the show page by permission script into the gm requests buttons module
+- [x] why are the request gm buttons no longer visible after making those scripts themselves also be permission resolvers, thus having 2 resolvers on the same object? What is going on - a permission system race condition that got introduced due to lockstep on init now being able to be spread out across frames
 
 - [ ] How to truly prevent locking yourself out of permissions to edit permissions
   - editing the permission values themselves could lock you out

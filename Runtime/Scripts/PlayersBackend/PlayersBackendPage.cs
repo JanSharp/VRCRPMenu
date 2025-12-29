@@ -133,10 +133,21 @@ namespace JanSharp
             permissionsPlayerDataIndex = playerDataManager.GetPlayerDataClassNameIndex<PermissionsPlayerData>(nameof(PermissionsPlayerData));
         }
 
+        private void InitializeRowsContent()
+        {
+            // Force a position changed event when the scroll view gets shown the first time,
+            // because a y of 1 forces it to move the view to 0.
+            // The height of the viewport rect is unknown until the game objects get activated for the first
+            // time, making calling ShowOnlyRowsVisibleInViewport in OnInit for example useless as the page
+            // is not yet shown.
+            rowsContent.anchoredPosition = new Vector2(0f, 1f);
+        }
+
         [PlayerDataEvent(PlayerDataEventType.OnPrePlayerDataManagerInit)]
         public void OnPrePlayerDataManagerInit()
         {
             FetchPlayerDataClassIndexes();
+            InitializeRowsContent();
             isInitialized = true;
         }
 
@@ -144,17 +155,17 @@ namespace JanSharp
         public void OnInit()
         {
             RebuildPermissionGroupButtons();
-            // Ensure this runs at some point during initialization at least once, in case the scroll rect
-            // does not raise its value changed event the first time the page gets opened.
-            ShowOnlyRowsVisibleInViewport();
         }
 
         [LockstepEvent(LockstepEventType.OnClientBeginCatchUp)]
         public void OnClientBeginCatchUp()
         {
             if (!lockstep.IsContinuationFromPrevFrame)
+            {
                 FetchPlayerDataClassIndexes();
-            RebuildRows(); // Runs ShowOnlyRowsVisibleInViewport, do not need to call it manually here.
+                InitializeRowsContent();
+            }
+            RebuildRows();
             if (lockstep.FlaggedToContinueNextFrame)
                 return;
             RebuildPermissionGroupButtons();
@@ -170,9 +181,11 @@ namespace JanSharp
         [LockstepEvent(LockstepEventType.OnImportFinishingUp)]
         public void OnImportFinishingUp()
         {
+            // Debug.Log($"[RPMenuDebug] PlayersBackendPage  OnImportFinishingUp - playerDataManager.IsPartOfCurrentImport: {playerDataManager.IsPartOfCurrentImport}, permissionManager.IsPartOfCurrentImport: {permissionManager.IsPartOfCurrentImport}");
+
             if (playerDataManager.IsPartOfCurrentImport)
             {
-                RebuildRows();
+                RebuildRows(); // Runs ShowOnlyRowsVisibleInViewport, do not need to call it manually here.
                 if (lockstep.FlaggedToContinueNextFrame)
                     return;
             }
@@ -337,6 +350,8 @@ namespace JanSharp
 
         private void RebuildRows()
         {
+            // Debug.Log($"[RPMenuDebug] PlayersBackendPage  RebuildRows");
+
             if (!lockstep.IsContinuationFromPrevFrame)
             {
                 EnsureClosedPopups();
@@ -416,6 +431,7 @@ namespace JanSharp
 
         private void HideAllCurrentlyVisibleRows()
         {
+            // Debug.Log($"[RPMenuDebug] PlayersBackendPage  HideAllCurrentlyVisibleRows - prevFirstVisibleRowIndex: {prevFirstVisibleRowIndex}, prevFirstInvisibleRowIndex: {prevFirstInvisibleRowIndex}, rowsCount: {rowsCount}");
             for (int i = prevFirstVisibleRowIndex; i < prevFirstInvisibleRowIndex; i++)
                 rows[i].rowGo.SetActive(false);
             prevFirstVisibleRowIndex = 0;
@@ -437,6 +453,8 @@ namespace JanSharp
                 firstVisibleIndex = 0;
             if (firstInvisibleIndex > rowsCount)
                 firstInvisibleIndex = rowsCount;
+
+            // Debug.Log($"[RPMenuDebug] PlayersBackendPage  ShowOnlyRowsVisibleInViewport (inner) - firstVisibleIndex: {firstVisibleIndex}, firstInvisibleIndex: {firstInvisibleIndex}, rowsCount: {rowsCount}, prevFirstVisibleRowIndex: {prevFirstVisibleRowIndex}, prevFirstInvisibleRowIndex: {prevFirstInvisibleRowIndex}");
 
             if (firstInvisibleIndex <= prevFirstVisibleRowIndex // New range is entirely below, no overlap.
                     || firstVisibleIndex >= prevFirstInvisibleRowIndex) // New range is entirely above, no overlap.
@@ -1055,6 +1073,7 @@ namespace JanSharp
 
         private void SortAll()
         {
+            // Debug.Log($"[RPMenuDebug] PlayersBackendPage  SortAll");
             HideAllCurrentlyVisibleRows();
             MergeSort(currentSortOrderFunction);
             for (int i = 0; i < rowsCount; i++)

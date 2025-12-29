@@ -167,8 +167,8 @@ namespace JanSharp
             EnsureClosedPopups();
         }
 
-        [LockstepEvent(LockstepEventType.OnImportFinished)]
-        public void OnImportFinished()
+        [LockstepEvent(LockstepEventType.OnImportFinishingUp)]
+        public void OnImportFinishingUp()
         {
             if (playerDataManager.IsPartOfCurrentImport)
             {

@@ -79,8 +79,6 @@ namespace JanSharp
         private Image currentSortOrderImage;
         private bool someRowsAreOutOfSortOrder;
 
-        private CorePlayerData playerDataAwaitingDeleteConfirmation;
-
         /// <summary>
         /// <para><see cref="uint"/> permissionGroupId => <see cref="PlayersBackendPermissionGroupButton"/> button</para>
         /// </summary>
@@ -90,7 +88,8 @@ namespace JanSharp
         private PlayersBackendPermissionGroupButton[] unusedPGButtons = new PlayersBackendPermissionGroupButton[ArrList.MinCapacity];
         private int unusedPGButtonsCount = 0;
 
-        private PlayersBackendRow selectedRowForPermissionGroupEditing;
+        private PlayersBackendRow selectedRowForPopup;
+        private CorePlayerData playerDataAwaitingDeleteConfirmation;
         private PlayersBackendPermissionGroupButton selectedPermissionGroupButton;
 
         private uint localPlayerId;
@@ -212,7 +211,7 @@ namespace JanSharp
 
         private void EnsureClosedPermissionGroupPopup()
         {
-            if (selectedRowForPermissionGroupEditing != null)
+            if (selectedRowForPopup != null)
                 menuManager.ClosePopup(permissionGroupPopup, doCallback: true);
         }
 
@@ -587,15 +586,27 @@ namespace JanSharp
             return false;
         }
 
+        private void SetSelectedRowForPopup(PlayersBackendRow row)
+        {
+            selectedRowForPopup = row;
+            selectedRowForPopup.activeRowHighlightImage.CrossFadeAlpha(1f, 0.1f, ignoreTimeScale: true);
+        }
+
+        private void UnsetSelectedRowForPopup()
+        {
+            selectedRowForPopup.activeRowHighlightImage.CrossFadeAlpha(0f, 0.1f, ignoreTimeScale: true);
+            selectedRowForPopup = null;
+        }
+
         public void OnPermissionGroupClick(PlayersBackendRow row)
         {
             if (lockstep.IsImporting)
                 return;
             if (!TryGetPermissionGroupButton(row.permissionsPlayerData.permissionGroup.id, out selectedPermissionGroupButton))
                 return;
+            EnsureClosedConfirmDeletePopup();
             selectedPermissionGroupButton.selectedImage.enabled = true;
-            selectedRowForPermissionGroupEditing = row;
-            selectedRowForPermissionGroupEditing.activeRowHighlightImage.CrossFadeAlpha(1f, 0.1f, ignoreTimeScale: true);
+            SetSelectedRowForPopup(row);
 
             permissionGroupPopup.SetParent(row.permissionGroupPopupLocation, worldPositionStays: false);
             permissionGroupPopup.anchoredPosition = Vector2.zero;
@@ -614,8 +625,7 @@ namespace JanSharp
             permissionGroupPopup.anchoredPosition = Vector2.zero;
             selectedPermissionGroupButton.selectedImage.enabled = false;
             selectedPermissionGroupButton = null;
-            selectedRowForPermissionGroupEditing.activeRowHighlightImage.CrossFadeAlpha(0f, 0.1f, ignoreTimeScale: true);
-            selectedRowForPermissionGroupEditing = null;
+            UnsetSelectedRowForPopup();
         }
 
         public void OnPermissionGroupPopupButtonClick(PlayersBackendPermissionGroupButton button)
@@ -624,9 +634,9 @@ namespace JanSharp
             // If the player ends up trying to edit the same player's permission group again before the IA
             // actually runs it's going to show the "wrong" group (the one the player is still apart of in the
             // game state), and it would only update once the IA runs.
-            SetPermissionGroupLabelText(selectedRowForPermissionGroupEditing, button.permissionGroup.groupName);
+            SetPermissionGroupLabelText(selectedRowForPopup, button.permissionGroup.groupName);
             playersBackendManager.SendSetPlayerPermissionGroupIA(
-                selectedRowForPermissionGroupEditing.permissionsPlayerData.core,
+                selectedRowForPopup.permissionsPlayerData.core,
                 button.permissionGroup);
             menuManager.ClosePopup(permissionGroupPopup, doCallback: true);
         }
@@ -651,7 +661,7 @@ namespace JanSharp
             SetPermissionGroupLabelText(row, permissionsPlayerData.permissionGroup.groupName);
             PotentiallySortChangedPermissionGroupRow(row);
 
-            if (row != selectedRowForPermissionGroupEditing)
+            if (row != selectedRowForPopup)
                 return;
             selectedPermissionGroupButton.selectedImage.enabled = false;
             if (!TryGetPermissionGroupButton(permissionsPlayerData.permissionGroup.id, out var button))
@@ -833,6 +843,8 @@ namespace JanSharp
         {
             if (lockstep.IsImporting)
                 return;
+            EnsureClosedPermissionGroupPopup();
+            SetSelectedRowForPopup(row);
             playerDataAwaitingDeleteConfirmation = row.rpPlayerData.core;
             confirmDeletePopup.SetParent(row.confirmDeletePopupLocation, worldPositionStays: false);
             confirmDeletePopup.anchoredPosition = Vector2.zero;
@@ -848,6 +860,7 @@ namespace JanSharp
             confirmDeletePopup.SetParent(popupsParent, worldPositionStays: false);
             confirmDeletePopup.anchoredPosition = Vector2.zero;
             playerDataAwaitingDeleteConfirmation = null;
+            UnsetSelectedRowForPopup();
         }
 
         public void OnConfirmDeleteClick()

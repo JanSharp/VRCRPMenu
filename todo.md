@@ -21,7 +21,7 @@
 - [x] test if disabling the root canvas stops all performance drain including moving - it does not, culling cost persists
 - [x] test if moving causes layout set dirty calls made by images and text (graphics) - it does not
 - [x] clamp the velocity of the scroll rect, even though it only matters for desktop since in VR it's constantly rebuilding batches anyway
-- [ ] highlight the row that is about to be deleted behind the popup
+- [x] highlight the row that is about to be deleted behind the popup
 - [ ] auto delete old read GM requests
 - [x] respect permissions in GM requests manager
 - [ ] maybe do raise the latency events alongside the game state events in GM requests manager, making listing to just latency events inform a script about all actions taken, without needing to listen to the game state events too

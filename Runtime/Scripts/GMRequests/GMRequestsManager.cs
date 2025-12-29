@@ -211,7 +211,6 @@ namespace JanSharp.Internal
                 RaiseOnGMRequestChangedInLatency(request);
                 return;
             }
-            request.isRead = true;
             request.requestType = requestType;
             if (request.latencyHiddenUniqueIds.Remove(lockstep.SendingUniqueId))
             {
@@ -381,6 +380,16 @@ namespace JanSharp.Internal
             return requestsById.TryGetValue(id, out DataToken requestToken)
                 ? (GMRequest)requestToken.Reference
                 : null;
+        }
+
+        #endregion
+
+        #region AutoDeletion
+
+        [HideInInspector][SerializeField] private uint checkAutoDeletionIAId;
+        [LockstepInputAction(nameof(checkAutoDeletionIAId))]
+        public void OnCheckAutoDeletionIA()
+        {
         }
 
         #endregion

@@ -47,6 +47,19 @@ namespace JanSharp.Internal
         private uint nextRequestId = 1u;
         #endregion
 
+        public override GMRequest[] GMRequests
+        {
+            get
+            {
+                GMRequest[] result = new GMRequest[requestsCount];
+                System.Array.Copy(requests, result, requestsCount);
+                return result;
+            }
+        }
+        public override GMRequest[] GMRequestsRaw => requests;
+        public override int GMRequestsCount => requestsCount;
+        public override GMRequest GetGMRequest(int index) => requests[index];
+
         #region Permissions
 
         [PermissionDefinitionReference(nameof(requestGMPermissionDef))]

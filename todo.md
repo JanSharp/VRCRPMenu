@@ -24,7 +24,7 @@
 - [x] highlight the row that is about to be deleted behind the popup
 - [x] auto delete old read GM requests
 - [x] respect permissions in GM requests manager
-- [ ] maybe do raise the latency events alongside the game state events in GM requests manager, making listing to just latency events inform a script about all actions taken, without needing to listen to the game state events too
+- [ ] maybe do raise the latency events alongside the game state events in GM requests manager, making listening to just latency events inform a script about all actions taken, without needing to listen to the game state events too
 - [x] move the show page by permission script into the gm requests buttons module
 - [x] why are the request gm buttons no longer visible after making those scripts themselves also be permission resolvers, thus having 2 resolvers on the same object? What is going on - a permission system race condition that got introduced due to lockstep on init now being able to be spread out across frames
 - [x] importing and opening the players backend page leaves rows disabled sometimes, like it didn't recalculate which ones should be visible

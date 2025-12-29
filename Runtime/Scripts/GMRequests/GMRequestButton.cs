@@ -20,11 +20,25 @@ namespace JanSharp
         public string associatedRequestPermissionAsset; // A guid.
         [HideInInspector][SerializeField] private PermissionDefinition associatedRequestPermissionDef;
 
-        // TODO: Check for requests in OnClientBeginCatchup.
-
         private GMRequest activeLocalRequest;
         private bool ActiveRequestMatchesType => activeLocalRequest != null
             && activeLocalRequest.latencyRequestType == requestType;
+
+        [LockstepEvent(LockstepEventType.OnClientBeginCatchUp)]
+        public void OnClientBeginCatchUp()
+        {
+            int count = requestsManager.GMRequestsCount;
+            GMRequest[] requests = requestsManager.GMRequests;
+            for (int i = 0; i < count; i++)
+            {
+                GMRequest request = requests[i];
+                if (IsRelevantActiveLocalRequest(request))
+                {
+                    SetActiveLocalRequest(request);
+                    return;
+                }
+            }
+        }
 
         public override void InitializeInstantiated() { }
 

@@ -93,10 +93,19 @@ namespace JanSharp.Internal
         private uint localPlayerId;
         private CorePlayerData localPlayer;
 
+        private void Start()
+        {
+            localPlayerId = (uint)Networking.LocalPlayer.playerId;
+        }
+
         [LockstepEvent(LockstepEventType.OnInit)]
         public void OnInit()
         {
-            localPlayerId = (uint)Networking.LocalPlayer.playerId;
+            FetchLocalPlayerData();
+        }
+
+        private void FetchLocalPlayerData()
+        {
             localPlayer = playerDataManager.GetCorePlayerDataForPlayerId(localPlayerId);
         }
 
@@ -430,6 +439,7 @@ namespace JanSharp.Internal
         {
             if (!lockstep.IsContinuationFromPrevFrame)
             {
+                FetchLocalPlayerData();
                 requestsCount = (int)lockstep.ReadSmallUInt();
                 ArrList.EnsureCapacity(ref requests, requestsCount);
             }

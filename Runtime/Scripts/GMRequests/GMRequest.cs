@@ -41,6 +41,10 @@ namespace JanSharp
         /// </summary>
         [System.NonSerialized] public uint requestedAtTick;
         /// <summary>
+        /// <para><c>0u</c> and meaningless while <see cref="isRead"/> is <see langword="false"/>.</para>
+        /// </summary>
+        [System.NonSerialized] public uint autoDeleteAtTick;
+        /// <summary>
         /// <para>Can be read while <see cref="isLatency"/> is <see langword="true"/>.</para>
         /// <para>Can be <see langword="null"/>.</para>
         /// <para>Readonly.</para>

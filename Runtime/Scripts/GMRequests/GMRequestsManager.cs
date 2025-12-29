@@ -22,6 +22,9 @@ namespace JanSharp.Internal
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
         [HideInInspector][SerializeField][SingletonReference] private PermissionManagerAPI permissionManager;
 
+        private const uint MinLiveTicksWhenMarkedRead = (uint)(60f * LockstepAPI.TickRate);
+        private const uint MinTotalLiveTicks = (uint)(10f * 60f * LockstepAPI.TickRate);
+
         #region LatencyState
         /// <summary>
         /// <para>Once a request is part of the game state, accessing it through here is also game state
@@ -256,8 +259,7 @@ namespace JanSharp.Internal
                 return;
             if (ResetIsReadIfMissingPermission(playerDataManager.SendingPlayerData, request))
                 return;
-            request.isRead = true;
-            request.respondingPlayer = playerDataManager.ReadCorePlayerDataRef();
+            MarkAsRead(request, playerDataManager.ReadCorePlayerDataRef());
             if (request.latencyHiddenUniqueIds.Remove(lockstep.SendingUniqueId))
             {
                 RaiseOnGMRequestChanged(request);
@@ -289,8 +291,7 @@ namespace JanSharp.Internal
                 return;
             if (ResetIsReadIfMissingPermission(playerDataManager.SendingPlayerData, request))
                 return;
-            request.isRead = false;
-            request.respondingPlayer = null;
+            MarkAsUnread(request);
             if (request.latencyHiddenUniqueIds.Remove(lockstep.SendingUniqueId))
             {
                 RaiseOnGMRequestChanged(request);
@@ -327,6 +328,11 @@ namespace JanSharp.Internal
                 RaiseOnGMRequestUnDeletedInLatency(request);
                 return;
             }
+            DeleteGMRequestInGS(request);
+        }
+
+        private void DeleteGMRequestInGS(GMRequest request)
+        {
             request.isDeleted = false;
             request.latencyIsDeleted = true;
             request.latencyHiddenUniqueIds.Clear();
@@ -343,6 +349,41 @@ namespace JanSharp.Internal
             requestsByUniqueId.Remove(request.uniqueId);
             RaiseOnGMRequestDeleted(request);
             request.DecrementRefsCount();
+        }
+
+        #endregion
+
+        #region AutoDeletion
+
+        private void MarkAsRead(GMRequest request, CorePlayerData respondingPlayer)
+        {
+            uint currentTick = lockstep.CurrentTick;
+            request.isRead = true;
+            request.autoDeleteAtTick = System.Math.Max(
+                currentTick + MinLiveTicksWhenMarkedRead,
+                request.requestedAtTick + MinTotalLiveTicks);
+            request.respondingPlayer = respondingPlayer;
+
+            WriteGMRequestRef(request);
+            lockstep.SendEventDelayedTicks(checkAutoDeletionIAId, request.autoDeleteAtTick - currentTick);
+        }
+
+        private void MarkAsUnread(GMRequest request)
+        {
+            request.isRead = false;
+            request.autoDeleteAtTick = 0u;
+            request.respondingPlayer = null;
+            // Cannot cancel the delayed event but it is fine, it has its own checks.
+        }
+
+        [HideInInspector][SerializeField] private uint checkAutoDeletionIAId;
+        [LockstepInputAction(nameof(checkAutoDeletionIAId))]
+        public void OnCheckAutoDeletionIA()
+        {
+            GMRequest request = ReadGMRequestRef();
+            if (request == null || !request.isRead || request.autoDeleteAtTick != lockstep.CurrentTick)
+                return;
+            DeleteGMRequestInGS(request);
         }
 
         #endregion
@@ -384,16 +425,6 @@ namespace JanSharp.Internal
 
         #endregion
 
-        #region AutoDeletion
-
-        [HideInInspector][SerializeField] private uint checkAutoDeletionIAId;
-        [LockstepInputAction(nameof(checkAutoDeletionIAId))]
-        public void OnCheckAutoDeletionIA()
-        {
-        }
-
-        #endregion
-
         #region Serialization
 
         private void WriteGMRequest(GMRequest request)
@@ -405,6 +436,8 @@ namespace JanSharp.Internal
             // without a player being associated as the responder
             lockstep.WriteFlags(request.isRead);
             lockstep.WriteSmallUInt(request.requestedAtTick);
+            if (request.isRead)
+                lockstep.WriteSmallUInt(request.autoDeleteAtTick);
             playerDataManager.WriteCorePlayerDataRef(request.requestingPlayer);
             playerDataManager.WriteCorePlayerDataRef(request.respondingPlayer);
         }
@@ -416,6 +449,7 @@ namespace JanSharp.Internal
             request.requestType = (GMRequestType)lockstep.ReadByte();
             lockstep.ReadFlags(out request.isRead);
             request.requestedAtTick = lockstep.ReadSmallUInt();
+            request.autoDeleteAtTick = request.isRead ? lockstep.ReadSmallUInt() : 0u;
             request.requestingPlayer = playerDataManager.ReadCorePlayerDataRef();
             request.respondingPlayer = playerDataManager.ReadCorePlayerDataRef();
             requestsByUniqueId.Add(request.uniqueId, request);

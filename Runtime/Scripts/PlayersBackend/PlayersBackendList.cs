@@ -9,8 +9,6 @@ namespace JanSharp
     public class PlayersBackendList : SortableScrollableList
     {
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
-        [HideInInspector][SerializeField][FindInParent] private MenuManagerAPI menuManager;
-        [HideInInspector][SerializeField][FindInParent] private MenuPageRoot menuPageRoot;
 
         private int rpPlayerDataIndex;
         private int permissionsPlayerDataIndex;
@@ -30,8 +28,6 @@ namespace JanSharp
         private DataDictionary rowsByPersistentId = new DataDictionary();
         public PlayersBackendRow[] Rows => (PlayersBackendRow[])rows;
         public int RowsCount => rowsCount;
-
-        protected override bool ListIsVisible => menuManager.IsMenuOpen && menuManager.ActivePageInternalName == menuPageRoot.PageInternalName;
 
         public override void Initialize()
         {

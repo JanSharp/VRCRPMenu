@@ -8,14 +8,6 @@ namespace JanSharp
     public class GMRequestsList : SortableScrollableList
     {
         [HideInInspector][SerializeField][SingletonReference] private GMRequestsManagerAPI requestsManager;
-        [HideInInspector][SerializeField][SingletonReference] private UpdateManager updateManager;
-        [HideInInspector][SerializeField][FindInParent] private MenuManagerAPI menuManager;
-        [HideInInspector][SerializeField][FindInParent] private MenuPageRoot menuPageRoot;
-
-        /// <summary>
-        /// <para>Used by <see cref="UpdateManager"/>.</para>
-        /// </summary>
-        private int customUpdateInternalIndex;
 
         /// <summary>
         /// <para><see cref="ulong"/> requestUniqueId => <see cref="GMRequestRow"/> row</para>
@@ -26,38 +18,23 @@ namespace JanSharp
 
         private uint nextTimeInfoUpdateTick;
 
-        protected override bool ListIsVisible => menuManager.IsMenuOpen && menuManager.ActivePageInternalName == menuPageRoot.PageInternalName;
-
         public override void Initialize()
         {
             base.Initialize();
 
             currentSortOrderFunction = nameof(CompareRow);
             someRowsAreOutOfSortOrder = false;
-
-            menuManager.RegisterOnMenuActivePageChanged(this);
-            menuManager.RegisterOnMenuOpenStateChanged(this);
-            StartStopUpdateLoop();
         }
 
-        public void OnMenuActivePageChanged() => StartStopUpdateLoop();
-
-        public void OnMenuOpenStateChanged() => StartStopUpdateLoop();
-
-        private void StartStopUpdateLoop()
+        protected override void OnPageWentVisible()
         {
-            if (ListIsVisible)
-            {
-                updateManager.Register(this);
-                nextTimeInfoUpdateTick = lockstep.CurrentTick;
-                CustomUpdate();
-            }
-            else
-                updateManager.Deregister(this);
+            nextTimeInfoUpdateTick = lockstep.CurrentTick;
+            base.OnPageWentVisible();
         }
 
-        public void CustomUpdate()
+        protected override void OnPageUpdateWhileVisible()
         {
+            base.OnPageUpdateWhileVisible();
             uint currentTick = lockstep.CurrentTick;
             if (currentTick < nextTimeInfoUpdateTick)
                 return;

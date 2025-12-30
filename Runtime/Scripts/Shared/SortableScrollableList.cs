@@ -8,6 +8,14 @@ namespace JanSharp
     public abstract class SortableScrollableList : UdonSharpBehaviour
     {
         [HideInInspector][SerializeField][SingletonReference] protected LockstepAPI lockstep;
+        [HideInInspector][SerializeField][SingletonReference] protected UpdateManager updateManager;
+        [HideInInspector][SerializeField][FindInParent] protected MenuManagerAPI menuManager;
+        [HideInInspector][SerializeField][FindInParent] protected MenuPageRoot menuPageRoot;
+
+        /// <summary>
+        /// <para>Used by <see cref="UpdateManager"/>.</para>
+        /// </summary>
+        private int customUpdateInternalIndex;
 
         public GameObject rowPrefab;
         public SortableScrollableRow rowPrefabScript;
@@ -16,6 +24,13 @@ namespace JanSharp
         private float rowHeight;
         private float negativeRowHeight;
         private float currentRowsContentHeight;
+        /// <summary>
+        /// <para>Even if the initial position is actually zero, which it likely is, the visible rows are
+        /// still going to update appropriately because the height is going to trigger an update.</para>
+        /// </summary>
+        private float prevRowsContentPosition = 0f;
+        private float prevRowsViewportHeight = 0f;
+        private int currentVisibleRowsCount = 0;
         private int prevFirstVisibleRowIndex = 0;
         private int prevFirstInvisibleRowIndex = 0;
         public ScrollRect rowsScrollRect;
@@ -54,25 +69,53 @@ namespace JanSharp
         protected SortableScrollableRow compareRight;
         protected bool leftSortsFirst;
 
+        protected bool pageIsVisible;
+
         public virtual void Initialize()
         {
             rowHeight = rowPrefabScript.rowRect.sizeDelta.y;
             negativeRowHeight = -rowHeight;
 
-            InitializeRowsContent();
+            menuManager.RegisterOnMenuActivePageChanged(this);
+            menuManager.RegisterOnMenuOpenStateChanged(this);
+            StartStopUpdateLoop();
         }
 
-        private void InitializeRowsContent()
+        public void OnMenuActivePageChanged() => StartStopUpdateLoop();
+
+        public void OnMenuOpenStateChanged() => StartStopUpdateLoop();
+
+        private void StartStopUpdateLoop()
         {
-            // Force a position changed event when the scroll view gets shown the first time,
-            // because a y of 1 forces it to move the view to 0.
-            // The height of the viewport rect is unknown until the game objects get activated for the first
-            // time, making calling ShowOnlyRowsVisibleInViewport in OnInit for example useless as the page
-            // is not yet shown.
-            rowsContent.anchoredPosition = new Vector2(0f, 1f);
+            pageIsVisible = menuManager.IsMenuOpen && menuManager.ActivePageInternalName == menuPageRoot.PageInternalName;
+            if (pageIsVisible)
+                OnPageWentVisible();
+            else
+                OnPageWentInvisible();
         }
 
-        protected abstract bool ListIsVisible { get; }
+        protected virtual void OnPageWentVisible()
+        {
+            updateManager.Register(this);
+            CustomUpdate();
+        }
+
+        protected virtual void OnPageWentInvisible()
+        {
+            updateManager.Deregister(this);
+        }
+
+        protected virtual void OnPageUpdateWhileVisible()
+        {
+            float rowsViewportHeight = rowsViewport.rect.height;
+            if (rowsViewportHeight == prevRowsViewportHeight)
+                return;
+            prevRowsViewportHeight = rowsViewportHeight;
+            currentVisibleRowsCount = Mathf.CeilToInt(rowsViewportHeight / rowHeight) + 1;
+            ShowOnlyRowsVisibleInViewport();
+        }
+
+        public void CustomUpdate() => OnPageUpdateWhileVisible();
 
         #region RowsManagement
 
@@ -92,8 +135,7 @@ namespace JanSharp
 
                 rowsCount = newRowsCount;
                 ArrList.EnsureCapacity(ref rows, rowsCount);
-                currentRowsContentHeight = rowsCount * rowHeight;
-                rowsContent.sizeDelta = new Vector2(0f, currentRowsContentHeight);
+                OnRowsCountChanged();
             }
 
             suspensionSw.Restart();
@@ -127,16 +169,29 @@ namespace JanSharp
             ArrList.Add(ref unusedRows, ref unusedRowsCount, row);
             int index = row.index;
             ArrList.RemoveAt(ref rows, ref rowsCount, index);
-            currentRowsContentHeight = rowsCount * rowHeight;
-            rowsContent.sizeDelta = new Vector2(0f, currentRowsContentHeight);
+            OnRowsCountChanged();
             for (int i = index; i < rowsCount; i++)
                 SetRowIndex(rows[i], i);
+        }
+
+        private void OnRowsCountChanged()
+        {
+            currentRowsContentHeight = rowsCount * rowHeight;
+            rowsContent.sizeDelta = new Vector2(0f, currentRowsContentHeight);
+            if (pageIsVisible)
+                ShowOnlyRowsVisibleInViewport();
+            else
+                prevRowsViewportHeight = 0f; // Force update the next time the page becomes visible.
         }
 
         public void OnRowsScrollRectValueChanged()
         {
             if (Mathf.Abs(rowsScrollRect.velocity.y) < minScrollRectVelocity)
                 rowsScrollRect.velocity = Vector2.zero;
+            float position = rowsContent.anchoredPosition.y;
+            if (position == prevRowsContentPosition)
+                return;
+            prevRowsContentPosition = position;
             ShowOnlyRowsVisibleInViewport();
         }
 
@@ -151,14 +206,8 @@ namespace JanSharp
 
         private void ShowOnlyRowsVisibleInViewport()
         {
-            // Always recalculate in order to support the size changing at runtime. Even though at the time of
-            // writing this with the current page setup it is static, things might change, people might use it
-            // differently.
-            float viewportHeight = rowsViewport.rect.height;
-            int visibleCount = Mathf.CeilToInt(viewportHeight / rowHeight) + 1;
-            float position = rowsContent.anchoredPosition.y;
-            int firstVisibleIndex = Mathf.FloorToInt(position / rowHeight);
-            int firstInvisibleIndex = firstVisibleIndex + visibleCount;
+            int firstVisibleIndex = Mathf.FloorToInt(prevRowsContentPosition / rowHeight);
+            int firstInvisibleIndex = firstVisibleIndex + currentVisibleRowsCount;
 
             if (firstVisibleIndex < 0)
                 firstVisibleIndex = 0;
@@ -219,8 +268,7 @@ namespace JanSharp
             if (rowsCount == 0)
             {
                 ArrList.Add(ref rows, ref rowsCount, row);
-                currentRowsContentHeight = rowsCount * rowHeight;
-                rowsContent.sizeDelta = new Vector2(0f, currentRowsContentHeight);
+                OnRowsCountChanged();
                 SetRowIndex(row, 0);
                 return;
             }
@@ -236,15 +284,14 @@ namespace JanSharp
             }
             while (index > 0);
             ArrList.Insert(ref rows, ref rowsCount, row, index);
-            currentRowsContentHeight = rowsCount * rowHeight;
-            rowsContent.sizeDelta = new Vector2(0f, currentRowsContentHeight);
+            OnRowsCountChanged();
             for (int i = index; i < rowsCount; i++)
                 SetRowIndex(rows[i], i);
         }
 
         protected void UpdateSortPositionDueToValueChange(SortableScrollableRow row)
         {
-            if (!ListIsVisible)
+            if (!pageIsVisible)
             {
                 SortOne(row);
                 return;
@@ -256,7 +303,7 @@ namespace JanSharp
 
         protected void UpdateSortPositionsDueToMultipleValueChanges()
         {
-            if (!ListIsVisible)
+            if (!pageIsVisible)
                 SortAll();
             else
                 MarkAsSomeRowsNoLongerBeingInSortOrder();

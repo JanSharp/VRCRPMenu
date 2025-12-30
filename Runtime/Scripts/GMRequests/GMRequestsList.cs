@@ -95,11 +95,7 @@ namespace JanSharp
 
         public void RebuildRows() => RebuildRows(requestsManager.GMRequestsCount);
 
-        protected override void OnRowCreated(SortableScrollableRow row)
-        {
-            GMRequestRow actualRow = (GMRequestRow)row;
-            actualRow.urgentHighlight.CrossFadeAlpha(0f, 0f, ignoreTimeScale: true);
-        }
+        protected override void OnRowCreated(SortableScrollableRow row) { }
 
         protected override void OnPreRebuildRows()
         {
@@ -139,10 +135,8 @@ namespace JanSharp
             GMRequest request = row.request;
 
             bool latencyIsRead = request.latencyIsRead;
-            bool isUrgent = request.latencyRequestType == GMRequestType.Urgent;
-
-            row.rowGroup.alpha = latencyIsRead ? 0.4f : 1f;
-            row.urgentHighlight.CrossFadeAlpha(isUrgent && !latencyIsRead ? 1f : 0f, 0.1f, ignoreTimeScale: true);
+            row.regularHighlight.SetActive(!latencyIsRead && request.latencyRequestType == GMRequestType.Regular);
+            row.urgentHighlight.SetActive(!latencyIsRead && request.latencyRequestType == GMRequestType.Urgent);
             row.readToggle.SetIsOnWithoutNotify(latencyIsRead);
 
             RPPlayerData responder = request.latencyRespondingPlayer;

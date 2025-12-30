@@ -10,8 +10,8 @@ namespace JanSharp
     {
         [System.NonSerialized] public GMRequest request;
         public GMRequestsPage page;
-        public CanvasGroup rowGroup;
-        public Image urgentHighlight;
+        public GameObject regularHighlight;
+        public GameObject urgentHighlight;
         public Toggle readToggle;
         public TextMeshProUGUI timeAndInfoText;
         public TextMeshProUGUI responderText;

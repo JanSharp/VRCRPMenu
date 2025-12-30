@@ -20,6 +20,7 @@ namespace JanSharp.Internal
 
         [HideInInspector][SerializeField][SingletonReference] private WannaBeClassesManager wannaBeClasses;
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
+        [HideInInspector][SerializeField][SingletonReference] private PlayersBackendManagerAPI playersBackendManager;
         [HideInInspector][SerializeField][SingletonReference] private PermissionManagerAPI permissionManager;
 
         private const uint MinLiveTicksWhenMarkedRead = (uint)(60f * LockstepAPI.TickRate);
@@ -35,6 +36,7 @@ namespace JanSharp.Internal
         #endregion
 
         #region GameState
+        private int rpPlayerDataIndex;
         private GMRequest[] requests = new GMRequest[ArrList.MinCapacity];
         private int requestsCount = 0;
         /// <summary>
@@ -101,17 +103,23 @@ namespace JanSharp.Internal
 
         private bool HasDeletePermission(CorePlayerData actingPlayer, GMRequest request)
         {
-            return request.requestingPlayer == null || request.requestingPlayer == actingPlayer;
+            return request.requestingPlayer == null || request.requestingPlayer.core == actingPlayer;
         }
 
         #endregion
 
         private uint localPlayerId;
-        private CorePlayerData localPlayer;
+        private RPPlayerData localPlayer;
 
         private void Start()
         {
             localPlayerId = (uint)Networking.LocalPlayer.playerId;
+        }
+
+        [PlayerDataEvent(PlayerDataEventType.OnAllCustomPlayerDataRegistered)]
+        public void OnAllCustomPlayerDataRegistered()
+        {
+            rpPlayerDataIndex = playerDataManager.GetPlayerDataClassNameIndex<RPPlayerData>(nameof(RPPlayerData));
         }
 
         [LockstepEvent(LockstepEventType.OnInit)]
@@ -122,7 +130,7 @@ namespace JanSharp.Internal
 
         private void FetchLocalPlayerData()
         {
-            localPlayer = playerDataManager.GetCorePlayerDataForPlayerId(localPlayerId);
+            localPlayer = (RPPlayerData)playerDataManager.GetCorePlayerDataForPlayerId(localPlayerId).customPlayerData[rpPlayerDataIndex];
         }
 
         private GMRequest CreateNewGMRequestInst()
@@ -138,12 +146,12 @@ namespace JanSharp.Internal
                 return;
             lockstep.WriteByte((byte)requestType);
             // Cannot rely on lockstep.SendingPlayerId, player could leave.
-            playerDataManager.WriteCorePlayerDataRef(localPlayer);
+            playersBackendManager.WriteRPPlayerDataRef(localPlayer);
             ulong uniqueId = lockstep.SendInputAction(createIAId);
             CreateInLS(uniqueId, requestType, localPlayer);
         }
 
-        public void CreateInLS(ulong uniqueId, GMRequestType requestType, CorePlayerData requestingPlayer)
+        public void CreateInLS(ulong uniqueId, GMRequestType requestType, RPPlayerData requestingPlayer)
         {
             GMRequest request = CreateNewGMRequestInst();
             request.isLatency = true;
@@ -159,8 +167,8 @@ namespace JanSharp.Internal
         public void OnCreateIA()
         {
             GMRequestType requestType = (GMRequestType)lockstep.ReadByte();
-            CorePlayerData requestingPlayer = playerDataManager.ReadCorePlayerDataRef();
-            bool hasPermission = HasCreatePermission(playerDataManager.SendingPlayerData, requestingPlayer, requestType);
+            RPPlayerData requestingPlayer = playersBackendManager.ReadRPPlayerDataRef();
+            bool hasPermission = HasCreatePermission(playerDataManager.SendingPlayerData, requestingPlayer.core, requestType);
 
             GMRequest request;
 
@@ -218,7 +226,7 @@ namespace JanSharp.Internal
             if (request == null)
                 return;
             GMRequestType requestType = (GMRequestType)lockstep.ReadByte();
-            if (!HasSetRequestTypePermission(playerDataManager.SendingPlayerData, request.requestingPlayer, requestType))
+            if (!HasSetRequestTypePermission(playerDataManager.SendingPlayerData, request.requestingPlayer.core, requestType))
             {
                 if (request.latencyHiddenUniqueIds.Count == 0)
                     return;
@@ -243,7 +251,7 @@ namespace JanSharp.Internal
             if (!lockstep.IsInitialized)
                 return;
             WriteGMRequestRef(request);
-            playerDataManager.WriteCorePlayerDataRef(localPlayer);
+            playersBackendManager.WriteRPPlayerDataRef(localPlayer);
             request.latencyHiddenUniqueIds.Add(lockstep.SendInputAction(markReadIAId), true);
             request.latencyIsRead = true;
             request.latencyRespondingPlayer = localPlayer;
@@ -272,7 +280,7 @@ namespace JanSharp.Internal
                 return;
             if (ResetIsReadIfMissingPermission(playerDataManager.SendingPlayerData, request))
                 return;
-            MarkAsRead(request, playerDataManager.ReadCorePlayerDataRef());
+            MarkAsRead(request, playersBackendManager.ReadRPPlayerDataRef());
             if (request.latencyHiddenUniqueIds.Remove(lockstep.SendingUniqueId))
             {
                 RaiseOnGMRequestChanged(request);
@@ -368,7 +376,7 @@ namespace JanSharp.Internal
 
         #region AutoDeletion
 
-        private void MarkAsRead(GMRequest request, CorePlayerData respondingPlayer)
+        private void MarkAsRead(GMRequest request, RPPlayerData respondingPlayer)
         {
             uint currentTick = lockstep.CurrentTick;
             request.isRead = true;
@@ -403,7 +411,7 @@ namespace JanSharp.Internal
 
         #region Utils
 
-        public void WriteGMRequestRef(GMRequest request)
+        public override void WriteGMRequestRef(GMRequest request)
         {
             if (!request.isLatency)
             {
@@ -414,7 +422,7 @@ namespace JanSharp.Internal
             lockstep.WriteULong(request.uniqueId);
         }
 
-        public GMRequest ReadGMRequestRef()
+        public override GMRequest ReadGMRequestRef()
         {
             byte header = lockstep.ReadByte();
             if (header != 0xff)
@@ -429,7 +437,7 @@ namespace JanSharp.Internal
                 : null;
         }
 
-        public GMRequest GetGMRequestById(uint id)
+        public override GMRequest GetGMRequestById(uint id)
         {
             return requestsById.TryGetValue(id, out DataToken requestToken)
                 ? (GMRequest)requestToken.Reference
@@ -451,8 +459,8 @@ namespace JanSharp.Internal
             lockstep.WriteSmallUInt(request.requestedAtTick);
             if (request.isRead)
                 lockstep.WriteSmallUInt(request.autoDeleteAtTick);
-            playerDataManager.WriteCorePlayerDataRef(request.requestingPlayer);
-            playerDataManager.WriteCorePlayerDataRef(request.respondingPlayer);
+            playersBackendManager.WriteRPPlayerDataRef(request.requestingPlayer);
+            playersBackendManager.WriteRPPlayerDataRef(request.respondingPlayer);
         }
 
         private GMRequest ReadGMRequest(GMRequest request)
@@ -463,8 +471,8 @@ namespace JanSharp.Internal
             lockstep.ReadFlags(out request.isRead);
             request.requestedAtTick = lockstep.ReadSmallUInt();
             request.autoDeleteAtTick = request.isRead ? lockstep.ReadSmallUInt() : 0u;
-            request.requestingPlayer = playerDataManager.ReadCorePlayerDataRef();
-            request.respondingPlayer = playerDataManager.ReadCorePlayerDataRef();
+            request.requestingPlayer = playersBackendManager.ReadRPPlayerDataRef();
+            request.respondingPlayer = playersBackendManager.ReadRPPlayerDataRef();
             requestsByUniqueId.Add(request.uniqueId, request);
             requestsById.Add(request.id, request);
             return request;

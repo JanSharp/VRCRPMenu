@@ -98,6 +98,12 @@ namespace JanSharp
         /// <param name="corePlayerData"></param>
         public abstract void SendDeleteOfflinePlayerDataIA(CorePlayerData corePlayerData);
 
+        public abstract RPPlayerData SendingRPPlayerData { get; }
+        public abstract RPPlayerData GetRPPlayerData(CorePlayerData core);
+
+        public abstract void WriteRPPlayerDataRef(RPPlayerData rpPlayerData);
+        public abstract RPPlayerData ReadRPPlayerDataRef();
+
         /// <summary>
         /// <para>Usable inside of
         /// <see cref="PlayersBackendEventType.OnRPPlayerDataOverriddenDisplayNameChanged"/> and

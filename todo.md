@@ -28,6 +28,14 @@
 - [x] move the show page by permission script into the gm requests buttons module
 - [x] why are the request gm buttons no longer visible after making those scripts themselves also be permission resolvers, thus having 2 resolvers on the same object? What is going on - a permission system race condition that got introduced due to lockstep on init now being able to be spread out across frames
 - [x] importing and opening the players backend page leaves rows disabled sometimes, like it didn't recalculate which ones should be visible
+- [ ] check every frame if the viewport rect height has changed, which also removes the hack of setting the scroll rect position to 1 initially
+- [ ] update which rows are visible every time one gets added or removed... but like isn't it already doing that? why was a row invisible after others got deleted? And it didn't even show up when scrolling?!
+- [ ] update names in the gm requests list whenever overridden display name or character names change
+- [ ] make urgent highlight image not fade in and out, it changing position instantly and then playing the fade looks stupid, just how the toggle checkmark looked stupid
+- [ ] add a main highlight color image for active gm requests
+- [ ] remove the canvas group, keeping read gm requests the same full opacity, just with the urgent or main color highlights disabled
+- [ ] sort read requests the other way around timing wise, newest to the top
+- [ ] why do the gm request toggles look like they have a different color than the page toggles?
 
 - [ ] How to truly prevent locking yourself out of permissions to edit permissions
   - editing the permission values themselves could lock you out

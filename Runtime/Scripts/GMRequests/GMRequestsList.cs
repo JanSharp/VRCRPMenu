@@ -1,0 +1,218 @@
+﻿using UdonSharp;
+using UnityEngine;
+using VRC.SDK3.Data;
+
+namespace JanSharp
+{
+    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    public class GMRequestsList : SortableScrollableList
+    {
+        [HideInInspector][SerializeField][SingletonReference] private GMRequestsManagerAPI requestsManager;
+        [HideInInspector][SerializeField][SingletonReference] private UpdateManager updateManager;
+        [HideInInspector][SerializeField][FindInParent] private MenuManagerAPI menuManager;
+        [HideInInspector][SerializeField][FindInParent] private MenuPageRoot menuPageRoot;
+
+        /// <summary>
+        /// <para>Used by <see cref="UpdateManager"/>.</para>
+        /// </summary>
+        private int customUpdateInternalIndex;
+
+        /// <summary>
+        /// <para><see cref="ulong"/> requestUniqueId => <see cref="GMRequestRow"/> row</para>
+        /// </summary>
+        private DataDictionary rowsByUniqueId = new DataDictionary();
+        public GMRequestRow[] Rows => (GMRequestRow[])rows;
+        public int RowsCount => rowsCount;
+
+        private uint nextTimeInfoUpdateTick;
+
+        protected override bool ListIsVisible => menuManager.IsMenuOpen && menuManager.ActivePageInternalName == menuPageRoot.PageInternalName;
+
+        public override void Initialize()
+        {
+            base.Initialize();
+
+            currentSortOrderFunction = nameof(CompareRow);
+            someRowsAreOutOfSortOrder = false;
+
+            menuManager.RegisterOnMenuActivePageChanged(this);
+            menuManager.RegisterOnMenuOpenStateChanged(this);
+            StartStopUpdateLoop();
+        }
+
+        public void OnMenuActivePageChanged() => StartStopUpdateLoop();
+
+        public void OnMenuOpenStateChanged() => StartStopUpdateLoop();
+
+        private void StartStopUpdateLoop()
+        {
+            if (ListIsVisible)
+            {
+                updateManager.Register(this);
+                nextTimeInfoUpdateTick = lockstep.CurrentTick;
+                CustomUpdate();
+            }
+            else
+                updateManager.Deregister(this);
+        }
+
+        public void CustomUpdate()
+        {
+            uint currentTick = lockstep.CurrentTick;
+            if (currentTick < nextTimeInfoUpdateTick)
+                return;
+            nextTimeInfoUpdateTick = currentTick + (uint)LockstepAPI.TickRate;
+            for (int i = 0; i < rowsCount; i++)
+                UpdateRowTimeInfo((GMRequestRow)rows[i]);
+        }
+
+        #region RowsManagement
+
+        public bool TryGetRow(GMRequest request, out GMRequestRow row)
+        {
+            if (rowsByUniqueId.TryGetValue(request.uniqueId, out DataToken rowToken))
+            {
+                row = (GMRequestRow)rowToken.Reference;
+                return true;
+            }
+            row = null;
+            return false;
+        }
+
+        public GMRequestRow CreateRow(GMRequest request)
+        {
+            GMRequestRow row = CreateRowForRequest(request);
+            rowsByUniqueId.Add(request.uniqueId, row);
+            InsertSortNewRow(row);
+            return row;
+        }
+
+        public void RemoveRow(GMRequestRow row)
+        {
+            rowsByUniqueId.Remove(row.request.uniqueId);
+            RemoveRow((SortableScrollableRow)row);
+        }
+
+        public void RebuildRows() => RebuildRows(requestsManager.GMRequestsCount);
+
+        protected override void OnRowCreated(SortableScrollableRow row)
+        {
+            GMRequestRow actualRow = (GMRequestRow)row;
+            actualRow.urgentHighlight.CrossFadeAlpha(0f, 0f, ignoreTimeScale: true);
+        }
+
+        protected override void OnPreRebuildRows()
+        {
+            rowsByUniqueId.Clear();
+        }
+
+        protected override SortableScrollableRow RebuildRow(int index)
+        {
+            GMRequest request = requestsManager.GetGMRequest(index);
+            GMRequestRow row = CreateRowForRequest(request);
+            rowsByUniqueId.Add(request.uniqueId, row);
+            return row;
+        }
+
+        private GMRequestRow CreateRowForRequest(GMRequest request)
+        {
+            GMRequestRow row = (GMRequestRow)CreateRow();
+            row.request = request;
+            UpdateRowRequester(row);
+            UpdateRowExceptRequester(row);
+            return row;
+        }
+
+        public void UpdateRowRequester(GMRequestRow row)
+        {
+            RPPlayerData requester = row.request.requestingPlayer;
+            row.requesterText.text = requester == null
+                ? "<Unknown>"
+                : requester.characterName == ""
+                    ? $"[{requester.PlayerDisplayName}]"
+                    : $"[{requester.PlayerDisplayName}]  {requester.characterName}"; // Intentional double space.
+        }
+
+        public void UpdateRowExceptRequester(GMRequestRow row)
+        {
+            UpdateRowTimeInfo(row);
+            GMRequest request = row.request;
+
+            bool latencyIsRead = request.latencyIsRead;
+            bool isUrgent = request.latencyRequestType == GMRequestType.Urgent;
+
+            row.rowGroup.alpha = latencyIsRead ? 0.4f : 1f;
+            row.urgentHighlight.CrossFadeAlpha(isUrgent && !latencyIsRead ? 1f : 0f, 0.1f, ignoreTimeScale: true);
+            row.readToggle.SetIsOnWithoutNotify(latencyIsRead);
+
+            RPPlayerData responder = request.latencyRespondingPlayer;
+            row.responderText.text = responder == null ? "" : $"Responder:  {responder.PlayerDisplayName}"; // Intentional double space.
+        }
+
+        public void UpdateRowTimeInfo(GMRequestRow row)
+        {
+            GMRequest request = row.request;
+            string postfix = request.latencyRequestType == GMRequestType.Urgent ? "  [Urgent]" : ""; // Intentional double space.
+            if (request.isLatency)
+            {
+                row.timeAndInfoText.text = "just now" + postfix;
+                return;
+            }
+            uint liveTicks = lockstep.CurrentTick - request.requestedAtTick;
+            int seconds = Mathf.FloorToInt(liveTicks / LockstepAPI.TickRate);
+            int minutes = seconds / 60;
+            if (minutes == 0)
+            {
+                row.timeAndInfoText.text = $"{seconds}s ago{postfix}";
+                return;
+            }
+            seconds -= minutes * 60;
+            row.timeAndInfoText.text = $"{minutes}m {seconds}s ago{postfix}";
+        }
+
+        #endregion
+
+        #region SortAPI
+
+        public void ResortRow(GMRequestRow row) => SortOne(row);
+
+        #endregion
+
+        #region MergeSortComparators
+
+        public void CompareRow()
+        {
+            GMRequest requestLeft = ((GMRequestRow)compareLeft).request;
+            GMRequest requestRight = ((GMRequestRow)compareRight).request;
+            if (requestLeft.isRead != requestRight.isRead)
+            {
+                leftSortsFirst = requestRight.isRead;
+                return;
+            }
+            if (!requestLeft.isRead && requestLeft.requestType != requestRight.requestType)
+            {
+                leftSortsFirst = requestLeft.requestType == GMRequestType.Urgent;
+                return;
+            }
+            if (requestLeft.isLatency || requestRight.isLatency)
+            {
+                leftSortsFirst = (requestLeft.isLatency && requestRight.isLatency)
+                    // Since both are by the same player this will actually reliably sort old first, although
+                    // that is relying on a lockstep implementation detail that is actually undefined behavior.
+                    // But even if the order was random - but stable - that would be fine.
+                    ? requestLeft.uniqueId < requestRight.uniqueId
+                    : requestRight.isLatency; // Latency state is new, so put it at the end.
+                return;
+            }
+            int compared = requestLeft.requestedAtTick.CompareTo(requestRight.requestedAtTick);
+            if (compared != 0)
+            {
+                leftSortsFirst = compared < 0; // Old requests come first.
+                return;
+            }
+            leftSortsFirst = requestLeft.id < requestRight.id; // Again old first. And these are never equal.
+        }
+
+        #endregion
+    }
+}

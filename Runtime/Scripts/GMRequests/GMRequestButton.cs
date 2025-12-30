@@ -89,7 +89,7 @@ namespace JanSharp
         private bool IsRelevantActiveLocalRequest(GMRequest request)
         {
             return request.requestingPlayer != null
-                && request.requestingPlayer.isLocal
+                && request.requestingPlayer.core.isLocal
                 && !request.latencyIsRead
                 && !request.latencyIsDeleted;
         }

@@ -174,6 +174,21 @@ namespace JanSharp.Internal
             playerDataManager.DeleteOfflinePlayerDataInGS(corePlayerData);
         }
 
+        public override RPPlayerData SendingRPPlayerData => (RPPlayerData)playerDataManager.SendingPlayerData.customPlayerData[rpPlayerDataIndex];
+
+        public override RPPlayerData GetRPPlayerData(CorePlayerData core) => (RPPlayerData)core.customPlayerData[rpPlayerDataIndex];
+
+        public override void WriteRPPlayerDataRef(RPPlayerData rpPlayerData)
+        {
+            playerDataManager.WriteCorePlayerDataRef(rpPlayerData == null ? null : rpPlayerData.core);
+        }
+
+        public override RPPlayerData ReadRPPlayerDataRef()
+        {
+            CorePlayerData core = playerDataManager.ReadCorePlayerDataRef();
+            return core == null ? null : (RPPlayerData)core.customPlayerData[rpPlayerDataIndex];
+        }
+
         #region EventDispatcher
 
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onRPPlayerDataOverriddenDisplayNameChangedListeners;

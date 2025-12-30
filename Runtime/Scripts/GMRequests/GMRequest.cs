@@ -18,7 +18,7 @@ namespace JanSharp
         [System.NonSerialized] public bool isLatency;
         [System.NonSerialized] public GMRequestType latencyRequestType;
         [System.NonSerialized] public bool latencyIsRead;
-        [System.NonSerialized] public CorePlayerData latencyRespondingPlayer;
+        [System.NonSerialized] public RPPlayerData latencyRespondingPlayer;
         [System.NonSerialized] public bool latencyIsDeleted;
         #endregion
 
@@ -49,12 +49,12 @@ namespace JanSharp
         /// <para>Can be <see langword="null"/>.</para>
         /// <para>Readonly.</para>
         /// </summary>
-        [System.NonSerialized] public CorePlayerData requestingPlayer;
+        [System.NonSerialized] public RPPlayerData requestingPlayer;
         /// <summary>
         /// <para>Is <see langword="null"/> while <see cref="isRead"/> is <see langword="false"/>, but can be
         /// <see langword="null"/> even when <see langword="true"/>.</para>
         /// </summary>
-        [System.NonSerialized] public CorePlayerData respondingPlayer;
+        [System.NonSerialized] public RPPlayerData respondingPlayer;
         [System.NonSerialized] public bool isDeleted;
         #endregion
     }

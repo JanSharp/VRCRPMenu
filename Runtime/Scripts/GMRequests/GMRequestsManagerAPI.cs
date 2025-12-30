@@ -91,6 +91,10 @@ namespace JanSharp
         public abstract void SendMarkUnreadIA(GMRequest request);
         public abstract void SendDeleteIA(GMRequest request);
 
+        public abstract void WriteGMRequestRef(GMRequest request);
+        public abstract GMRequest ReadGMRequestRef();
+        public abstract GMRequest GetGMRequestById(uint id);
+
         public abstract GMRequest RequestForEvent { get; }
     }
 }

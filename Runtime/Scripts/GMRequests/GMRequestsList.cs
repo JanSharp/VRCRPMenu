@@ -178,12 +178,14 @@ namespace JanSharp
         {
             GMRequest requestLeft = ((GMRequestRow)compareLeft).request;
             GMRequest requestRight = ((GMRequestRow)compareRight).request;
-            if (requestLeft.isRead != requestRight.isRead)
+            bool isRead = requestRight.isRead;
+            if (requestLeft.isRead != isRead)
             {
-                leftSortsFirst = requestRight.isRead;
+                leftSortsFirst = isRead;
                 return;
             }
-            if (!requestLeft.isRead && requestLeft.requestType != requestRight.requestType)
+            // isRead means "are read" from this point forward.
+            if (!isRead && requestLeft.requestType != requestRight.requestType)
             {
                 leftSortsFirst = requestLeft.requestType == GMRequestType.Urgent;
                 return;
@@ -196,15 +198,17 @@ namespace JanSharp
                     // But even if the order was random - but stable - that would be fine.
                     ? requestLeft.uniqueId < requestRight.uniqueId
                     : requestRight.isLatency; // Latency state is new, so put it at the end.
+                leftSortsFirst = leftSortsFirst != isRead; // Invert when requests are read, new requests first.
                 return;
             }
             int compared = requestLeft.requestedAtTick.CompareTo(requestRight.requestedAtTick);
             if (compared != 0)
             {
-                leftSortsFirst = compared < 0; // Old requests come first.
+                leftSortsFirst = (compared < 0) != isRead; // Old requests come first, inverted when read.
                 return;
             }
-            leftSortsFirst = requestLeft.id < requestRight.id; // Again old first. And these are never equal.
+            // Again old first, inverted when read. And these are never equal.
+            leftSortsFirst = (requestLeft.id < requestRight.id) != isRead;
         }
 
         #endregion

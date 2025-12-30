@@ -34,9 +34,10 @@
 - [x] make urgent highlight image not fade in and out, it changing position instantly and then playing the fade looks stupid, just how the toggle checkmark looked stupid
 - [x] add a main highlight color image for active gm requests
 - [x] remove the canvas group, keeping read gm requests the same full opacity, just with the urgent or main color highlights disabled
-- [ ] sort read requests the other way around timing wise, newest to the top
+- [x] sort read requests the other way around timing wise, newest to the top
 - [x] why do the gm request toggles look like they have a different color than the page toggles?
 - [ ] make regular gm requests red after x minutes
+- [ ] try out non elastic scroll rects
 
 - [ ] How to truly prevent locking yourself out of permissions to edit permissions
   - editing the permission values themselves could lock you out

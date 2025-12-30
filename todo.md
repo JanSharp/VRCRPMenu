@@ -35,7 +35,7 @@
 - [ ] add a main highlight color image for active gm requests
 - [ ] remove the canvas group, keeping read gm requests the same full opacity, just with the urgent or main color highlights disabled
 - [ ] sort read requests the other way around timing wise, newest to the top
-- [ ] why do the gm request toggles look like they have a different color than the page toggles?
+- [x] why do the gm request toggles look like they have a different color than the page toggles?
 
 - [ ] How to truly prevent locking yourself out of permissions to edit permissions
   - editing the permission values themselves could lock you out

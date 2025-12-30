@@ -108,7 +108,6 @@ namespace JanSharp
 
         public void UpdateRowExceptRequester(GMRequestRow row)
         {
-            UpdateRowTimeInfo(row);
             GMRequest request = row.request;
 
             bool latencyIsRead = request.latencyIsRead;
@@ -118,6 +117,8 @@ namespace JanSharp
 
             RPPlayerData responder = request.latencyRespondingPlayer;
             row.responderText.text = responder == null ? "" : $"Responder:  {responder.PlayerDisplayName}"; // Intentional double space.
+
+            UpdateRowTimeInfo(row); // Must do this after updating regular/urgent highlights, as this might toggle those.
         }
 
         public void UpdateRowTimeInfo(GMRequestRow row)
@@ -131,6 +132,7 @@ namespace JanSharp
             }
             uint liveTicks = lockstep.CurrentTick - request.requestedAtTick;
             int seconds = Mathf.FloorToInt(liveTicks / LockstepAPI.TickRate);
+            UpdateRowPresentedAsUrgent(row, seconds);
             int minutes = seconds / 60;
             if (minutes == 0)
             {
@@ -139,6 +141,19 @@ namespace JanSharp
             }
             seconds -= minutes * 60;
             row.timeAndInfoText.text = $"{minutes}m {seconds}s ago{postfix}";
+        }
+
+        private void UpdateRowPresentedAsUrgent(GMRequestRow row, int seconds)
+        {
+            GMRequest request = row.request;
+            if (request.latencyIsRead || request.latencyRequestType != GMRequestType.Regular)
+                return;
+            int presentAsUrgentAfterSeconds = requestsManager.PresentAsUrgentAfterSeconds;
+            if (presentAsUrgentAfterSeconds == -1)
+                return;
+            bool becameUrgent = seconds >= presentAsUrgentAfterSeconds;
+            row.regularHighlight.SetActive(!becameUrgent);
+            row.urgentHighlight.SetActive(becameUrgent);
         }
 
         #endregion

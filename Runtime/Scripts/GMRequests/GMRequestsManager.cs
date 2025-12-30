@@ -23,6 +23,11 @@ namespace JanSharp.Internal
         [HideInInspector][SerializeField][SingletonReference] private PlayersBackendManagerAPI playersBackendManager;
         [HideInInspector][SerializeField][SingletonReference] private PermissionManagerAPI permissionManager;
 
+        [Tooltip("-1 makes regular requests never be presented as urgent.")]
+        [Min(-1)]
+        [SerializeField] private int presentAsUrgentAfterSeconds = 180;
+        public override int PresentAsUrgentAfterSeconds => presentAsUrgentAfterSeconds;
+
         private const uint MinLiveTicksWhenMarkedRead = (uint)(60f * LockstepAPI.TickRate);
         private const uint MinTotalLiveTicks = (uint)(10f * 60f * LockstepAPI.TickRate);
 

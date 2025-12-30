@@ -62,6 +62,8 @@ namespace JanSharp
     [SingletonScript("244fcac5ffbfe1f3b8c588e7f8d9ee5b")] // Runtime/Prefabs/Managers/GMRequestsManager.prefab
     public abstract class GMRequestsManagerAPI : LockstepGameState
     {
+        public abstract int PresentAsUrgentAfterSeconds { get; }
+
         // As a general note, there is no way to get GMRequests which have been created in the latency state
         // but aren't in the game state yet.
         /// <summary>

@@ -143,13 +143,8 @@ namespace JanSharp
             int seconds = Mathf.FloorToInt(liveTicks / LockstepAPI.TickRate);
             UpdateRowPresentedAsUrgent(row, seconds);
             int minutes = seconds / 60;
-            if (minutes == 0)
-            {
-                row.timeAndInfoText.text = $"{seconds}s ago{postfix}";
-                return;
-            }
             seconds -= minutes * 60;
-            row.timeAndInfoText.text = $"{minutes}m {seconds}s ago{postfix}";
+            row.timeAndInfoText.text = $"{minutes}:{seconds:d2}{postfix}";
         }
 
         private void UpdateRowPresentedAsUrgent(GMRequestRow row, int seconds)

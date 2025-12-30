@@ -127,6 +127,8 @@ namespace JanSharp
             ArrList.Add(ref unusedRows, ref unusedRowsCount, row);
             int index = row.index;
             ArrList.RemoveAt(ref rows, ref rowsCount, index);
+            currentRowsContentHeight = rowsCount * rowHeight;
+            rowsContent.sizeDelta = new Vector2(0f, currentRowsContentHeight);
             for (int i = index; i < rowsCount; i++)
                 SetRowIndex(rows[i], i);
         }

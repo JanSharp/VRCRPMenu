@@ -30,26 +30,16 @@ namespace JanSharp.Internal
         public string deleteOfflinePlayerDataPermissionAsset; // A guid.
         [HideInInspector][SerializeField] private PermissionDefinition deleteOfflinePlayerDataPermissionDef;
 
-        private void Start()
+        [PlayerDataEvent(PlayerDataEventType.OnRegisterCustomPlayerData)]
+        public void OnRegisterCustomPlayerData()
         {
             playerDataManager.RegisterCustomPlayerData<RPPlayerData>(nameof(RPPlayerData));
         }
 
-        private void FetchPlayerDataClassIndex()
+        [PlayerDataEvent(PlayerDataEventType.OnAllCustomPlayerDataRegistered)]
+        public void OnAllCustomPlayerDataRegistered()
         {
             rpPlayerDataIndex = playerDataManager.GetPlayerDataClassNameIndex<RPPlayerData>(nameof(RPPlayerData));
-        }
-
-        [PlayerDataEvent(PlayerDataEventType.OnPrePlayerDataManagerInit)]
-        public void OnPrePlayerDataManagerInit()
-        {
-            FetchPlayerDataClassIndex();
-        }
-
-        [LockstepEvent(LockstepEventType.OnClientBeginCatchUp)]
-        public void OnClientBeginCatchUp()
-        {
-            FetchPlayerDataClassIndex();
         }
 
         private bool TryGetRPPlayerData(uint persistentId, out RPPlayerData rpPlayerData)

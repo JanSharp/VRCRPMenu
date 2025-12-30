@@ -41,11 +41,10 @@ namespace JanSharp
             currentSortOrderImage = sortPlayerNameAscendingImage;
             currentSortOrderImage.enabled = true;
             someRowsAreOutOfSortOrder = false;
-
-            FetchPlayerDataClassIndexes();
         }
 
-        private void FetchPlayerDataClassIndexes()
+        [PlayerDataEvent(PlayerDataEventType.OnAllCustomPlayerDataRegistered)]
+        public void OnAllCustomPlayerDataRegistered()
         {
             rpPlayerDataIndex = playerDataManager.GetPlayerDataClassNameIndex<RPPlayerData>(nameof(RPPlayerData));
             permissionsPlayerDataIndex = playerDataManager.GetPlayerDataClassNameIndex<PermissionsPlayerData>(nameof(PermissionsPlayerData));

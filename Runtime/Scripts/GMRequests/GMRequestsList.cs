@@ -119,10 +119,15 @@ namespace JanSharp
             row.urgentHighlight.SetActive(!latencyIsRead && request.latencyRequestType == GMRequestType.Urgent);
             row.readToggle.SetIsOnWithoutNotify(latencyIsRead);
 
-            RPPlayerData responder = request.latencyRespondingPlayer;
-            row.responderText.text = responder == null ? "" : $"Responder:  {responder.PlayerDisplayName}"; // Intentional double space.
+            UpdateRowResponder(row);
 
             UpdateRowTimeInfo(row); // Must do this after updating regular/urgent highlights, as this might toggle those.
+        }
+
+        public void UpdateRowResponder(GMRequestRow row)
+        {
+            RPPlayerData responder = row.request.latencyRespondingPlayer;
+            row.responderText.text = responder == null ? "" : $"Responder:  {responder.PlayerDisplayName}"; // Intentional double space.
         }
 
         public void UpdateRowTimeInfo(GMRequestRow row)

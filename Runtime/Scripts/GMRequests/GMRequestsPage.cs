@@ -8,6 +8,7 @@ namespace JanSharp
     {
         [HideInInspector][SerializeField][SingletonReference] private LockstepAPI lockstep;
         [HideInInspector][SerializeField][SingletonReference] private GMRequestsManagerAPI requestsManager;
+        [HideInInspector][SerializeField][SingletonReference] private PlayersBackendManagerAPI playersBackendManager;
 
         public GMRequestsList requestsList;
 
@@ -175,6 +176,44 @@ namespace JanSharp
                 return;
             if (requestsList.TryGetRow(requestsManager.RequestForEvent, out GMRequestRow row))
                 requestsList.RemoveRow(row);
+        }
+
+        [PlayersBackendEvent(PlayersBackendEventType.OnRPPlayerDataOverriddenDisplayNameChanged)]
+        public void OnRPPlayerDataOverriddenDisplayNameChanged()
+        {
+#if RP_MENU_DEBUG
+            Debug.Log("[RPMenuDebug] GMRequestsPage  OnRPPlayerDataOverriddenDisplayNameChanged");
+#endif
+            RPPlayerData rpPlayerData = playersBackendManager.RPPlayerDataForEvent;
+            GMRequestRow[] rows = requestsList.Rows;
+            int count = requestsList.RowsCount;
+            for (int i = 0; i < count; i++)
+            {
+                GMRequestRow row = rows[i];
+                GMRequest request = row.request;
+                if (request.latencyRespondingPlayer == rpPlayerData)
+                    requestsList.UpdateRowResponder(row);
+                if (request.requestingPlayer == rpPlayerData)
+                    requestsList.UpdateRowRequester(row);
+            }
+        }
+
+        [PlayersBackendEvent(PlayersBackendEventType.OnRPPlayerDataCharacterNameChanged)]
+        public void OnRPPlayerDataCharacterNameChanged()
+        {
+#if RP_MENU_DEBUG
+            Debug.Log("[RPMenuDebug] GMRequestsPage  OnRPPlayerDataCharacterNameChanged");
+#endif
+            RPPlayerData rpPlayerData = playersBackendManager.RPPlayerDataForEvent;
+            GMRequestRow[] rows = requestsList.Rows;
+            int count = requestsList.RowsCount;
+            for (int i = 0; i < count; i++)
+            {
+                GMRequestRow row = rows[i];
+                GMRequest request = row.request;
+                if (request.requestingPlayer == rpPlayerData)
+                    requestsList.UpdateRowRequester(row);
+            }
         }
     }
 }

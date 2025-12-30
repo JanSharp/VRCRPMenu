@@ -30,7 +30,7 @@
 - [x] importing and opening the players backend page leaves rows disabled sometimes, like it didn't recalculate which ones should be visible
 - [x] check every frame if the viewport rect height has changed, which also removes the hack of setting the scroll rect position to 1 initially
 - [x] update which rows are visible every time one gets added or removed... but like isn't it already doing that? why was a row invisible after others got deleted? And it didn't even show up when scrolling?! - probably most likely fixed, not sure if the observation here of it not updating even after scrolling was correct
-- [ ] update names in the gm requests list whenever overridden display name or character names change
+- [x] update names in the gm requests list whenever overridden display name or character names change
 - [x] make urgent highlight image not fade in and out, it changing position instantly and then playing the fade looks stupid, just how the toggle checkmark looked stupid
 - [x] add a main highlight color image for active gm requests
 - [x] remove the canvas group, keeping read gm requests the same full opacity, just with the urgent or main color highlights disabled

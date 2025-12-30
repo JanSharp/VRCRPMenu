@@ -14,32 +14,9 @@ namespace JanSharp
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
         [HideInInspector][SerializeField][SingletonReference] private PermissionManagerAPI permissionManager;
         [HideInInspector][SerializeField][FindInParent] private MenuManagerAPI menuManager;
-        [HideInInspector][SerializeField][FindInParent] private MenuPageRoot menuPageRoot;
 
-        private int rpPlayerDataIndex;
-        private int permissionsPlayerDataIndex;
-
-        public GameObject rowPrefab;
+        public PlayersBackendList rowsList;
         public PlayersBackendRow rowPrefabScript;
-        public RectTransform rowsContent;
-        public RectTransform rowsViewport;
-        private float rowHeight;
-        private float negativeRowHeight;
-        private float currentRowsContentHeight;
-        private int prevFirstVisibleRowIndex = 0;
-        private int prevFirstInvisibleRowIndex = 0;
-        public ScrollRect rowsScrollRect;
-        [Min(0f)]
-        [Tooltip("Units per second, so kind of like pixels per second.")]
-        public float minScrollRectVelocity;
-        public Image sortPlayerNameAscendingImage;
-        public Image sortPlayerNameDescendingImage;
-        public Image sortOverriddenDisplayNameAscendingImage;
-        public Image sortOverriddenDisplayNameDescendingImage;
-        public Image sortCharacterNameAscendingImage;
-        public Image sortCharacterNameDescendingImage;
-        public Image sortPermissionGroupAscendingImage;
-        public Image sortPermissionGroupDescendingImage;
         public Transform popupsParent;
         public RectTransform confirmDeletePopup;
         public RectTransform permissionGroupPopup;
@@ -68,18 +45,6 @@ namespace JanSharp
         [HideInInspector][SerializeField] private PermissionDefinition deleteOfflinePlayerDataPermissionDef;
 
         /// <summary>
-        /// <para><see cref="uint"/> persistentId => <see cref="PlayersBackendRow"/> row</para>
-        /// </summary>
-        private DataDictionary rowsByPersistentId = new DataDictionary();
-        private PlayersBackendRow[] rows = new PlayersBackendRow[ArrList.MinCapacity];
-        private int rowsCount = 0;
-        private PlayersBackendRow[] unusedRows = new PlayersBackendRow[ArrList.MinCapacity];
-        private int unusedRowsCount = 0;
-        private string currentSortOrderFunction;
-        private Image currentSortOrderImage;
-        private bool someRowsAreOutOfSortOrder;
-
-        /// <summary>
         /// <para><see cref="uint"/> permissionGroupId => <see cref="PlayersBackendPermissionGroupButton"/> button</para>
         /// </summary>
         private DataDictionary pgButtonsById = new DataDictionary();
@@ -95,58 +60,18 @@ namespace JanSharp
         private uint localPlayerId;
         private bool isInitialized = false;
 
-        public bool PageIsVisible => menuManager.IsMenuOpen && menuManager.ActivePageInternalName == menuPageRoot.PageInternalName;
-
-        private int suspendedIndexInArray = 0;
-        private System.Diagnostics.Stopwatch suspensionSw = new System.Diagnostics.Stopwatch();
-        private const long MaxWorkMSPerFrame = 10L;
-
-        private bool LogicIsRunningLong()
-        {
-            if (suspensionSw.ElapsedMilliseconds >= MaxWorkMSPerFrame)
-            {
-                lockstep.FlagToContinueNextFrame();
-                return true;
-            }
-            return false;
-        }
-
         [MenuManagerEvent(MenuManagerEventType.OnMenuManagerStart)]
         public void OnMenuManagerStart()
         {
             localPlayerId = (uint)Networking.LocalPlayer.playerId;
-            currentSortOrderFunction = nameof(CompareRowPlayerNameAscending);
-            currentSortOrderImage = sortPlayerNameAscendingImage;
-            currentSortOrderImage.enabled = true;
-            someRowsAreOutOfSortOrder = false;
-
-            rowHeight = rowPrefabScript.rowRect.sizeDelta.y;
-            negativeRowHeight = -rowHeight;
             permissionGroupButtonHeight = permissionGroupPrefab.GetComponent<LayoutElement>().preferredHeight;
             maxPermissionGroupsPopupHeight = permissionGroupPopup.sizeDelta.y;
-        }
-
-        private void FetchPlayerDataClassIndexes()
-        {
-            rpPlayerDataIndex = playerDataManager.GetPlayerDataClassNameIndex<RPPlayerData>(nameof(RPPlayerData));
-            permissionsPlayerDataIndex = playerDataManager.GetPlayerDataClassNameIndex<PermissionsPlayerData>(nameof(PermissionsPlayerData));
-        }
-
-        private void InitializeRowsContent()
-        {
-            // Force a position changed event when the scroll view gets shown the first time,
-            // because a y of 1 forces it to move the view to 0.
-            // The height of the viewport rect is unknown until the game objects get activated for the first
-            // time, making calling ShowOnlyRowsVisibleInViewport in OnInit for example useless as the page
-            // is not yet shown.
-            rowsContent.anchoredPosition = new Vector2(0f, 1f);
         }
 
         [PlayerDataEvent(PlayerDataEventType.OnPrePlayerDataManagerInit)]
         public void OnPrePlayerDataManagerInit()
         {
-            FetchPlayerDataClassIndexes();
-            InitializeRowsContent();
+            rowsList.Initialize();
             isInitialized = true;
         }
 
@@ -160,10 +85,7 @@ namespace JanSharp
         public void OnClientBeginCatchUp()
         {
             if (!lockstep.IsContinuationFromPrevFrame)
-            {
-                FetchPlayerDataClassIndexes();
-                InitializeRowsContent();
-            }
+                rowsList.Initialize();
             RebuildRows();
             if (lockstep.FlaggedToContinueNextFrame)
                 return;
@@ -226,22 +148,7 @@ namespace JanSharp
             bool permissionGroupValue = editPermissionGroupPermissionDef.valueForLocalPlayer;
             bool deleteValue = deleteOfflinePlayerDataPermissionDef.valueForLocalPlayer;
 
-            if (!displayNameValue
-                && (currentSortOrderFunction == nameof(CompareRowOverriddenDisplayNameAscending)
-                    || currentSortOrderFunction == nameof(CompareRowOverriddenDisplayNameDescending))
-                || !characterNameValue
-                && (currentSortOrderFunction == nameof(CompareRowCharacterNameAscending)
-                    || currentSortOrderFunction == nameof(CompareRowCharacterNameDescending))
-                || !permissionGroupValue
-                && (currentSortOrderFunction == nameof(CompareRowPermissionGroupAscending)
-                    || currentSortOrderFunction == nameof(CompareRowPermissionGroupDescending)))
-            {
-                currentSortOrderFunction = nameof(CompareRowPlayerNameAscending);
-                currentSortOrderImage.enabled = false;
-                currentSortOrderImage = sortPlayerNameAscendingImage;
-                currentSortOrderImage.enabled = true;
-                SortAll();
-            }
+            rowsList.SortOnPermissionChange(displayNameValue, characterNameValue, permissionGroupValue);
 
             if (!permissionGroupValue)
                 EnsureClosedPermissionGroupPopup();
@@ -257,6 +164,8 @@ namespace JanSharp
             rowPrefabScript.permissionGroupRoot.SetActive(permissionGroupValue);
             rowPrefabScript.deleteRoot.SetActive(deleteValue);
 
+            PlayersBackendRow[] rows = rowsList.Rows;
+            int rowsCount = rowsList.RowsCount;
             for (int i = 0; i < rowsCount; i++)
             {
                 // I'm thinking that in any case where 2 permissions changed it is faster to do all 4 ifs
@@ -277,25 +186,14 @@ namespace JanSharp
 
         #region RowsManagement
 
-        private bool TryGetRow(uint persistentId, out PlayersBackendRow row)
-        {
-            if (rowsByPersistentId.TryGetValue(persistentId, out DataToken rowToken))
-            {
-                row = (PlayersBackendRow)rowToken.Reference;
-                return true;
-            }
-            row = null;
-            return false;
-        }
+        private bool TryGetRow(uint persistentId, out PlayersBackendRow row) => rowsList.TryGetRow(persistentId, out row);
 
         [PlayerDataEvent(PlayerDataEventType.OnPlayerDataCreated)]
         public void OnPlayerDataCreated()
         {
             if (!isInitialized)
                 return;
-            PlayersBackendRow row = CreateRowForPlayer(playerDataManager.PlayerDataForEvent);
-            rowsByPersistentId.Add(row.rpPlayerData.core.persistentId, row);
-            InsertSortNewRow(row);
+            rowsList.CreateRow(playerDataManager.PlayerDataForEvent);
         }
 
         [PlayerDataEvent(PlayerDataEventType.OnPlayerDataWentOnline)]
@@ -339,159 +237,14 @@ namespace JanSharp
                 // (Once the API to create offline player data exists.)
                 return;
             }
-            row.rowGo.SetActive(false);
-            ArrList.Add(ref unusedRows, ref unusedRowsCount, row);
-            int index = row.index;
-            ArrList.RemoveAt(ref rows, ref rowsCount, index);
-            for (int i = index; i < rowsCount; i++)
-                SetRowIndex(rows[i], i);
+            rowsList.RemoveRow(row);
         }
 
         private void RebuildRows()
         {
-            // Debug.Log($"[RPMenuDebug] PlayersBackendPage  RebuildRows");
-
             if (!lockstep.IsContinuationFromPrevFrame)
-            {
                 EnsureClosedPopups();
-
-                HideAllCurrentlyVisibleRows();
-                rowsByPersistentId.Clear();
-                ArrList.AddRange(ref unusedRows, ref unusedRowsCount, rows, rowsCount);
-
-                rowsCount = playerDataManager.AllCorePlayerDataCount;
-                ArrList.EnsureCapacity(ref rows, rowsCount);
-                currentRowsContentHeight = rowsCount * rowHeight;
-                rowsContent.sizeDelta = new Vector2(0f, currentRowsContentHeight);
-            }
-
-            suspensionSw.Restart();
-            CorePlayerData[] allCorePlayerData = playerDataManager.AllCorePlayerDataRaw;
-            while (suspendedIndexInArray < rowsCount)
-            {
-                if (LogicIsRunningLong())
-                    return;
-                CorePlayerData core = allCorePlayerData[suspendedIndexInArray];
-                PlayersBackendRow row = CreateRowForPlayer(core);
-                rows[suspendedIndexInArray] = row;
-                rowsByPersistentId.Add(core.persistentId, row);
-                suspendedIndexInArray++;
-            }
-            suspendedIndexInArray = 0;
-
-            SortAll();
-        }
-
-        private PlayersBackendRow CreateRowForPlayer(CorePlayerData core)
-        {
-            PlayersBackendRow row = CreateRow();
-            RPPlayerData rpPlayerData = (RPPlayerData)core.customPlayerData[rpPlayerDataIndex];
-            PermissionsPlayerData permissionsPlayerData = (PermissionsPlayerData)core.customPlayerData[permissionsPlayerDataIndex];
-            row.rpPlayerData = rpPlayerData;
-            row.permissionsPlayerData = permissionsPlayerData;
-
-            string playerName = core.displayName;
-            string characterName = rpPlayerData.characterName;
-            string groupName = permissionsPlayerData.permissionGroup.groupName;
-
-            row.sortablePlayerName = playerName.ToLower();
-            row.sortableOverriddenDisplayName = rpPlayerData.PlayerDisplayName.ToLower();
-            row.sortableCharacterName = characterName.ToLower();
-            row.sortablePermissionGroupName = groupName.ToLower();
-
-            row.playerNameLabel.text = playerName;
-            row.overriddenDisplayNameField.SetTextWithoutNotify(rpPlayerData.overriddenDisplayName ?? "");
-            row.overriddenDisplayNameLabel.text = playerName;
-            row.characterNameField.SetTextWithoutNotify(characterName);
-            row.permissionGroupLabel.text = groupName;
-            row.deleteButton.interactable = core.isOffline;
-            row.deleteLabel.interactable = core.isOffline;
-
-            return row;
-        }
-
-        private PlayersBackendRow CreateRow()
-        {
-            if (unusedRowsCount != 0)
-                return ArrList.RemoveAt(ref unusedRows, ref unusedRowsCount, unusedRowsCount - 1);
-            GameObject go = Instantiate(rowPrefab);
-            go.transform.SetParent(rowsContent, worldPositionStays: false);
-            PlayersBackendRow row = go.GetComponent<PlayersBackendRow>();
-            row.activeRowHighlightImage.CrossFadeAlpha(0f, 0f, ignoreTimeScale: true);
-            return row;
-        }
-
-        public void OnRowsScrollRectValueChanged()
-        {
-            if (Mathf.Abs(rowsScrollRect.velocity.y) < minScrollRectVelocity)
-                rowsScrollRect.velocity = Vector2.zero;
-            ShowOnlyRowsVisibleInViewport();
-        }
-
-        private void HideAllCurrentlyVisibleRows()
-        {
-            // Debug.Log($"[RPMenuDebug] PlayersBackendPage  HideAllCurrentlyVisibleRows - prevFirstVisibleRowIndex: {prevFirstVisibleRowIndex}, prevFirstInvisibleRowIndex: {prevFirstInvisibleRowIndex}, rowsCount: {rowsCount}");
-            for (int i = prevFirstVisibleRowIndex; i < prevFirstInvisibleRowIndex; i++)
-                rows[i].rowGo.SetActive(false);
-            prevFirstVisibleRowIndex = 0;
-            prevFirstInvisibleRowIndex = 0;
-        }
-
-        private void ShowOnlyRowsVisibleInViewport()
-        {
-            // Always recalculate in order to support the size changing at runtime. Even though at the time of
-            // writing this with the current page setup it is static, things might change, people might use it
-            // differently.
-            float viewportHeight = rowsViewport.rect.height;
-            int visibleCount = Mathf.CeilToInt(viewportHeight / rowHeight) + 1;
-            float position = rowsContent.anchoredPosition.y;
-            int firstVisibleIndex = Mathf.FloorToInt(position / rowHeight);
-            int firstInvisibleIndex = firstVisibleIndex + visibleCount;
-
-            if (firstVisibleIndex < 0)
-                firstVisibleIndex = 0;
-            if (firstInvisibleIndex > rowsCount)
-                firstInvisibleIndex = rowsCount;
-
-            // Debug.Log($"[RPMenuDebug] PlayersBackendPage  ShowOnlyRowsVisibleInViewport (inner) - firstVisibleIndex: {firstVisibleIndex}, firstInvisibleIndex: {firstInvisibleIndex}, rowsCount: {rowsCount}, prevFirstVisibleRowIndex: {prevFirstVisibleRowIndex}, prevFirstInvisibleRowIndex: {prevFirstInvisibleRowIndex}");
-
-            if (firstInvisibleIndex <= prevFirstVisibleRowIndex // New range is entirely below, no overlap.
-                    || firstVisibleIndex >= prevFirstInvisibleRowIndex) // New range is entirely above, no overlap.
-            {
-                for (int i = prevFirstVisibleRowIndex; i < prevFirstInvisibleRowIndex; i++)
-                    rows[i].rowGo.SetActive(false);
-                for (int i = firstVisibleIndex; i < firstInvisibleIndex; i++)
-                    rows[i].rowGo.SetActive(true);
-                prevFirstVisibleRowIndex = firstVisibleIndex;
-                prevFirstInvisibleRowIndex = firstInvisibleIndex;
-                return;
-            }
-            // There is overlap.
-            // The logic below handles prev and new ranges being of different sizes (visible counts).
-
-            if (prevFirstVisibleRowIndex < firstVisibleIndex)
-                for (int i = prevFirstVisibleRowIndex; i < firstVisibleIndex; i++)
-                    rows[i].rowGo.SetActive(false);
-            else
-                for (int i = firstVisibleIndex; i < prevFirstVisibleRowIndex; i++)
-                    rows[i].rowGo.SetActive(true);
-
-            if (prevFirstInvisibleRowIndex < firstInvisibleIndex)
-                for (int i = prevFirstInvisibleRowIndex; i < firstInvisibleIndex; i++)
-                    rows[i].rowGo.SetActive(true);
-            else
-                for (int i = firstInvisibleIndex; i < prevFirstInvisibleRowIndex; i++)
-                    rows[i].rowGo.SetActive(false);
-
-            prevFirstVisibleRowIndex = firstVisibleIndex;
-            prevFirstInvisibleRowIndex = firstInvisibleIndex;
-        }
-
-        private void SetRowIndex(PlayersBackendRow row, int index)
-        {
-            row.index = index;
-            row.rowRect.anchoredPosition = new Vector2(0f, index * negativeRowHeight);
-            row.rowGo.SetActive(prevFirstVisibleRowIndex <= index && index < prevFirstInvisibleRowIndex);
+            rowsList.RebuildRows();
         }
 
         #endregion
@@ -525,12 +278,7 @@ namespace JanSharp
                 return; // Some system did something weird.
             row.sortableOverriddenDisplayName = rpPlayerData.PlayerDisplayName.ToLower();
             row.overriddenDisplayNameField.SetTextWithoutNotify(rpPlayerData.overriddenDisplayName);
-
-            if (currentSortOrderFunction == nameof(CompareRowOverriddenDisplayNameAscending)
-                || currentSortOrderFunction == nameof(CompareRowOverriddenDisplayNameDescending))
-            {
-                UpdateSortPositionDueToValueChange(row);
-            }
+            rowsList.PotentiallySortChangedOverriddenDisplayNameRow(row);
         }
 
         #endregion
@@ -563,12 +311,7 @@ namespace JanSharp
             string characterName = rpPlayerData.characterName;
             row.sortableCharacterName = characterName.ToLower();
             row.characterNameField.SetTextWithoutNotify(characterName);
-
-            if (currentSortOrderFunction == nameof(CompareRowCharacterNameAscending)
-                || currentSortOrderFunction == nameof(CompareRowCharacterNameDescending))
-            {
-                UpdateSortPositionDueToValueChange(row);
-            }
+            rowsList.PotentiallySortChangedCharacterNameRow(row);
         }
 
         #endregion
@@ -659,7 +402,7 @@ namespace JanSharp
             if (!TryGetRow(permissionsPlayerData.core.persistentId, out PlayersBackendRow row))
                 return; // Some system did something weird.
             SetPermissionGroupLabelText(row, permissionsPlayerData.permissionGroup.groupName);
-            PotentiallySortChangedPermissionGroupRow(row);
+            rowsList.PotentiallySortChangedPermissionGroupRow(row);
 
             if (row != selectedRowForPopup)
                 return;
@@ -679,15 +422,6 @@ namespace JanSharp
             row.permissionGroupLabel.text = groupName;
         }
 
-        private void PotentiallySortChangedPermissionGroupRow(PlayersBackendRow row)
-        {
-            if (currentSortOrderFunction == nameof(CompareRowPermissionGroupAscending)
-                || currentSortOrderFunction == nameof(CompareRowPermissionGroupDescending))
-            {
-                UpdateSortPositionDueToValueChange(row);
-            }
-        }
-
         [PermissionsEvent(PermissionsEventType.OnPermissionGroupRenamed)]
         public void OnPermissionGroupRenamed()
         {
@@ -699,6 +433,8 @@ namespace JanSharp
                 UpdatePermissionGroupButtonLabel(button);
 
             int affectedCount = 0;
+            PlayersBackendRow[] rows = rowsList.Rows;
+            int rowsCount = rowsList.RowsCount;
             for (int i = 0; i < rowsCount; i++)
             {
                 PlayersBackendRow row = rows[i];
@@ -709,12 +445,8 @@ namespace JanSharp
                 row.permissionGroupLabel.text = permissionGroupName;
             }
 
-            if (affectedCount != 0
-                && (currentSortOrderFunction == nameof(CompareRowPermissionGroupAscending)
-                    || currentSortOrderFunction == nameof(CompareRowPermissionGroupDescending)))
-            {
-                UpdateSortPositionsDueToMultipleValueChanges();
-            }
+            if (affectedCount != 0)
+                rowsList.PotentiallySortChangedPermissionGroupRows();
         }
 
         [PermissionsEvent(PermissionsEventType.OnPermissionGroupDuplicated)]
@@ -872,338 +604,6 @@ namespace JanSharp
             playersBackendManager.SendDeleteOfflinePlayerDataIA(toDelete);
             // Don't need to listen to the denied event because row deletion is not latency hidden.
             // Thank goodness.
-        }
-
-        #endregion
-
-        #region SortHeaders
-
-        // NOTE: Cannot just invert the order of the rows when inverting the order of a sorted column.
-        // The permission groups are the most clear example of this. When inverting the sort order there it
-        // makes more sense for just the groups to flip order, while players in that group to retain relative
-        // order
-
-        public void OnPlayerNameSortHeaderClick()
-        {
-            currentSortOrderImage.enabled = false;
-            if (!someRowsAreOutOfSortOrder && currentSortOrderFunction == nameof(CompareRowPlayerNameAscending))
-            {
-                currentSortOrderFunction = nameof(CompareRowPlayerNameDescending);
-                currentSortOrderImage = sortPlayerNameDescendingImage;
-            }
-            else
-            {
-                currentSortOrderFunction = nameof(CompareRowPlayerNameAscending);
-                currentSortOrderImage = sortPlayerNameAscendingImage;
-            }
-            currentSortOrderImage.enabled = true;
-            SortAll();
-        }
-
-        public void OnOverriddenDisplayNameSortHeaderClick()
-        {
-            currentSortOrderImage.enabled = false;
-            if (!someRowsAreOutOfSortOrder && currentSortOrderFunction == nameof(CompareRowOverriddenDisplayNameAscending))
-            {
-                currentSortOrderFunction = nameof(CompareRowOverriddenDisplayNameDescending);
-                currentSortOrderImage = sortOverriddenDisplayNameDescendingImage;
-            }
-            else
-            {
-                currentSortOrderFunction = nameof(CompareRowOverriddenDisplayNameAscending);
-                currentSortOrderImage = sortOverriddenDisplayNameAscendingImage;
-            }
-            currentSortOrderImage.enabled = true;
-            SortAll();
-        }
-
-        public void OnCharacterNameSortHeaderClick()
-        {
-            currentSortOrderImage.enabled = false;
-            if (!someRowsAreOutOfSortOrder && currentSortOrderFunction == nameof(CompareRowCharacterNameAscending))
-            {
-                currentSortOrderFunction = nameof(CompareRowCharacterNameDescending);
-                currentSortOrderImage = sortCharacterNameDescendingImage;
-            }
-            else
-            {
-                currentSortOrderFunction = nameof(CompareRowCharacterNameAscending);
-                currentSortOrderImage = sortCharacterNameAscendingImage;
-            }
-            currentSortOrderImage.enabled = true;
-            SortAll();
-        }
-
-        public void OnPermissionGroupSortHeaderClick()
-        {
-            currentSortOrderImage.enabled = false;
-            if (!someRowsAreOutOfSortOrder && currentSortOrderFunction == nameof(CompareRowPermissionGroupAscending))
-            {
-                currentSortOrderFunction = nameof(CompareRowPermissionGroupDescending);
-                currentSortOrderImage = sortPermissionGroupDescendingImage;
-            }
-            else
-            {
-                currentSortOrderFunction = nameof(CompareRowPermissionGroupAscending);
-                currentSortOrderImage = sortPermissionGroupAscendingImage;
-            }
-            currentSortOrderImage.enabled = true;
-            SortAll();
-        }
-
-        #endregion
-
-        #region SortAPI
-
-        /// <summary>
-        /// <para>Adds <paramref name="row"/> to <see cref="rows"/>.</para>
-        /// </summary>
-        /// <param name="row"></param>
-        private void InsertSortNewRow(PlayersBackendRow row)
-        {
-            if (rowsCount == 0)
-            {
-                ArrList.Add(ref rows, ref rowsCount, row);
-                currentRowsContentHeight = rowsCount * rowHeight;
-                rowsContent.sizeDelta = new Vector2(0f, currentRowsContentHeight);
-                SetRowIndex(row, 0);
-                return;
-            }
-            compareRight = row;
-            int index = rowsCount; // Not -1 because the new row is not in the list yet.
-            do
-            {
-                compareLeft = rows[index - 1];
-                SendCustomEvent(currentSortOrderFunction);
-                if (leftSortsFirst)
-                    break;
-                index--;
-            }
-            while (index > 0);
-            ArrList.Insert(ref rows, ref rowsCount, row, index);
-            currentRowsContentHeight = rowsCount * rowHeight;
-            rowsContent.sizeDelta = new Vector2(0f, currentRowsContentHeight);
-            for (int i = index; i < rowsCount; i++)
-                SetRowIndex(rows[i], i);
-        }
-
-        private void UpdateSortPositionDueToValueChange(PlayersBackendRow row)
-        {
-            if (!PageIsVisible)
-            {
-                SortOne(row);
-                return;
-            }
-            if (someRowsAreOutOfSortOrder || IsInSortedPosition(row))
-                return;
-            MarkAsSomeRowsNoLongerBeingInSortOrder();
-        }
-
-        private void UpdateSortPositionsDueToMultipleValueChanges()
-        {
-            if (!PageIsVisible)
-                SortAll();
-            else
-                MarkAsSomeRowsNoLongerBeingInSortOrder();
-        }
-
-        private void MarkAsSomeRowsNoLongerBeingInSortOrder()
-        {
-            currentSortOrderImage.enabled = false;
-            someRowsAreOutOfSortOrder = true;
-        }
-
-        private bool IsInSortedPosition(PlayersBackendRow row)
-        {
-            int index = row.index;
-
-            if (index > 0) // Check if it would move left.
-            {
-                compareLeft = rows[index - 1];
-                compareRight = row;
-                SendCustomEvent(currentSortOrderFunction);
-                if (!leftSortsFirst)
-                    return false;
-            }
-
-            if (index < rowsCount - 1) // Check if it would move right.
-            {
-                compareLeft = row;
-                compareRight = rows[index + 1];
-                SendCustomEvent(currentSortOrderFunction);
-                if (!leftSortsFirst)
-                    return false;
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// <para><paramref name="row"/> must already be in <see cref="rows"/>.</para>
-        /// </summary>
-        /// <param name="row"></param>
-        private void SortOne(PlayersBackendRow row)
-        {
-            int index = row.index;
-            int initialIndex = index;
-
-            compareRight = row;
-            while (index > 0) // Try move left.
-            {
-                compareLeft = rows[index - 1];
-                SendCustomEvent(currentSortOrderFunction);
-                if (leftSortsFirst)
-                    break;
-                rows[index] = compareLeft;
-                SetRowIndex(compareLeft, index);
-                index--;
-            }
-            if (index != initialIndex)
-            {
-                rows[index] = row;
-                SetRowIndex(row, index);
-                return;
-            }
-
-            compareLeft = row;
-            while (index < rowsCount - 1) // Try move right.
-            {
-                compareRight = rows[index + 1];
-                SendCustomEvent(currentSortOrderFunction);
-                if (leftSortsFirst)
-                    break;
-                rows[index] = compareRight;
-                SetRowIndex(compareRight, index);
-                index++;
-            }
-            if (index != initialIndex)
-            {
-                rows[index] = row;
-                SetRowIndex(row, index);
-                return;
-            }
-        }
-
-        private void SortAll()
-        {
-            // Debug.Log($"[RPMenuDebug] PlayersBackendPage  SortAll");
-            HideAllCurrentlyVisibleRows();
-            MergeSort(currentSortOrderFunction);
-            for (int i = 0; i < rowsCount; i++)
-                SetRowIndex(rows[i], i);
-            someRowsAreOutOfSortOrder = false;
-            ShowOnlyRowsVisibleInViewport();
-        }
-
-        #endregion
-
-        #region MergeSortComparators
-
-        private PlayersBackendRow compareLeft;
-        private PlayersBackendRow compareRight;
-        private bool leftSortsFirst;
-
-        public void CompareRowPlayerNameAscending()
-            => leftSortsFirst = compareLeft.sortablePlayerName.CompareTo(compareRight.sortablePlayerName) <= 0;
-        public void CompareRowPlayerNameDescending()
-            => leftSortsFirst = compareLeft.sortablePlayerName.CompareTo(compareRight.sortablePlayerName) >= 0;
-
-        public void CompareRowOverriddenDisplayNameAscending()
-            => leftSortsFirst = compareLeft.sortableOverriddenDisplayName.CompareTo(compareRight.sortableOverriddenDisplayName) <= 0;
-        public void CompareRowOverriddenDisplayNameDescending()
-            => leftSortsFirst = compareLeft.sortableOverriddenDisplayName.CompareTo(compareRight.sortableOverriddenDisplayName) >= 0;
-
-        public void CompareRowCharacterNameAscending()
-            => leftSortsFirst = compareLeft.sortableCharacterName.CompareTo(compareRight.sortableCharacterName) <= 0;
-        public void CompareRowCharacterNameDescending()
-            => leftSortsFirst = compareLeft.sortableCharacterName.CompareTo(compareRight.sortableCharacterName) >= 0;
-
-        public void CompareRowPermissionGroupAscending()
-            => leftSortsFirst = compareLeft.sortablePermissionGroupName.CompareTo(compareRight.sortablePermissionGroupName) <= 0;
-        public void CompareRowPermissionGroupDescending()
-            => leftSortsFirst = compareLeft.sortablePermissionGroupName.CompareTo(compareRight.sortablePermissionGroupName) >= 0;
-
-        #endregion
-
-        #region MergeSort
-
-        /// <summary>
-        /// <para>Merge sort is a stable sorting algorithm.</para>
-        /// </summary>
-        /// <param name="sortFunctionName"></param>
-        private void MergeSort(string sortFunctionName)
-        {
-            if (rowsCount <= 1)
-                return;
-            ArrList.EnsureCapacity(ref mergeSortRowsCopy, rowsCount);
-            mergeSortStack[0] = 0;
-            mergeSortStack[1] = rowsCount;
-            mergeSortStackTop = 1;
-            mergeSortSortFunction = sortFunctionName;
-            MergeSortRecursive();
-        }
-
-        private PlayersBackendRow[] mergeSortRowsCopy = new PlayersBackendRow[ArrList.MinCapacity];
-        private int[] mergeSortStack = new int[32];
-        private int mergeSortStackTop = -1;
-        private string mergeSortSortFunction;
-
-        /// <summary>
-        /// <para>Not using <see cref="RecursiveMethodAttribute"/>, manually "optimized".</para>
-        /// </summary>
-        private void MergeSortRecursive()
-        {
-            int count = mergeSortStack[mergeSortStackTop];
-            if (count <= 1)
-            {
-                mergeSortStackTop -= 2; // Pop args for this MergeSortRecursive call.
-                return;
-            }
-            int index = mergeSortStack[mergeSortStackTop - 1];
-            int leftCount = count / 2;
-
-            ArrList.EnsureCapacity(ref mergeSortStack, mergeSortStackTop + 5); // 5 instead of 4, because top == count - 1.
-            mergeSortStack[++mergeSortStackTop] = index + leftCount; // Push args for the second MergeSortRecursive call.
-            mergeSortStack[++mergeSortStackTop] = count - leftCount;
-
-            if (leftCount > 1) // Duplicated early check for optimization.
-            {
-                mergeSortStack[++mergeSortStackTop] = index;
-                mergeSortStack[++mergeSortStackTop] = leftCount;
-                MergeSortRecursive();
-            }
-
-            MergeSortRecursive();
-
-            Merge(mergeSortStack[mergeSortStackTop - 1], mergeSortStack[mergeSortStackTop]);
-            mergeSortStackTop -= 2; // Pop args for this MergeSortRecursive call.
-        }
-
-        private void Merge(int startIndex, int count)
-        {
-            int leftCount = count / 2;
-            int rightCount = count - leftCount;
-            System.Array.Copy(rows, startIndex, mergeSortRowsCopy, 0, leftCount + rightCount);
-
-            int leftIndex = 0;
-            int rightIndex = 0;
-            int targetIndex = startIndex;
-            // Compare until reaching the end of either left or right.
-            while (leftIndex < leftCount && rightIndex < rightCount)
-            {
-                compareLeft = mergeSortRowsCopy[leftIndex];
-                compareRight = mergeSortRowsCopy[leftCount + rightIndex];
-                SendCustomEvent(mergeSortSortFunction);
-                if (leftSortsFirst)
-                    rows[targetIndex++] = mergeSortRowsCopy[leftIndex++];
-                else
-                    rows[targetIndex++] = mergeSortRowsCopy[leftCount + rightIndex++];
-            }
-
-            if (leftIndex < leftCount) // Copy remaining left.
-                System.Array.Copy(mergeSortRowsCopy, leftIndex, rows, targetIndex, leftCount - leftIndex);
-            else // Otherwise copy remaining right (guaranteed to be at least 1 remaining in right).
-                System.Array.Copy(mergeSortRowsCopy, leftCount + rightIndex, rows, targetIndex, rightCount - rightIndex);
         }
 
         #endregion

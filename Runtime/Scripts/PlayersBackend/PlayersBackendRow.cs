@@ -6,9 +6,8 @@ using UnityEngine.UI;
 namespace JanSharp
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-    public class PlayersBackendRow : UdonSharpBehaviour
+    public class PlayersBackendRow : SortableScrollableRow
     {
-        [System.NonSerialized] public int index;
         [System.NonSerialized] public string sortablePlayerName;
         [System.NonSerialized] public string sortableOverriddenDisplayName;
         [System.NonSerialized] public string sortableCharacterName;
@@ -16,8 +15,6 @@ namespace JanSharp
         [System.NonSerialized] public RPPlayerData rpPlayerData;
         [System.NonSerialized] public PermissionsPlayerData permissionsPlayerData;
         public PlayersBackendPage page;
-        public GameObject rowGo;
-        public RectTransform rowRect;
         public TextMeshProUGUI playerNameLabel;
         public TMP_InputField overriddenDisplayNameField;
         public TextMeshProUGUI overriddenDisplayNameLabel;

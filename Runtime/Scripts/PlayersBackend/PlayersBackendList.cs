@@ -72,7 +72,11 @@ namespace JanSharp
             return row;
         }
 
-        public void RemoveRow(PlayersBackendRow row) => RemoveRow((SortableScrollableRow)row);
+        public void RemoveRow(PlayersBackendRow row)
+        {
+            rowsByPersistentId.Remove(row.rpPlayerData.core.persistentId);
+            RemoveRow((SortableScrollableRow)row);
+        }
 
         public void RebuildRows() => RebuildRows(playerDataManager.AllCorePlayerDataCount);
 

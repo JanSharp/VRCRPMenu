@@ -125,8 +125,6 @@ namespace JanSharp
 
         protected void RebuildRows(int newRowsCount)
         {
-            // Debug.Log($"[RPMenuDebug] PlayersBackendPage  RebuildRows");
-
             if (!lockstep.IsContinuationFromPrevFrame)
             {
                 OnPreRebuildRows();
@@ -197,7 +195,6 @@ namespace JanSharp
 
         private void HideAllCurrentlyVisibleRows()
         {
-            // Debug.Log($"[RPMenuDebug] PlayersBackendPage  HideAllCurrentlyVisibleRows - prevFirstVisibleRowIndex: {prevFirstVisibleRowIndex}, prevFirstInvisibleRowIndex: {prevFirstInvisibleRowIndex}, rowsCount: {rowsCount}");
             for (int i = prevFirstVisibleRowIndex; i < prevFirstInvisibleRowIndex; i++)
                 rows[i].rowGo.SetActive(false);
             prevFirstVisibleRowIndex = 0;
@@ -213,8 +210,6 @@ namespace JanSharp
                 firstVisibleIndex = 0;
             if (firstInvisibleIndex > rowsCount)
                 firstInvisibleIndex = rowsCount;
-
-            // Debug.Log($"[RPMenuDebug] PlayersBackendPage  ShowOnlyRowsVisibleInViewport (inner) - firstVisibleIndex: {firstVisibleIndex}, firstInvisibleIndex: {firstInvisibleIndex}, rowsCount: {rowsCount}, prevFirstVisibleRowIndex: {prevFirstVisibleRowIndex}, prevFirstInvisibleRowIndex: {prevFirstInvisibleRowIndex}");
 
             if (firstInvisibleIndex <= prevFirstVisibleRowIndex // New range is entirely below, no overlap.
                     || firstVisibleIndex >= prevFirstInvisibleRowIndex) // New range is entirely above, no overlap.
@@ -389,7 +384,6 @@ namespace JanSharp
 
         protected void SortAll()
         {
-            // Debug.Log($"[RPMenuDebug] PlayersBackendPage  SortAll");
             HideAllCurrentlyVisibleRows();
             MergeSort(currentSortOrderFunction);
             for (int i = 0; i < rowsCount; i++)

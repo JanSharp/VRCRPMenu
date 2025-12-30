@@ -38,7 +38,11 @@ namespace JanSharp
             uint currentTick = lockstep.CurrentTick;
             if (currentTick < nextTimeInfoUpdateTick)
                 return;
-            nextTimeInfoUpdateTick = currentTick + (uint)LockstepAPI.TickRate;
+            uint ticksInASecond = (uint)LockstepAPI.TickRate;
+            while (nextTimeInfoUpdateTick <= currentTick)
+                nextTimeInfoUpdateTick += ticksInASecond;
+            // "nextTimeInfoUpdateTick = currentTick + ticksInASecond" has the issue that it can drift
+            // slightly causing the UI to appear as though timers did not change for up to 1.9 seconds.
             for (int i = 0; i < rowsCount; i++)
                 UpdateRowTimeInfo((GMRequestRow)rows[i]);
         }

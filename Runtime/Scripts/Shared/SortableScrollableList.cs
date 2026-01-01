@@ -176,6 +176,10 @@ namespace JanSharp
         {
             currentRowsContentHeight = rowsCount * rowHeight;
             rowsContent.sizeDelta = new Vector2(0f, currentRowsContentHeight);
+            if (prevFirstVisibleRowIndex >= rowsCount) // Prevent from going out of bounds, causing updates to oob rows.
+                prevFirstVisibleRowIndex = System.Math.Max(0, rowsCount - 1);
+            if (prevFirstInvisibleRowIndex >= rowsCount) // Prevent from going out of bounds, causing updates to oob rows.
+                prevFirstInvisibleRowIndex = System.Math.Max(0, rowsCount - 1);
             if (pageIsVisible)
                 ShowOnlyRowsVisibleInViewport();
             else

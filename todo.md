@@ -38,6 +38,10 @@
 - [x] why do the gm request toggles look like they have a different color than the page toggles?
 - [x] make regular gm requests red after x minutes
 - [ ] try out non elastic scroll rects
+- [x] update gm requests names upon import
+- [ ] make buttons aware of all open requests by the local player
+- [ ] hud for the gm requests
+- [ ] do something with gm requests where the requesting player left, either visually or idk
 
 - [ ] How to truly prevent locking yourself out of permissions to edit permissions
   - editing the permission values themselves could lock you out

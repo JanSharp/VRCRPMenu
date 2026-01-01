@@ -215,5 +215,18 @@ namespace JanSharp
                     requestsList.UpdateRowRequester(row);
             }
         }
+
+        [LockstepEvent(LockstepEventType.OnImportFinishingUp)]
+        public void OnImportFinishingUp()
+        {
+            GMRequestRow[] rows = requestsList.Rows;
+            int count = requestsList.RowsCount;
+            for (int i = 0; i < count; i++)
+            {
+                GMRequestRow row = rows[i];
+                requestsList.UpdateRowResponder(row);
+                requestsList.UpdateRowRequester(row);
+            }
+        }
     }
 }

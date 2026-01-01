@@ -20,9 +20,33 @@ namespace JanSharp
         public string associatedRequestPermissionAsset; // A guid.
         [HideInInspector][SerializeField] private PermissionDefinition associatedRequestPermissionDef;
 
-        private GMRequest activeLocalRequest;
-        private bool ActiveRequestMatchesType => activeLocalRequest != null
-            && activeLocalRequest.latencyRequestType == requestType;
+        private GMRequest[] activeLocalRequests = new GMRequest[ArrList.MinCapacity];
+        private int activeLocalRequestsCount = 0;
+
+        private GMRequest GetLatestActiveLocalRequest()
+        {
+            if (activeLocalRequestsCount == 0)
+                return null;
+            GMRequest result = activeLocalRequests[0];
+            for (int i = 1; i < activeLocalRequestsCount; i++)
+            {
+                GMRequest request = activeLocalRequests[i];
+                if (result.isLatency)
+                {
+                    if (request.isLatency && request.uniqueId > result.uniqueId)
+                        result = request;
+                    continue;
+                }
+                if (request.isLatency || request.requestedAtTick > result.requestedAtTick)
+                    result = request;
+            }
+            return result;
+        }
+
+        private bool RequestMatchesButtonType(GMRequest request)
+        {
+            return request != null && request.latencyRequestType == requestType;
+        }
 
         [LockstepEvent(LockstepEventType.OnClientBeginCatchUp)]
         public void OnClientBeginCatchUp()
@@ -34,7 +58,7 @@ namespace JanSharp
                 GMRequest request = requests[i];
                 if (IsRelevantActiveLocalRequest(request))
                 {
-                    SetActiveLocalRequest(request);
+                    AddActiveLocalRequest(request);
                     return;
                 }
             }
@@ -53,37 +77,45 @@ namespace JanSharp
             bool isOn = toggle.isOn;
             label.text = isOn ? onText : offText;
 
-            if (isOn == ActiveRequestMatchesType)
+            GMRequest latestRequest = GetLatestActiveLocalRequest();
+
+            if (isOn == RequestMatchesButtonType(latestRequest))
                 return;
 
             if (!isOn)
             {
-                requestsManager.SendDeleteIA(activeLocalRequest);
+                requestsManager.SendDeleteIA(latestRequest);
                 return;
             }
 
-            if (activeLocalRequest == null)
+            if (latestRequest == null)
             {
                 requestsManager.SendCreateIA(requestType);
                 return;
             }
 
-            requestsManager.SendSetRequestTypeIA(activeLocalRequest, requestType);
+            requestsManager.SendSetRequestTypeIA(latestRequest, requestType);
         }
 
-        private void SetActiveLocalRequest(GMRequest request)
+        private void AddActiveLocalRequest(GMRequest request)
         {
-            activeLocalRequest = request;
-            bool isOn = ActiveRequestMatchesType;
+            if (!ArrList.Contains(ref activeLocalRequests, ref activeLocalRequestsCount, request))
+                ArrList.Add(ref activeLocalRequests, ref activeLocalRequestsCount, request);
+            UpdateToggleStateBasedOnLatest();
+        }
+
+        private void RemoveActiveLocalRequest(GMRequest request)
+        {
+            if (ArrList.Remove(ref activeLocalRequests, ref activeLocalRequestsCount, request) == -1)
+                return;
+            UpdateToggleStateBasedOnLatest();
+        }
+
+        private void UpdateToggleStateBasedOnLatest()
+        {
+            bool isOn = RequestMatchesButtonType(GetLatestActiveLocalRequest());
             toggle.SetIsOnWithoutNotify(isOn);
             label.text = isOn ? onText : offText;
-        }
-
-        private void ClearActiveLocalRequest()
-        {
-            activeLocalRequest = null;
-            toggle.SetIsOnWithoutNotify(false);
-            label.text = offText;
         }
 
         private bool IsRelevantActiveLocalRequest(GMRequest request)
@@ -98,9 +130,9 @@ namespace JanSharp
         {
             GMRequest request = requestsManager.RequestForEvent;
             if (IsRelevantActiveLocalRequest(request))
-                SetActiveLocalRequest(request);
+                AddActiveLocalRequest(request);
             else
-                ClearActiveLocalRequest();
+                RemoveActiveLocalRequest(request);
         }
 
         [GMRequestsEvent(GMRequestsEventType.OnGMRequestCreatedInLatency)]

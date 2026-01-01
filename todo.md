@@ -39,9 +39,10 @@
 - [x] make regular gm requests red after x minutes
 - [ ] try out non elastic scroll rects
 - [x] update gm requests names upon import
-- [ ] make buttons aware of all open requests by the local player
+- [x] make buttons aware of all open requests by the local player
 - [ ] hud for the gm requests
 - [ ] do something with gm requests where the requesting player left, either visually or idk
+- [ ] deleting the second last row makes the last row invisible until that row goes out of view and into view again
 
 - [ ] How to truly prevent locking yourself out of permissions to edit permissions
   - editing the permission values themselves could lock you out

@@ -38,7 +38,16 @@ namespace JanSharp.Internal
         /// <para><see cref="ulong"/> uniqueId => <see cref="GMRequest"/> request</para>
         /// </summary>
         private DataDictionary requestsByUniqueId = new DataDictionary();
+        private GMRequest[] activeLocalRequests = new GMRequest[ArrList.MinCapacity];
+        private int activeLocalRequestsCount = 0;
+        private GMRequest[] activeRequests = new GMRequest[ArrList.MinCapacity];
+        private int activeRequestsCount = 0;
         #endregion
+
+        public override GMRequest[] ActiveLocalRequestsRaw => activeLocalRequests;
+        public override int ActiveLocalRequestsCount => activeLocalRequestsCount;
+        public override GMRequest[] ActiveRequestsRaw => activeRequests;
+        public override int ActiveRequestsCount => activeRequestsCount;
 
         #region GameState
         private int rpPlayerDataIndex;
@@ -259,7 +268,7 @@ namespace JanSharp.Internal
             WriteGMRequestRef(request);
             playersBackendManager.WriteRPPlayerDataRef(localPlayer);
             request.latencyHiddenUniqueIds.Add(lockstep.SendInputAction(markReadIAId), true);
-            request.latencyIsRead = true;
+            SetLatencyIsRead(request, true);
             request.latencyRespondingPlayer = localPlayer;
             RaiseOnGMRequestChangedInLatency(request);
         }
@@ -271,7 +280,7 @@ namespace JanSharp.Internal
             if (request.latencyHiddenUniqueIds.Count == 0)
                 return true;
             request.latencyHiddenUniqueIds.Clear(); // Latency state has predicted incorrectly.
-            request.latencyIsRead = request.isRead;
+            SetLatencyIsRead(request, request.isRead);
             request.latencyRespondingPlayer = request.respondingPlayer;
             RaiseOnGMRequestChangedInLatency(request);
             return true;
@@ -293,7 +302,7 @@ namespace JanSharp.Internal
                 return;
             }
             request.latencyHiddenUniqueIds.Clear(); // Latency state may have predicted incorrectly.
-            request.latencyIsRead = true;
+            SetLatencyIsRead(request, true);
             request.latencyRespondingPlayer = request.respondingPlayer;
             RaiseOnGMRequestChangedInLatency(request);
             RaiseOnGMRequestChanged(request);
@@ -305,7 +314,7 @@ namespace JanSharp.Internal
                 return;
             WriteGMRequestRef(request);
             request.latencyHiddenUniqueIds.Add(lockstep.SendInputAction(markUnreadIAId), true);
-            request.latencyIsRead = false;
+            SetLatencyIsRead(request, false);
             request.latencyRespondingPlayer = null;
             RaiseOnGMRequestChangedInLatency(request);
         }
@@ -326,7 +335,7 @@ namespace JanSharp.Internal
                 return;
             }
             request.latencyHiddenUniqueIds.Clear(); // Latency state may have predicted incorrectly.
-            request.latencyIsRead = false;
+            SetLatencyIsRead(request, false);
             request.latencyRespondingPlayer = null;
             RaiseOnGMRequestChangedInLatency(request);
             RaiseOnGMRequestChanged(request);
@@ -421,6 +430,8 @@ namespace JanSharp.Internal
         private void RegisterRequestInLS(GMRequest request, bool doRaise)
         {
             requestsByUniqueId.Add(request.uniqueId, request);
+            if (!request.latencyIsRead)
+                AddActiveRequestInLS(request);
             if (doRaise)
                 RaiseOnGMRequestCreatedInLatency(request);
         }
@@ -431,7 +442,54 @@ namespace JanSharp.Internal
                 return;
             request.latencyIsDeleted = true;
             requestsByUniqueId.Remove(request.uniqueId);
+            if (!request.latencyIsRead)
+                RemoveActiveRequestInLS(request);
             RaiseOnGMRequestDeletedInLatency(request);
+        }
+
+        private void SetLatencyIsRead(GMRequest request, bool isRead)
+        {
+            if (request.latencyIsRead == isRead)
+                return;
+            request.latencyIsRead = isRead;
+            if (isRead)
+                RemoveActiveRequestInLS(request);
+            else
+                AddActiveRequestInLS(request);
+        }
+
+        private void AddActiveRequestInLS(GMRequest request)
+        {
+            ArrList.Add(ref activeRequests, ref activeRequestsCount, request);
+            if (request.requestingPlayer == localPlayer)
+                ArrList.Add(ref activeLocalRequests, ref activeLocalRequestsCount, request);
+        }
+
+        private void RemoveActiveRequestInLS(GMRequest request)
+        {
+            ArrList.Remove(ref activeRequests, ref activeRequestsCount, request);
+            if (request.requestingPlayer == localPlayer)
+                ArrList.Remove(ref activeLocalRequests, ref activeLocalRequestsCount, request);
+        }
+
+        public override GMRequest GetLatestActiveLocalRequest()
+        {
+            if (activeLocalRequestsCount == 0)
+                return null;
+            GMRequest result = activeLocalRequests[0];
+            for (int i = 1; i < activeLocalRequestsCount; i++)
+            {
+                GMRequest request = activeLocalRequests[i];
+                if (result.isLatency)
+                {
+                    if (request.isLatency && request.uniqueId > result.uniqueId)
+                        result = request;
+                    continue;
+                }
+                if (request.isLatency || request.requestedAtTick > result.requestedAtTick)
+                    result = request;
+            }
+            return result;
         }
 
         #endregion

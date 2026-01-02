@@ -64,8 +64,37 @@ namespace JanSharp
     {
         public abstract int PresentAsUrgentAfterSeconds { get; }
 
-        // As a general note, there is no way to get GMRequests which have been created in the latency state
-        // but aren't in the game state yet.
+        /// <summary>
+        /// <para>Not only does this contain latency hidden requests and do not contain latency deleted
+        /// requests, the order is also non deterministic.</para>
+        /// <para>Direct reference to an <see cref="ArrList"/>.</para>
+        /// <para>Not game state safe.</para>
+        /// </summary>
+        public abstract GMRequest[] ActiveRequestsRaw { get; }
+        /// <summary>
+        /// <para>Not game state safe.</para>
+        /// </summary>
+        public abstract int ActiveRequestsCount { get; }
+        /// <summary>
+        /// <para>Not only does this contain latency hidden requests and do not contain latency deleted
+        /// requests, the order is also non deterministic.</para>
+        /// <para>Not game state safe.</para>
+        /// <para>Direct reference to an <see cref="ArrList"/>.</para>
+        /// </summary>
+        public abstract GMRequest[] ActiveLocalRequestsRaw { get; }
+        /// <summary>
+        /// <para>Not game state safe.</para>
+        /// </summary>
+        public abstract int ActiveLocalRequestsCount { get; }
+        /// <summary>
+        /// <para>Get the most recent request in <see cref="ActiveLocalRequestsRaw"/>.</para>
+        /// <para>Affected by <see cref="GMRequest.requestedAtTick"/> which doesn't have its own associated
+        /// latency event. Listen to <see cref="GMRequestsEventType.OnGMRequestCreated"/>.</para>
+        /// <para>Not game state safe.</para>
+        /// </summary>
+        /// <returns></returns>
+        public abstract GMRequest GetLatestActiveLocalRequest();
+
         /// <summary>
         /// <para>Game state safe, including order.</para>
         /// </summary>

@@ -49,6 +49,12 @@ namespace JanSharp
         /// <para>Can be <see langword="null"/>.</para>
         /// <para>Readonly.</para>
         /// </summary>
+        [System.NonSerialized] public CorePlayerData requestingCorePlayer;
+        /// <summary>
+        /// <para>Can be read while <see cref="isLatency"/> is <see langword="true"/>.</para>
+        /// <para>Can be <see langword="null"/>.</para>
+        /// <para>Readonly.</para>
+        /// </summary>
         [System.NonSerialized] public RPPlayerData requestingPlayer;
         /// <summary>
         /// <para>Is <see langword="null"/> while <see cref="isRead"/> is <see langword="false"/>, but can be

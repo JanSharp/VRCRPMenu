@@ -130,6 +130,11 @@ namespace JanSharp
         public abstract void SendCreateIA(GMRequestType requestType);
         public abstract void SendSetRequestTypeIA(GMRequest request, GMRequestType requestType);
         public abstract void SendMarkReadIA(GMRequest request);
+        /// <summary>
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="respondingPlayer">Can be <see langword="null"/>.</param>
+        public abstract void MarkReadInGS(GMRequest request, RPPlayerData respondingPlayer);
         public abstract void SendMarkUnreadIA(GMRequest request);
         public abstract void SendDeleteIA(GMRequest request);
 

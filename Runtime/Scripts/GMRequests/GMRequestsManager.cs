@@ -124,7 +124,7 @@ namespace JanSharp.Internal
 
         private bool HasDeletePermission(CorePlayerData actingPlayer, GMRequest request)
         {
-            return request.requestingPlayer == null || request.requestingPlayer.core == actingPlayer;
+            return request.requestingCorePlayer == null || request.requestingCorePlayer == actingPlayer;
         }
 
         #endregion
@@ -177,6 +177,7 @@ namespace JanSharp.Internal
             GMRequest request = CreateNewGMRequestInst();
             request.isLatency = true;
             request.uniqueId = uniqueId;
+            request.requestingCorePlayer = requestingPlayer == null ? null : requestingPlayer.core;
             request.requestingPlayer = requestingPlayer;
             request.latencyRequestType = requestType;
             RegisterRequestInLS(request, doRaise: true);
@@ -188,7 +189,8 @@ namespace JanSharp.Internal
         {
             GMRequestType requestType = (GMRequestType)lockstep.ReadByte();
             RPPlayerData requestingPlayer = playersBackendManager.ReadRPPlayerDataRef();
-            bool hasPermission = HasCreatePermission(playerDataManager.SendingPlayerData, requestingPlayer.core, requestType);
+            bool hasPermission = requestingPlayer == null
+                || HasCreatePermission(playerDataManager.SendingPlayerData, requestingPlayer.core, requestType);
 
             GMRequest request;
 
@@ -222,6 +224,7 @@ namespace JanSharp.Internal
 
             request.requestType = requestType;
             request.requestedAtTick = lockstep.CurrentTick;
+            request.requestingCorePlayer = requestingPlayer == null ? null : requestingPlayer.core;
             request.requestingPlayer = requestingPlayer; // Overwrite even if it was latency hidden.
             if (mustRegisterInLS)
                 RegisterRequestInLS(request, doRaise: true);
@@ -272,7 +275,7 @@ namespace JanSharp.Internal
             if (request == null)
                 return;
             GMRequestType requestType = (GMRequestType)lockstep.ReadByte();
-            if (!HasSetRequestTypePermission(playerDataManager.SendingPlayerData, request.requestingPlayer.core, requestType))
+            if (!HasSetRequestTypePermission(playerDataManager.SendingPlayerData, request.requestingCorePlayer, requestType))
             {
                 if (request.latencyHiddenUniqueIds.Count == 0)
                     return;
@@ -336,6 +339,16 @@ namespace JanSharp.Internal
             request.latencyHiddenUniqueIds.Clear(); // Latency state may have predicted incorrectly.
             SetLatencyIsRead(request, true);
             request.latencyRespondingPlayer = request.respondingPlayer;
+            RaiseOnGMRequestChangedInLatency(request);
+            RaiseOnGMRequestChanged(request);
+        }
+
+        public override void MarkReadInGS(GMRequest request, RPPlayerData respondingPlayer)
+        {
+            request.latencyHiddenUniqueIds.Clear(); // Latency state has predicted incorrectly.
+            SetLatencyIsRead(request, true);
+            request.latencyRespondingPlayer = respondingPlayer;
+            MarkAsRead(request, respondingPlayer);
             RaiseOnGMRequestChangedInLatency(request);
             RaiseOnGMRequestChanged(request);
         }
@@ -589,6 +602,7 @@ namespace JanSharp.Internal
             request.requestedAtTick = lockstep.ReadSmallUInt();
             request.autoDeleteAtTick = request.isRead ? lockstep.ReadSmallUInt() : 0u;
             request.requestingPlayer = playersBackendManager.ReadRPPlayerDataRef();
+            request.requestingCorePlayer = request.requestingPlayer == null ? null : request.requestingPlayer.core;
             request.respondingPlayer = playersBackendManager.ReadRPPlayerDataRef();
             RegisterRequestInLS(request, doRaise: false);
             requestsById.Add(request.id, request);

@@ -9,15 +9,32 @@ namespace JanSharp
     public class GMRequestsHUD : PermissionResolver
     {
         [HideInInspector][SerializeField][SingletonReference] private GMRequestsManagerAPI requestsManager;
+        [HideInInspector][SerializeField][SingletonReference] private UpdateManager updateManager;
         [HideInInspector][SerializeField][SingletonReference] private HUDManagerAPI hudManager;
+        /// <summary>
+        /// <para>Used by <see cref="UpdateManager"/>.</para>
+        /// </summary>
+        private int customUpdateInternalIndex;
 
         public Transform requesterHUDRoot;
         public GameObject requesterRegularRoot;
         public GameObject requesterUrgentRoot;
         public Image requesterRegularImage;
         public Image requesterUrgentImage;
+        private Color requesterRegularBaseColor;
+        private Color requesterUrgentBaseColor;
+        private Color requesterCurrentBaseColor;
+        private Color requesterCurrentBrightColor;
         private Image requesterCurrentImage;
         private bool requesterHUDIsShown = false;
+        private GMRequest prevActiveLocalRequest = null;
+        private bool requesterIsInFadeOutAnimation = false;
+        private float requesterShowUntil;
+        private float requesterStartBlinkingAt;
+        private const float RequesterFadeOutTotalTime = 3f;
+        private const float RequesterFadeOutBlinkStartTime = 2f;
+        private const float RequesterFadeOutBlinksPerSecond = 4f;
+        private const float TAU = Mathf.PI * 2f;
         [Space]
         public Transform responderHUDRoot;
         public GameObject responderRegularRoot;
@@ -44,19 +61,27 @@ namespace JanSharp
 
         private void Start()
         {
+            requesterRegularBaseColor = requesterRegularImage.color;
+            requesterUrgentBaseColor = requesterUrgentImage.color;
             hudManager.AddHUDElement(requesterHUDRoot, "ec[gm-requests]-e[requester]", isShown: false);
             hudManager.AddHUDElement(responderHUDRoot, "ec[gm-requests]-c[responder]", isShown: false);
         }
 
         private void ShowHideRequesterHUD(bool show)
         {
+#if RP_MENU_DEBUG
+            Debug.Log($"[RPMenuDebug] GMRequestsHUD  ShowHideRequesterHUD - show: {show}");
+#endif
             if (show == requesterHUDIsShown)
                 return;
             requesterHUDIsShown = show;
             if (requesterHUDIsShown)
                 hudManager.ShowHUDElement(requesterHUDRoot);
             else
+            {
                 hudManager.HideHUDElement(requesterHUDRoot);
+                StopFadeOutAnimation();
+            }
         }
 
         private void ShowHideResponderHUD(bool show)
@@ -81,10 +106,7 @@ namespace JanSharp
             GMRequest request = requestsManager.GetLatestActiveLocalRequest();
             if (request == null)
             {
-                // TODO: If there is now no active request and the previously active request has been marked
-                // as read - not deleted - delay hiding the HUD for a total of 3 seconds and flash for 1 second
-                // at the end too
-                ShowHideRequesterHUD(false);
+                PotentiallyStartFadeOutAnimation();
                 return;
             }
 
@@ -95,13 +117,77 @@ namespace JanSharp
                 return;
             }
 
-            requesterCurrentImage = isRegular
-                ? requesterRegularImage
-                : requesterUrgentImage;
+            StopFadeOutAnimation();
+            prevActiveLocalRequest = request;
             requesterRegularRoot.SetActive(isRegular);
             requesterUrgentRoot.SetActive(!isRegular);
 
             ShowHideRequesterHUD(true);
+        }
+
+        private void PotentiallyStartFadeOutAnimation()
+        {
+#if RP_MENU_DEBUG
+            Debug.Log($"[RPMenuDebug] GMRequestsHUD  PotentiallyStartFadeOutAnimation - prevActiveLocalRequest != null: {prevActiveLocalRequest != null}");
+            if (prevActiveLocalRequest != null)
+                Debug.Log($"[RPMenuDebug] GMRequestsHUD  PotentiallyStartFadeOutAnimation - prevActiveLocalRequest.latencyIsDeleted: {prevActiveLocalRequest.latencyIsDeleted}, prevActiveLocalRequest.latencyIsRead: {prevActiveLocalRequest.latencyIsRead}");
+#endif
+            if (prevActiveLocalRequest == null
+                || prevActiveLocalRequest.latencyIsDeleted
+                || !prevActiveLocalRequest.latencyIsRead)
+            {
+                ShowHideRequesterHUD(false);
+                return;
+            }
+            if (requesterIsInFadeOutAnimation)
+                return;
+#if RP_MENU_DEBUG
+            Debug.Log($"[RPMenuDebug] GMRequestsHUD  PotentiallyStartFadeOutAnimation (inner) - starting fade out animation");
+#endif
+            requesterIsInFadeOutAnimation = true;
+
+            bool isRegular = prevActiveLocalRequest.latencyRequestType == GMRequestType.Regular;
+            requesterCurrentImage = isRegular
+                ? requesterRegularImage
+                : requesterUrgentImage;
+            requesterCurrentBaseColor = isRegular
+                ? requesterRegularBaseColor
+                : requesterUrgentBaseColor;
+            requesterCurrentBrightColor = requesterCurrentBaseColor;
+            requesterCurrentBrightColor.a = 1f;
+            float time = Time.time;
+            requesterShowUntil = time + RequesterFadeOutTotalTime;
+            requesterStartBlinkingAt = time + RequesterFadeOutBlinkStartTime;
+            updateManager.Register(this);
+        }
+
+        private void StopFadeOutAnimation()
+        {
+            if (!requesterIsInFadeOutAnimation)
+                return;
+#if RP_MENU_DEBUG
+            Debug.Log($"[RPMenuDebug] GMRequestsHUD  StopFadeOutAnimation (inner) - stopping fade out animation");
+#endif
+            requesterIsInFadeOutAnimation = false;
+            requesterCurrentImage.color = requesterCurrentBaseColor;
+            prevActiveLocalRequest = null;
+            updateManager.Deregister(this);
+        }
+
+        public void CustomUpdate()
+        {
+            float time = Time.time;
+            if (time >= requesterShowUntil)
+            {
+                ShowHideRequesterHUD(false);
+                return;
+            }
+            if (time < requesterStartBlinkingAt)
+                return;
+            float timeInAnimation = time - requesterStartBlinkingAt;
+            float t = (Mathf.Cos(timeInAnimation * TAU * RequesterFadeOutBlinksPerSecond) + 1f) / 2f;
+            // t is 1 when timeInAnimation is 0.
+            requesterCurrentImage.color = Color.Lerp(requesterCurrentBrightColor, requesterCurrentBaseColor, t);
         }
 
         private void UpdateResponderHUD()

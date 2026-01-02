@@ -937,6 +937,9 @@ MonoBehaviour:
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 378832678485108007}
   lockstep: {fileID: 0}
+  updateManager: {fileID: 0}
+  menuManager: {fileID: 0}
+  menuPageRoot: {fileID: 0}
   rowPrefab: {fileID: 4810787088127460584}
   rowPrefabScript: {fileID: 6937405944853398511}
   rowsContent: {fileID: 8070117790442002312}
@@ -944,9 +947,6 @@ MonoBehaviour:
   rowsScrollRect: {fileID: 2751174832540173620}
   minScrollRectVelocity: 20
   requestsManager: {fileID: 0}
-  updateManager: {fileID: 0}
-  menuManager: {fileID: 0}
-  menuPageRoot: {fileID: 0}
 --- !u!114 &378832678485108007
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3619,7 +3619,11 @@ MonoBehaviour:
   _udonSharpBackingUdonBehaviour: {fileID: 8540368004820648144}
   lockstep: {fileID: 0}
   requestsManager: {fileID: 0}
+  playersBackendManager: {fileID: 0}
   requestsList: {fileID: 4980807158816293606}
+  localPlayerCollidingLayers:
+    serializedVersion: 2
+    m_Bits: 7604695
 --- !u!114 &8540368004820648144
 MonoBehaviour:
   m_ObjectHideFlags: 0

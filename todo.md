@@ -43,7 +43,7 @@
 - [x] hud for the gm requests
 - [ ] do something with gm requests where the requesting player left, either visually or idk
 - [x] deleting the second last row makes the last row invisible until that row goes out of view and into view again
-- [ ] rename the RequestGMButtons prefab to GMRequestButtons
+- [x] rename the RequestGMButtons prefab to GMRequestButtons
 
 - [ ] How to truly prevent locking yourself out of permissions to edit permissions
   - editing the permission values themselves could lock you out

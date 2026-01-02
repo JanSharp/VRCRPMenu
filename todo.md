@@ -40,9 +40,10 @@
 - [ ] try out non elastic scroll rects
 - [x] update gm requests names upon import
 - [x] make buttons aware of all open requests by the local player
-- [ ] hud for the gm requests
+- [x] hud for the gm requests
 - [ ] do something with gm requests where the requesting player left, either visually or idk
 - [x] deleting the second last row makes the last row invisible until that row goes out of view and into view again
+- [ ] rename the RequestGMButtons prefab to GMRequestButtons
 
 - [ ] How to truly prevent locking yourself out of permissions to edit permissions
   - editing the permission values themselves could lock you out

@@ -61,12 +61,16 @@ namespace JanSharp
 
         [GMRequestsEvent(GMRequestsEventType.OnGMRequestCreatedInLatency)]
         public void OnGMRequestCreatedInLatency() => UpdateToggleStateBasedOnLatest();
+
         [GMRequestsEvent(GMRequestsEventType.OnGMRequestCreated)]
         public void OnGMRequestCreated() => UpdateToggleStateBasedOnLatest(); // requestedAtTick is now known.
+
         [GMRequestsEvent(GMRequestsEventType.OnGMRequestChangedInLatency)]
         public void OnGMRequestChangedInLatency() => UpdateToggleStateBasedOnLatest();
+
         [GMRequestsEvent(GMRequestsEventType.OnGMRequestDeletedInLatency)]
         public void OnGMRequestDeletedInLatency() => UpdateToggleStateBasedOnLatest();
+
         [GMRequestsEvent(GMRequestsEventType.OnGMRequestUnDeletedInLatency)]
         public void OnGMRequestUnDeletedInLatency() => UpdateToggleStateBasedOnLatest();
     }

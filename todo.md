@@ -45,6 +45,7 @@
 - [x] deleting the second last row makes the last row invisible until that row goes out of view and into view again
 - [x] rename the RequestGMButtons prefab to GMRequestButtons
 - [ ] very most likely change gm requests page to make calls to an external teleports manager
+- [ ] maybe, probably, make the count slightly smaller for GM requests HUD to make it feel less squished into that spot. Though would be good to test in VR first
 - [ ] How to truly prevent locking yourself out of permissions to edit permissions
   - editing the permission values themselves could lock you out
   - deleting a permission group could lock you out

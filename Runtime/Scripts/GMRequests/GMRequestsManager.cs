@@ -28,8 +28,8 @@ namespace JanSharp.Internal
         [SerializeField] private int presentAsUrgentAfterSeconds = 180;
         public override int PresentAsUrgentAfterSeconds => presentAsUrgentAfterSeconds;
 
-        private const uint MinLiveTicksWhenMarkedRead = (uint)(60f * LockstepAPI.TickRate);
-        private const uint MinTotalLiveTicks = (uint)(10f * 60f * LockstepAPI.TickRate);
+        private const uint MinLiveTicksWhenMarkedRead = 60u * LockstepAPI.TickRateUInt;
+        private const uint MinTotalLiveTicks = 10u * 60u * LockstepAPI.TickRateUInt;
 
         #region LatencyState
         /// <summary>

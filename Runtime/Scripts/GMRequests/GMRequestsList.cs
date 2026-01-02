@@ -38,9 +38,8 @@ namespace JanSharp
             uint currentTick = lockstep.CurrentTick;
             if (currentTick < nextTimeInfoUpdateTick)
                 return;
-            uint ticksInASecond = (uint)LockstepAPI.TickRate;
             while (nextTimeInfoUpdateTick <= currentTick)
-                nextTimeInfoUpdateTick += ticksInASecond;
+                nextTimeInfoUpdateTick += LockstepAPI.TickRateUInt;
             // "nextTimeInfoUpdateTick = currentTick + ticksInASecond" has the issue that it can drift
             // slightly causing the UI to appear as though timers did not change for up to 1.9 seconds.
             for (int i = 0; i < rowsCount; i++)
@@ -140,14 +139,14 @@ namespace JanSharp
                 return;
             }
             uint liveTicks = lockstep.CurrentTick - request.requestedAtTick;
-            int seconds = Mathf.FloorToInt(liveTicks / LockstepAPI.TickRate);
+            uint seconds = liveTicks / LockstepAPI.TickRateUInt;
             UpdateRowPresentedAsUrgent(row, seconds);
-            int minutes = seconds / 60;
-            seconds -= minutes * 60;
+            uint minutes = seconds / 60u;
+            seconds -= minutes * 60u;
             row.timeAndInfoText.text = $"{minutes}:{seconds:d2}{postfix}";
         }
 
-        private void UpdateRowPresentedAsUrgent(GMRequestRow row, int seconds)
+        private void UpdateRowPresentedAsUrgent(GMRequestRow row, uint seconds)
         {
             GMRequest request = row.request;
             if (request.latencyIsRead || request.latencyRequestType != GMRequestType.Regular)

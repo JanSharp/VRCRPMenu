@@ -6,7 +6,7 @@ using UnityEngine.UI;
 namespace JanSharp
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-    public class GMRequestButton : PermissionResolver
+    public class GMRequestButton : UdonSharpBehaviour
     {
         [HideInInspector][SerializeField][SingletonReference] private GMRequestsManagerAPI requestsManager;
 
@@ -15,10 +15,6 @@ namespace JanSharp
         public TextMeshProUGUI label;
         public string offText;
         public string onText;
-
-        [PermissionDefinitionReference(nameof(associatedRequestPermissionDef))]
-        public string associatedRequestPermissionAsset; // A guid.
-        [HideInInspector][SerializeField] private PermissionDefinition associatedRequestPermissionDef;
 
         private bool RequestMatchesButtonType(GMRequest request)
         {
@@ -29,15 +25,6 @@ namespace JanSharp
         public void OnClientBeginCatchUp()
         {
             UpdateToggleStateBasedOnLatest();
-        }
-
-        public override void InitializeInstantiated() { }
-
-        public override void Resolve()
-        {
-            // TODO: Delete all active local requests.
-            if (!associatedRequestPermissionDef.valueForLocalPlayer)
-                toggle.isOn = false;
         }
 
         public void OnValueChanged()

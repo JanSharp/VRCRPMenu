@@ -28,6 +28,13 @@ namespace JanSharp.Internal
         [SerializeField] private int presentAsUrgentAfterSeconds = 180;
         public override int PresentAsUrgentAfterSeconds => presentAsUrgentAfterSeconds;
 
+        public override bool ShouldPresetAsUrgent(GMRequest request)
+        {
+            return presentAsUrgentAfterSeconds != -1
+                && !request.isLatency
+                && lockstep.CurrentTick >= request.requestedAtTick + (uint)presentAsUrgentAfterSeconds * LockstepAPI.TickRateUInt;
+        }
+
         private const uint MinLiveTicksWhenMarkedRead = 60u * LockstepAPI.TickRateUInt;
         private const uint MinTotalLiveTicks = 10u * 60u * LockstepAPI.TickRateUInt;
 
@@ -219,6 +226,31 @@ namespace JanSharp.Internal
             if (mustRegisterInLS)
                 RegisterRequestInLS(request, doRaise: true);
             RaiseOnGMRequestCreated(request);
+            ManagePresentAsUrgentForNewRequest(request);
+        }
+
+        private void ManagePresentAsUrgentForNewRequest(GMRequest request)
+        {
+            if (presentAsUrgentAfterSeconds == -1)
+                return;
+            if (presentAsUrgentAfterSeconds == 0)
+            {
+                if (request.requestType == GMRequestType.Regular)
+                    RaiseOnGMRequestShouldPresetAsUrgentChanged(request);
+                return;
+            }
+            WriteGMRequestRef(request);
+            lockstep.SendEventDelayedTicks(gmRequestShouldPresetAsUrgentChangedIAId, (uint)presentAsUrgentAfterSeconds * LockstepAPI.TickRateUInt);
+        }
+
+        [HideInInspector][SerializeField] private uint gmRequestShouldPresetAsUrgentChangedIAId;
+        [LockstepInputAction(nameof(gmRequestShouldPresetAsUrgentChangedIAId))]
+        public void OnGMRequestShouldPresetAsUrgentChangedIA()
+        {
+            GMRequest request = ReadGMRequestRef();
+            if (request == null || request.requestType != GMRequestType.Regular)
+                return;
+            RaiseOnGMRequestShouldPresetAsUrgentChanged(request);
         }
 
         public override void SendSetRequestTypeIA(GMRequest request, GMRequestType requestType)
@@ -612,6 +644,7 @@ namespace JanSharp.Internal
 
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onGMRequestCreatedInLatencyListeners;
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onGMRequestCreatedListeners;
+        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onGMRequestShouldPresetAsUrgentChangedListeners;
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onGMRequestChangedInLatencyListeners;
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onGMRequestChangedListeners;
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onGMRequestDeletedInLatencyListeners;
@@ -634,6 +667,14 @@ namespace JanSharp.Internal
             this.requestForEvent = requestForEvent;
             // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
             JanSharp.CustomRaisedEvents.Raise(ref onGMRequestCreatedListeners, nameof(GMRequestsEventType.OnGMRequestCreated));
+            this.requestForEvent = null; // To prevent misuse of the API.
+        }
+
+        private void RaiseOnGMRequestShouldPresetAsUrgentChanged(GMRequest requestForEvent)
+        {
+            this.requestForEvent = requestForEvent;
+            // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
+            JanSharp.CustomRaisedEvents.Raise(ref onGMRequestShouldPresetAsUrgentChangedListeners, nameof(GMRequestsEventType.OnGMRequestShouldPresetAsUrgentChanged));
             this.requestForEvent = null; // To prevent misuse of the API.
         }
 

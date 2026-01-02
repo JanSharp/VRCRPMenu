@@ -39,7 +39,11 @@ namespace JanSharp
         public Transform responderHUDRoot;
         public GameObject responderRegularRoot;
         public GameObject responderUrgentRoot;
+        public Image responderRegularImage;
+        public Image responderUrgentImage;
         public TextMeshProUGUI responderCountText;
+        private Color responderRegularBaseColor;
+        private Color responderUrgentBaseColor;
         private bool responderHUDIsShown = false;
 
         [Space]
@@ -63,6 +67,8 @@ namespace JanSharp
         {
             requesterRegularBaseColor = requesterRegularImage.color;
             requesterUrgentBaseColor = requesterUrgentImage.color;
+            responderRegularBaseColor = responderRegularImage.color;
+            responderUrgentBaseColor = responderUrgentImage.color;
             hudManager.AddHUDElement(requesterHUDRoot, "ec[gm-requests]-e[requester]", isShown: false);
             hudManager.AddHUDElement(responderHUDRoot, "ec[gm-requests]-c[responder]", isShown: false);
         }
@@ -206,20 +212,33 @@ namespace JanSharp
             }
 
             bool anyUrgent = false;
+            bool anyPresentAsUrgent = false;
             GMRequest[] requests = requestsManager.ActiveRequestsRaw;
             for (int i = 0; i < count; i++)
-                if (requests[i].latencyRequestType == GMRequestType.Urgent)
+            {
+                var request = requests[i];
+                if (request.latencyRequestType == GMRequestType.Urgent)
                 {
                     anyUrgent = true;
                     break;
                 }
+                if (!anyPresentAsUrgent && requestsManager.ShouldPresetAsUrgent(request))
+                    anyPresentAsUrgent = true;
+            }
 
             responderCountText.text = count.ToString();
             responderRegularRoot.SetActive(!anyUrgent);
             responderUrgentRoot.SetActive(anyUrgent);
-            // TODO: Show "regular presented as urgent" as its own icon too.
+            SetPresentAsUrgent(anyPresentAsUrgent);
 
             ShowHideResponderHUD(true);
+        }
+
+        private void SetPresentAsUrgent(bool presentAsUrgent)
+        {
+            responderRegularImage.color = presentAsUrgent
+                ? responderUrgentBaseColor
+                : responderRegularBaseColor;
         }
 
         private void UpdateHUD()
@@ -243,6 +262,14 @@ namespace JanSharp
 
         [GMRequestsEvent(GMRequestsEventType.OnGMRequestCreatedInLatency)]
         public void OnGMRequestCreatedInLatency() => UpdateHUD();
+
+        [GMRequestsEvent(GMRequestsEventType.OnGMRequestShouldPresetAsUrgentChanged)]
+        public void OnGMRequestShouldPresetAsUrgentChanged()
+        {
+            GMRequest request = requestsManager.RequestForEvent;
+            if (!request.latencyIsRead && request.latencyRequestType == GMRequestType.Regular)
+                SetPresentAsUrgent(true);
+        }
 
         [GMRequestsEvent(GMRequestsEventType.OnGMRequestChangedInLatency)]
         public void OnGMRequestChangedInLatency() => UpdateHUD();

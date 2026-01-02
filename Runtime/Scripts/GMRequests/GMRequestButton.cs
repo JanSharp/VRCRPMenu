@@ -68,6 +68,7 @@ namespace JanSharp
 
         public override void Resolve()
         {
+            // TODO: Delete all active local requests.
             if (!associatedRequestPermissionDef.valueForLocalPlayer)
                 toggle.isOn = false;
         }
@@ -138,16 +139,12 @@ namespace JanSharp
         [GMRequestsEvent(GMRequestsEventType.OnGMRequestCreatedInLatency)]
         public void OnGMRequestCreatedInLatency() => OnGMRequestsEvent();
         [GMRequestsEvent(GMRequestsEventType.OnGMRequestCreated)]
-        public void OnGMRequestCreated() => OnGMRequestsEvent();
+        public void OnGMRequestCreated() => OnGMRequestsEvent(); // requestedAtTick is now known.
         [GMRequestsEvent(GMRequestsEventType.OnGMRequestChangedInLatency)]
         public void OnGMRequestChangedInLatency() => OnGMRequestsEvent();
-        [GMRequestsEvent(GMRequestsEventType.OnGMRequestChanged)]
-        public void OnGMRequestChanged() => OnGMRequestsEvent();
         [GMRequestsEvent(GMRequestsEventType.OnGMRequestDeletedInLatency)]
         public void OnGMRequestDeletedInLatency() => OnGMRequestsEvent();
         [GMRequestsEvent(GMRequestsEventType.OnGMRequestUnDeletedInLatency)]
         public void OnGMRequestUnDeletedInLatency() => OnGMRequestsEvent();
-        [GMRequestsEvent(GMRequestsEventType.OnGMRequestDeleted)]
-        public void OnGMRequestDeleted() => OnGMRequestsEvent();
     }
 }

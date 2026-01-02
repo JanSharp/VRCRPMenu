@@ -174,16 +174,16 @@ namespace JanSharp
         {
             GMRequest requestLeft = ((GMRequestRow)compareLeft).request;
             GMRequest requestRight = ((GMRequestRow)compareRight).request;
-            bool isRead = requestRight.isRead;
-            if (requestLeft.isRead != isRead)
+            bool isRead = requestRight.latencyIsRead;
+            if (requestLeft.latencyIsRead != isRead)
             {
                 leftSortsFirst = isRead;
                 return;
             }
             // isRead means "are read" from this point forward.
-            if (!isRead && requestLeft.requestType != requestRight.requestType)
+            if (!isRead && requestLeft.latencyRequestType != requestRight.latencyRequestType)
             {
-                leftSortsFirst = requestLeft.requestType == GMRequestType.Urgent;
+                leftSortsFirst = requestLeft.latencyRequestType == GMRequestType.Urgent;
                 return;
             }
             if (requestLeft.isLatency || requestRight.isLatency)

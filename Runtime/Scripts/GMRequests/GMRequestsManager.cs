@@ -156,15 +156,14 @@ namespace JanSharp.Internal
             CreateInLS(uniqueId, requestType, localPlayer);
         }
 
-        public void CreateInLS(ulong uniqueId, GMRequestType requestType, RPPlayerData requestingPlayer)
+        private void CreateInLS(ulong uniqueId, GMRequestType requestType, RPPlayerData requestingPlayer)
         {
             GMRequest request = CreateNewGMRequestInst();
             request.isLatency = true;
             request.uniqueId = uniqueId;
             request.requestingPlayer = requestingPlayer;
             request.latencyRequestType = requestType;
-            requestsByUniqueId.Add(uniqueId, request);
-            RaiseOnGMRequestCreatedInLatency(request);
+            RegisterRequestInLS(request, doRaise: true);
         }
 
         [HideInInspector][SerializeField] private uint createIAId;
@@ -178,14 +177,13 @@ namespace JanSharp.Internal
             GMRequest request;
 
             ulong uniqueId = lockstep.SendingUniqueId;
+            bool mustRegisterInLS = false;
             if (requestsByUniqueId.TryGetValue(uniqueId, out DataToken requestToken))
             {
                 request = (GMRequest)requestToken.Reference;
                 if (!hasPermission)
                 {
-                    request.latencyIsDeleted = true;
-                    requestsByUniqueId.Remove(uniqueId);
-                    RaiseOnGMRequestDeletedInLatency(request);
+                    DeregisterRequestInLS(request);
                     request.DecrementRefsCount();
                     return;
                 }
@@ -198,7 +196,7 @@ namespace JanSharp.Internal
                 request = CreateNewGMRequestInst();
                 request.uniqueId = uniqueId;
                 request.latencyRequestType = requestType;
-                requestsByUniqueId.Add(uniqueId, request);
+                mustRegisterInLS = true;
             }
 
             request.id = nextRequestId++;
@@ -209,12 +207,14 @@ namespace JanSharp.Internal
             request.requestType = requestType;
             request.requestedAtTick = lockstep.CurrentTick;
             request.requestingPlayer = requestingPlayer; // Overwrite even if it was latency hidden.
+            if (mustRegisterInLS)
+                RegisterRequestInLS(request, doRaise: true);
             RaiseOnGMRequestCreated(request);
         }
 
         public override void SendSetRequestTypeIA(GMRequest request, GMRequestType requestType)
         {
-            if (!lockstep.IsInitialized)
+            if (!lockstep.IsInitialized || request.latencyIsDeleted)
                 return;
             WriteGMRequestRef(request);
             lockstep.WriteByte((byte)requestType);
@@ -248,12 +248,13 @@ namespace JanSharp.Internal
             }
             request.latencyHiddenUniqueIds.Clear(); // Latency state may have predicted incorrectly.
             request.latencyRequestType = request.requestType;
+            RaiseOnGMRequestChangedInLatency(request);
             RaiseOnGMRequestChanged(request);
         }
 
         public override void SendMarkReadIA(GMRequest request)
         {
-            if (!lockstep.IsInitialized)
+            if (!lockstep.IsInitialized || request.latencyIsDeleted)
                 return;
             WriteGMRequestRef(request);
             playersBackendManager.WriteRPPlayerDataRef(localPlayer);
@@ -294,12 +295,13 @@ namespace JanSharp.Internal
             request.latencyHiddenUniqueIds.Clear(); // Latency state may have predicted incorrectly.
             request.latencyIsRead = true;
             request.latencyRespondingPlayer = request.respondingPlayer;
+            RaiseOnGMRequestChangedInLatency(request);
             RaiseOnGMRequestChanged(request);
         }
 
         public override void SendMarkUnreadIA(GMRequest request)
         {
-            if (!lockstep.IsInitialized)
+            if (!lockstep.IsInitialized || request.latencyIsDeleted)
                 return;
             WriteGMRequestRef(request);
             request.latencyHiddenUniqueIds.Add(lockstep.SendInputAction(markUnreadIAId), true);
@@ -326,17 +328,17 @@ namespace JanSharp.Internal
             request.latencyHiddenUniqueIds.Clear(); // Latency state may have predicted incorrectly.
             request.latencyIsRead = false;
             request.latencyRespondingPlayer = null;
+            RaiseOnGMRequestChangedInLatency(request);
             RaiseOnGMRequestChanged(request);
         }
 
         public override void SendDeleteIA(GMRequest request)
         {
-            if (!lockstep.IsInitialized)
+            if (!lockstep.IsInitialized || request.latencyIsDeleted)
                 return;
             WriteGMRequestRef(request);
             lockstep.SendInputAction(deleteIAId);
-            request.latencyIsDeleted = true;
-            RaiseOnGMRequestDeletedInLatency(request);
+            DeregisterRequestInLS(request);
         }
 
         [HideInInspector][SerializeField] private uint deleteIAId;
@@ -351,6 +353,7 @@ namespace JanSharp.Internal
                 if (!request.latencyIsDeleted)
                     return;
                 request.latencyIsDeleted = false;
+                RegisterRequestInLS(request, doRaise: false);
                 RaiseOnGMRequestUnDeletedInLatency(request);
                 return;
             }
@@ -360,7 +363,6 @@ namespace JanSharp.Internal
         private void DeleteGMRequestInGS(GMRequest request)
         {
             request.isDeleted = false;
-            request.latencyIsDeleted = true;
             request.latencyHiddenUniqueIds.Clear();
 
             int index = request.index;
@@ -372,7 +374,7 @@ namespace JanSharp.Internal
                 top.index = index;
             }
             requestsById.Remove(request.id);
-            requestsByUniqueId.Remove(request.uniqueId);
+            DeregisterRequestInLS(request);
             RaiseOnGMRequestDeleted(request);
             request.DecrementRefsCount();
         }
@@ -410,6 +412,26 @@ namespace JanSharp.Internal
             if (request == null || !request.isRead || request.autoDeleteAtTick != lockstep.CurrentTick)
                 return;
             DeleteGMRequestInGS(request);
+        }
+
+        #endregion
+
+        #region LatencyState
+
+        private void RegisterRequestInLS(GMRequest request, bool doRaise)
+        {
+            requestsByUniqueId.Add(request.uniqueId, request);
+            if (doRaise)
+                RaiseOnGMRequestCreatedInLatency(request);
+        }
+
+        private void DeregisterRequestInLS(GMRequest request)
+        {
+            if (request.latencyIsDeleted)
+                return;
+            request.latencyIsDeleted = true;
+            requestsByUniqueId.Remove(request.uniqueId);
+            RaiseOnGMRequestDeletedInLatency(request);
         }
 
         #endregion
@@ -478,7 +500,7 @@ namespace JanSharp.Internal
             request.autoDeleteAtTick = request.isRead ? lockstep.ReadSmallUInt() : 0u;
             request.requestingPlayer = playersBackendManager.ReadRPPlayerDataRef();
             request.respondingPlayer = playersBackendManager.ReadRPPlayerDataRef();
-            requestsByUniqueId.Add(request.uniqueId, request);
+            RegisterRequestInLS(request, doRaise: false);
             requestsById.Add(request.id, request);
             return request;
         }

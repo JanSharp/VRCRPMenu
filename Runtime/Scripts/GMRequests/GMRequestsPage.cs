@@ -97,13 +97,10 @@ namespace JanSharp
             if (!isInitialized)
                 return;
             GMRequest request = requestsManager.RequestForEvent;
-            if (requestsList.TryGetRow(request, out GMRequestRow row))
-            {
-                requestsList.UpdateRowExceptRequester(row);
-                requestsList.ResortRow(row);
-            }
-            else
-                requestsList.CreateRow(request);
+            if (!requestsList.TryGetRow(request, out GMRequestRow row))
+                return; // Already deleted in latency again.
+            requestsList.UpdateRowTimeInfo(row); // requestedAtTick is known now.
+            requestsList.ResortRow(row);
         }
 
         [GMRequestsEvent(GMRequestsEventType.OnGMRequestChangedInLatency)]
@@ -114,26 +111,10 @@ namespace JanSharp
 #endif
             if (!isInitialized)
                 return;
-            if (requestsList.TryGetRow(requestsManager.RequestForEvent, out GMRequestRow row))
-            {
-                requestsList.UpdateRowExceptRequester(row);
-                requestsList.ResortRow(row);
-            }
-        }
-
-        [GMRequestsEvent(GMRequestsEventType.OnGMRequestChanged)]
-        public void OnGMRequestChanged()
-        {
-#if RP_MENU_DEBUG
-            Debug.Log("[RPMenuDebug] GMRequestsPage  OnGMRequestChanged");
-#endif
-            if (!isInitialized)
+            if (!requestsList.TryGetRow(requestsManager.RequestForEvent, out GMRequestRow row))
                 return;
-            if (requestsList.TryGetRow(requestsManager.RequestForEvent, out GMRequestRow row))
-            {
-                requestsList.UpdateRowExceptRequester(row);
-                requestsList.ResortRow(row);
-            }
+            requestsList.UpdateRowExceptRequester(row);
+            requestsList.ResortRow(row);
         }
 
         [GMRequestsEvent(GMRequestsEventType.OnGMRequestDeletedInLatency)]
@@ -144,8 +125,9 @@ namespace JanSharp
 #endif
             if (!isInitialized)
                 return;
-            if (requestsList.TryGetRow(requestsManager.RequestForEvent, out GMRequestRow row))
-                requestsList.RemoveRow(row);
+            if (!requestsList.TryGetRow(requestsManager.RequestForEvent, out GMRequestRow row))
+                return;
+            requestsList.RemoveRow(row);
         }
 
         [GMRequestsEvent(GMRequestsEventType.OnGMRequestUnDeletedInLatency)]
@@ -156,26 +138,7 @@ namespace JanSharp
 #endif
             if (!isInitialized)
                 return;
-            GMRequest request = requestsManager.RequestForEvent;
-            if (requestsList.TryGetRow(request, out GMRequestRow row))
-            {
-                requestsList.UpdateRowExceptRequester(row);
-                requestsList.ResortRow(row);
-            }
-            else
-                requestsList.CreateRow(request);
-        }
-
-        [GMRequestsEvent(GMRequestsEventType.OnGMRequestDeleted)]
-        public void OnGMRequestDeleted()
-        {
-#if RP_MENU_DEBUG
-            Debug.Log("[RPMenuDebug] GMRequestsPage  OnGMRequestDeleted");
-#endif
-            if (!isInitialized)
-                return;
-            if (requestsList.TryGetRow(requestsManager.RequestForEvent, out GMRequestRow row))
-                requestsList.RemoveRow(row);
+            requestsList.CreateRow(requestsManager.RequestForEvent);
         }
 
         [PlayersBackendEvent(PlayersBackendEventType.OnRPPlayerDataOverriddenDisplayNameChanged)]

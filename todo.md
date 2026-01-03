@@ -57,3 +57,4 @@
 - [ ] voice range HUD
 - [ ] voice range in world indicator
 - [ ] voice range AudioManager integration
+- [ ] which ones of these layout elements actually need layout priority 2? something with the input fields afaik

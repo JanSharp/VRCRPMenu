@@ -67,6 +67,9 @@ namespace JanSharp.Internal
 
         #region Initialization
 
+        private bool isInitialized = false;
+        public override bool IsInitialized => isInitialized;
+
         private void Start()
         {
             localPlayerId = (uint)Networking.LocalPlayer.playerId;
@@ -136,7 +139,13 @@ namespace JanSharp.Internal
         [PlayerDataEvent(PlayerDataEventType.OnPostPlayerDataManagerInit)]
         public void OnPostPlayerDataManagerInit()
         {
+            Setup();
+        }
+
+        private void Setup()
+        {
             FetchLocalPlayerData();
+            isInitialized = true;
         }
 
         private void FetchLocalPlayerData()
@@ -265,7 +274,7 @@ namespace JanSharp.Internal
         {
             if (!isImport)
             {
-                FetchLocalPlayerData();
+                Setup();
                 return null;
             }
             suspensionSw.Restart();

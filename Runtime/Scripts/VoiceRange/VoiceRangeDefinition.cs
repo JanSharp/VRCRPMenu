@@ -47,7 +47,7 @@ namespace JanSharp
 
         public override void Resolve()
         {
-            if (permissionDef.valueForLocalPlayer)
+            if (permissionDef.valueForLocalPlayer || !voiceRangeManager.IsInitialized)
                 return;
             VoiceRangePlayerData localPlayer = voiceRangeManager.LocalPlayer;
             if (localPlayer.latencyVoiceRangeIndex == index)

@@ -1,11 +1,13 @@
 ﻿using UdonSharp;
 using UnityEngine;
 using VRC.SDK3.Data;
+using VRC.SDKBase;
 
-namespace JanSharp
+namespace JanSharp.Internal
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     [LockstepGameStateDependency(typeof(PlayerDataManagerAPI))]
+    [CustomRaisedEventsDispatcher(typeof(VoiceRangeEventAttribute), typeof(VoiceRangeEventType))]
     public class VoiceRangeManager : VoiceRangeManagerAPI
     {
         public override string GameStateInternalName => "jansharp.voice-range-manager";
@@ -25,8 +27,13 @@ namespace JanSharp
         [SerializeField] public VoiceRangeDefinition defaultRangeDef;
         private DataDictionary rangeDefsByInternalName = new DataDictionary();
         private int rangeDefsCount;
+        public override VoiceRangeDefinition GetVoiceRangeDefinition(int index) => rangeDefs[index];
+        public override VoiceRangeDefinition GetVoiceRangeDefinition(string internalName) => (VoiceRangeDefinition)rangeDefsByInternalName[internalName].Reference;
 
         private int voiceRangePlayerDataIndex;
+        private uint localPlayerId;
+        private VoiceRangePlayerData localPlayer;
+        public override VoiceRangePlayerData LocalPlayer => localPlayer;
 
         private int defaultVoiceRangeIndex;
         private uint defaultShowInWorldMask;
@@ -58,8 +65,11 @@ namespace JanSharp
             return false;
         }
 
+        #region Initialization
+
         private void Start()
         {
+            localPlayerId = (uint)Networking.LocalPlayer.playerId;
             rangeDefsCount = rangeDefs.Length;
             if (rangeDefsCount > 32)
             {
@@ -69,6 +79,11 @@ namespace JanSharp
             if (defaultRangeDef == null)
             {
                 Debug.LogError($"[RPMenu] The default Voice Range Definition must not be null.", this);
+                return;
+            }
+            if (defaultRangeDef.permissionDef != null)
+            {
+                Debug.LogError($"[RPMenu] The default Voice Range Definition must not have an associated permission.", this);
                 return;
             }
             bool foundDefault = false;
@@ -117,6 +132,81 @@ namespace JanSharp
         {
             voiceRangePlayerDataIndex = playerDataManager.GetPlayerDataClassNameIndex<VoiceRangePlayerData>(nameof(VoiceRangePlayerData));
         }
+
+        [PlayerDataEvent(PlayerDataEventType.OnPostPlayerDataManagerInit)]
+        public void OnPostPlayerDataManagerInit()
+        {
+            FetchLocalPlayerData();
+        }
+
+        private void FetchLocalPlayerData()
+        {
+            localPlayer = (VoiceRangePlayerData)playerDataManager.GetCorePlayerDataForPlayerId(localPlayerId).customPlayerData[voiceRangePlayerDataIndex];
+        }
+
+        #endregion
+
+        #region InputActions
+
+        public override void SendSetVoiceRangeIndexIA(int voiceRangeIndex, VoiceRangePlayerData player)
+        {
+            if (!lockstep.IsInitialized)
+                return;
+            WriteVoiceRangePlayerDataRef(player);
+            lockstep.WriteSmallUInt((uint)voiceRangeIndex);
+            player.latencyHiddenUniqueIds.Add(lockstep.SendInputAction(setVoiceRangeIndexIAId), true);
+            player.latencyVoiceRangeIndex = voiceRangeIndex;
+            RaiseOnVoiceRangeIndexChangedInLatency(player);
+        }
+
+        [HideInInspector][SerializeField] private uint setVoiceRangeIndexIAId;
+        [LockstepInputAction(nameof(setVoiceRangeIndexIAId))]
+        public void OnSetVoiceRangeIndexIA()
+        {
+            VoiceRangePlayerData player = ReadVoiceRangePlayerDataRef();
+            if (player == null)
+                return;
+            int voiceRangeIndex = (int)lockstep.ReadSmallUInt();
+            VoiceRangeDefinition def = rangeDefs[voiceRangeIndex];
+            if (!def.PlayerHasPermission(player.core))
+            {
+                if (player.latencyHiddenUniqueIds.Count == 0)
+                    return;
+                player.latencyHiddenUniqueIds.Clear(); // Latency state has predicted incorrectly.
+                player.latencyVoiceRangeIndex = player.voiceRangeIndex;
+                RaiseOnVoiceRangeIndexChangedInLatency(player);
+                return;
+            }
+            player.voiceRangeIndex = voiceRangeIndex;
+            if (player.latencyHiddenUniqueIds.Remove(lockstep.SendingUniqueId))
+            {
+                RaiseOnVoiceRangeIndexChanged(player);
+                return;
+            }
+            player.latencyHiddenUniqueIds.Clear(); // Latency state may have predicted incorrectly.
+            player.latencyVoiceRangeIndex = voiceRangeIndex;
+            RaiseOnVoiceRangeIndexChangedInLatency(player);
+            RaiseOnVoiceRangeIndexChanged(player);
+        }
+
+        #endregion
+
+        #region Utils
+
+        public override VoiceRangePlayerData GetVoiceRangePlayerData(CorePlayerData core) => (VoiceRangePlayerData)core.customPlayerData[voiceRangePlayerDataIndex];
+
+        public override void WriteVoiceRangePlayerDataRef(VoiceRangePlayerData voiceRangePlayerData)
+        {
+            playerDataManager.WriteCorePlayerDataRef(voiceRangePlayerData == null ? null : voiceRangePlayerData.core);
+        }
+
+        public override VoiceRangePlayerData ReadVoiceRangePlayerDataRef()
+        {
+            CorePlayerData core = playerDataManager.ReadCorePlayerDataRef();
+            return core == null ? null : (VoiceRangePlayerData)core.customPlayerData[voiceRangePlayerDataIndex];
+        }
+
+        #endregion
 
         #region Serialization
 
@@ -174,7 +264,10 @@ namespace JanSharp
         public override string DeserializeGameState(bool isImport, uint importedDataVersion, LockstepGameStateOptionsData importOptions)
         {
             if (!isImport)
+            {
+                FetchLocalPlayerData();
                 return null;
+            }
             suspensionSw.Restart();
             if (!lockstep.IsContinuationFromPrevFrame && !BuildImportRemapAndMasks())
                 return null;
@@ -206,6 +299,50 @@ namespace JanSharp
             }
             suspendedIndexInArray = 0;
             return null;
+        }
+
+        #endregion
+
+        #region EventDispatcher
+
+        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onVoiceRangeIndexChangedInLatencyListeners;
+        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onVoiceRangeIndexChangedListeners;
+        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onLocalVoiceRangeIndexChangedInLatencyListeners;
+        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onLocalVoiceRangeIndexChangedListeners;
+
+        private VoiceRangePlayerData playerDataForEvent;
+        public override VoiceRangePlayerData PlayerDataForEvent => playerDataForEvent;
+
+        private void RaiseOnVoiceRangeIndexChangedInLatency(VoiceRangePlayerData playerDataForEvent)
+        {
+            this.playerDataForEvent = playerDataForEvent;
+            // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
+            JanSharp.CustomRaisedEvents.Raise(ref onVoiceRangeIndexChangedInLatencyListeners, nameof(VoiceRangeEventType.OnVoiceRangeIndexChangedInLatency));
+            this.playerDataForEvent = null; // To prevent misuse of the API.
+            if (playerDataForEvent.core.isLocal)
+                RaiseOnLocalVoiceRangeIndexChangedInLatency();
+        }
+
+        private void RaiseOnVoiceRangeIndexChanged(VoiceRangePlayerData playerDataForEvent)
+        {
+            this.playerDataForEvent = playerDataForEvent;
+            // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
+            JanSharp.CustomRaisedEvents.Raise(ref onVoiceRangeIndexChangedListeners, nameof(VoiceRangeEventType.OnVoiceRangeIndexChanged));
+            this.playerDataForEvent = null; // To prevent misuse of the API.
+            if (playerDataForEvent.core.isLocal)
+                RaiseOnLocalVoiceRangeIndexChanged();
+        }
+
+        private void RaiseOnLocalVoiceRangeIndexChangedInLatency()
+        {
+            // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
+            JanSharp.CustomRaisedEvents.Raise(ref onLocalVoiceRangeIndexChangedInLatencyListeners, nameof(VoiceRangeEventType.OnLocalVoiceRangeIndexChangedInLatency));
+        }
+
+        private void RaiseOnLocalVoiceRangeIndexChanged()
+        {
+            // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
+            JanSharp.CustomRaisedEvents.Raise(ref onLocalVoiceRangeIndexChangedListeners, nameof(VoiceRangeEventType.OnLocalVoiceRangeIndexChanged));
         }
 
         #endregion

@@ -10,6 +10,46 @@ namespace JanSharp
         Default = Pulse,
     }
 
+    public enum VoiceRangeEventType
+    {
+        /// <summary>
+        /// <para>Use <see cref="VoiceRangeManagerAPI.PlayerDataForEvent"/>.</para>
+        /// <para>Not game state safe.</para>
+        /// </summary>
+        OnVoiceRangeIndexChangedInLatency,
+        /// <summary>
+        /// <para>Use <see cref="VoiceRangeManagerAPI.PlayerDataForEvent"/>.</para>
+        /// <para>Game state safe.</para>
+        /// </summary>
+        OnVoiceRangeIndexChanged,
+        /// <summary>
+        /// <para>Not game state safe.</para>
+        /// </summary>
+        OnLocalVoiceRangeIndexChangedInLatency,
+        /// <summary>
+        /// <para>Game state safe.</para>
+        /// </summary>
+        OnLocalVoiceRangeIndexChanged,
+    }
+
+    [System.AttributeUsage(System.AttributeTargets.Method, Inherited = true, AllowMultiple = false)]
+    public sealed class VoiceRangeEventAttribute : CustomRaisedEventBaseAttribute
+    {
+        /// <summary>
+        /// <para>The method this attribute gets applied to must be public.</para>
+        /// <para>The name of the function this attribute is applied to must have the exact same name as the
+        /// name of the <paramref name="eventType"/>.</para>
+        /// <para>Event registration is performed at OnBuild, which is to say that scripts with these kinds of
+        /// event handlers must exist in the scene at build time, any runtime instantiated objects with these
+        /// scripts on them will not receive these events.</para>
+        /// <para>Disabled scripts still receive events.</para>
+        /// </summary>
+        /// <param name="eventType">The event to register this function as a listener to.</param>
+        public VoiceRangeEventAttribute(VoiceRangeEventType eventType)
+            : base((int)eventType)
+        { }
+    }
+
     [SingletonScript("2c883c84a21e7a786a9cb7778e7a00fb")] // Runtime/Prefabs/Managers/VoiceRangeManager.prefab
     public abstract class VoiceRangeManagerAPI : LockstepGameState
     {
@@ -28,5 +68,18 @@ namespace JanSharp
         /// <para>Game sate safe.</para>
         /// </summary>
         public abstract uint DefaultShowInHUDMask { get; }
+
+        public abstract VoiceRangeDefinition GetVoiceRangeDefinition(int index);
+        public abstract VoiceRangeDefinition GetVoiceRangeDefinition(string internalName);
+
+        public abstract VoiceRangePlayerData LocalPlayer { get; }
+
+        public abstract void SendSetVoiceRangeIndexIA(int voiceRangeIndex, VoiceRangePlayerData player);
+
+        public abstract VoiceRangePlayerData GetVoiceRangePlayerData(CorePlayerData core);
+        public abstract void WriteVoiceRangePlayerDataRef(VoiceRangePlayerData voiceRangePlayerData);
+        public abstract VoiceRangePlayerData ReadVoiceRangePlayerDataRef();
+
+        public abstract VoiceRangePlayerData PlayerDataForEvent { get; }
     }
 }

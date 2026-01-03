@@ -52,3 +52,4 @@
   - deleting a permission group could lock you out
   - deleting the last player data which had the necessary permissions could lock you out
   - changing the last player data's group could lock you out
+- [ ] think about combining the edit permissions permission and the change permission group permission

@@ -55,6 +55,8 @@ MonoBehaviour:
     PrefabModifications: []
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 5533611684436844420}
+  permissionManager: {fileID: 0}
+  voiceRangeManager: {fileID: 3941206064067425395}
   internalName: whisper
   color: {r: 1, g: 0, b: 1, a: 1}
   gain: 15
@@ -64,6 +66,8 @@ MonoBehaviour:
   lowPass: 0
   showInWorldByDefault: 1
   showInHUDByDefault: 1
+  permissionAsset: 2915de94df6292d348245398f97a82c2
+  permissionDef: {fileID: 0}
 --- !u!114 &5533611684436844420
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -144,6 +148,8 @@ MonoBehaviour:
     PrefabModifications: []
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 614478233638521354}
+  permissionManager: {fileID: 0}
+  voiceRangeManager: {fileID: 3941206064067425395}
   internalName: broadcast
   color: {r: 0, g: 0, b: 1, a: 1}
   gain: 15
@@ -153,6 +159,8 @@ MonoBehaviour:
   lowPass: 0
   showInWorldByDefault: 1
   showInHUDByDefault: 1
+  permissionAsset: f35ccf60d3f3a6b308cd393c88f5e842
+  permissionDef: {fileID: 0}
 --- !u!114 &614478233638521354
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -233,6 +241,8 @@ MonoBehaviour:
     PrefabModifications: []
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 75168312399802126}
+  permissionManager: {fileID: 0}
+  voiceRangeManager: {fileID: 3941206064067425395}
   internalName: quiet
   color: {r: 0, g: 1, b: 0, a: 1}
   gain: 15
@@ -242,6 +252,8 @@ MonoBehaviour:
   lowPass: 0
   showInWorldByDefault: 1
   showInHUDByDefault: 1
+  permissionAsset: 7d3642867ccc7f5f9ba9dca7b49c9991
+  permissionDef: {fileID: 0}
 --- !u!114 &75168312399802126
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -336,6 +348,13 @@ MonoBehaviour:
   - {fileID: 5845099747246033008}
   - {fileID: 6973282774079798060}
   defaultRangeDef: {fileID: 6971705794774712595}
+  setVoiceRangeIndexIAId: 0
+  onVoiceRangeIndexChangedInLatencyListeners: []
+  onVoiceRangeIndexChangedListeners: []
+  onLocalVoiceRangeIndexChangedInLatencyListeners:
+  - {fileID: 0}
+  - {fileID: 0}
+  onLocalVoiceRangeIndexChangedListeners: []
 --- !u!114 &2150805941460345862
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -416,6 +435,8 @@ MonoBehaviour:
     PrefabModifications: []
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 629364193303039581}
+  permissionManager: {fileID: 0}
+  voiceRangeManager: {fileID: 3941206064067425395}
   internalName: yell
   color: {r: 1, g: 0, b: 0, a: 1}
   gain: 15
@@ -425,6 +446,8 @@ MonoBehaviour:
   lowPass: 0
   showInWorldByDefault: 1
   showInHUDByDefault: 1
+  permissionAsset: 350329537d97ddbf3a110599dc93c8d8
+  permissionDef: {fileID: 0}
 --- !u!114 &629364193303039581
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -505,6 +528,8 @@ MonoBehaviour:
     PrefabModifications: []
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 7010081623667226123}
+  permissionManager: {fileID: 0}
+  voiceRangeManager: {fileID: 3941206064067425395}
   internalName: talk
   color: {r: 1, g: 1, b: 0, a: 1}
   gain: 15
@@ -514,6 +539,8 @@ MonoBehaviour:
   lowPass: 0
   showInWorldByDefault: 0
   showInHUDByDefault: 0
+  permissionAsset: 
+  permissionDef: {fileID: 0}
 --- !u!114 &7010081623667226123
 MonoBehaviour:
   m_ObjectHideFlags: 0

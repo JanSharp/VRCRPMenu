@@ -17,7 +17,7 @@ namespace JanSharp
 
         #region LatencyState
         [System.NonSerialized] public DataDictionary latencyHiddenUniqueIds = new DataDictionary();
-        [System.NonSerialized] public int latencyCurrentRangeIndex;
+        [System.NonSerialized] public int latencyVoiceRangeIndex;
         [System.NonSerialized] public uint latencyShowInWorldMask;
         [System.NonSerialized] public VoiceRangeVisualizationType latencyWorldVisualType = VoiceRangeVisualizationType.Default;
         [System.NonSerialized] public uint latencyShowInHUDMask;
@@ -25,7 +25,7 @@ namespace JanSharp
         #endregion
 
         #region GameState
-        [System.NonSerialized] public int currentRangeIndex;
+        [System.NonSerialized] public int voiceRangeIndex;
         [System.NonSerialized] public uint showInWorldMask;
         [System.NonSerialized] public VoiceRangeVisualizationType worldVisualType = VoiceRangeVisualizationType.Default;
         [System.NonSerialized] public uint showInHUDMask;
@@ -34,8 +34,8 @@ namespace JanSharp
 
         public override void OnPlayerDataInit(bool isAboutToBeImported)
         {
-            currentRangeIndex = voiceRangeManager.DefaultVoiceRangeIndex;
-            latencyCurrentRangeIndex = currentRangeIndex;
+            voiceRangeIndex = voiceRangeManager.DefaultVoiceRangeIndex;
+            latencyVoiceRangeIndex = voiceRangeIndex;
             if (isAboutToBeImported)
                 return;
             showInWorldMask = voiceRangeManager.DefaultShowInWorldMask;
@@ -55,7 +55,7 @@ namespace JanSharp
         public override void Serialize(bool isExport)
         {
             if (!isExport)
-                lockstep.WriteSmallUInt((uint)currentRangeIndex);
+                lockstep.WriteSmallUInt((uint)voiceRangeIndex);
             lockstep.WriteSmallUInt(showInWorldMask);
             lockstep.WriteByte((byte)worldVisualType);
             lockstep.WriteSmallUInt(showInHUDMask);
@@ -65,7 +65,7 @@ namespace JanSharp
         public override void Deserialize(bool isImport, uint importedDataVersion)
         {
             if (!isImport)
-                currentRangeIndex = (int)lockstep.ReadSmallUInt();
+                voiceRangeIndex = (int)lockstep.ReadSmallUInt();
             else
                 latencyHiddenUniqueIds.Clear(); // Empty when not importing anyway, no need to clear there.
             showInWorldMask = lockstep.ReadSmallUInt();

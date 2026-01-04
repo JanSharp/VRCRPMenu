@@ -24,15 +24,15 @@ namespace JanSharp
         private Color requesterRegularBaseColor;
         private Color requesterUrgentBaseColor;
         private Color requesterCurrentBaseColor;
-        private Color requesterCurrentBrightColor;
+        private Color requesterCurrentPulseColor;
         private Image requesterCurrentImage;
         private bool requesterHUDIsShown = false;
         private GMRequest prevActiveLocalRequest = null;
         private bool requesterIsInFadeOutAnimation = false;
         private float elapsedTimeInAnimation;
         private const float RequesterFadeOutTotalTime = 3f;
-        private const float RequesterFadeOutBlinkStartTime = 2f;
-        private const float RequesterFadeOutBlinksPerSecondWithTAU = 4f * TAU;
+        private const float RequesterFadeOutPulseStartTime = 2f;
+        private const float RequesterFadeOutPulsesPerSecondWithTAU = 3.5f * TAU;
         private const float TAU = Mathf.PI * 2f;
         [Space]
         public Transform responderHUDRoot;
@@ -158,8 +158,8 @@ namespace JanSharp
             requesterCurrentBaseColor = isRegular
                 ? requesterRegularBaseColor
                 : requesterUrgentBaseColor;
-            requesterCurrentBrightColor = requesterCurrentBaseColor;
-            requesterCurrentBrightColor.a = 1f;
+            requesterCurrentPulseColor = requesterCurrentBaseColor;
+            requesterCurrentPulseColor.a *= 0.1f;
             elapsedTimeInAnimation = 0f;
             updateManager.Register(this);
         }
@@ -185,12 +185,12 @@ namespace JanSharp
                 ShowHideRequesterHUD(false);
                 return;
             }
-            if (elapsedTimeInAnimation < RequesterFadeOutBlinkStartTime)
+            if (elapsedTimeInAnimation < RequesterFadeOutPulseStartTime)
                 return;
-            float timeInBlink = elapsedTimeInAnimation - RequesterFadeOutBlinkStartTime;
-            float t = (Mathf.Cos(timeInBlink * RequesterFadeOutBlinksPerSecondWithTAU) + 1f) / 2f;
+            float timeInPulses = elapsedTimeInAnimation - RequesterFadeOutPulseStartTime;
+            float t = (Mathf.Cos(timeInPulses * RequesterFadeOutPulsesPerSecondWithTAU) + 1f) / 2f;
             // t is 1 when timeInAnimation is 0.
-            requesterCurrentImage.color = Color.Lerp(requesterCurrentBrightColor, requesterCurrentBaseColor, t);
+            requesterCurrentImage.color = Color.Lerp(requesterCurrentPulseColor, requesterCurrentBaseColor, t);
         }
 
         private void UpdateResponderHUD()

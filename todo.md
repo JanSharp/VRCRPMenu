@@ -55,7 +55,7 @@
 - [ ] think about combining the edit permissions permission and the change permission group permission
 - [x] voice range settings UI
 - [x] voice range HUD
-- [ ] voice range in world indicator
+- [x] voice range in world indicator
 - [ ] voice range AudioManager integration
 - [ ] which ones of these layout elements actually need layout priority 2? something with the input fields afaik
 - [x] change GMRequestsHUD to use Time.deltaTime instead

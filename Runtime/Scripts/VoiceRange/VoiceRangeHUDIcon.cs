@@ -30,11 +30,11 @@ namespace JanSharp
         private int customUpdateInternalIndex;
 
         private const float TAU = Mathf.PI * 2f;
-        private const float PulsesPerSecondWithTAU = 0.25f * TAU;
-        private const float BlinkInterval = 4f;
+        public const float PulsesPerSecondWithTAU = 0.25f * TAU;
+        public const float BlinkInterval = 4f;
         private VoiceRangeVisualizationType visualType = VoiceRangeVisualizationType.Static;
 
-        private const float FadeDuration = 0.4f;
+        public const float FadeDuration = 0.4f;
         private float fadeElapsedTime = 0f;
         private float blinkingElapsedTime = 0f;
         private VoiceRangeHUDIconState iconState = VoiceRangeHUDIconState.Off;

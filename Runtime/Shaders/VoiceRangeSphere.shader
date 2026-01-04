@@ -13,8 +13,7 @@ Shader "RP Menu/Voice Range Sphere"
     Properties
     {
         [Header(Base)]
-        _Color("Min Color", Color) = (1,1,1,1)
-        _MaxColor("Max Color", Color) = (1,1,1,1)
+        _Color("Color", Color) = (1,1,1,1)
 
         _InnerRadius("Inner Radius", Float) = 4.95
         _MiddleRadius("Middle Radius", Float) = 5
@@ -32,7 +31,7 @@ Shader "RP Menu/Voice Range Sphere"
     {
         Tags
         {
-            "Queue" = "Transparent-216"
+            "Queue" = "Geometry+13"
             "RenderType" = "Custom"
             "ForceNoShadowCasting"="True"
             "IgnoreProjector"="True"
@@ -64,7 +63,6 @@ Shader "RP Menu/Voice Range Sphere"
             #include "Lighting.cginc"
 
             float4 _Color;
-            float4 _MaxColor;
             float _InnerRadius;
             float _MiddleRadius;
             float _OuterRadius;
@@ -184,7 +182,7 @@ Shader "RP Menu/Voice Range Sphere"
                     opacity = 1 - sin(opacity * UNITY_PI);
                     opacity = pow(opacity, 4); // Should compile into just 2 multiplications.
                 }
-                float4 color = lerp(_Color, _MaxColor, (_SinTime.w + 1) / 2);
+                float4 color = _Color;
                 color.w *= opacity;
                 return color;
             }

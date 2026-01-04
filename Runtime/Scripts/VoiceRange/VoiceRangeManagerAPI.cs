@@ -1,5 +1,3 @@
-using UdonSharp;
-
 namespace JanSharp
 {
     public enum VoiceRangeVisualizationType : byte
@@ -7,7 +5,6 @@ namespace JanSharp
         Static = 0,
         Pulse = 1,
         Blink = 2,
-        Default = Pulse,
     }
 
     public enum VoiceRangeEventType
@@ -105,7 +102,17 @@ namespace JanSharp
         /// <para>Initialized in <c>Start</c>, usable any time after that.</para>
         /// <para>Game sate safe.</para>
         /// </summary>
+        public abstract VoiceRangeVisualizationType DefaultWorldVisualType { get; }
+        /// <summary>
+        /// <para>Initialized in <c>Start</c>, usable any time after that.</para>
+        /// <para>Game sate safe.</para>
+        /// </summary>
         public abstract uint DefaultShowInHUDMask { get; }
+        /// <summary>
+        /// <para>Initialized in <c>Start</c>, usable any time after that.</para>
+        /// <para>Game sate safe.</para>
+        /// </summary>
+        public abstract VoiceRangeVisualizationType DefaultHUDVisualType { get; }
 
         public abstract int VoiceRangeDefinitionCount { get; }
         public abstract VoiceRangeDefinition GetVoiceRangeDefinition(int index);

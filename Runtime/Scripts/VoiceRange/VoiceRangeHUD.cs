@@ -84,7 +84,7 @@ namespace JanSharp
                 return;
             VoiceRangeVisualizationType visualType = voiceRangeHUDSettingsPermissionDef.valueForLocalPlayer
                 ? localPlayer.latencyHUDVisualType
-                : VoiceRangeVisualizationType.Default;
+                : voiceRangeManager.DefaultHUDVisualType;
             switch (visualType)
             {
                 case VoiceRangeVisualizationType.Pulse:

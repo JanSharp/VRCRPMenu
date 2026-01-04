@@ -19,17 +19,17 @@ namespace JanSharp
         [System.NonSerialized] public DataDictionary latencyHiddenUniqueIds = new DataDictionary();
         [System.NonSerialized] public int latencyVoiceRangeIndex;
         [System.NonSerialized] public uint latencyShowInWorldMask;
-        [System.NonSerialized] public VoiceRangeVisualizationType latencyWorldVisualType = VoiceRangeVisualizationType.Default;
+        [System.NonSerialized] public VoiceRangeVisualizationType latencyWorldVisualType;
         [System.NonSerialized] public uint latencyShowInHUDMask;
-        [System.NonSerialized] public VoiceRangeVisualizationType latencyHUDVisualType = VoiceRangeVisualizationType.Default;
+        [System.NonSerialized] public VoiceRangeVisualizationType latencyHUDVisualType;
         #endregion
 
         #region GameState
         [System.NonSerialized] public int voiceRangeIndex;
         [System.NonSerialized] public uint showInWorldMask;
-        [System.NonSerialized] public VoiceRangeVisualizationType worldVisualType = VoiceRangeVisualizationType.Default;
+        [System.NonSerialized] public VoiceRangeVisualizationType worldVisualType;
         [System.NonSerialized] public uint showInHUDMask;
-        [System.NonSerialized] public VoiceRangeVisualizationType hudVisualType = VoiceRangeVisualizationType.Default;
+        [System.NonSerialized] public VoiceRangeVisualizationType hudVisualType;
         #endregion
 
         public override void OnPlayerDataInit(bool isAboutToBeImported)
@@ -39,17 +39,21 @@ namespace JanSharp
             if (isAboutToBeImported)
                 return;
             showInWorldMask = voiceRangeManager.DefaultShowInWorldMask;
+            worldVisualType = voiceRangeManager.DefaultWorldVisualType;
             showInHUDMask = voiceRangeManager.DefaultShowInHUDMask;
+            hudVisualType = voiceRangeManager.DefaultHUDVisualType;
             latencyShowInWorldMask = showInWorldMask;
+            latencyWorldVisualType = worldVisualType;
             latencyShowInHUDMask = showInHUDMask;
+            latencyHUDVisualType = hudVisualType;
         }
 
         public override bool PersistPlayerDataWhileOffline()
         {
             return showInWorldMask != voiceRangeManager.DefaultShowInWorldMask
-                || worldVisualType != VoiceRangeVisualizationType.Default
+                || worldVisualType != voiceRangeManager.DefaultWorldVisualType
                 || showInHUDMask != voiceRangeManager.DefaultShowInHUDMask
-                || hudVisualType != VoiceRangeVisualizationType.Default;
+                || hudVisualType != voiceRangeManager.DefaultHUDVisualType;
         }
 
         public override void Serialize(bool isExport)

@@ -24,7 +24,7 @@ namespace JanSharp.Internal
 
         [Tooltip("Maximum 32 definitions.")]
         [SerializeField] private VoiceRangeDefinition[] rangeDefs;
-        [SerializeField] public VoiceRangeDefinition defaultRangeDef;
+        [SerializeField] private VoiceRangeDefinition defaultRangeDef;
         private DataDictionary rangeDefsByInternalName = new DataDictionary();
         private int rangeDefsCount;
         public override int VoiceRangeDefinitionCount => rangeDefsCount;
@@ -38,10 +38,14 @@ namespace JanSharp.Internal
 
         private int defaultVoiceRangeIndex;
         private uint defaultShowInWorldMask;
+        [SerializeField] private VoiceRangeVisualizationType defaultWorldVisualType;
         private uint defaultShowInHUDMask;
+        [SerializeField] private VoiceRangeVisualizationType defaultHUDVisualType;
         public override int DefaultVoiceRangeIndex => defaultVoiceRangeIndex;
         public override uint DefaultShowInWorldMask => defaultShowInWorldMask;
+        public override VoiceRangeVisualizationType DefaultWorldVisualType => defaultWorldVisualType;
         public override uint DefaultShowInHUDMask => defaultShowInHUDMask;
+        public override VoiceRangeVisualizationType DefaultHUDVisualType => defaultHUDVisualType;
 
         #endregion
 

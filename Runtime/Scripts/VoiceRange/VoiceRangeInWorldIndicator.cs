@@ -221,8 +221,9 @@ namespace JanSharp
             if (fadeElapsedTime < VoiceRangeHUDIcon.FadeDuration)
             {
                 float t = fadeElapsedTime / VoiceRangeHUDIcon.FadeDuration;
-                indicatorMaterial.color = Color.Lerp(fadeSourceColor, fadeDestinationColor, t);
-                SetShownRadius(Mathf.Lerp(fadeSourceRadius, fadeDestinationRadius, t));
+                t = (Mathf.Cos(t * Mathf.PI) + 1f) / 2f; // t ends up going from 1 to 0.
+                indicatorMaterial.color = Color.Lerp(fadeDestinationColor, fadeSourceColor, t);
+                SetShownRadius(Mathf.Lerp(fadeDestinationRadius, fadeSourceRadius, t));
             }
             else
             {

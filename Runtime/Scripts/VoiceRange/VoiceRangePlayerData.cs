@@ -21,7 +21,7 @@ namespace JanSharp
         [System.NonSerialized] public uint latencyShowInWorldMask;
         [System.NonSerialized] public VoiceRangeVisualizationType latencyWorldVisualType = VoiceRangeVisualizationType.Default;
         [System.NonSerialized] public uint latencyShowInHUDMask;
-        [System.NonSerialized] public VoiceRangeVisualizationType latencyHudVisualType = VoiceRangeVisualizationType.Default;
+        [System.NonSerialized] public VoiceRangeVisualizationType latencyHUDVisualType = VoiceRangeVisualizationType.Default;
         #endregion
 
         #region GameState
@@ -75,7 +75,7 @@ namespace JanSharp
             latencyShowInWorldMask = showInWorldMask;
             latencyWorldVisualType = worldVisualType;
             latencyShowInHUDMask = showInHUDMask;
-            latencyHudVisualType = hudVisualType;
+            latencyHUDVisualType = hudVisualType;
         }
     }
 }

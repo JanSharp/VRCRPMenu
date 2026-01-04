@@ -51,7 +51,7 @@ namespace JanSharp
                 return;
             VoiceRangePlayerData localPlayer = voiceRangeManager.LocalPlayer;
             if (localPlayer.latencyVoiceRangeIndex == index)
-                voiceRangeManager.SendSetVoiceRangeIndexIA(voiceRangeManager.DefaultVoiceRangeIndex, localPlayer);
+                voiceRangeManager.SendSetVoiceRangeIndexIA(localPlayer, voiceRangeManager.DefaultVoiceRangeIndex);
         }
     }
 }

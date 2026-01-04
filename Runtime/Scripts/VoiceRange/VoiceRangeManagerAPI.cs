@@ -27,9 +27,45 @@ namespace JanSharp
         /// </summary>
         OnLocalVoiceRangeIndexChangedInLatency,
         /// <summary>
-        /// <para>Game state safe.</para>
+        /// <para>Not game state safe.</para>
         /// </summary>
         OnLocalVoiceRangeIndexChanged,
+        /// <summary>
+        /// <para>Use <see cref="VoiceRangeManagerAPI.PlayerDataForEvent"/>.</para>
+        /// <para>Not game state safe.</para>
+        /// </summary>
+        OnInWorldSettingsChangedInLatency,
+        /// <summary>
+        /// <para>Use <see cref="VoiceRangeManagerAPI.PlayerDataForEvent"/>.</para>
+        /// <para>Game state safe.</para>
+        /// </summary>
+        OnInWorldSettingsChanged,
+        /// <summary>
+        /// <para>Not game state safe.</para>
+        /// </summary>
+        OnLocalInWorldSettingsChangedInLatency,
+        /// <summary>
+        /// <para>Not game state safe.</para>
+        /// </summary>
+        OnLocalInWorldSettingsChanged,
+        /// <summary>
+        /// <para>Use <see cref="VoiceRangeManagerAPI.PlayerDataForEvent"/>.</para>
+        /// <para>Not game state safe.</para>
+        /// </summary>
+        OnInHUDSettingsChangedInLatency,
+        /// <summary>
+        /// <para>Use <see cref="VoiceRangeManagerAPI.PlayerDataForEvent"/>.</para>
+        /// <para>Game state safe.</para>
+        /// </summary>
+        OnInHUDSettingsChanged,
+        /// <summary>
+        /// <para>Not game state safe.</para>
+        /// </summary>
+        OnLocalInHUDSettingsChangedInLatency,
+        /// <summary>
+        /// <para>Not game state safe.</para>
+        /// </summary>
+        OnLocalInHUDSettingsChanged,
     }
 
     [System.AttributeUsage(System.AttributeTargets.Method, Inherited = true, AllowMultiple = false)]
@@ -76,7 +112,9 @@ namespace JanSharp
 
         public abstract VoiceRangePlayerData LocalPlayer { get; }
 
-        public abstract void SendSetVoiceRangeIndexIA(int voiceRangeIndex, VoiceRangePlayerData player);
+        public abstract void SendSetVoiceRangeIndexIA(VoiceRangePlayerData player, int voiceRangeIndex);
+        public abstract void SendSetInWorldSettingsIA(VoiceRangePlayerData player, uint showMask, VoiceRangeVisualizationType visualType);
+        public abstract void SendSetInHUDSettingsIA(VoiceRangePlayerData player, uint showMask, VoiceRangeVisualizationType visualType);
 
         public abstract VoiceRangePlayerData GetVoiceRangePlayerData(CorePlayerData core);
         public abstract void WriteVoiceRangePlayerDataRef(VoiceRangePlayerData voiceRangePlayerData);

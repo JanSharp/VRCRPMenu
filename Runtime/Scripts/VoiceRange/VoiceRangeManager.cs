@@ -157,7 +157,7 @@ namespace JanSharp.Internal
 
         #region InputActions
 
-        public override void SendSetVoiceRangeIndexIA(int voiceRangeIndex, VoiceRangePlayerData player)
+        public override void SendSetVoiceRangeIndexIA(VoiceRangePlayerData player, int voiceRangeIndex)
         {
             if (!lockstep.IsInitialized)
                 return;
@@ -196,6 +196,74 @@ namespace JanSharp.Internal
             player.latencyVoiceRangeIndex = voiceRangeIndex;
             RaiseOnVoiceRangeIndexChangedInLatency(player);
             RaiseOnVoiceRangeIndexChanged(player);
+        }
+
+        public override void SendSetInWorldSettingsIA(VoiceRangePlayerData player, uint showMask, VoiceRangeVisualizationType visualType)
+        {
+            if (!lockstep.IsInitialized)
+                return;
+            WriteVoiceRangePlayerDataRef(player);
+            lockstep.WriteSmallUInt(showMask);
+            lockstep.WriteByte((byte)visualType);
+            player.latencyHiddenUniqueIds.Add(lockstep.SendInputAction(setInWorldSettingsIAId), true);
+            player.latencyShowInWorldMask = showMask;
+            player.latencyWorldVisualType = visualType;
+            RaiseOnInWorldSettingsChangedInLatency(player);
+        }
+
+        [HideInInspector][SerializeField] private uint setInWorldSettingsIAId;
+        [LockstepInputAction(nameof(setInWorldSettingsIAId))]
+        public void OnSetInWorldSettingsIA()
+        {
+            VoiceRangePlayerData player = ReadVoiceRangePlayerDataRef();
+            if (player == null)
+                return;
+            player.showInWorldMask = lockstep.ReadSmallUInt();
+            player.worldVisualType = (VoiceRangeVisualizationType)lockstep.ReadByte();
+            if (player.latencyHiddenUniqueIds.Remove(lockstep.SendingUniqueId))
+            {
+                RaiseOnInWorldSettingsChanged(player);
+                return;
+            }
+            player.latencyHiddenUniqueIds.Clear(); // Latency state may have predicted incorrectly.
+            player.latencyShowInWorldMask = player.showInWorldMask;
+            player.latencyWorldVisualType = player.worldVisualType;
+            RaiseOnInWorldSettingsChangedInLatency(player);
+            RaiseOnInWorldSettingsChanged(player);
+        }
+
+        public override void SendSetInHUDSettingsIA(VoiceRangePlayerData player, uint showMask, VoiceRangeVisualizationType visualType)
+        {
+            if (!lockstep.IsInitialized)
+                return;
+            WriteVoiceRangePlayerDataRef(player);
+            lockstep.WriteSmallUInt(showMask);
+            lockstep.WriteByte((byte)visualType);
+            player.latencyHiddenUniqueIds.Add(lockstep.SendInputAction(setInHUDSettingsIAId), true);
+            player.latencyShowInHUDMask = showMask;
+            player.latencyHUDVisualType = visualType;
+            RaiseOnInHUDSettingsChangedInLatency(player);
+        }
+
+        [HideInInspector][SerializeField] private uint setInHUDSettingsIAId;
+        [LockstepInputAction(nameof(setInHUDSettingsIAId))]
+        public void OnSetInHUDSettingsIA()
+        {
+            VoiceRangePlayerData player = ReadVoiceRangePlayerDataRef();
+            if (player == null)
+                return;
+            player.showInHUDMask = lockstep.ReadSmallUInt();
+            player.hudVisualType = (VoiceRangeVisualizationType)lockstep.ReadByte();
+            if (player.latencyHiddenUniqueIds.Remove(lockstep.SendingUniqueId))
+            {
+                RaiseOnInHUDSettingsChanged(player);
+                return;
+            }
+            player.latencyHiddenUniqueIds.Clear(); // Latency state may have predicted incorrectly.
+            player.latencyShowInHUDMask = player.showInHUDMask;
+            player.latencyHUDVisualType = player.hudVisualType;
+            RaiseOnInHUDSettingsChangedInLatency(player);
+            RaiseOnInHUDSettingsChanged(player);
         }
 
         #endregion
@@ -318,6 +386,14 @@ namespace JanSharp.Internal
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onVoiceRangeIndexChangedListeners;
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onLocalVoiceRangeIndexChangedInLatencyListeners;
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onLocalVoiceRangeIndexChangedListeners;
+        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onInWorldSettingsChangedInLatencyListeners;
+        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onInWorldSettingsChangedListeners;
+        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onLocalInWorldSettingsChangedInLatencyListeners;
+        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onLocalInWorldSettingsChangedListeners;
+        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onInHUDSettingsChangedInLatencyListeners;
+        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onInHUDSettingsChangedListeners;
+        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onLocalInHUDSettingsChangedInLatencyListeners;
+        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onLocalInHUDSettingsChangedListeners;
 
         private VoiceRangePlayerData playerDataForEvent;
         public override VoiceRangePlayerData PlayerDataForEvent => playerDataForEvent;
@@ -352,6 +428,70 @@ namespace JanSharp.Internal
         {
             // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
             JanSharp.CustomRaisedEvents.Raise(ref onLocalVoiceRangeIndexChangedListeners, nameof(VoiceRangeEventType.OnLocalVoiceRangeIndexChanged));
+        }
+
+        private void RaiseOnInWorldSettingsChangedInLatency(VoiceRangePlayerData playerDataForEvent)
+        {
+            this.playerDataForEvent = playerDataForEvent;
+            // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
+            JanSharp.CustomRaisedEvents.Raise(ref onInWorldSettingsChangedInLatencyListeners, nameof(VoiceRangeEventType.OnInWorldSettingsChangedInLatency));
+            this.playerDataForEvent = null; // To prevent misuse of the API.
+            if (playerDataForEvent.core.isLocal)
+                RaiseOnLocalInWorldSettingsChangedInLatency();
+        }
+
+        private void RaiseOnInWorldSettingsChanged(VoiceRangePlayerData playerDataForEvent)
+        {
+            this.playerDataForEvent = playerDataForEvent;
+            // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
+            JanSharp.CustomRaisedEvents.Raise(ref onInWorldSettingsChangedListeners, nameof(VoiceRangeEventType.OnInWorldSettingsChanged));
+            this.playerDataForEvent = null; // To prevent misuse of the API.
+            if (playerDataForEvent.core.isLocal)
+                RaiseOnLocalInWorldSettingsChanged();
+        }
+
+        private void RaiseOnLocalInWorldSettingsChangedInLatency()
+        {
+            // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
+            JanSharp.CustomRaisedEvents.Raise(ref onLocalInWorldSettingsChangedInLatencyListeners, nameof(VoiceRangeEventType.OnLocalInWorldSettingsChangedInLatency));
+        }
+
+        private void RaiseOnLocalInWorldSettingsChanged()
+        {
+            // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
+            JanSharp.CustomRaisedEvents.Raise(ref onLocalInWorldSettingsChangedListeners, nameof(VoiceRangeEventType.OnLocalInWorldSettingsChanged));
+        }
+
+        private void RaiseOnInHUDSettingsChangedInLatency(VoiceRangePlayerData playerDataForEvent)
+        {
+            this.playerDataForEvent = playerDataForEvent;
+            // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
+            JanSharp.CustomRaisedEvents.Raise(ref onInHUDSettingsChangedInLatencyListeners, nameof(VoiceRangeEventType.OnInHUDSettingsChangedInLatency));
+            this.playerDataForEvent = null; // To prevent misuse of the API.
+            if (playerDataForEvent.core.isLocal)
+                RaiseOnLocalInHUDSettingsChangedInLatency();
+        }
+
+        private void RaiseOnInHUDSettingsChanged(VoiceRangePlayerData playerDataForEvent)
+        {
+            this.playerDataForEvent = playerDataForEvent;
+            // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
+            JanSharp.CustomRaisedEvents.Raise(ref onInHUDSettingsChangedListeners, nameof(VoiceRangeEventType.OnInHUDSettingsChanged));
+            this.playerDataForEvent = null; // To prevent misuse of the API.
+            if (playerDataForEvent.core.isLocal)
+                RaiseOnLocalInHUDSettingsChanged();
+        }
+
+        private void RaiseOnLocalInHUDSettingsChangedInLatency()
+        {
+            // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
+            JanSharp.CustomRaisedEvents.Raise(ref onLocalInHUDSettingsChangedInLatencyListeners, nameof(VoiceRangeEventType.OnLocalInHUDSettingsChangedInLatency));
+        }
+
+        private void RaiseOnLocalInHUDSettingsChanged()
+        {
+            // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
+            JanSharp.CustomRaisedEvents.Raise(ref onLocalInHUDSettingsChangedListeners, nameof(VoiceRangeEventType.OnLocalInHUDSettingsChanged));
         }
 
         #endregion

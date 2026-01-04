@@ -28,7 +28,7 @@ namespace JanSharp
             int voiceRangeIndex = voiceRangeManager.GetVoiceRangeDefinition(toggle.voiceRangeInternalName).index;
             VoiceRangePlayerData localPlayer = voiceRangeManager.LocalPlayer;
             if (localPlayer.latencyVoiceRangeIndex != voiceRangeIndex)
-                voiceRangeManager.SendSetVoiceRangeIndexIA(voiceRangeIndex, localPlayer);
+                voiceRangeManager.SendSetVoiceRangeIndexIA(localPlayer, voiceRangeIndex);
         }
 
         [VoiceRangeEvent(VoiceRangeEventType.OnLocalVoiceRangeIndexChangedInLatency)]

@@ -27,6 +27,7 @@ namespace JanSharp.Internal
         [SerializeField] public VoiceRangeDefinition defaultRangeDef;
         private DataDictionary rangeDefsByInternalName = new DataDictionary();
         private int rangeDefsCount;
+        public override int VoiceRangeDefinitionCount => rangeDefsCount;
         public override VoiceRangeDefinition GetVoiceRangeDefinition(int index) => rangeDefs[index];
         public override VoiceRangeDefinition GetVoiceRangeDefinition(string internalName) => (VoiceRangeDefinition)rangeDefsByInternalName[internalName].Reference;
 

@@ -54,7 +54,9 @@
   - changing the last player data's group could lock you out
 - [ ] think about combining the edit permissions permission and the change permission group permission
 - [x] voice range settings UI
-- [ ] voice range HUD
+- [x] voice range HUD
 - [ ] voice range in world indicator
 - [ ] voice range AudioManager integration
 - [ ] which ones of these layout elements actually need layout priority 2? something with the input fields afaik
+- [ ] change GMRequestsHUD to use Time.deltaTime instead
+- [ ] make default visualization type for hud and in world defined through inspector

@@ -107,6 +107,7 @@ namespace JanSharp
         /// </summary>
         public abstract uint DefaultShowInHUDMask { get; }
 
+        public abstract int VoiceRangeDefinitionCount { get; }
         public abstract VoiceRangeDefinition GetVoiceRangeDefinition(int index);
         public abstract VoiceRangeDefinition GetVoiceRangeDefinition(string internalName);
 

@@ -39,9 +39,5 @@ namespace JanSharp
 
         [LockstepEvent(LockstepEventType.OnClientBeginCatchUp)]
         public void OnClientBeginCatchUp() => MakeTogglesMatchLatencyState();
-
-        // TODO: This might not be needed, depends on how permission importing ends up affecting this.
-        [LockstepEvent(LockstepEventType.OnImportFinishingUp)]
-        public void OnImportFinishingUp() => MakeTogglesMatchLatencyState();
     }
 }

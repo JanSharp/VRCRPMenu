@@ -1,59 +1,32 @@
-﻿// SkyProbe Fog by Silent
+﻿// Based off SkyProbe Fog by Silent licensed under MIT, see LICENSE_THIRD_PARTY.txt.
+// git history has been kept from Silent's repository (make sure to follow renames).
+
+// SkyProbe Fog by Silent
 // version 3
 
 // Based off Distance Fade Cube Volume
 // by Neitri, free of charge, free to redistribute
 // from https://github.com/netri/Neitri-Unity-Shaders
 
-Shader "Silent/SkyProbe Fog (Height)"
+Shader "RP Menu/Voice Range Sphere"
 {
     Properties
     {
         [Header(Base)]
-        _Color("Color Tint", Color) = (1,1,1,1)
-        [Space]
-        [ToggleUI]_UseDepthColours("Use Near/Mid/Far Colours", Float) = 0 
-        _Color1("Near Color Tint", Color) = (1,1,1,1)
-        _Color1Start("Near Start", Float) = 0
-        _Color2("Mid Color Tint", Color) = (0.5,0.5,0.5,1)
-        _Color2Start("Mid Start", Float) = 500
-        _Color3("Far Color Tint", Color) = (0,0,0,1)
-        _Color3Start("Far Start", Float) = 1000
+        _Color("Min Color", Color) = (1,1,1,1)
+        _MaxColor("Max Color", Color) = (1,1,1,1)
 
-        [Header(Probe Settings)]
-        [NoScaleOffset]_ProbeTexture("Probe Texture Override", Cube) = "unity_SpecCube0" {}
-        _BlurLevelNear("Blur Level Near (def: 4)", Range(0, 7)) = 7
-        _BlurLevelFar("Blur Level Far (def: 4)", Range(0, 7)) = 4
-        _ProbeAlpha("Probe Alpha", Range(0, 1)) = 1
-
-        [Header(Fog)]
-        [Gamma]_FogStrengthA("Fog Density", Range(0.0, 1)) = .2
-        [Gamma]_FogStrengthB ("Fog Height", Range(0.0, 1)) = .5
-        _FogVerticalOffset("Fog Vertical Offset", Float) = 0
-        [Space]
-        [ToggleUI]_ApplyClip ("Don't apply to foreground", Float) = 0.0
-        [ToggleUI]_ApplySkybox ("Don't apply to skybox", Float) = 0.0
-        [Space]
-        [ToggleUI]_ApplySun ("Show Sun", Float) = 0.0
-        _SunSize ("Sun Size", Range(0, 1)) = 0.04
-
-        [Header(Clouds)]
-        [Toggle(_NORMALMAP)]_UseClouds("Enable Clouds", Float) = 0
-        _CloudNoiseTexture("Cloud Noise Texture", 2D) = "grey" {}
-        [HDR]_CloudDirection("Cloud Scale", Vector) = (.1, .1, .1, .1)
-        [HDR]_CloudMovement("Cloud Movement", Vector) = (1, 1, 1, .1)
-        _CloudStrength("Cloud Strength", Range(0, 10)) = 1
-        _CloudDither("Cloud Dithering", Range(0, 1)) = 0
+        _InnerRadius("Inner Radius", Float) = 4.95
+        _MiddleRadius("Middle Radius", Float) = 5
+        _OuterRadius("Outer Radius", Float) = 8
 
         [Header(System)]
-        [Enum(UnityEngine.Rendering.CullMode)] _CullMode("Cull Mode", Float) = 0
+        [Enum(UnityEngine.Rendering.CullMode)] _CullMode("Cull Mode", Float) = 1
 
         [Enum(UnityEngine.Rendering.BlendMode)]
         _SrcBlend("Src Factor", Float) = 5  // SrcAlpha
         [Enum(UnityEngine.Rendering.BlendMode)]
         _DstBlend("Dst Factor", Float) = 10 // OneMinusSrcAlpha
-        [Space]
-        [Toggle(BLOOM)]_NoPremultiplyAlpha("Don't premultiply alpha", Float) = 0.0
     }
     SubShader
     {
@@ -61,7 +34,7 @@ Shader "Silent/SkyProbe Fog (Height)"
         {
             "Queue" = "Transparent-216"
             "RenderType" = "Custom"
-            "ForceNoShadowCasting"="True" 
+            "ForceNoShadowCasting"="True"
             "IgnoreProjector"="True"
             "DisableBatching"="True"
         }
@@ -85,64 +58,29 @@ Shader "Silent/SkyProbe Fog (Height)"
             #pragma target 3.0
 
             #pragma multi_compile_instancing
-            // #pragma multi_compile_fwdbase nolightmap nodynlightmap novertexlight
-            // #pragma multi_compile_fwdadd_fullshadows
 
             #include "UnityCG.cginc"
             #include "AutoLight.cginc"
             #include "Lighting.cginc"
 
-            #if defined(SHADER_API_D3D11) || defined(SHADER_API_XBOXONE) || defined(UNITY_COMPILER_HLSLCC)//ASE Sampler Macros
-            #define UNITY_SAMPLE_TEX2D_LOD(tex,coord,lod) tex.SampleLevel (sampler##tex,coord, lod)
-            #else
-            #define UNITY_SAMPLE_TEX2D_LOD(tex,coord,lod) tex2Dlod(tex,float4(coord,0,lod))
-            #endif
-
-            #pragma shader_feature _ BLOOM
-            #pragma shader_feature _ _NORMALMAP
-
-            #define _PREMULTIPLY defined(BLOOM)
-            #define _CLOUDS defined(_NORMALMAP)
-
             float4 _Color;
-            float4 _LightScaleOffset;
-            float4 _CloudDirection;
-            float4 _CloudMovement;
-            float _ProbeAlpha;
-            float _FadeFalloff;
-            float _ApplyClip;
-            float _ApplySkybox;
-            float _ApplySun;
-            float _FogStrengthB;
-            float _FogStrengthA;
-            float _SunSize;
-            float _BlurLevelNear;
-            float _BlurLevelFar;
-            float _CloudStrength;
-            float _CloudDither;
-            float _FogVerticalOffset;
-            int _FadeType;
-
-            float _UseDepthColours;
-            float4 _Color1;
-            float4 _Color2;
-            float4 _Color3;
-            float _Color1Start;
-            float _Color2Start;
-            float _Color3Start;
+            float4 _MaxColor;
+            float _InnerRadius;
+            float _MiddleRadius;
+            float _OuterRadius;
 
             sampler2D _CloudNoiseTexture; float4 _CloudNoiseTexture_TexelSize;
             UNITY_DECLARE_TEXCUBE(_ProbeTexture); float4 _ProbeTexture_HDR;
 
             struct appdata
             {
-                UNITY_VERTEX_INPUT_INSTANCE_ID 
+                UNITY_VERTEX_INPUT_INSTANCE_ID
                 float4 vertex : POSITION;
             };
 
             struct v2f
             {
-                UNITY_VERTEX_INPUT_INSTANCE_ID 
+                UNITY_VERTEX_INPUT_INSTANCE_ID
                 UNITY_VERTEX_OUTPUT_STEREO
                 float4 pos : SV_POSITION;
                 float4 depthTextureUv : TEXCOORD1;
@@ -152,30 +90,6 @@ Shader "Silent/SkyProbe Fog (Height)"
             };
 
             UNITY_DECLARE_DEPTH_TEXTURE(_CameraDepthTexture);
-
-            // normalizedcrow's method for getting linear
-            float GetLinearDepth(float4 clipPos)
-            {
-                float4 screenPos = ComputeScreenPos(clipPos);
-                float2 screenUV = screenPos.xy / screenPos.w;
-                float2 normalizedDeviceCoordinates = clipPos.xy / clipPos.w;
-
-                //sample depth texture
-                float projectedDepth = SAMPLE_DEPTH_TEXTURE_LOD(_CameraDepthTexture, float4(screenUV, 0.0, 0.0));
-
-                //handle skewed depth planes (such as in mirrors), works for both orthographic and perspective projections
-                //(in VR the eye projection matrix can also skew the clip pos based on depth which is why the _m02 and _m12 terms
-                //are here. that part isn't correct for orthographic projections but those terms should always be 0 then anyway)
-                projectedDepth -= ((normalizedDeviceCoordinates.x + UNITY_MATRIX_P._m02) / UNITY_MATRIX_P._m00) * UNITY_MATRIX_P._m20;
-                projectedDepth -= ((normalizedDeviceCoordinates.y + UNITY_MATRIX_P._m12) / UNITY_MATRIX_P._m11) * UNITY_MATRIX_P._m21;
-
-                //un-project depth
-                float depth = (UNITY_MATRIX_P._m33 == 0.0) //check if this is a perspective matrix
-                            ? (UNITY_MATRIX_P._m23 / (projectedDepth + UNITY_MATRIX_P._m22)) //perspective
-                            : ((UNITY_MATRIX_P._m23 - projectedDepth) / UNITY_MATRIX_P._m22); //orthographic
-                
-                return depth;
-            }
 
             // Dj Lukis.LT's oblique view frustum correction (VRChat mirrors use such view frustum)
             // https://github.com/lukis101/VRCUnityStuffs/blob/master/Shaders/DJL/Overlays/WorldPosOblique.shader
@@ -203,7 +117,7 @@ Shader "Silent/SkyProbe Fog (Height)"
             {
                 v2f o;
                 UNITY_SETUP_INSTANCE_ID(v);
-                UNITY_INITIALIZE_OUTPUT(v2f, o); 
+                UNITY_INITIALIZE_OUTPUT(v2f, o);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
                 float4 worldPosition = mul(unity_ObjectToWorld, v.vertex);
                 const fixed3 baseWorldPos = unity_ObjectToWorld._m03_m13_m23;
@@ -219,56 +133,6 @@ Shader "Silent/SkyProbe Fog (Height)"
                 return o;
             }
 
-            #if _CLOUDS
-            float remap_pdf_tri_unity( float v )
-            {
-                v = v*2.0-1.0;
-                return sign(v) * (1.0 - sqrt(1.0 - abs(v)));
-            }
-            float r2dither(float2 pixel) {
-                const float a1 = 0.75487766624669276;
-                const float a2 = 0.569840290998;
-                return frac(a1 * float(pixel.x) + a2 * float(pixel.y));
-            }
-            float snoise(float3 x) 
-            {
-                float f = frac(x.z);
-                float i = floor(x.z); 
-                f *= f * (3. - 2.*f);
-                float2 uv = x.xy*float2(0.00390625, -0.00390625) + float2(37, 17)*i*float2(0.00390625, -0.00390625) + 0.001953125;
-                float2 n = tex2Dlod(_CloudNoiseTexture, float4(uv, 0, 0)).yx;
-                return lerp(n.x, n.y, f);
-            }
-            const float4x4 m = 
-            float4x4( 0.00,  0.80,  0.60, -0.4,
-                     -0.80,  0.36, -0.48, -0.5,
-                     -0.60, -0.48,  0.64,  0.2,
-                      0.40,  0.30,  0.20,  0.4);
-            #endif 
-
-            float fogFactorExp2( float dist, float density) 
-            {
-              const float LOG2 = -1.442695;
-              float d = density * dist;
-              return 1.0 - clamp(exp2(d * d * LOG2), 0.0, 1.0);
-            }
-
-            // Calculates the sun shape
-            half calcSunAttenuation(half3 lightPos, half3 ray)
-            {
-                half3 delta = lightPos - ray;
-                half dist = length(delta);
-                half sunSize =  _SunSize; 
-                half spot = 1.0 - smoothstep(0.0, sunSize, dist);
-                return spot * spot;
-            }
-
-            // https://iquilezles.org/www/articles/fog/fog.htm
-            float fogFactorNonConstant(float3 rayOri, float3 rayDir, float distance, float c, float b)
-            {
-                return c * exp(-rayOri.y*b) * (1.0-exp( -distance*rayDir.y*b ))/rayDir.y;
-            }
-
             float3 worldPosFromDepth(sampler2D depthTexture, float2 depthSamplePos, float3 camPos, float4 worldCoordinates)
             {
                 float sampleDepth = SAMPLE_DEPTH_TEXTURE(depthTexture, depthSamplePos);
@@ -282,7 +146,7 @@ Shader "Silent/SkyProbe Fog (Height)"
 
             float4 frag(v2f i) : SV_Target
             {
-                UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i); 
+                UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
                 float perspectiveDivide = 1.f / i.pos.w;
                 float4 rayFromCamera = i.rayFromCamera * perspectiveDivide;
 
@@ -294,114 +158,38 @@ Shader "Silent/SkyProbe Fog (Height)"
 
                 float sceneZ = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, depthTextureUv);
                 bool isSkybox = (sceneZ == SceneZDefaultValue());
-                if (isSkybox)
-                {
-                    // This is skybox, depth texture has default value
-                    // It's scene dependant on whether we want the fog to be clipped by the skybox
-                    clip(-_ApplySkybox);
-                    sceneZ = 0;
-                }
+                clip(-isSkybox); // save the compute time of the rest of the shader
 
                 // linearize depth and use it to calculate background world position
                 float sceneDepth = CorrectedLinearEyeDepth(sceneZ, rayFromCamera.w*perspectiveDivide);
                 float3 worldPosition = rayFromCamera.xyz * sceneDepth + _WorldSpaceCameraPos.xyz;
-                float4 localPosition = mul(unity_WorldToObject, float4(worldPosition, 1));
-                float localDepth = CorrectedLinearEyeDepth(i.pos.z, rayFromCamera.w);
-
                 worldPosition = worldPosFromDepth(_CameraDepthTexture, depthTextureUv, _WorldSpaceCameraPos, i.worldPosition);
-                //return float4(frac(worldPosition), 1);
 
-                float clipAt = (localDepth < sceneDepth);
+                float3 objectPosition = UNITY_MATRIX_M._m03_m13_m23;
+                float dist = distance(objectPosition, worldPosition);
 
-                localPosition.xyz /= localPosition.w;
-
-                float fogDepthForBlur = saturate(exp(-sceneDepth*_FogStrengthB));
-                float blurLevel = lerp(_BlurLevelFar, _BlurLevelNear, fogDepthForBlur);
-
-                float4 color = UNITY_SAMPLE_TEXCUBE_LOD( _ProbeTexture, rayFromCamera, blurLevel);
-                color = float4(DecodeHDR(color, _ProbeTexture_HDR), 1.0);
-
-                color = lerp(1, color, _ProbeAlpha);
-
-                if (_UseDepthColours)
+                clip(-(dist <= _InnerRadius || _OuterRadius <= dist));
+                float opacity;
+                if (dist <= _MiddleRadius)
                 {
-                    float fogDistance = (length(rayFromCamera.xyz * sceneDepth));
-                    float fogRange1 = saturate((fogDistance-_Color1Start)/_Color2Start);
-                    float fogRange2 = saturate((fogDistance-_Color2Start)/_Color3Start);
-                    color *= lerp(lerp(_Color1, _Color2, fogRange1), _Color3, fogRange2);
+                    opacity = dist - _InnerRadius;
+                    opacity = opacity / (_MiddleRadius - _InnerRadius) / 2;
+                    opacity = sin(opacity * UNITY_PI);
+                    opacity = opacity * opacity;
                 }
-                else 
+                else
                 {
-                    color *= _Color;
+                    opacity = dist - _MiddleRadius;
+                    opacity = opacity / (_OuterRadius - _MiddleRadius) / 2;
+                    opacity = 1 - sin(opacity * UNITY_PI);
+                    opacity = pow(opacity, 4); // Should compile into just 2 multiplications.
                 }
-
-                // Add sun
-                if (_ApplySun) 
-                {
-                    float sunAtt = calcSunAttenuation(_WorldSpaceLightPos0.xyz, rayFromCamera);
-                    //color.rgb = color.rgb * (1-sunAtt) + sunAtt * _LightColor0.xyz;
-                    color.rgb += sunAtt * _LightColor0.xyz;
-                }
-
-                #if _CLOUDS
-                // Don't attempt to get noise if we're in the skybox.
-                if (!isSkybox)
-                {
-                    // ref: https://www.shadertoy.com/view/tsjyzV
-                    // Dither input to noise function to compensate for texture sampling imprecision.
-                    // But not with a texture. ALU is cheaper, right? 
-                    // 8 bit fixed point so adjust sub pixel precision by 1/256
-                    float ditherSize = (1.0/256.0) * 0.1;
-                    float d1 = remap_pdf_tri_unity(r2dither(i.pos.xy + .99));
-                    float d2 = remap_pdf_tri_unity(r2dither(i.pos.xy + .33));
-                    float d3 = remap_pdf_tri_unity(r2dither(i.pos.xy + .66));
-
-                    float3 dither = float3(d1, d2, d3) * _CloudDither;
-
-                    float f;
-
-                    float3 q = worldPosition * _CloudDirection.xyz * _CloudDirection.w;
-                    q += _Time.x * _CloudMovement.xyz * _CloudMovement.w;
-
-                    q += _CloudNoiseTexture_TexelSize.zwz * dither * ditherSize;
-
-                    f  = 0.5000*snoise( q ); q = mul(m,q)*2.01;
-                    f += 0.2500*snoise( q ); q = mul(m,q)*2.02;
-                    f += 0.1250*snoise( q ); q = mul(m,q)*2.03;
-                    f += 0.0625*snoise( q ); q = mul(m,q)*2.01;
-
-                    f = f * 2 - 1;
-
-                    f *= _CloudStrength;
-
-                    _FogStrengthB *= 1+f;
-                }
-                #endif
-
-                // a is the density at y = 0
-                // b is the density
-                // c is a/b
-                float3 vertOffset = float3(0, _FogVerticalOffset, 0);
-                float fogAmount = fogFactorNonConstant(_WorldSpaceCameraPos + vertOffset, rayFromCamera, sceneDepth, 
-                    _FogStrengthA/_FogStrengthB, _FogStrengthB);
-
-                #if 0 // Old blending, kept for reference.
-                color.a *= fogAmount;
-                color.a = saturate(color.a);
-                #else
-                color.a *= saturate(fogAmount);
-                #endif
-
-                if (_ApplyClip) color.a *= clipAt;
-
-                #if !_PREMULTIPLY
-                color.rgb *= color.a;
-                #endif
-
+                float4 color = lerp(_Color, _MaxColor, (_SinTime.w + 1) / 2);
+                color.w *= opacity;
                 return color;
             }
 
             ENDCG
         }
     }
-    }
+}

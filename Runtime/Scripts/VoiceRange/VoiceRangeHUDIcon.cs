@@ -9,8 +9,7 @@ namespace JanSharp
         Off,
         FadingIn,
         FadingOut,
-        Blinking,
-        Static,
+        MatchingVisualType,
     }
 
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
@@ -30,8 +29,12 @@ namespace JanSharp
         /// </summary>
         private int customUpdateInternalIndex;
 
+        private const float TAU = Mathf.PI * 2f;
+        private const float PulsesPerSecondWithTAU = 0.25f * TAU;
+        private const float BlinkInterval = 4f;
+        private VoiceRangeVisualizationType visualType = VoiceRangeVisualizationType.Static;
+
         private const float FadeDuration = 0.4f;
-        private float blinksPerSecondWithTAU;
         private float fadeElapsedTime = 0f;
         private float blinkingElapsedTime = 0f;
         private VoiceRangeHUDIconState iconState = VoiceRangeHUDIconState.Off;
@@ -61,23 +64,28 @@ namespace JanSharp
         private void SetIconStateToStatic()
         {
             iconImage.color = maxColor;
-            iconState = VoiceRangeHUDIconState.Static;
+            visualType = VoiceRangeVisualizationType.Static;
+            iconState = VoiceRangeHUDIconState.MatchingVisualType;
             updateManager.Deregister(this);
         }
 
-        public void SetBlinksPerSecond(float blinksPerSecondWithTAU)
+        public void SetVisualType(VoiceRangeVisualizationType visualType)
         {
-            this.blinksPerSecondWithTAU = blinksPerSecondWithTAU;
-            if (blinksPerSecondWithTAU != 0f)
+            if (this.visualType == visualType)
+                return;
+            if (iconState != VoiceRangeHUDIconState.MatchingVisualType)
             {
-                if (iconState == VoiceRangeHUDIconState.Static)
-                {
-                    iconState = VoiceRangeHUDIconState.Blinking;
-                    updateManager.Register(this);
-                }
+                this.visualType = visualType;
+                return;
             }
-            else if (iconState == VoiceRangeHUDIconState.Blinking)
+
+            if (visualType == VoiceRangeVisualizationType.Static)
                 SetIconStateToStatic();
+            else
+            {
+                this.visualType = visualType;
+                updateManager.Register(this);
+            }
         }
 
         public void FadeIn()
@@ -85,6 +93,8 @@ namespace JanSharp
             if (iconState != VoiceRangeHUDIconState.Off && iconState != VoiceRangeHUDIconState.FadingOut)
                 return;
             fadeElapsedTime = 0;
+            if (visualType != VoiceRangeVisualizationType.Pulse)
+                blinkingElapsedTime = 0f;
             fadeSourceColor = iconImage.color;
             fadeDestinationColor = GetColorAtCurrentBlinkingElapsedTime();
             iconState = VoiceRangeHUDIconState.FadingIn;
@@ -94,10 +104,10 @@ namespace JanSharp
 
         private void FinishedFadingIn()
         {
-            if (blinksPerSecondWithTAU == 0f)
+            if (visualType == VoiceRangeVisualizationType.Static)
                 SetIconStateToStatic(); // fadeDestinationColor may not match maxColor.
             else
-                iconState = VoiceRangeHUDIconState.Blinking;
+                iconState = VoiceRangeHUDIconState.MatchingVisualType;
         }
 
         public void FadeOut()
@@ -121,19 +131,29 @@ namespace JanSharp
 
         private Color GetColorAtCurrentBlinkingElapsedTime()
         {
-            float t = (Mathf.Cos(blinkingElapsedTime * blinksPerSecondWithTAU) + 1f) / 2f;
+            if (visualType != VoiceRangeVisualizationType.Pulse)
+                return maxColor;
+            float t = (Mathf.Cos(blinkingElapsedTime * PulsesPerSecondWithTAU) + 1f) / 2f;
             // t is 1 when blinkingElapsedTime is 0.
             return Color.Lerp(minColor, maxColor, t);
         }
 
         public void CustomUpdate()
         {
-            if (iconState == VoiceRangeHUDIconState.Blinking)
+            if (iconState == VoiceRangeHUDIconState.MatchingVisualType)
             {
                 blinkingElapsedTime += Time.deltaTime;
-                // This is GetColorAtCurrentBlinkingElapsedTime inlined (aka copy pasted).
-                float t = (Mathf.Cos(blinkingElapsedTime * blinksPerSecondWithTAU) + 1f) / 2f;
-                iconImage.color = Color.Lerp(minColor, maxColor, t);
+                if (visualType == VoiceRangeVisualizationType.Pulse)
+                {
+                    // This is GetColorAtCurrentBlinkingElapsedTime inlined (aka copy pasted).
+                    float t = (Mathf.Cos(blinkingElapsedTime * PulsesPerSecondWithTAU) + 1f) / 2f;
+                    iconImage.color = Color.Lerp(minColor, maxColor, t);
+                }
+                else // Blink
+                {
+                    float t = (blinkingElapsedTime % BlinkInterval) / BlinkInterval;
+                    iconImage.color = t < 0.5f ? maxColor : minColor;
+                }
                 return;
             }
 

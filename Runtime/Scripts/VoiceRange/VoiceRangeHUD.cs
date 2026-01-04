@@ -17,11 +17,7 @@ namespace JanSharp
         /// </summary>
         private VoiceRangeHUDIcon[] sortedIcons;
         private VoiceRangeHUDIcon activeIcon;
-        private float blinksPerSecondWithTAU;
-
-        private const float TAU = Mathf.PI * 2f;
-        private const float PulseBlinksPerSecondWithTAU = 0.4f * TAU;
-        private const float BlinkBlinksPerSecondWithTAU = 2.5f * TAU;
+        private VoiceRangeVisualizationType activeVisualType;
 
         [PermissionDefinitionReference(nameof(voiceRangeHUDSettingsPermissionDef))]
         public string voiceRangeHUDSettingsPermissionAsset; // A guid.
@@ -49,7 +45,7 @@ namespace JanSharp
                 icon.resolvedDef = def;
                 Color color = icon.iconImage.color * def.color;
                 icon.maxColor = color;
-                color.a *= 0.5f;
+                color.a *= 0.25f;
                 icon.minColor = color;
                 color.a = 0;
                 icon.offColor = color;
@@ -74,31 +70,19 @@ namespace JanSharp
 
         private void UpdateToMatchLatencyState()
         {
-            UpdateBlinksPerSecond();
+            UpdateVisualType();
             UpdateActiveIcon();
         }
 
-        private void UpdateBlinksPerSecond()
+        private void UpdateVisualType()
         {
             if (!isInitialized)
                 return;
-            VoiceRangeVisualizationType visualType = voiceRangeHUDSettingsPermissionDef.valueForLocalPlayer
+            activeVisualType = voiceRangeHUDSettingsPermissionDef.valueForLocalPlayer
                 ? localPlayer.latencyHUDVisualType
                 : voiceRangeManager.DefaultHUDVisualType;
-            switch (visualType)
-            {
-                case VoiceRangeVisualizationType.Pulse:
-                    blinksPerSecondWithTAU = PulseBlinksPerSecondWithTAU;
-                    break;
-                case VoiceRangeVisualizationType.Blink:
-                    blinksPerSecondWithTAU = BlinkBlinksPerSecondWithTAU;
-                    break;
-                default:
-                    blinksPerSecondWithTAU = 0f;
-                    break;
-            }
             if (activeIcon != null)
-                activeIcon.SetBlinksPerSecond(blinksPerSecondWithTAU);
+                activeIcon.SetVisualType(activeVisualType);
         }
 
         private void UpdateActiveIcon()
@@ -120,7 +104,7 @@ namespace JanSharp
                 activeIcon.FadeOut();
             if (nextActiveIcon != null)
             {
-                nextActiveIcon.SetBlinksPerSecond(blinksPerSecondWithTAU);
+                nextActiveIcon.SetVisualType(activeVisualType);
                 nextActiveIcon.FadeIn();
             }
             activeIcon = nextActiveIcon;

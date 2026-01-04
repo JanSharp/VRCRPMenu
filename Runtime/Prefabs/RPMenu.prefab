@@ -1098,7 +1098,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   profileName: image-gm-request-urgent-icon
   sourceImage: gm-request-urgent
-  color: urgent-highlight
+  color: hud-urgent-highlight
   material: {fileID: 2100000, guid: 35630e38b4e5ffb40b44ec5348b4333f, type: 2}
   raycastTarget: 0
   raycastPaddingLeft: 0
@@ -1947,10 +1947,14 @@ MonoBehaviour:
     color: {r: 1, g: 0, b: 0, a: 0}
   - name: static-invisible
     color: {r: 1, g: 1, b: 1, a: 0}
-  - name: main-hud
-    color: {r: 1, g: 1, b: 1, a: 0.4}
+  - name: hud-main
+    color: {r: 1, g: 1, b: 1, a: 0.7490196}
   - name: hud-tintable
-    color: {r: 1, g: 1, b: 1, a: 0.4}
+    color: {r: 1, g: 1, b: 1, a: 0.7490196}
+  - name: hud-main-highlight
+    color: {r: 0.5019608, g: 0.83137256, b: 1, a: 0.7490196}
+  - name: hud-urgent-highlight
+    color: {r: 1, g: 0, b: 0, a: 0.7490196}
 --- !u!1 &3515971651857050423
 GameObject:
   m_ObjectHideFlags: 0
@@ -2371,7 +2375,7 @@ MonoBehaviour:
   autoSizeMax: 36
   autoSizeMaxCharacterAdjust: 0
   autoSizeMaxLineAdjust: 0
-  vertexColor: main-hud
+  vertexColor: hud-main
   colorGradient: 0
   colorGradientPreset: {fileID: 0}
   colorGradientMode: 3
@@ -3124,7 +3128,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   profileName: image-gm-request-regular-icon
   sourceImage: gm-request-regular
-  color: main-highlight
+  color: hud-main-highlight
   material: {fileID: 2100000, guid: 35630e38b4e5ffb40b44ec5348b4333f, type: 2}
   raycastTarget: 0
   raycastPaddingLeft: 0

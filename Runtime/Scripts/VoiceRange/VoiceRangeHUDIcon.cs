@@ -34,7 +34,7 @@ namespace JanSharp
         public const float BlinkInterval = 4f;
         private VoiceRangeVisualizationType visualType = VoiceRangeVisualizationType.Static;
 
-        public const float FadeDuration = 0.4f;
+        public const float FadeDuration = 0.6f;
         private float fadeElapsedTime = 0f;
         private float blinkingElapsedTime = 0f;
         private VoiceRangeHUDIconState iconState = VoiceRangeHUDIconState.Off;

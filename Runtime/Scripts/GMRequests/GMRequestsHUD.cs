@@ -29,11 +29,10 @@ namespace JanSharp
         private bool requesterHUDIsShown = false;
         private GMRequest prevActiveLocalRequest = null;
         private bool requesterIsInFadeOutAnimation = false;
-        private float requesterShowUntil;
-        private float requesterStartBlinkingAt;
+        private float elapsedTimeInAnimation;
         private const float RequesterFadeOutTotalTime = 3f;
         private const float RequesterFadeOutBlinkStartTime = 2f;
-        private const float RequesterFadeOutBlinksPerSecond = 4f;
+        private const float RequesterFadeOutBlinksPerSecondWithTAU = 4f * TAU;
         private const float TAU = Mathf.PI * 2f;
         [Space]
         public Transform responderHUDRoot;
@@ -161,9 +160,7 @@ namespace JanSharp
                 : requesterUrgentBaseColor;
             requesterCurrentBrightColor = requesterCurrentBaseColor;
             requesterCurrentBrightColor.a = 1f;
-            float time = Time.time;
-            requesterShowUntil = time + RequesterFadeOutTotalTime;
-            requesterStartBlinkingAt = time + RequesterFadeOutBlinkStartTime;
+            elapsedTimeInAnimation = 0f;
             updateManager.Register(this);
         }
 
@@ -182,16 +179,16 @@ namespace JanSharp
 
         public void CustomUpdate()
         {
-            float time = Time.time;
-            if (time >= requesterShowUntil)
+            elapsedTimeInAnimation += Time.deltaTime;
+            if (elapsedTimeInAnimation >= RequesterFadeOutTotalTime)
             {
                 ShowHideRequesterHUD(false);
                 return;
             }
-            if (time < requesterStartBlinkingAt)
+            if (elapsedTimeInAnimation < RequesterFadeOutBlinkStartTime)
                 return;
-            float timeInAnimation = time - requesterStartBlinkingAt;
-            float t = (Mathf.Cos(timeInAnimation * TAU * RequesterFadeOutBlinksPerSecond) + 1f) / 2f;
+            float timeInBlink = elapsedTimeInAnimation - RequesterFadeOutBlinkStartTime;
+            float t = (Mathf.Cos(timeInBlink * RequesterFadeOutBlinksPerSecondWithTAU) + 1f) / 2f;
             // t is 1 when timeInAnimation is 0.
             requesterCurrentImage.color = Color.Lerp(requesterCurrentBrightColor, requesterCurrentBaseColor, t);
         }

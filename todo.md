@@ -58,5 +58,5 @@
 - [ ] voice range in world indicator
 - [ ] voice range AudioManager integration
 - [ ] which ones of these layout elements actually need layout priority 2? something with the input fields afaik
-- [ ] change GMRequestsHUD to use Time.deltaTime instead
+- [x] change GMRequestsHUD to use Time.deltaTime instead
 - [x] make default visualization type for hud and in world defined through inspector

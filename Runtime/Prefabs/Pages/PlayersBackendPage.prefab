@@ -347,6 +347,9 @@ MonoBehaviour:
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 2448956102023620067}
   lockstep: {fileID: 0}
+  updateManager: {fileID: 0}
+  menuManager: {fileID: 0}
+  menuPageRoot: {fileID: 0}
   rowPrefab: {fileID: 6752636682576748393}
   rowPrefabScript: {fileID: 714104658791306060}
   rowsContent: {fileID: 9050113402479600709}
@@ -354,8 +357,6 @@ MonoBehaviour:
   rowsScrollRect: {fileID: 4293852634561429377}
   minScrollRectVelocity: 20
   playerDataManager: {fileID: 0}
-  menuManager: {fileID: 0}
-  menuPageRoot: {fileID: 0}
   sortPlayerNameAscendingImage: {fileID: 3410573004261285690}
   sortPlayerNameDescendingImage: {fileID: 1053017692227995422}
   sortOverriddenDisplayNameAscendingImage: {fileID: 6095763056408158583}
@@ -383,7 +384,7 @@ MonoBehaviour:
   SynchronizePosition: 0
   AllowCollisionOwnershipTransfer: 0
   Reliable: 0
-  _syncMethod: 0
+  _syncMethod: 1
   serializedProgramAsset: {fileID: 0}
   programSource: {fileID: 11400000, guid: 89cbcc535e40dcab2ac2903df2c6657d, type: 2}
   serializedPublicVariablesBytesString: Ai8AAAAAATIAAABWAFIAQwAuAFUAZABvAG4ALgBDAG8AbQBtAG8AbgAuAFUAZABvAG4AVgBhAHIAaQBhAGIAbABlAFQAYQBiAGwAZQAsACAAVgBSAEMALgBVAGQAbwBuAC4AQwBvAG0AbQBvAG4AAAAAAAYBAAAAAAAAACcBBAAAAHQAeQBwAGUAAWgAAABTAHkAcwB0AGUAbQAuAEMAbwBsAGwAZQBjAHQAaQBvAG4AcwAuAEcAZQBuAGUAcgBpAGMALgBMAGkAcwB0AGAAMQBbAFsAVgBSAEMALgBVAGQAbwBuAC4AQwBvAG0AbQBvAG4ALgBJAG4AdABlAHIAZgBhAGMAZQBzAC4ASQBVAGQAbwBuAFYAYQByAGkAYQBiAGwAZQAsACAAVgBSAEMALgBVAGQAbwBuAC4AQwBvAG0AbQBvAG4AXQBdACwAIABtAHMAYwBvAHIAbABpAGIAAQEJAAAAVgBhAHIAaQBhAGIAbABlAHMALwEAAAABaAAAAFMAeQBzAHQAZQBtAC4AQwBvAGwAbABlAGMAdABpAG8AbgBzAC4ARwBlAG4AZQByAGkAYwAuAEwAaQBzAHQAYAAxAFsAWwBWAFIAQwAuAFUAZABvAG4ALgBDAG8AbQBtAG8AbgAuAEkAbgB0AGUAcgBmAGEAYwBlAHMALgBJAFUAZABvAG4AVgBhAHIAaQBhAGIAbABlACwAIABWAFIAQwAuAFUAZABvAG4ALgBDAG8AbQBtAG8AbgBdAF0ALAAgAG0AcwBjAG8AcgBsAGkAYgABAAAABgEAAAAAAAAAAi8CAAAAAUkAAABWAFIAQwAuAFUAZABvAG4ALgBDAG8AbQBtAG8AbgAuAFUAZABvAG4AVgBhAHIAaQBhAGIAbABlAGAAMQBbAFsAUwB5AHMAdABlAG0ALgBJAG4AdAAzADIALAAgAG0AcwBjAG8AcgBsAGkAYgBdAF0ALAAgAFYAUgBDAC4AVQBkAG8AbgAuAEMAbwBtAG0AbwBuAAIAAAAGAgAAAAAAAAAnAQQAAAB0AHkAcABlAAEXAAAAUwB5AHMAdABlAG0ALgBTAHQAcgBpAG4AZwAsACAAbQBzAGMAbwByAGwAaQBiACcBCgAAAFMAeQBtAGIAbwBsAE4AYQBtAGUAAR8AAABfAF8AXwBVAGQAbwBuAFMAaABhAHIAcABCAGUAaABhAHYAaQBvAHUAcgBWAGUAcgBzAGkAbwBuAF8AXwBfACcBBAAAAHQAeQBwAGUAARYAAABTAHkAcwB0AGUAbQAuAEkAbgB0ADMAMgAsACAAbQBzAGMAbwByAGwAaQBiABcBBQAAAFYAYQBsAHUAZQACAAAABwUHBQcF
@@ -3986,7 +3987,7 @@ MonoBehaviour:
   m_PreferredHeight: 50
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
-  m_LayoutPriority: 1
+  m_LayoutPriority: 2
 --- !u!114 &264046562619394596
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4467,7 +4468,7 @@ MonoBehaviour:
   m_PreferredHeight: -1
   m_FlexibleWidth: 1
   m_FlexibleHeight: 1
-  m_LayoutPriority: 1
+  m_LayoutPriority: 2
 --- !u!114 &156399811715192770
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4801,7 +4802,7 @@ MonoBehaviour:
   m_PreferredHeight: 50
   m_FlexibleWidth: 1
   m_FlexibleHeight: -1
-  m_LayoutPriority: 1
+  m_LayoutPriority: 2
 --- !u!114 &2236839984127840977
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6066,7 +6067,7 @@ MonoBehaviour:
   m_PreferredHeight: -1
   m_FlexibleWidth: -1
   m_FlexibleHeight: 1
-  m_LayoutPriority: 1
+  m_LayoutPriority: 2
 --- !u!114 &3729369475192993180
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6583,7 +6584,7 @@ MonoBehaviour:
   m_PreferredHeight: 50
   m_FlexibleWidth: 1
   m_FlexibleHeight: -1
-  m_LayoutPriority: 1
+  m_LayoutPriority: 2
 --- !u!114 &2767071464079968028
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6859,7 +6860,7 @@ MonoBehaviour:
   m_PreferredHeight: -1
   m_FlexibleWidth: 1
   m_FlexibleHeight: 1
-  m_LayoutPriority: 1
+  m_LayoutPriority: 2
 --- !u!114 &8311643740598343826
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10583,7 +10584,7 @@ MonoBehaviour:
   m_PreferredHeight: 50
   m_FlexibleWidth: 1
   m_FlexibleHeight: -1
-  m_LayoutPriority: 1
+  m_LayoutPriority: 2
 --- !u!114 &1058642213632274413
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12163,7 +12164,7 @@ MonoBehaviour:
   m_PreferredHeight: 50
   m_FlexibleWidth: 1
   m_FlexibleHeight: -1
-  m_LayoutPriority: 1
+  m_LayoutPriority: 2
 --- !u!114 &9163086549561612616
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12806,7 +12807,7 @@ MonoBehaviour:
   m_PreferredHeight: -1
   m_FlexibleWidth: -1
   m_FlexibleHeight: 1
-  m_LayoutPriority: 1
+  m_LayoutPriority: 2
 --- !u!114 &4936208040667558953
 MonoBehaviour:
   m_ObjectHideFlags: 0

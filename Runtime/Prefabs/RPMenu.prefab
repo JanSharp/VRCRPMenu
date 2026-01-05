@@ -1052,6 +1052,55 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   profileName: rect-gm-requests-hud-count
+--- !u!1 &1624988809985867646
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 719069820211414644}
+  - component: {fileID: 7845571958433188365}
+  m_Layer: 17
+  m_Name: rect-scroll-rect-viewport-internal-scrollbar
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &719069820211414644
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1624988809985867646}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8074509459206155029}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: -50, y: 0}
+  m_Pivot: {x: 0, y: 1}
+--- !u!114 &7845571958433188365
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1624988809985867646}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2634e557d124019e89cef2a6feaf85c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  profileName: rect-scroll-rect-viewport-internal-scrollbar
 --- !u!1 &1717277419357249078
 GameObject:
   m_ObjectHideFlags: 0
@@ -4312,7 +4361,7 @@ GameObject:
   - component: {fileID: 12095461389376576}
   - component: {fileID: 491550625587345398}
   m_Layer: 17
-  m_Name: rect-scroll-rect-hide-able-internal-scrollbar
+  m_Name: rect-scroll-rect-internal-scrollbar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4349,7 +4398,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2634e557d124019e89cef2a6feaf85c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  profileName: rect-scroll-rect-hide-able-internal-scrollbar
+  profileName: rect-scroll-rect-internal-scrollbar
 --- !u!1 &7048570282759394002
 GameObject:
   m_ObjectHideFlags: 0
@@ -6777,6 +6826,10 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4775507753093523148, guid: b30c0489bc1cef59baba23f87dd71436,
         type: 3}
       insertIndex: -1
+      addedObject: {fileID: 719069820211414644}
+    - targetCorrespondingSourceObject: {fileID: 4775507753093523148, guid: b30c0489bc1cef59baba23f87dd71436,
+        type: 3}
+      insertIndex: -1
       addedObject: {fileID: 12095461389376576}
     - targetCorrespondingSourceObject: {fileID: 4775507753093523148, guid: b30c0489bc1cef59baba23f87dd71436,
         type: 3}
@@ -8063,6 +8116,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 5286160735069168887, guid: 8fb4dac757b34f06384d79863453be0e,
         type: 3}
+    - target: {fileID: 7550283354885213398, guid: 8fb4dac757b34f06384d79863453be0e,
+        type: 3}
+      propertyPath: _syncMethod
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -9003,6 +9061,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: VoiceRangeAudioManagerIntegration
+      objectReference: {fileID: 0}
+    - target: {fileID: 1684697466817171452, guid: 5f8a876fe0cd07508a87c579f128ec5e,
+        type: 3}
+      propertyPath: _syncMethod
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1702810631559229523, guid: 5f8a876fe0cd07508a87c579f128ec5e,
         type: 3}

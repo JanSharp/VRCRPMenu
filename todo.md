@@ -77,3 +77,4 @@ VRC.SDK3.Editor.Builder.VRCWorldBuilder:ExportSceneResource ()
 VRC.SDK3.Editor.VRCSdkControlPanelWorldBuilder/<Build>d__149:MoveNext () (at ./Packages/com.vrchat.worlds/Editor/VRCSDK/SDK3/VRCSdkControlPanelWorldBuilder.cs:2567)
 UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 ```
+- NOTE: HUD text does not draw above opaque geometry while images do. I believe that fixing that would require making a copy of the text mesh pro shaders just to change ZTest to Always, or maybe using legacy text instead. Pretty sure the former would work, though it is very annoying, and did not try the latter

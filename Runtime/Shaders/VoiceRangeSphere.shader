@@ -131,15 +131,14 @@ Shader "RP Menu/Voice Range Sphere"
                 return o;
             }
 
-            float3 worldPosFromDepth(sampler2D depthTexture, float2 depthSamplePos, float3 camPos, float4 worldCoordinates)
+            float3 worldPosFromDepth(float sceneZ, float3 camPos, float4 worldCoordinates)
             {
-                float sampleDepth = SAMPLE_DEPTH_TEXTURE(depthTexture, depthSamplePos);
-                sampleDepth = DECODE_EYEDEPTH(sampleDepth);
+                sceneZ = DECODE_EYEDEPTH(sceneZ);
 
                 // https://gamedev.stackexchange.com/questions/131978/shader-reconstructing-position-from-depth-in-vr-through-projection-matrix
                 float3 viewDirection = (worldCoordinates.xyz - camPos) / (-mul(UNITY_MATRIX_V, worldCoordinates).z);
 
-                return camPos + viewDirection * sampleDepth;
+                return camPos + viewDirection * sceneZ;
             }
 
             float4 frag(v2f i) : SV_Target
@@ -161,7 +160,7 @@ Shader "RP Menu/Voice Range Sphere"
                 // linearize depth and use it to calculate background world position
                 float sceneDepth = CorrectedLinearEyeDepth(sceneZ, rayFromCamera.w*perspectiveDivide);
                 float3 worldPosition = rayFromCamera.xyz * sceneDepth + _WorldSpaceCameraPos.xyz;
-                worldPosition = worldPosFromDepth(_CameraDepthTexture, depthTextureUv, _WorldSpaceCameraPos, i.worldPosition);
+                worldPosition = worldPosFromDepth(sceneZ, _WorldSpaceCameraPos, i.worldPosition);
 
                 float3 objectPosition = UNITY_MATRIX_M._m03_m13_m23;
                 float dist = distance(objectPosition, worldPosition);

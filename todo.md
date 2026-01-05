@@ -60,3 +60,20 @@
 - [x] which ones of these layout elements actually need layout priority 2? something with the input fields afaik
 - [x] change GMRequestsHUD to use Time.deltaTime instead
 - [x] make default visualization type for hud and in world defined through inspector
+- [ ] maybe some kind of flash or indicator on the hud for when a new GM request came in. Or like a plus sign that pops up from the hud and moves upwards before fading away
+- [ ] show mask settings toggle group sets flags for any definitions that do not have a toggle to off rather than using the appropriate default value
+- [ ] tweak voice range shader properties or shader itself, likely to make it less obtrusive
+- [x] getting shader compile error on publish:
+```
+Shader error in 'RP Menu/Voice Range Sphere': undeclared identifier 'samplerdepthTexture' at line 136 (on d3d11)
+
+Compiling Subshader: 0, Pass: , Vertex program with STEREO_INSTANCING_ON
+Platform defines: SHADER_API_DESKTOP UNITY_ENABLE_DETAIL_NORMALMAP UNITY_ENABLE_REFLECTION_BUFFERS UNITY_LIGHTMAP_FULL_HDR UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BLENDING UNITY_SPECCUBE_BOX_PROJECTION UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS
+Disabled keywords: INSTANCING_ON SHADER_API_GLES30 UNITY_ASTC_NORMALMAP_ENCODING UNITY_COLORSPACE_GAMMA UNITY_FRAMEBUFFER_FETCH_AVAILABLE UNITY_HALF_PRECISION_FRAGMENT_SHADER_REGISTERS UNITY_HARDWARE_TIER1 UNITY_HARDWARE_TIER2 UNITY_HARDWARE_TIER3 UNITY_LIGHTMAP_DLDR_ENCODING UNITY_LIGHTMAP_RGBM_ENCODING UNITY_METAL_SHADOWS_USE_POINT_FILTERING UNITY_NO_DXT5nm UNITY_NO_FULL_STANDARD_SHADER UNITY_NO_SCREENSPACE_SHADOWS UNITY_PBS_USE_BRDF2 UNITY_PBS_USE_BRDF3 UNITY_PRETRANSFORM_TO_DISPLAY_ORIENTATION UNITY_UNIFIED_SHADER_PRECISION_MODEL UNITY_VIRTUAL_TEXTURING
+UnityEditor.BuildPipeline:BuildAssetBundles (string,UnityEditor.AssetBundleBuild[],UnityEditor.BuildAssetBundleOptions,UnityEditor.BuildTarget)
+VRC.SDK3.Editor.Builder.VRCWorldAssetExporter:ExportCurrentSceneResource (bool,System.Action`1<string>,System.Action`1<object>)
+VRC.SDK3.Editor.Builder.VRCWorldBuilder:ExportSceneResourceInternal (bool)
+VRC.SDK3.Editor.Builder.VRCWorldBuilder:ExportSceneResource ()
+VRC.SDK3.Editor.VRCSdkControlPanelWorldBuilder/<Build>d__149:MoveNext () (at ./Packages/com.vrchat.worlds/Editor/VRCSDK/SDK3/VRCSdkControlPanelWorldBuilder.cs:2567)
+UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
+```

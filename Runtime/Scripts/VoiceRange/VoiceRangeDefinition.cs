@@ -35,6 +35,11 @@ namespace JanSharp
         public string permissionAsset; // A guid.
         [HideInInspector] public PermissionDefinition permissionDef;
 
+        [Header("Lower number means higher priority", order = 0)]
+        [Space(-10, order = 1)]
+        [Header("Audio Zones have priority 1000", order = 2)]
+        public int audioSettingPriority = 2000;
+
         public bool LocalPlayerHasPermission
             => permissionDef == null
             || permissionDef.valueForLocalPlayer;

@@ -68,6 +68,7 @@ namespace JanSharp
             GameObject go = Object.Instantiate(generator.permissionRowPrefab);
             go.transform.SetParent(generator.content, worldPositionStays: false);
             Undo.RegisterCreatedObjectUndo(go, "Generate Permissions Permission Row");
+            OnBuildUtil.MarkForRerunDueToScriptInstantiation();
             return go.GetComponent<PermissionsPermissionRow>();
         }
 

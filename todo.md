@@ -78,3 +78,4 @@ VRC.SDK3.Editor.VRCSdkControlPanelWorldBuilder/<Build>d__149:MoveNext () (at ./P
 UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 ```
 - NOTE: HUD text does not draw above opaque geometry while images do. I believe that fixing that would require making a copy of the text mesh pro shaders just to change ZTest to Always, or maybe using legacy text instead. Pretty sure the former would work, though it is very annoying, and did not try the latter
+- NOTE: the RPMenu prefab should not contain the generated permission rows already. I mean its fine if it does, but it shouldn't. So when making a release, make sure to hit the build menu button beforehand

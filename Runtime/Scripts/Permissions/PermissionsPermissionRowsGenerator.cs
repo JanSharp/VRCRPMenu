@@ -5,6 +5,7 @@ namespace JanSharp
 {
     public class PermissionsPermissionRowsGenerator : MonoBehaviour, VRC.SDKBase.IEditorOnly
     {
+        public PermissionsPage page;
         public VerticalLayoutGroup layoutGroupSpecification;
         public GameObject permissionRowPrefab;
         public GameObject permissionRowTagToUse;

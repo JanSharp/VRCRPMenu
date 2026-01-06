@@ -45,6 +45,9 @@ namespace JanSharp
             if (customElements.Count != 0 && allPermissionDefs.Length != 0)
                 currentY += layoutGroup.spacing;
 
+            PermissionsPermissionRow[] rows = existingRows.Length == allPermissionDefs.Length
+                ? existingRows
+                : new PermissionsPermissionRow[allPermissionDefs.Length];
             for (int i = 0; i < allPermissionDefs.Length; i++)
             {
                 PermissionsPermissionRow row = i < existingRows.Length
@@ -56,8 +59,10 @@ namespace JanSharp
                 SetLabelText(row, allPermissionDefs[i]);
                 SetPermissionDefRef(row, allPermissionDefs[i]);
                 UnsetEditorOnlyTag(row.gameObject, generator.permissionRowTagToUse);
+                rows[i] = row;
             }
 
+            SetPermissionDefsOnPage(generator.page, rows);
             SetContentSize(generator, currentY + layoutGroup.padding.bottom);
 
             return true;
@@ -97,6 +102,16 @@ namespace JanSharp
         {
             SerializedObject so = new(row);
             so.FindProperty(nameof(PermissionsPermissionRow.permissionDef)).objectReferenceValue = permissionDef;
+            so.ApplyModifiedProperties();
+        }
+
+        private static void SetPermissionDefsOnPage(PermissionsPage page, PermissionsPermissionRow[] rows)
+        {
+            SerializedObject so = new(page);
+            EditorUtil.SetArrayProperty(
+                so.FindProperty(nameof(PermissionsPage.permissionRows)),
+                rows,
+                (p, v) => p.objectReferenceValue = v);
             so.ApplyModifiedProperties();
         }
 

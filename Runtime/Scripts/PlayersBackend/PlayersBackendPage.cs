@@ -21,6 +21,7 @@ namespace JanSharp
         public RectTransform confirmDeletePopup;
         public RectTransform permissionGroupPopup;
         public GameObject permissionGroupPrefab;
+        public LayoutElement permissionGroupPrefabLayoutElement;
         public Transform permissionGroupsParent;
         [Min(0)]
         public int permissionGroupButtonSiblingIndexBaseOffset;
@@ -64,7 +65,7 @@ namespace JanSharp
         public void OnMenuManagerStart()
         {
             localPlayerId = (uint)Networking.LocalPlayer.playerId;
-            permissionGroupButtonHeight = permissionGroupPrefab.GetComponent<LayoutElement>().preferredHeight;
+            permissionGroupButtonHeight = permissionGroupPrefabLayoutElement.preferredHeight;
             maxPermissionGroupsPopupHeight = permissionGroupPopup.sizeDelta.y;
         }
 
@@ -452,7 +453,7 @@ namespace JanSharp
         [PermissionsEvent(PermissionsEventType.OnPermissionGroupDuplicated)]
         public void OnPermissionGroupDuplicated()
         {
-            var group = permissionManager.CreatedPermissionGroup;
+            PermissionGroup group = permissionManager.CreatedPermissionGroup;
             PlayersBackendPermissionGroupButton button = CreatePermissionGroupButton(group);
             pgButtonsById.Add(group.id, button);
             InsertSortPermissionGroupButton(button);

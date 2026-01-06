@@ -19,6 +19,48 @@ namespace JanSharp.Internal
         public string editPermissionGroupPermissionAsset; // A guid.
         [HideInInspector][SerializeField] private PermissionDefinition editPermissionGroupPermissionDef;
 
+        public override void SendDuplicatePermissionGroupIA(string groupName, PermissionGroup toDuplicate)
+        {
+            lockstep.WriteString(groupName);
+            lockstep.WriteSmallUInt(toDuplicate.id);
+            lockstep.SendInputAction(duplicatePermissionGroupIAId);
+        }
+
+        [HideInInspector][SerializeField] private uint duplicatePermissionGroupIAId;
+        [LockstepInputAction(nameof(duplicatePermissionGroupIAId))]
+        public void OnDuplicatePermissionGroupIA()
+        {
+            if (!permissionManager.PlayerHasPermission(playerDataManager.SendingPlayerData, editPermissionsPermissionDef))
+                return;
+            string groupName = lockstep.ReadString();
+            uint groupId = lockstep.ReadSmallUInt();
+            if (!permissionManager.TryGetPermissionGroup(groupId, out PermissionGroup group))
+                return;
+            permissionManager.DuplicatePermissionGroupInGS(groupName, group);
+        }
+
+        public override void SendDeletePermissionGroupIA(PermissionGroup group, PermissionGroup groupToMovePlayersTo)
+        {
+            lockstep.WriteSmallUInt(group.id);
+            lockstep.WriteSmallUInt(groupToMovePlayersTo.id);
+            lockstep.SendInputAction(deletePermissionGroupIAId);
+        }
+
+        [HideInInspector][SerializeField] private uint deletePermissionGroupIAId;
+        [LockstepInputAction(nameof(deletePermissionGroupIAId))]
+        public void OnDeletePermissionGroupIA()
+        {
+            if (!permissionManager.PlayerHasPermission(playerDataManager.SendingPlayerData, editPermissionsPermissionDef))
+                return;
+            uint groupId = lockstep.ReadSmallUInt();
+            uint groupToMovePlayersToId = lockstep.ReadSmallUInt();
+            if (!permissionManager.TryGetPermissionGroup(groupId, out PermissionGroup group))
+                return;
+            if (!permissionManager.TryGetPermissionGroup(groupToMovePlayersToId, out PermissionGroup groupToMovePlayersTo))
+                return;
+            permissionManager.DeletePermissionGroupInGS(group, groupToMovePlayersTo);
+        }
+
         public override void SendRenamePermissionGroupIA(PermissionGroup group, string newGroupName)
         {
             lockstep.WriteSmallUInt(group.id);

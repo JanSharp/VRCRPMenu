@@ -78,6 +78,22 @@ namespace JanSharp
     {
         /// <summary>
         /// <para>Effectively the same as
+        /// <see cref="PermissionManagerAPI.SendDuplicatePermissionGroupIA(string, PermissionGroup)"/>
+        /// except checks if the sending player has permission to do so.</para>
+        /// </summary>
+        /// <param name="groupName"></param>
+        /// <param name="toDuplicate"></param>
+        public abstract void SendDuplicatePermissionGroupIA(string groupName, PermissionGroup toDuplicate);
+        /// <summary>
+        /// <para>Effectively the same as
+        /// <see cref="PermissionManagerAPI.SendDeletePermissionGroupIA(PermissionGroup, PermissionGroup)"/>
+        /// except checks if the sending player has permission to do so.</para>
+        /// </summary>
+        /// <param name="group"></param>
+        /// <param name="groupToMovePlayersTo"></param>
+        public abstract void SendDeletePermissionGroupIA(PermissionGroup group, PermissionGroup groupToMovePlayersTo);
+        /// <summary>
+        /// <para>Effectively the same as
         /// <see cref="PermissionManagerAPI.SendRenamePermissionGroupIA(PermissionGroup, string)"/>
         /// except that it raises <see cref="PermissionsPagesEventType.OnPermissionGroupRenameDenied"/>
         /// instead if the sending player lacks permission to do so.</para>

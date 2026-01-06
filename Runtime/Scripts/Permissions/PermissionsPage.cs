@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using System.Text.RegularExpressions;
+using TMPro;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
@@ -150,6 +151,16 @@ namespace JanSharp
                 groupNameField.SetTextWithoutNotify(group.groupName);
         }
 
+        public void OnDuplicateClick()
+        {
+            // Group 0 is the entire matching string. 1 is the first user defined group.
+            string prefix = Regex.Match(activePermissionGroupToggle.permissionGroup.groupName, @"^(.*?)(\s+\d+)?$").Groups[1].Value + " ";
+            int postfix = 1;
+            while (permissionManager.GetPermissionGroup(prefix + postfix) != null)
+                postfix++;
+            permissionsPagesManager.SendDuplicatePermissionGroupIA(prefix + postfix, activePermissionGroupToggle.permissionGroup);
+        }
+
         [PermissionsEvent(PermissionsEventType.OnPermissionGroupDuplicated)]
         public void OnPermissionGroupDuplicated()
         {
@@ -170,6 +181,11 @@ namespace JanSharp
             SetActivePermissionGroupToggle(toggle);
         }
 
+        public void OnDeleteClick()
+        {
+            permissionsPagesManager.SendDeletePermissionGroupIA(activePermissionGroupToggle.permissionGroup, permissionManager.DefaultPermissionGroup);
+        }
+
         [PermissionsEvent(PermissionsEventType.OnPermissionGroupDeleted)]
         public void OnPermissionGroupDeleted()
         {
@@ -183,7 +199,7 @@ namespace JanSharp
             ArrList.Remove(ref pgToggles, ref pgTogglesCount, toggle);
             CalculatePermissionGroupsContentHeight();
 
-            if (permissionManager.DeletedPermissionGroup == activePermissionGroupToggle)
+            if (toggle == activePermissionGroupToggle)
                 SetActivePermissionGroupToggle(GetPermissionGroupToggle(permissionManager.DefaultPermissionGroup));
         }
 

@@ -10,7 +10,9 @@ namespace JanSharp
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class PermissionsPage : UdonSharpBehaviour
     {
+        [HideInInspector][SerializeField][SingletonReference] private LockstepAPI lockstep;
         [HideInInspector][SerializeField][SingletonReference] private PermissionManagerAPI permissionManager;
+        [HideInInspector][SerializeField][SingletonReference] private PermissionsPagesManagerAPI permissionsPagesManager;
 
         /// <summary>
         /// <para>The order matches that of <see cref="PermissionManagerAPI.PermissionDefinitions"/>.</para>
@@ -120,6 +122,11 @@ namespace JanSharp
             return false;
         }
 
+        public void OnGroupNameChanged()
+        {
+            permissionsPagesManager.SendRenamePermissionGroupIA(activePermissionGroupToggle.permissionGroup, groupNameField.text);
+        }
+
         [PermissionsEvent(PermissionsEventType.OnPermissionGroupRenamed)]
         public void OnPermissionGroupRenamed()
         {
@@ -131,6 +138,16 @@ namespace JanSharp
 
             if (renamedGroup == activePermissionGroupToggle.permissionGroup)
                 groupNameField.SetTextWithoutNotify(renamedGroup.groupName);
+        }
+
+        [PermissionsPagesEvent(PermissionsPagesEventType.OnPermissionGroupRenameDenied)]
+        public void OnPermissionGroupRenameDenied()
+        {
+            if (lockstep.SendingPlayerId != localPlayerId)
+                return; // Only the sending player has to reset their latency state back to game state.
+            PermissionGroup group = permissionsPagesManager.PermissionGroupAttemptedToBeAffected;
+            if (group == activePermissionGroupToggle.permissionGroup)
+                groupNameField.SetTextWithoutNotify(group.groupName);
         }
 
         [PermissionsEvent(PermissionsEventType.OnPermissionGroupDuplicated)]

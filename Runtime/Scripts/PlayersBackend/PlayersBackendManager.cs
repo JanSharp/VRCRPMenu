@@ -4,7 +4,6 @@ using UnityEngine;
 namespace JanSharp.Internal
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-    [SingletonDependency(typeof(PermissionManagerAPI))]
     [CustomRaisedEventsDispatcher(typeof(PlayersBackendEventAttribute), typeof(PlayersBackendEventType))]
     public class PlayersBackendManager : PlayersBackendManagerAPI
     {
@@ -21,10 +20,6 @@ namespace JanSharp.Internal
         [PermissionDefinitionReference(nameof(editCharacterNamePermissionDef))]
         public string editCharacterNamePermissionAsset; // A guid.
         [HideInInspector][SerializeField] private PermissionDefinition editCharacterNamePermissionDef;
-
-        [PermissionDefinitionReference(nameof(editPermissionGroupPermissionDef))]
-        public string editPermissionGroupPermissionAsset; // A guid.
-        [HideInInspector][SerializeField] private PermissionDefinition editPermissionGroupPermissionDef;
 
         [PermissionDefinitionReference(nameof(deleteOfflinePlayerDataPermissionDef))]
         public string deleteOfflinePlayerDataPermissionAsset; // A guid.
@@ -126,31 +121,6 @@ namespace JanSharp.Internal
             RaiseOnRPPlayerDataCharacterNameChanged(rpPlayerData, prev);
         }
 
-        public override void SendSetPlayerPermissionGroupIA(CorePlayerData corePlayerData, PermissionGroup group)
-        {
-            lockstep.WriteSmallUInt(corePlayerData.persistentId); // playerId would not work for offline players.
-            lockstep.WriteSmallUInt(group.id);
-            lockstep.SendInputAction(setPlayerPermissionGroupIAId);
-        }
-
-        [HideInInspector][SerializeField] private uint setPlayerPermissionGroupIAId;
-        [LockstepInputAction(nameof(setPlayerPermissionGroupIAId))]
-        public void OnSetPlayerPermissionGroupIA()
-        {
-            uint persistentId = lockstep.ReadSmallUInt();
-            if (!permissionManager.PlayerHasPermission(playerDataManager.SendingPlayerData, editPermissionGroupPermissionDef))
-            {
-                RaiseOnPlayerPermissionGroupChangeDenied(persistentId);
-                return;
-            }
-            if (!playerDataManager.TryGetCorePlayerDataForPersistentId(persistentId, out CorePlayerData corePlayerData))
-                return;
-            uint groupId = lockstep.ReadSmallUInt();
-            if (!permissionManager.TryGetPermissionGroup(groupId, out PermissionGroup group))
-                return;
-            permissionManager.SetPlayerPermissionGroupInGS(corePlayerData, group);
-        }
-
         public override void SendDeleteOfflinePlayerDataIA(CorePlayerData corePlayerData)
         {
             if (!corePlayerData.isOffline)
@@ -195,7 +165,6 @@ namespace JanSharp.Internal
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onRPPlayerDataCharacterNameChangedListeners;
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onRPPlayerDataOverriddenDisplayNameChangeDeniedListeners;
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onRPPlayerDataCharacterNameChangeDeniedListeners;
-        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onPlayerPermissionGroupChangeDeniedListeners;
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onDeleteOfflinePlayerDataDeniedListeners;
 
         private RPPlayerData rpPlayerDataForEvent;
@@ -242,14 +211,6 @@ namespace JanSharp.Internal
             // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
             JanSharp.CustomRaisedEvents.Raise(ref onRPPlayerDataCharacterNameChangeDeniedListeners, nameof(PlayersBackendEventType.OnRPPlayerDataCharacterNameChangeDenied));
             this.rpPlayerDataForEvent = null; // To prevent misuse of the API.
-        }
-
-        private void RaiseOnPlayerPermissionGroupChangeDenied(uint persistentIdAttemptedToBeAffected)
-        {
-            this.persistentIdAttemptedToBeAffected = persistentIdAttemptedToBeAffected;
-            // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
-            JanSharp.CustomRaisedEvents.Raise(ref onPlayerPermissionGroupChangeDeniedListeners, nameof(PlayersBackendEventType.OnPlayerPermissionGroupChangeDenied));
-            this.persistentIdAttemptedToBeAffected = 0u; // To prevent misuse of the API.
         }
 
         private void RaiseOnDeleteOfflinePlayerDataDenied(uint persistentIdAttemptedToBeAffected)

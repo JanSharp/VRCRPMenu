@@ -38,14 +38,6 @@ namespace JanSharp
         OnRPPlayerDataCharacterNameChangeDenied,
         /// <summary>
         /// <para>Use <see cref="PlayersBackendManagerAPI.PersistentIdAttemptedToBeAffected"/> to get the
-        /// player which was attempted to have their permission group changed.</para>
-        /// <para>Runs inside of an input action, making API properties for input actions from lockstep or
-        /// other systems available.</para>
-        /// <para>Game state safe.</para>
-        /// </summary>
-        OnPlayerPermissionGroupChangeDenied,
-        /// <summary>
-        /// <para>Use <see cref="PlayersBackendManagerAPI.PersistentIdAttemptedToBeAffected"/> to get the
         /// player which was attempted to be deleted.</para>
         /// <para>Runs inside of an input action, making API properties for input actions from lockstep or
         /// other systems available.</para>
@@ -80,15 +72,6 @@ namespace JanSharp
         public abstract void SendSetCharacterNameIA(RPPlayerData rpPlayerData, string characterName);
         public abstract void SetCharacterNameInGS(RPPlayerData rpPlayerData, string characterName);
 
-        /// <summary>
-        /// <para>Effectively the same as
-        /// <see cref="PermissionManagerAPI.SendSetPlayerPermissionGroupIA(CorePlayerData, PermissionGroup)"/>
-        /// except that it raises <see cref="PlayersBackendEventType.OnPlayerPermissionGroupChangeDenied"/>
-        /// instead if the sending player lacks permission to do so.</para>
-        /// </summary>
-        /// <param name="corePlayerData"></param>
-        /// <param name="group"></param>
-        public abstract void SendSetPlayerPermissionGroupIA(CorePlayerData corePlayerData, PermissionGroup group);
         /// <summary>
         /// <para>Effectively the same as
         /// <see cref="PlayerDataManagerAPI.SendDeleteOfflinePlayerDataIA(CorePlayerData)"/> except that it
@@ -127,7 +110,6 @@ namespace JanSharp
 
         /// <summary>
         /// <para>Usable inside of
-        /// <see cref="PlayersBackendEventType.OnPlayerPermissionGroupChangeDenied"/> and
         /// <see cref="PlayersBackendEventType.OnDeleteOfflinePlayerDataDenied"/>.</para>
         /// <para>Game state safe.</para>
         /// </summary>

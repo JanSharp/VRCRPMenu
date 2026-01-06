@@ -13,6 +13,7 @@ namespace JanSharp
         [HideInInspector][SerializeField][SingletonReference] private PlayersBackendManagerAPI playersBackendManager;
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
         [HideInInspector][SerializeField][SingletonReference] private PermissionManagerAPI permissionManager;
+        [HideInInspector][SerializeField][SingletonReference] private PermissionsPagesManagerAPI permissionsPagesManager;
         [HideInInspector][SerializeField][FindInParent] private MenuManagerAPI menuManager;
 
         public PlayersBackendList rowsList;
@@ -379,13 +380,13 @@ namespace JanSharp
             // actually runs it's going to show the "wrong" group (the one the player is still apart of in the
             // game state), and it would only update once the IA runs.
             SetPermissionGroupLabelText(selectedRowForPopup, button.permissionGroup.groupName);
-            playersBackendManager.SendSetPlayerPermissionGroupIA(
+            permissionsPagesManager.SendSetPlayerPermissionGroupIA(
                 selectedRowForPopup.permissionsPlayerData.core,
                 button.permissionGroup);
             menuManager.ClosePopup(permissionGroupPopup, doCallback: true);
         }
 
-        [PlayersBackendEvent(PlayersBackendEventType.OnPlayerPermissionGroupChangeDenied)]
+        [PermissionsPagesEvent(PermissionsPagesEventType.OnPlayerPermissionGroupChangeDenied)]
         public void OnPlayerPermissionGroupChangeDenied()
         {
             if (lockstep.SendingPlayerId != localPlayerId)

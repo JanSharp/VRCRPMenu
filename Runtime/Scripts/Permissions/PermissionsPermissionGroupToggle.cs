@@ -15,7 +15,10 @@ namespace JanSharp
 
         public void OnValueChanged()
         {
-
+            if (toggle.isOn)
+                page.SetActivePermissionGroupToggle(this);
+            else
+                toggle.SetIsOnWithoutNotify(true);
         }
     }
 }

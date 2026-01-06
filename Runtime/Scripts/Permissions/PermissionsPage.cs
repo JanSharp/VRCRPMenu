@@ -1,4 +1,5 @@
-﻿using UdonSharp;
+﻿using TMPro;
+using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
 using VRC.SDK3.Data;
@@ -24,6 +25,9 @@ namespace JanSharp
         public int permissionGroupToggleSiblingIndexBaseOffset;
         private float permissionGroupToggleHeight;
 
+        public Button deleteGroupButton;
+        public TMP_InputField groupNameField;
+
         /// <summary>
         /// <para><see cref="uint"/> permissionGroupId => <see cref="PermissionsPermissionGroupToggle"/> toggle</para>
         /// </summary>
@@ -32,6 +36,7 @@ namespace JanSharp
         private int pgTogglesCount = 0;
         private PermissionsPermissionGroupToggle[] unusedPGToggles = new PermissionsPermissionGroupToggle[ArrList.MinCapacity];
         private int unusedPGTogglesCount = 0;
+        private PermissionsPermissionGroupToggle activePermissionGroupToggle;
 
         private uint localPlayerId;
         private bool isInitialized = false;
@@ -47,6 +52,7 @@ namespace JanSharp
         public void OnInit()
         {
             RebuildPermissionGroupToggles();
+            SetActivePermissionGroupToggle(GetPermissionGroupToggle(permissionManager.DefaultPermissionGroup));
             isInitialized = true;
         }
 
@@ -54,6 +60,7 @@ namespace JanSharp
         public void OnClientBeginCatchUp()
         {
             RebuildPermissionGroupToggles();
+            SetActivePermissionGroupToggle(GetPermissionGroupToggle(permissionManager.DefaultPermissionGroup));
             isInitialized = true;
         }
 
@@ -61,12 +68,46 @@ namespace JanSharp
         public void OnImportFinishingUp()
         {
             if (permissionManager.IsPartOfCurrentImport)
+            {
                 RebuildPermissionGroupToggles();
+                if (activePermissionGroupToggle.permissionGroup == null || activePermissionGroupToggle.permissionGroup.isDeleted)
+                    SetActivePermissionGroupToggle(GetPermissionGroupToggle(permissionManager.DefaultPermissionGroup));
+            }
         }
 
         #region PermissionGroupToggles
 
-        // NOTE: This is pretty much entirely copy paste from PlayersBackendPage.cs
+        public void SetActivePermissionGroupToggle(PermissionsPermissionGroupToggle toggle)
+        {
+            PermissionsPermissionGroupToggle prevToggle = activePermissionGroupToggle;
+            activePermissionGroupToggle = toggle;
+            if (prevToggle != null)
+                prevToggle.toggle.SetIsOnWithoutNotify(false);
+            toggle.toggle.SetIsOnWithoutNotify(true);
+
+            PermissionGroup group = toggle.permissionGroup;
+            groupNameField.text = group.groupName;
+            bool isNotDefault = !group.isDefault;
+            groupNameField.interactable = isNotDefault;
+            deleteGroupButton.interactable = isNotDefault;
+
+            int defsCount = permissionManager.PermissionDefinitions.Length;
+            bool[] groupValues = group.permissionValues;
+            for (int i = 0; i < defsCount; i++)
+                permissionRows[i].SetIsOnWithoutNotify(groupValues[i]);
+        }
+
+        private PermissionsPermissionGroupToggle GetPermissionGroupToggle(uint permissionGroupId)
+        {
+            return (PermissionsPermissionGroupToggle)pgTogglesById[permissionGroupId].Reference;
+        }
+
+        private PermissionsPermissionGroupToggle GetPermissionGroupToggle(PermissionGroup permissionGroup)
+        {
+            return (PermissionsPermissionGroupToggle)pgTogglesById[permissionGroup.id].Reference;
+        }
+
+        // NOTE: This has a lot of copy paste from PlayersBackendPage.cs
 
         private bool TryGetPermissionGroupToggle(uint permissionGroupId, out PermissionsPermissionGroupToggle toggle)
         {
@@ -82,23 +123,41 @@ namespace JanSharp
         [PermissionsEvent(PermissionsEventType.OnPermissionGroupRenamed)]
         public void OnPermissionGroupRenamed()
         {
-            if (TryGetPermissionGroupToggle(permissionManager.RenamedPermissionGroup.id, out var toggle))
+            if (!isInitialized)
+                return;
+            PermissionGroup renamedGroup = permissionManager.RenamedPermissionGroup;
+            if (TryGetPermissionGroupToggle(renamedGroup.id, out var toggle))
                 UpdatePermissionGroupToggleLabel(toggle);
+
+            if (renamedGroup == activePermissionGroupToggle.permissionGroup)
+                groupNameField.SetTextWithoutNotify(renamedGroup.groupName);
         }
 
         [PermissionsEvent(PermissionsEventType.OnPermissionGroupDuplicated)]
         public void OnPermissionGroupDuplicated()
         {
+            if (!isInitialized)
+                return;
             PermissionGroup group = permissionManager.CreatedPermissionGroup;
             PermissionsPermissionGroupToggle toggle = CreatePermissionGroupToggle(group);
             pgTogglesById.Add(group.id, toggle);
             InsertSortPermissionGroupToggle(toggle);
             CalculatePermissionGroupsContentHeight();
+
+            // TODO: Knowing which player, if any, created a new group would be useful, so we can only
+            // switch to that group if it was the local player creating it.
+            // Cannot use lockstep.SendingPlayerID because it is not guaranteed that we are inside of an input
+            // action here, just that it is game state safe.
+            // In other words, the API would have to provide explicit support for knowing which player created
+            // the group.
+            SetActivePermissionGroupToggle(toggle);
         }
 
         [PermissionsEvent(PermissionsEventType.OnPermissionGroupDeleted)]
         public void OnPermissionGroupDeleted()
         {
+            if (!isInitialized)
+                return;
             if (!TryGetPermissionGroupToggle(permissionManager.DeletedPermissionGroup.id, out var toggle))
                 return;
             toggle.gameObject.SetActive(false);
@@ -106,11 +165,17 @@ namespace JanSharp
             ArrList.Add(ref unusedPGToggles, ref unusedPGTogglesCount, toggle);
             ArrList.Remove(ref pgToggles, ref pgTogglesCount, toggle);
             CalculatePermissionGroupsContentHeight();
+
+            if (permissionManager.DeletedPermissionGroup == activePermissionGroupToggle)
+                SetActivePermissionGroupToggle(GetPermissionGroupToggle(permissionManager.DefaultPermissionGroup));
         }
 
         private void RebuildPermissionGroupToggles()
         {
             int newCount = permissionManager.PermissionGroupsCount;
+            PermissionGroup activeGroup = activePermissionGroupToggle == null
+                ? null
+                : activePermissionGroupToggle.permissionGroup;
 
             pgTogglesById.Clear();
             ArrList.AddRange(ref unusedPGToggles, ref unusedPGTogglesCount, pgToggles, pgTogglesCount);
@@ -120,6 +185,7 @@ namespace JanSharp
                     // Disable the low index ones, the higher ones will be reused from the unusedRows "stack".
                     PermissionsPermissionGroupToggle toggle = pgToggles[i];
                     toggle.gameObject.SetActive(false);
+                    toggle.toggle.SetIsOnWithoutNotify(false);
                     toggle.transform.SetAsLastSibling();
                 }
 
@@ -133,6 +199,10 @@ namespace JanSharp
                 PermissionsPermissionGroupToggle toggle = CreatePermissionGroupToggle(group);
                 InsertSortPermissionGroupToggle(toggle);
                 pgTogglesById.Add(group.id, toggle);
+                bool isActiveToggle = group == activeGroup;
+                toggle.toggle.SetIsOnWithoutNotify(isActiveToggle);
+                if (isActiveToggle)
+                    activePermissionGroupToggle = toggle;
             }
 
             CalculatePermissionGroupsContentHeight();

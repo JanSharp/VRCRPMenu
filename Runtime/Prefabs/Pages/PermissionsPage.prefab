@@ -614,6 +614,8 @@ MonoBehaviour:
   permissionGroupPrefabLayoutElement: {fileID: 1325673580577301724}
   permissionGroupsParent: {fileID: 7308716913450471841}
   permissionGroupToggleSiblingIndexBaseOffset: 1
+  deleteGroupButton: {fileID: 836898682318016456}
+  groupNameField: {fileID: 2030345360832616169}
 --- !u!114 &4701018904812747839
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1168,7 +1170,19 @@ MonoBehaviour:
   m_Group: {fileID: 0}
   onValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 3013646600905764124}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SendCustomEvent
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: OnValueChanged
+          m_BoolArgument: 0
+        m_CallState: 2
   m_IsOn: 0
 --- !u!114 &7183718844014362593
 MonoBehaviour:

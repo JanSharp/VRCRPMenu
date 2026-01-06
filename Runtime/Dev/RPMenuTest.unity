@@ -7647,11 +7647,11 @@ MonoBehaviour:
   displayName: Edit Permissions
   defaultValue: 1
   resolvers:
+  - {fileID: 1370586899}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  - {fileID: 0}
-  resolversCount: 0
+  resolversCount: 1
 --- !u!1 &824869458
 GameObject:
   m_ObjectHideFlags: 0
@@ -8718,6 +8718,18 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 2513727047246078096}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1006452594 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1631274755849692366, guid: c1a26f964e70d51e3a4af28632b3910f,
+    type: 3}
+  m_PrefabInstance: {fileID: 2513727047246078096}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1006452593}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5265d19ca01708dea909a990a3c85ff4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1008514972
 GameObject:
   m_ObjectHideFlags: 0
@@ -11209,6 +11221,24 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 3828525567010155542}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1370586898 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2071851296856406384, guid: c1a26f964e70d51e3a4af28632b3910f,
+    type: 3}
+  m_PrefabInstance: {fileID: 2513727047246078096}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1370586899 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 9210836886348230877, guid: c1a26f964e70d51e3a4af28632b3910f,
+    type: 3}
+  m_PrefabInstance: {fileID: 2513727047246078096}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1370586898}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3846bdff508d08364a3e4d5f9a1c2424, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1381286538
 GameObject:
   m_ObjectHideFlags: 0
@@ -13392,6 +13422,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 910427d32de5308cf85dacab0f4d5f7c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &1524811759 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3853620170805223256, guid: 3a67ef387aa3e3e84a5fdfa168d7ae99,
+    type: 3}
+  m_PrefabInstance: {fileID: 870786948663879269}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1529339699
 GameObject:
   m_ObjectHideFlags: 0
@@ -15337,7 +15373,7 @@ PrefabInstance:
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.size
-      value: 44
+      value: 45
       objectReference: {fileID: 0}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
@@ -15363,52 +15399,52 @@ PrefabInstance:
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[0]
       value: 
-      objectReference: {fileID: 44792564}
+      objectReference: {fileID: 1370586899}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[1]
       value: 
-      objectReference: {fileID: 194569031}
+      objectReference: {fileID: 44792564}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[2]
       value: 
-      objectReference: {fileID: 200041546}
+      objectReference: {fileID: 194569031}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[3]
       value: 
-      objectReference: {fileID: 204128798}
+      objectReference: {fileID: 200041546}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[4]
       value: 
-      objectReference: {fileID: 218305883}
+      objectReference: {fileID: 204128798}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[5]
       value: 
-      objectReference: {fileID: 335046796}
+      objectReference: {fileID: 218305883}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[6]
       value: 
-      objectReference: {fileID: 353075037}
+      objectReference: {fileID: 335046796}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[7]
       value: 
-      objectReference: {fileID: 466203285}
+      objectReference: {fileID: 353075037}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[8]
       value: 
-      objectReference: {fileID: 469715656}
+      objectReference: {fileID: 466203285}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[9]
       value: 
-      objectReference: {fileID: 635051556}
+      objectReference: {fileID: 469715656}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: onPermissionManagerImportFinishedListeners.Array.size
@@ -15433,172 +15469,172 @@ PrefabInstance:
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[10]
       value: 
-      objectReference: {fileID: 655000239}
+      objectReference: {fileID: 635051556}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[11]
       value: 
-      objectReference: {fileID: 704706419}
+      objectReference: {fileID: 655000239}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[12]
       value: 
-      objectReference: {fileID: 729876036}
+      objectReference: {fileID: 704706419}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[13]
       value: 
-      objectReference: {fileID: 733037960}
+      objectReference: {fileID: 729876036}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[14]
       value: 
-      objectReference: {fileID: 775005259}
+      objectReference: {fileID: 733037960}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[15]
       value: 
-      objectReference: {fileID: 790118241}
+      objectReference: {fileID: 775005259}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[16]
       value: 
-      objectReference: {fileID: 980609347}
+      objectReference: {fileID: 790118241}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[17]
       value: 
-      objectReference: {fileID: 1005924042}
+      objectReference: {fileID: 980609347}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[18]
       value: 
-      objectReference: {fileID: 1036411563}
+      objectReference: {fileID: 1005924042}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[19]
       value: 
-      objectReference: {fileID: 1103898977}
+      objectReference: {fileID: 1036411563}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[20]
       value: 
-      objectReference: {fileID: 1161672117}
+      objectReference: {fileID: 1103898977}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[21]
       value: 
-      objectReference: {fileID: 1341320723}
+      objectReference: {fileID: 1161672117}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[22]
       value: 
-      objectReference: {fileID: 1387460357}
+      objectReference: {fileID: 1341320723}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[23]
       value: 
-      objectReference: {fileID: 1443771135}
+      objectReference: {fileID: 1387460357}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[24]
       value: 
-      objectReference: {fileID: 1500539114}
+      objectReference: {fileID: 1443771135}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[25]
       value: 
-      objectReference: {fileID: 1655548270}
+      objectReference: {fileID: 1500539114}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[26]
       value: 
-      objectReference: {fileID: 1659575481}
+      objectReference: {fileID: 1655548270}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[27]
       value: 
-      objectReference: {fileID: 1668835232}
+      objectReference: {fileID: 1659575481}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[28]
       value: 
-      objectReference: {fileID: 1730896604}
+      objectReference: {fileID: 1668835232}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[29]
       value: 
-      objectReference: {fileID: 1738638679}
+      objectReference: {fileID: 1730896604}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[30]
       value: 
-      objectReference: {fileID: 1786279757}
+      objectReference: {fileID: 1738638679}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[31]
       value: 
-      objectReference: {fileID: 1825659343}
+      objectReference: {fileID: 1786279757}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[32]
       value: 
-      objectReference: {fileID: 1906365469}
+      objectReference: {fileID: 1825659343}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[33]
       value: 
-      objectReference: {fileID: 1937314311}
+      objectReference: {fileID: 1906365469}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[34]
       value: 
-      objectReference: {fileID: 1979887193}
+      objectReference: {fileID: 1937314311}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[35]
       value: 
-      objectReference: {fileID: 2074810124}
+      objectReference: {fileID: 1979887193}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[36]
       value: 
-      objectReference: {fileID: 2084167955}
+      objectReference: {fileID: 2074810124}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[37]
       value: 
-      objectReference: {fileID: 2090600456}
+      objectReference: {fileID: 2084167955}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[38]
       value: 
-      objectReference: {fileID: 2106501784}
+      objectReference: {fileID: 2090600456}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[39]
       value: 
-      objectReference: {fileID: 2109460387}
+      objectReference: {fileID: 2106501784}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[40]
       value: 
-      objectReference: {fileID: 2141476413}
+      objectReference: {fileID: 2109460387}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[41]
       value: 
-      objectReference: {fileID: 2513727047246078098}
+      objectReference: {fileID: 2141476413}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[42]
       value: 
-      objectReference: {fileID: 3805926219095462896}
+      objectReference: {fileID: 2513727047246078098}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[43]
       value: 
-      objectReference: {fileID: 3805926219095462897}
+      objectReference: {fileID: 3805926219095462896}
     - target: {fileID: 8651540747086455185, guid: fe2230975d59bf380865519bc62b6a3a,
         type: 3}
       propertyPath: permissionResolversExistingAtSceneLoad.Array.data[44]
@@ -17063,7 +17099,7 @@ PrefabInstance:
     - target: {fileID: 6759095419728963412, guid: 8894fa7e4588a5c4fab98453e558847d,
         type: 3}
       propertyPath: NetworkIDs.Array.size
-      value: 265
+      value: 267
       objectReference: {fileID: 0}
     - target: {fileID: 6759095419728963412, guid: 8894fa7e4588a5c4fab98453e558847d,
         type: 3}
@@ -18399,6 +18435,16 @@ PrefabInstance:
         type: 3}
       propertyPath: NetworkIDs.Array.data[264].ID
       value: 350
+      objectReference: {fileID: 0}
+    - target: {fileID: 6759095419728963412, guid: 8894fa7e4588a5c4fab98453e558847d,
+        type: 3}
+      propertyPath: NetworkIDs.Array.data[265].ID
+      value: 351
+      objectReference: {fileID: 0}
+    - target: {fileID: 6759095419728963412, guid: 8894fa7e4588a5c4fab98453e558847d,
+        type: 3}
+      propertyPath: NetworkIDs.Array.data[266].ID
+      value: 352
       objectReference: {fileID: 0}
     - target: {fileID: 6759095419728963412, guid: 8894fa7e4588a5c4fab98453e558847d,
         type: 3}
@@ -20092,6 +20138,16 @@ PrefabInstance:
       objectReference: {fileID: 265435534}
     - target: {fileID: 6759095419728963412, guid: 8894fa7e4588a5c4fab98453e558847d,
         type: 3}
+      propertyPath: NetworkIDs.Array.data[265].gameObject
+      value: 
+      objectReference: {fileID: 1524811759}
+    - target: {fileID: 6759095419728963412, guid: 8894fa7e4588a5c4fab98453e558847d,
+        type: 3}
+      propertyPath: NetworkIDs.Array.data[266].gameObject
+      value: 
+      objectReference: {fileID: 1370586898}
+    - target: {fileID: 6759095419728963412, guid: 8894fa7e4588a5c4fab98453e558847d,
+        type: 3}
       propertyPath: NetworkIDs.Array.data[0].SerializedTypeNames.Array.size
       value: 3
       objectReference: {fileID: 0}
@@ -21413,6 +21469,16 @@ PrefabInstance:
     - target: {fileID: 6759095419728963412, guid: 8894fa7e4588a5c4fab98453e558847d,
         type: 3}
       propertyPath: NetworkIDs.Array.data[264].SerializedTypeNames.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6759095419728963412, guid: 8894fa7e4588a5c4fab98453e558847d,
+        type: 3}
+      propertyPath: NetworkIDs.Array.data[265].SerializedTypeNames.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6759095419728963412, guid: 8894fa7e4588a5c4fab98453e558847d,
+        type: 3}
+      propertyPath: NetworkIDs.Array.data[266].SerializedTypeNames.Array.size
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6759095419728963412, guid: 8894fa7e4588a5c4fab98453e558847d,
@@ -23265,6 +23331,16 @@ PrefabInstance:
       propertyPath: NetworkIDs.Array.data[264].SerializedTypeNames.Array.data[0]
       value: VRC.Udon.UdonBehaviour
       objectReference: {fileID: 0}
+    - target: {fileID: 6759095419728963412, guid: 8894fa7e4588a5c4fab98453e558847d,
+        type: 3}
+      propertyPath: NetworkIDs.Array.data[265].SerializedTypeNames.Array.data[0]
+      value: VRC.Udon.UdonBehaviour
+      objectReference: {fileID: 0}
+    - target: {fileID: 6759095419728963412, guid: 8894fa7e4588a5c4fab98453e558847d,
+        type: 3}
+      propertyPath: NetworkIDs.Array.data[266].SerializedTypeNames.Array.data[0]
+      value: VRC.Udon.UdonBehaviour
+      objectReference: {fileID: 0}
     - target: {fileID: 8464459589408506562, guid: 8894fa7e4588a5c4fab98453e558847d,
         type: 3}
       propertyPath: serializedProgramAsset
@@ -24942,6 +25018,12 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6226518676069619445, guid: 3a67ef387aa3e3e84a5fdfa168d7ae99,
+        type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 6226518676069619445, guid: 3a67ef387aa3e3e84a5fdfa168d7ae99,
+        type: 3}
     - target: {fileID: 6347173316919767838, guid: 3a67ef387aa3e3e84a5fdfa168d7ae99,
         type: 3}
       propertyPath: m_Name
@@ -25195,6 +25277,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9116095161333396026, guid: 3a67ef387aa3e3e84a5fdfa168d7ae99,
+        type: 3}
+      propertyPath: _syncMethod
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -25812,6 +25899,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1631274755849692366, guid: c1a26f964e70d51e3a4af28632b3910f,
         type: 3}
+    - target: {fileID: 1631274755849692366, guid: c1a26f964e70d51e3a4af28632b3910f,
+        type: 3}
+      propertyPath: hasAnyShowPageByPermissionsInChildren
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1831256434563607367, guid: c1a26f964e70d51e3a4af28632b3910f,
         type: 3}
       propertyPath: serializationData.Prefab
@@ -26474,6 +26566,11 @@ PrefabInstance:
       propertyPath: deleteOfflinePlayerDataPermissionDef
       value: 
       objectReference: {fileID: 1788691945}
+    - target: {fileID: 6284947723334571026, guid: c1a26f964e70d51e3a4af28632b3910f,
+        type: 3}
+      propertyPath: _syncMethod
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6453228150972863213, guid: c1a26f964e70d51e3a4af28632b3910f,
         type: 3}
       propertyPath: serializationData.Prefab
@@ -27203,6 +27300,27 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 9098439972423261618, guid: c1a26f964e70d51e3a4af28632b3910f,
         type: 3}
+    - target: {fileID: 9210836886348230877, guid: c1a26f964e70d51e3a4af28632b3910f,
+        type: 3}
+      propertyPath: menuPageRoot
+      value: 
+      objectReference: {fileID: 1006452594}
+    - target: {fileID: 9210836886348230877, guid: c1a26f964e70d51e3a4af28632b3910f,
+        type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 9210836886348230877, guid: c1a26f964e70d51e3a4af28632b3910f,
+        type: 3}
+    - target: {fileID: 9210836886348230877, guid: c1a26f964e70d51e3a4af28632b3910f,
+        type: 3}
+      propertyPath: permissionDefs.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9210836886348230877, guid: c1a26f964e70d51e3a4af28632b3910f,
+        type: 3}
+      propertyPath: permissionDefs.Array.data[0]
+      value: 
+      objectReference: {fileID: 813248564}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:

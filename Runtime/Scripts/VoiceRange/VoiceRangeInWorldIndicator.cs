@@ -265,7 +265,17 @@ namespace JanSharp
             if ((showMask & nextActiveDef.bitMaskFlag) == 0u)
                 nextActiveDef = null;
             if (activeDef == nextActiveDef)
+            {
+                if (activeDef != null)
+                    return;
+                // When they are both null snap to the current definition's values to make fading in start at
+                // the proper values if the next active voice range is one that does end up getting shown.
+                Color color = maxColors[index];
+                color.a = 0f;
+                indicatorMaterial.color = color;
+                SetShownRadius(activeRadius);
                 return;
+            }
             activeDef = nextActiveDef;
             activeMinColor = minColors[index];
             activeMaxColor = maxColors[index];

@@ -38,9 +38,9 @@ namespace JanSharp
         public string editCharacterNamePermissionAsset; // A guid.
         [HideInInspector][SerializeField] private PermissionDefinition editCharacterNamePermissionDef;
 
-        [PermissionDefinitionReference(nameof(editPermissionGroupPermissionDef))]
-        public string editPermissionGroupPermissionAsset; // A guid.
-        [HideInInspector][SerializeField] private PermissionDefinition editPermissionGroupPermissionDef;
+        [PermissionDefinitionReference(nameof(editPermissionsPermissionDef))]
+        public string editPermissionsPermissionAsset; // A guid.
+        [HideInInspector][SerializeField] private PermissionDefinition editPermissionsPermissionDef;
 
         [PermissionDefinitionReference(nameof(deleteOfflinePlayerDataPermissionDef))]
         public string deleteOfflinePlayerDataPermissionAsset; // A guid.
@@ -147,7 +147,7 @@ namespace JanSharp
         {
             bool displayNameValue = editDisplayNamePermissionDef.valueForLocalPlayer;
             bool characterNameValue = editCharacterNamePermissionDef.valueForLocalPlayer;
-            bool permissionGroupValue = editPermissionGroupPermissionDef.valueForLocalPlayer;
+            bool permissionGroupValue = editPermissionsPermissionDef.valueForLocalPlayer;
             bool deleteValue = deleteOfflinePlayerDataPermissionDef.valueForLocalPlayer;
 
             rowsList.SortOnPermissionChange(displayNameValue, characterNameValue, permissionGroupValue);

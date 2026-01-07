@@ -49,10 +49,14 @@
 - [ ] add the crazy ideas for requesting GM without opening the menu, see gm-menu-requirements.md in menu-system
 - [ ] How to truly prevent locking yourself out of permissions to edit permissions
   - editing the permission values themselves could lock you out
+    - [ ] disallow removing the edit permissions permission if the actively edited group is the group you yourself are in
   - deleting a permission group could lock you out
+    - [ ] disallow deleting the permission group you are in if the default group does not have the edit permissions permission
   - deleting the last player data which had the necessary permissions could lock you out
+    - [ ] disallow deleting the last offline player data which is in a group that has the edit permissions permission
   - changing the last player data's group could lock you out
-- [ ] think about combining the edit permissions permission and the change permission group permission
+    - [ ] disallow changing your permission group to a group which does not have the edit permissions permission
+- [x] think about combining the edit permissions permission and the change permission group permission
 - [x] voice range settings UI
 - [x] voice range HUD
 - [x] voice range in world indicator

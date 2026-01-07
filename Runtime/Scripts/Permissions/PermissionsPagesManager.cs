@@ -15,10 +15,6 @@ namespace JanSharp.Internal
         public string editPermissionsPermissionAsset; // A guid.
         [HideInInspector][SerializeField] private PermissionDefinition editPermissionsPermissionDef;
 
-        [PermissionDefinitionReference(nameof(editPermissionGroupPermissionDef))]
-        public string editPermissionGroupPermissionAsset; // A guid.
-        [HideInInspector][SerializeField] private PermissionDefinition editPermissionGroupPermissionDef;
-
         public override void SendDuplicatePermissionGroupIA(string groupName, PermissionGroup toDuplicate)
         {
             lockstep.WriteString(groupName);
@@ -99,7 +95,7 @@ namespace JanSharp.Internal
         {
             uint persistentId = lockstep.ReadSmallUInt();
 
-            if (!permissionManager.PlayerHasPermission(playerDataManager.SendingPlayerData, editPermissionGroupPermissionDef))
+            if (!permissionManager.PlayerHasPermission(playerDataManager.SendingPlayerData, editPermissionsPermissionDef))
             {
                 RaiseOnPlayerPermissionGroupChangeDenied(persistentId);
                 return;

@@ -404,10 +404,11 @@ namespace JanSharp
                     this,
                     nameof(OnWouldLoseEditPermissionsPopupClosed));
 
-            PermissionsPlayerData permissionsPlayerData = permissionManager.PlayerDataForEvent;
-            if (!TryGetRow(permissionsPlayerData.core.persistentId, out PlayersBackendRow row))
+            uint persistentId = permissionsPagesManager.PersistentIdAttemptedToBeAffected;
+            if (!TryGetRow(persistentId, out PlayersBackendRow row))
                 return; // Some system did something weird.
-            SetPermissionGroupLabelText(row, permissionsPlayerData.permissionGroup.groupName);
+            CorePlayerData core = playerDataManager.GetCorePlayerDataForPersistentId(persistentId);
+            SetPermissionGroupLabelText(row, permissionManager.GetPermissionsPlayerData(core).permissionGroup.groupName);
         }
 
         public void OnWouldLoseEditPermissionsPopupClosed()

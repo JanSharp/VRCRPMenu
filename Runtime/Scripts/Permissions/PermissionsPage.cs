@@ -30,6 +30,8 @@ namespace JanSharp
 
         public Button deleteGroupButton;
         public TMP_InputField groupNameField;
+        public TextMeshProUGUI playersInGroupCountsText;
+        private string playersInGroupCountsFormat;
 
         /// <summary>
         /// <para><see cref="uint"/> permissionGroupId => <see cref="PermissionsPermissionGroupToggle"/> toggle</para>
@@ -54,6 +56,7 @@ namespace JanSharp
         [LockstepEvent(LockstepEventType.OnInit)]
         public void OnInit()
         {
+            InitPlayersInGroupCounts();
             RebuildPermissionGroupToggles();
             SetActivePermissionGroupToggle(GetPermissionGroupToggle(permissionManager.DefaultPermissionGroup));
             isInitialized = true;
@@ -62,6 +65,7 @@ namespace JanSharp
         [LockstepEvent(LockstepEventType.OnClientBeginCatchUp)]
         public void OnClientBeginCatchUp()
         {
+            InitPlayersInGroupCounts();
             RebuildPermissionGroupToggles();
             SetActivePermissionGroupToggle(GetPermissionGroupToggle(permissionManager.DefaultPermissionGroup));
             isInitialized = true;
@@ -76,9 +80,64 @@ namespace JanSharp
                 if (activePermissionGroupToggle.permissionGroup == null || activePermissionGroupToggle.permissionGroup.isDeleted)
                     SetActivePermissionGroupToggle(GetPermissionGroupToggle(permissionManager.DefaultPermissionGroup));
                 else
-                    UpdateAllPermissionRows();
+                    UpdatePermissionGroupDetailsExceptNameField();
             }
         }
+
+        #region PlayersInGroup
+
+        private void InitPlayersInGroupCounts()
+        {
+            playersInGroupCountsFormat = playersInGroupCountsText.text;
+        }
+
+        private void UpdatePlayersInGroupCounts()
+        {
+            PermissionGroup group = activePermissionGroupToggle.permissionGroup;
+            playersInGroupCountsText.text = string.Format(playersInGroupCountsFormat, group.playersInGroupCount, group.onlinePlayersInGroupCount);
+        }
+
+        [PlayerDataEvent(PlayerDataEventType.OnPlayerDataCreated)]
+        public void OnPlayerDataCreated()
+        {
+            if (!isInitialized)
+                return;
+            UpdatePlayersInGroupCounts();
+        }
+
+        [PlayerDataEvent(PlayerDataEventType.OnPlayerDataDeleted)]
+        public void OnPlayerDataDeleted()
+        {
+            if (!isInitialized)
+                return;
+            UpdatePlayersInGroupCounts();
+        }
+
+        [PlayerDataEvent(PlayerDataEventType.OnPlayerDataWentOnline)]
+        public void OnPlayerDataWentOnline()
+        {
+            if (!isInitialized)
+                return;
+            UpdatePlayersInGroupCounts();
+        }
+
+        [PlayerDataEvent(PlayerDataEventType.OnPlayerDataWentOffline)]
+        public void OnPlayerDataWentOffline()
+        {
+            if (!isInitialized)
+                return;
+            UpdatePlayersInGroupCounts();
+        }
+
+        [PermissionsEvent(PermissionsEventType.OnPlayerPermissionGroupChanged)]
+        public void OnPlayerPermissionGroupChanged()
+        {
+            if (!isInitialized)
+                return;
+            UpdatePlayersInGroupCounts();
+        }
+
+        #endregion
 
         #region PermissionGroupToggles
 
@@ -96,6 +155,12 @@ namespace JanSharp
             groupNameField.interactable = isNotDefault;
             deleteGroupButton.interactable = isNotDefault;
 
+            UpdatePermissionGroupDetailsExceptNameField();
+        }
+
+        private void UpdatePermissionGroupDetailsExceptNameField()
+        {
+            UpdatePlayersInGroupCounts();
             UpdateAllPermissionRows();
         }
 

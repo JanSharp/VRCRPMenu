@@ -25,6 +25,10 @@ namespace JanSharp.Internal
         public string deleteOfflinePlayerDataPermissionAsset; // A guid.
         [HideInInspector][SerializeField] private PermissionDefinition deleteOfflinePlayerDataPermissionDef;
 
+        [PermissionDefinitionReference(nameof(editPermissionsPermissionDef))]
+        public string editPermissionsPermissionAsset; // A guid.
+        [HideInInspector][SerializeField] private PermissionDefinition editPermissionsPermissionDef;
+
         [PlayerDataEvent(PlayerDataEventType.OnRegisterCustomPlayerData)]
         public void OnRegisterCustomPlayerData()
         {
@@ -136,12 +140,32 @@ namespace JanSharp.Internal
             uint persistentId = lockstep.ReadSmallUInt();
             if (!permissionManager.PlayerHasPermission(playerDataManager.SendingPlayerData, deleteOfflinePlayerDataPermissionDef))
             {
-                RaiseOnDeleteOfflinePlayerDataDenied(persistentId);
+                RaiseOnDeleteOfflinePlayerDataDenied(persistentId, isLastPlayerWhoCanEditPermissions: false);
                 return;
             }
             if (!playerDataManager.TryGetCorePlayerDataForPersistentId(persistentId, out CorePlayerData corePlayerData))
                 return;
-            playerDataManager.DeleteOfflinePlayerDataInGS(corePlayerData);
+
+            if (AnyOtherPlayerHasEditPermissions(corePlayerData))
+                playerDataManager.DeleteOfflinePlayerDataInGS(corePlayerData);
+            else
+                RaiseOnDeleteOfflinePlayerDataDenied(persistentId, isLastPlayerWhoCanEditPermissions: true);
+        }
+
+        private bool AnyOtherPlayerHasEditPermissions(CorePlayerData playerBeingDeleted)
+        {
+            PermissionGroup group = permissionManager.GetPermissionsPlayerData(playerBeingDeleted).permissionGroup;
+            if (group.playersInGroupCount != 1 || !group.permissionValues[editPermissionsPermissionDef.index])
+                return true;
+            PermissionGroup[] groups = permissionManager.PermissionGroupsRaw;
+            int count = permissionManager.PermissionGroupsCount;
+            for (int i = 0; i < count; i++)
+            {
+                PermissionGroup otherGroup = groups[i];
+                if (otherGroup != group && otherGroup.playersInGroupCount != 0 && otherGroup.permissionValues[editPermissionsPermissionDef.index])
+                    return true;
+            }
+            return false;
         }
 
         public override RPPlayerData SendingRPPlayerData => (RPPlayerData)playerDataManager.SendingPlayerData.customPlayerData[rpPlayerDataIndex];
@@ -176,6 +200,8 @@ namespace JanSharp.Internal
 
         private uint persistentIdAttemptedToBeAffected;
         public override uint PersistentIdAttemptedToBeAffected => persistentIdAttemptedToBeAffected;
+        private bool isLastPlayerWhoCanEditPermissions;
+        public override bool IsLastPlayerWhoCanEditPermissions => isLastPlayerWhoCanEditPermissions;
 
         private void RaiseOnRPPlayerDataOverriddenDisplayNameChanged(RPPlayerData rpPlayerDataForEvent, string previousOverriddenDisplayName)
         {
@@ -213,12 +239,14 @@ namespace JanSharp.Internal
             this.rpPlayerDataForEvent = null; // To prevent misuse of the API.
         }
 
-        private void RaiseOnDeleteOfflinePlayerDataDenied(uint persistentIdAttemptedToBeAffected)
+        private void RaiseOnDeleteOfflinePlayerDataDenied(uint persistentIdAttemptedToBeAffected, bool isLastPlayerWhoCanEditPermissions)
         {
             this.persistentIdAttemptedToBeAffected = persistentIdAttemptedToBeAffected;
+            this.isLastPlayerWhoCanEditPermissions = isLastPlayerWhoCanEditPermissions;
             // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
             JanSharp.CustomRaisedEvents.Raise(ref onDeleteOfflinePlayerDataDeniedListeners, nameof(PlayersBackendEventType.OnDeleteOfflinePlayerDataDenied));
             this.persistentIdAttemptedToBeAffected = 0u; // To prevent misuse of the API.
+            this.isLastPlayerWhoCanEditPermissions = false; // To prevent misuse of the API.
         }
 
         #endregion

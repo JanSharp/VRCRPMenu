@@ -1,7 +1,7 @@
 
 - [x] Show by permission scripts in players backend page
 - [x] Change how the odd and even row images get enabled and disabled
-- [ ] Prevent changing the last player which has permissions to edit permissions to a group which does not have those permissions
+- [x] Prevent changing the last player which has permissions to edit permissions to a group which does not have those permissions
 - [x] Use ~~a selectable or a toggle~~ CrossFadeAlpha for the highlight shown while the permission group popup is shown
 - [x] When losing permissions to edit one of the columns in the player backend, but that was the active sort order, change sort order to the player name
 - [ ] Maybe actually just disable (make non interactable) the 3 columns that are tied to permissions in the players backend page rather than hiding them, except for the delete column that would go hidden
@@ -53,7 +53,7 @@
   - deleting a permission group could lock you out
     - [ ] disallow deleting the permission group you are in if the default group does not have the edit permissions permission
   - deleting the last player data which had the necessary permissions could lock you out
-    - [ ] disallow deleting the last offline player data which is in a group that has the edit permissions permission
+    - [x] disallow deleting the last offline player data which is in a group that has the edit permissions permission
   - changing the last player data's group could lock you out
     - [ ] disallow changing your permission group to a group which does not have the edit permissions permission
 - [x] think about combining the edit permissions permission and the change permission group permission

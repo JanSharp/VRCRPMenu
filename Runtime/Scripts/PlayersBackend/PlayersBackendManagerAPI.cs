@@ -39,6 +39,9 @@ namespace JanSharp
         /// <summary>
         /// <para>Use <see cref="PlayersBackendManagerAPI.PersistentIdAttemptedToBeAffected"/> to get the
         /// player which was attempted to be deleted.</para>
+        /// <para>Use <see cref="PlayersBackendManagerAPI.IsLastPlayerWhoCanEditPermissions"/> to check if it
+        /// was denied due to that being the last player who has have the permission to edit
+        /// permissions.</para>
         /// <para>Runs inside of an input action, making API properties for input actions from lockstep or
         /// other systems available.</para>
         /// <para>Game state safe.</para>
@@ -114,5 +117,11 @@ namespace JanSharp
         /// <para>Game state safe.</para>
         /// </summary>
         public abstract uint PersistentIdAttemptedToBeAffected { get; }
+        /// <summary>
+        /// <para>Usable inside of
+        /// <see cref="PlayersBackendEventType.OnDeleteOfflinePlayerDataDenied"/>.</para>
+        /// <para>Game state safe.</para>
+        /// </summary>
+        public abstract bool IsLastPlayerWhoCanEditPermissions { get; }
     }
 }

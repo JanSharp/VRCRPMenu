@@ -20,6 +20,7 @@ namespace JanSharp
         public PlayersBackendRow rowPrefabScript;
         public Transform popupsParent;
         public RectTransform confirmDeletePopup;
+        public RectTransform cannotDeleteLastPlayerWithEditPermissionsPermissionPopup;
         public RectTransform permissionGroupPopup;
         public GameObject permissionGroupPrefab;
         public LayoutElement permissionGroupPrefabLayoutElement;
@@ -125,6 +126,8 @@ namespace JanSharp
         {
             EnsureClosedConfirmDeletePopup();
             EnsureClosedPermissionGroupPopup();
+            if (cannotDeleteLastPlayerWithEditPermissionsPermissionPopup.parent != popupsParent)
+                menuManager.ClosePopup(cannotDeleteLastPlayerWithEditPermissionsPermissionPopup, doCallback: true);
         }
 
         private void EnsureClosedConfirmDeletePopup()
@@ -600,12 +603,30 @@ namespace JanSharp
         public void OnConfirmDeleteClick()
         {
             CorePlayerData toDelete = playerDataAwaitingDeleteConfirmation;
-            menuManager.ClosePopup(confirmDeletePopup, doCallback: true); // Clears rowAwaitingDeleteConfirmation.
+            menuManager.ClosePopup(confirmDeletePopup, doCallback: true); // Clears playerDataAwaitingDeleteConfirmation.
             if (toDelete == null || toDelete.isDeleted) // Shouldn't really be possible but just to be sure.
                 return;
             playersBackendManager.SendDeleteOfflinePlayerDataIA(toDelete);
-            // Don't need to listen to the denied event because row deletion is not latency hidden.
-            // Thank goodness.
+        }
+
+        [PlayersBackendEvent(PlayersBackendEventType.OnDeleteOfflinePlayerDataDenied)]
+        public void OnDeleteOfflinePlayerDataDenied()
+        {
+            // Unlike the other denied events this doesn't need to undo latency hiding because row deletion is
+            // not latency hidden. Thank goodness.
+            if (lockstep.SendingPlayerId != localPlayerId) // Only the sending player should see the popup.
+                return;
+            if (!playersBackendManager.IsLastPlayerWhoCanEditPermissions)
+                return;
+            menuManager.ShowPopupAtItsAnchor(
+                cannotDeleteLastPlayerWithEditPermissionsPermissionPopup,
+                this,
+                nameof(OnCannotDeleteLastPlayerWithEditPermissionsPermissionPopupClosed));
+        }
+
+        public void OnCannotDeleteLastPlayerWithEditPermissionsPermissionPopupClosed()
+        {
+            cannotDeleteLastPlayerWithEditPermissionsPermissionPopup.SetParent(popupsParent, worldPositionStays: false);
         }
 
         #endregion

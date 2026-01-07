@@ -21,6 +21,7 @@ namespace JanSharp
         public Transform popupsParent;
         public RectTransform confirmDeletePopup;
         public RectTransform cannotDeleteLastPlayerWithEditPermissionsPermissionPopup;
+        public RectTransform wouldLoseEditPermissionsPopup;
         public RectTransform permissionGroupPopup;
         public GameObject permissionGroupPrefab;
         public LayoutElement permissionGroupPrefabLayoutElement;
@@ -128,6 +129,8 @@ namespace JanSharp
             EnsureClosedPermissionGroupPopup();
             if (cannotDeleteLastPlayerWithEditPermissionsPermissionPopup.parent != popupsParent)
                 menuManager.ClosePopup(cannotDeleteLastPlayerWithEditPermissionsPermissionPopup, doCallback: true);
+            if (wouldLoseEditPermissionsPopup.parent != popupsParent)
+                menuManager.ClosePopup(wouldLoseEditPermissionsPopup, doCallback: true);
         }
 
         private void EnsureClosedConfirmDeletePopup()
@@ -394,10 +397,22 @@ namespace JanSharp
         {
             if (lockstep.SendingPlayerId != localPlayerId)
                 return; // Only the sending player has to reset their latency state back to game state.
+                        // Also only the sending player should see the popup if relevant.
+            if (permissionsPagesManager.WouldLoseEditPermissions)
+                menuManager.ShowPopupAtItsAnchor(
+                    wouldLoseEditPermissionsPopup,
+                    this,
+                    nameof(OnWouldLoseEditPermissionsPopupClosed));
+
             PermissionsPlayerData permissionsPlayerData = permissionManager.PlayerDataForEvent;
             if (!TryGetRow(permissionsPlayerData.core.persistentId, out PlayersBackendRow row))
                 return; // Some system did something weird.
             SetPermissionGroupLabelText(row, permissionsPlayerData.permissionGroup.groupName);
+        }
+
+        public void OnWouldLoseEditPermissionsPopupClosed()
+        {
+            wouldLoseEditPermissionsPopup.SetParent(popupsParent, worldPositionStays: false);
         }
 
         [PermissionsEvent(PermissionsEventType.OnPlayerPermissionGroupChanged)]

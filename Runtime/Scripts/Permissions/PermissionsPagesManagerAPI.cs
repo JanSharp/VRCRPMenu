@@ -34,6 +34,9 @@ namespace JanSharp
         /// <para>Use <see cref="PermissionsPagesManagerAPI.PersistentIdAttemptedToBeAffected"/> to get the
         /// player who's <see cref="PermissionsPlayerData.permissionGroup"/> was attempted to be
         /// changed.</para>
+        /// <para>Use <see cref="PermissionsPagesManagerAPI.WouldLoseEditPermissions"/> check if it was denied
+        /// due to the sending player also being the affected player and the target permission group not
+        /// having the edit permissions permission.</para>
         /// <para>Runs inside of an input action, making API properties for input actions from lockstep or
         /// other systems available.</para>
         /// <para>Game state safe.</para>
@@ -133,6 +136,12 @@ namespace JanSharp
         /// <para>Game state safe.</para>
         /// </summary>
         public abstract uint PersistentIdAttemptedToBeAffected { get; }
+        /// <summary>
+        /// <para>Usable inside of
+        /// <see cref="PermissionsPagesEventType.OnPlayerPermissionGroupChangeDenied"/>.</para>
+        /// <para>Game state safe.</para>
+        /// </summary>
+        public abstract bool WouldLoseEditPermissions { get; }
         /// <summary>
         /// <para>Usable inside of
         /// <see cref="PermissionsPagesEventType.OnPermissionValueChangeDenied"/>.</para>

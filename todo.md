@@ -55,7 +55,7 @@
   - deleting the last player data which had the necessary permissions could lock you out
     - [x] disallow deleting the last offline player data which is in a group that has the edit permissions permission
   - changing the last player data's group could lock you out
-    - [ ] disallow changing your permission group to a group which does not have the edit permissions permission
+    - [x] disallow changing your permission group to a group which does not have the edit permissions permission
 - [x] think about combining the edit permissions permission and the change permission group permission
 - [x] voice range settings UI
 - [x] voice range HUD

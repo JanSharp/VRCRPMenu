@@ -16,11 +16,19 @@ namespace JanSharp
 
         [SerializeField] private VoiceRangeSettingsScriptType scriptType;
         [SerializeField] private VoiceRangeShowSettingToggle[] toggles;
+        private uint defaultMaskForDefsWithoutToggles;
 
         private void Initialize()
         {
+            defaultMaskForDefsWithoutToggles = scriptType == VoiceRangeSettingsScriptType.InWorld
+                ? voiceRangeManager.DefaultShowInWorldMask
+                : voiceRangeManager.DefaultShowInHUDMask;
             foreach (VoiceRangeShowSettingToggle toggle in toggles)
-                toggle.resolvedDef = voiceRangeManager.GetVoiceRangeDefinition(toggle.voiceRangeInternalName);
+            {
+                VoiceRangeDefinition def = voiceRangeManager.GetVoiceRangeDefinition(toggle.voiceRangeInternalName);
+                toggle.resolvedDef = def;
+                defaultMaskForDefsWithoutToggles &= ~def.bitMaskFlag;
+            }
             MakeTogglesMatchLatencyState();
         }
 
@@ -36,7 +44,7 @@ namespace JanSharp
 
         public void OnValueChanged()
         {
-            uint showMask = 0u;
+            uint showMask = defaultMaskForDefsWithoutToggles;
             foreach (VoiceRangeShowSettingToggle toggle in toggles)
                 if (toggle.toggle.isOn)
                     showMask |= toggle.resolvedDef.bitMaskFlag;

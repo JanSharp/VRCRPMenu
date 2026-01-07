@@ -132,14 +132,22 @@ namespace JanSharp.Internal
             int defIndex = (int)lockstep.ReadSmallUInt();
             PermissionDefinition permissionDef = permissionManager.PermissionDefinitions[defIndex];
 
-            if (!permissionManager.PlayerHasPermission(playerDataManager.SendingPlayerData, editPermissionsPermissionDef))
+            CorePlayerData sendingPlayerData = playerDataManager.SendingPlayerData;
+            if (!permissionManager.PlayerHasPermission(sendingPlayerData, editPermissionsPermissionDef))
             {
-                RaiseOnPermissionValueChangeDenied(group, permissionDef);
+                RaiseOnPermissionValueChangeDenied(group, permissionDef, wouldLoseEditPermissions: false);
                 return;
             }
 
             lockstep.ReadFlags(out bool value);
-            permissionManager.SetPermissionValueInGS(group, permissionDef, value);
+            if (value
+                || permissionDef != editPermissionsPermissionDef
+                || group != permissionManager.GetPermissionsPlayerData(sendingPlayerData).permissionGroup)
+            {
+                permissionManager.SetPermissionValueInGS(group, permissionDef, value);
+            }
+            else
+                RaiseOnPermissionValueChangeDenied(group, permissionDef, wouldLoseEditPermissions: true);
         }
 
         #region EventDispatcher
@@ -148,12 +156,12 @@ namespace JanSharp.Internal
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onPlayerPermissionGroupChangeDeniedListeners;
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onPermissionValueChangeDeniedListeners;
 
+        private bool wouldLoseEditPermissions;
+        public override bool WouldLoseEditPermissions => wouldLoseEditPermissions;
         private PermissionGroup permissionGroupAttemptedToBeAffected;
         public override PermissionGroup PermissionGroupAttemptedToBeAffected => permissionGroupAttemptedToBeAffected;
         private uint persistentIdAttemptedToBeAffected;
         public override uint PersistentIdAttemptedToBeAffected => persistentIdAttemptedToBeAffected;
-        private bool wouldLoseEditPermissions;
-        public override bool WouldLoseEditPermissions => wouldLoseEditPermissions;
         private PermissionDefinition permissionAttemptedToBeAffected;
         public override PermissionDefinition PermissionAttemptedToBeAffected => permissionAttemptedToBeAffected;
 
@@ -175,14 +183,16 @@ namespace JanSharp.Internal
             this.wouldLoseEditPermissions = false; // To prevent misuse of the API.
         }
 
-        private void RaiseOnPermissionValueChangeDenied(PermissionGroup permissionGroupAttemptedToBeAffected, PermissionDefinition permissionAttemptedToBeAffected)
+        private void RaiseOnPermissionValueChangeDenied(PermissionGroup permissionGroupAttemptedToBeAffected, PermissionDefinition permissionAttemptedToBeAffected, bool wouldLoseEditPermissions)
         {
             this.permissionGroupAttemptedToBeAffected = permissionGroupAttemptedToBeAffected;
             this.permissionAttemptedToBeAffected = permissionAttemptedToBeAffected;
+            this.wouldLoseEditPermissions = wouldLoseEditPermissions;
             // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
             JanSharp.CustomRaisedEvents.Raise(ref onPermissionValueChangeDeniedListeners, nameof(PermissionsPagesEventType.OnPermissionValueChangeDenied));
             this.permissionGroupAttemptedToBeAffected = null; // To prevent misuse of the API.
             this.permissionAttemptedToBeAffected = null; // To prevent misuse of the API.
+            this.wouldLoseEditPermissions = false; // To prevent misuse of the API.
         }
 
         #endregion

@@ -48,6 +48,10 @@ namespace JanSharp
         /// changed.</para>
         /// <para>Use <see cref="PermissionsPagesManagerAPI.PermissionAttemptedToBeAffected"/> to get the
         /// permission which has was attempted to be changed.</para>
+        /// <para>Use <see cref="PermissionsPagesManagerAPI.WouldLoseEditPermissions"/> check if it was denied
+        /// due to the sending player being in the affected permission group and the affected permission being
+        /// the edit permissions permission and it would be set to false, causing the sending player to lose
+        /// the edit permissions permission.</para>
         /// <para>Only gets raised if the value actually changed, and since it is either
         /// <see langword="true"/> or <see langword="false"/> the previous value can be determined quite
         /// easily. It is the inverse of the current value.</para>
@@ -125,6 +129,13 @@ namespace JanSharp
         public abstract void SendSetPermissionValueIA(PermissionGroup group, PermissionDefinition permissionDef, bool value);
 
         /// <summary>
+        /// <para>Usable inside of
+        /// <see cref="PermissionsPagesEventType.OnPlayerPermissionGroupChangeDenied"/> and
+        /// <see cref="PermissionsPagesEventType.OnPermissionValueChangeDenied"/>.</para>
+        /// <para>Game state safe.</para>
+        /// </summary>
+        public abstract bool WouldLoseEditPermissions { get; }
+        /// <summary>
         /// <para>Usable inside of <see cref="PermissionsPagesEventType.OnPermissionGroupRenameDenied"/>,
         /// and <see cref="PermissionsPagesEventType.OnPermissionValueChangeDenied"/>.</para>
         /// <para>Game state safe.</para>
@@ -136,12 +147,6 @@ namespace JanSharp
         /// <para>Game state safe.</para>
         /// </summary>
         public abstract uint PersistentIdAttemptedToBeAffected { get; }
-        /// <summary>
-        /// <para>Usable inside of
-        /// <see cref="PermissionsPagesEventType.OnPlayerPermissionGroupChangeDenied"/>.</para>
-        /// <para>Game state safe.</para>
-        /// </summary>
-        public abstract bool WouldLoseEditPermissions { get; }
         /// <summary>
         /// <para>Usable inside of
         /// <see cref="PermissionsPagesEventType.OnPermissionValueChangeDenied"/>.</para>

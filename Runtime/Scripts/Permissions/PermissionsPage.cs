@@ -14,6 +14,7 @@ namespace JanSharp
         [HideInInspector][SerializeField][SingletonReference] private LockstepAPI lockstep;
         [HideInInspector][SerializeField][SingletonReference] private PermissionManagerAPI permissionManager;
         [HideInInspector][SerializeField][SingletonReference] private PermissionsPagesManagerAPI permissionsPagesManager;
+        [HideInInspector][SerializeField][FindInParent] private MenuManagerAPI menuManager;
 
         /// <summary>
         /// <para>The order matches that of <see cref="PermissionManagerAPI.PermissionDefinitions"/>.</para>
@@ -32,6 +33,9 @@ namespace JanSharp
         public TMP_InputField groupNameField;
         public TextMeshProUGUI playersInGroupCountsText;
         private string playersInGroupCountsFormat;
+
+        public Transform popupsParent;
+        public RectTransform wouldLoseEditPermissionsDueToEditPopup;
 
         /// <summary>
         /// <para><see cref="uint"/> permissionGroupId => <see cref="PermissionsPermissionGroupToggle"/> toggle</para>
@@ -69,6 +73,13 @@ namespace JanSharp
             RebuildPermissionGroupToggles();
             SetActivePermissionGroupToggle(GetPermissionGroupToggle(permissionManager.DefaultPermissionGroup));
             isInitialized = true;
+        }
+
+        [LockstepEvent(LockstepEventType.OnImportStart)]
+        public void OnImportStart()
+        {
+            if (wouldLoseEditPermissionsDueToEditPopup.parent != popupsParent)
+                menuManager.ClosePopup(wouldLoseEditPermissionsDueToEditPopup, doCallback: true);
         }
 
         [LockstepEvent(LockstepEventType.OnImportFinishingUp)]
@@ -302,11 +313,23 @@ namespace JanSharp
         {
             if (!isInitialized)
                 return;
+
+            if (lockstep.SendingPlayerId == localPlayerId && permissionsPagesManager.WouldLoseEditPermissions)
+                menuManager.ShowPopupAtItsAnchor(
+                    wouldLoseEditPermissionsDueToEditPopup,
+                    this,
+                    nameof(OnWouldLoseEditPermissionsDueToEditPopupClosed));
+
             PermissionGroup group = permissionsPagesManager.PermissionGroupAttemptedToBeAffected;
             if (group != activePermissionGroupToggle.permissionGroup)
                 return;
             int index = permissionsPagesManager.PermissionAttemptedToBeAffected.index;
             permissionRows[index].SetIsOnWithoutNotify(group.permissionValues[index]);
+        }
+
+        public void OnWouldLoseEditPermissionsDueToEditPopupClosed()
+        {
+            wouldLoseEditPermissionsDueToEditPopup.SetParent(popupsParent, worldPositionStays: false);
         }
 
         private void RebuildPermissionGroupToggles()

@@ -49,7 +49,7 @@
 - [ ] add the crazy ideas for requesting GM without opening the menu, see gm-menu-requirements.md in menu-system
 - [ ] How to truly prevent locking yourself out of permissions to edit permissions
   - editing the permission values themselves could lock you out
-    - [ ] disallow removing the edit permissions permission if the actively edited group is the group you yourself are in
+    - [x] disallow removing the edit permissions permission if the actively edited group is the group you yourself are in
   - deleting a permission group could lock you out
     - [ ] disallow deleting the permission group you are in if the default group does not have the edit permissions permission
   - deleting the last player data which had the necessary permissions could lock you out

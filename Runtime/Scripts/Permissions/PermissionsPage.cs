@@ -75,6 +75,8 @@ namespace JanSharp
                 RebuildPermissionGroupToggles();
                 if (activePermissionGroupToggle.permissionGroup == null || activePermissionGroupToggle.permissionGroup.isDeleted)
                     SetActivePermissionGroupToggle(GetPermissionGroupToggle(permissionManager.DefaultPermissionGroup));
+                else
+                    UpdateAllPermissionRows();
             }
         }
 
@@ -94,8 +96,13 @@ namespace JanSharp
             groupNameField.interactable = isNotDefault;
             deleteGroupButton.interactable = isNotDefault;
 
+            UpdateAllPermissionRows();
+        }
+
+        private void UpdateAllPermissionRows()
+        {
             int defsCount = permissionManager.PermissionDefinitions.Length;
-            bool[] groupValues = group.permissionValues;
+            bool[] groupValues = activePermissionGroupToggle.permissionGroup.permissionValues;
             for (int i = 0; i < defsCount; i++)
                 permissionRows[i].SetIsOnWithoutNotify(groupValues[i]);
         }
@@ -144,6 +151,8 @@ namespace JanSharp
         [PermissionsPagesEvent(PermissionsPagesEventType.OnPermissionGroupRenameDenied)]
         public void OnPermissionGroupRenameDenied()
         {
+            if (!isInitialized)
+                return;
             if (lockstep.SendingPlayerId != localPlayerId)
                 return; // Only the sending player has to reset their latency state back to game state.
             PermissionGroup group = permissionsPagesManager.PermissionGroupAttemptedToBeAffected;
@@ -201,6 +210,38 @@ namespace JanSharp
 
             if (toggle == activePermissionGroupToggle)
                 SetActivePermissionGroupToggle(GetPermissionGroupToggle(permissionManager.DefaultPermissionGroup));
+        }
+
+        public void OnRowValueChanged(PermissionsPermissionRow row)
+        {
+            permissionsPagesManager.SendSetPermissionValueIA(
+                activePermissionGroupToggle.permissionGroup,
+                row.permissionDef,
+                row.toggle.isOn);
+        }
+
+        [PermissionsEvent(PermissionsEventType.OnPermissionValueChanged)]
+        public void OnPermissionValueChanged()
+        {
+            if (!isInitialized)
+                return;
+            PermissionGroup group = permissionManager.ChangedPermissionGroup;
+            if (group != activePermissionGroupToggle.permissionGroup)
+                return;
+            int index = permissionManager.ChangedPermission.index;
+            permissionRows[index].SetIsOnWithoutNotify(group.permissionValues[index]);
+        }
+
+        [PermissionsPagesEvent(PermissionsPagesEventType.OnPermissionValueChangeDenied)]
+        public void OnPermissionValueChangeDenied()
+        {
+            if (!isInitialized)
+                return;
+            PermissionGroup group = permissionsPagesManager.PermissionGroupAttemptedToBeAffected;
+            if (group != activePermissionGroupToggle.permissionGroup)
+                return;
+            int index = permissionsPagesManager.PermissionAttemptedToBeAffected.index;
+            permissionRows[index].SetIsOnWithoutNotify(group.permissionValues[index]);
         }
 
         private void RebuildPermissionGroupToggles()

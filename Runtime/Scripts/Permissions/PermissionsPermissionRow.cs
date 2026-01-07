@@ -8,6 +8,7 @@ namespace JanSharp
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class PermissionsPermissionRow : UdonSharpBehaviour
     {
+        public PermissionsPage page;
         public TextMeshProUGUI label;
         public Toggle toggle;
         public Toggle linkedToggle;
@@ -16,6 +17,7 @@ namespace JanSharp
         public void OnValueChanged()
         {
             linkedToggle.SetIsOnWithoutNotify(toggle.isOn);
+            page.OnRowValueChanged(this);
         }
 
         public void SetIsOnWithoutNotify(bool value)

@@ -80,3 +80,4 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - NOTE: HUD text does not draw above opaque geometry while images do. I believe that fixing that would require making a copy of the text mesh pro shaders just to change ZTest to Always, or maybe using legacy text instead. Pretty sure the former would work, though it is very annoying, and did not try the latter
 - NOTE: the RPMenu prefab should not contain the generated permission rows already. I mean its fine if it does, but it shouldn't. So when making a release, make sure to hit the build menu button beforehand
 - [ ] proofread all of the permission page related code
+- [ ] importing the 1000 players, the loading UI closed too soon, it was still running OnImportFinishingUp. This could be a lockstep with the IsImporting flag or a menu system bug

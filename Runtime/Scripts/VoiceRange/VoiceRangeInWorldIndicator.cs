@@ -38,8 +38,8 @@ namespace JanSharp
 
         private bool isInitialized = false;
         private VoiceRangePlayerData localPlayer;
-        private const float InnerRadiusMultiplier = 0.97f;
-        private const float OuterRadiusMultiplier = 1.25f;
+        private const float InnerRadiusMultiplier = 0.98f;
+        private const float OuterRadiusMultiplier = 1.15f;
 
         private bool isShown = false;
         private VoiceRangeHUDIconState indicatorState = VoiceRangeHUDIconState.Off;

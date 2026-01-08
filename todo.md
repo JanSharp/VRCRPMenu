@@ -66,7 +66,7 @@
 - [x] make default visualization type for hud and in world defined through inspector
 - [ ] maybe some kind of flash or indicator on the hud for when a new GM request came in. Or like a plus sign that pops up from the hud and moves upwards before fading away
 - [x] show mask settings toggle group sets flags for any definitions that do not have a toggle to off rather than using the appropriate default value
-- [ ] tweak voice range shader properties or shader itself, likely to make it less obtrusive
+- [x] tweak voice range shader properties or shader itself, likely to make it less obtrusive
 - [x] getting shader compile error on publish:
 ```
 Shader error in 'RP Menu/Voice Range Sphere': undeclared identifier 'samplerdepthTexture' at line 136 (on d3d11)

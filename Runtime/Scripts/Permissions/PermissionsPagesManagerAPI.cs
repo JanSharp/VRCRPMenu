@@ -14,14 +14,17 @@ namespace JanSharp
         // /// <para>Game state safe.</para>
         // /// </summary>
         // OnPermissionGroupDuplicatedDenied,
-        // /// <summary>
-        // /// <para>Use <see cref="PermissionManagerAPI.DeletedPermissionGroup"/> to get the permission group
-        // /// which has been deleted.</para>
-        // /// <para>Runs inside of an input action, making API properties for input actions from lockstep or
-        // /// other systems available.</para>
-        // /// <para>Game state safe.</para>
-        // /// </summary>
-        // OnPermissionGroupDeletedDenied,
+        /// <summary>
+        /// <para>Use <see cref="PermissionsPagesManagerAPI.PermissionGroupAttemptedToBeAffected"/> to get the
+        /// permission group which was attempted to be deleted.</para>
+        /// <para>Use <see cref="PermissionsPagesManagerAPI.WouldLoseEditPermissions"/> check if it was denied
+        /// due to the sending player being in the group to be deleted and the group to move players to not
+        /// having the edit permissions permission.</para>
+        /// <para>Runs inside of an input action, making API properties for input actions from lockstep or
+        /// other systems available.</para>
+        /// <para>Game state safe.</para>
+        /// </summary>
+        OnPermissionGroupDeletedDenied,
         /// <summary>
         /// <para>Use <see cref="PermissionsPagesManagerAPI.PermissionGroupAttemptedToBeAffected"/> to get the
         /// permission group which was attempted to be renamed.</para>
@@ -130,6 +133,7 @@ namespace JanSharp
 
         /// <summary>
         /// <para>Usable inside of
+        /// <see cref="PermissionsPagesEventType.OnPermissionGroupDeletedDenied"/> and
         /// <see cref="PermissionsPagesEventType.OnPlayerPermissionGroupChangeDenied"/> and
         /// <see cref="PermissionsPagesEventType.OnPermissionValueChangeDenied"/>.</para>
         /// <para>Game state safe.</para>

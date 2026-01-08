@@ -47,11 +47,11 @@
 - [ ] very most likely change gm requests page to make calls to an external teleports manager
 - [ ] maybe, probably, make the count slightly smaller for GM requests HUD to make it feel less squished into that spot. Though would be good to test in VR first
 - [ ] add the crazy ideas for requesting GM without opening the menu, see gm-menu-requirements.md in menu-system
-- [ ] How to truly prevent locking yourself out of permissions to edit permissions
+- [x] How to truly prevent locking yourself out of permissions to edit permissions
   - editing the permission values themselves could lock you out
     - [x] disallow removing the edit permissions permission if the actively edited group is the group you yourself are in
   - deleting a permission group could lock you out
-    - [ ] disallow deleting the permission group you are in if the default group does not have the edit permissions permission
+    - [x] disallow deleting the permission group you are in if the default group does not have the edit permissions permission
   - deleting the last player data which had the necessary permissions could lock you out
     - [x] disallow deleting the last offline player data which is in a group that has the edit permissions permission
   - changing the last player data's group could lock you out

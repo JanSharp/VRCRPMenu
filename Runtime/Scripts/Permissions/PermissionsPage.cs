@@ -36,6 +36,7 @@ namespace JanSharp
 
         public Transform popupsParent;
         public RectTransform wouldLoseEditPermissionsDueToEditPopup;
+        public RectTransform wouldLoseEditPermissionsDueToDeletionPopup;
 
         /// <summary>
         /// <para><see cref="uint"/> permissionGroupId => <see cref="PermissionsPermissionGroupToggle"/> toggle</para>
@@ -80,6 +81,8 @@ namespace JanSharp
         {
             if (wouldLoseEditPermissionsDueToEditPopup.parent != popupsParent)
                 menuManager.ClosePopup(wouldLoseEditPermissionsDueToEditPopup, doCallback: true);
+            if (wouldLoseEditPermissionsDueToDeletionPopup.parent != popupsParent)
+                menuManager.ClosePopup(wouldLoseEditPermissionsDueToDeletionPopup, doCallback: true);
         }
 
         [LockstepEvent(LockstepEventType.OnImportFinishingUp)]
@@ -286,6 +289,24 @@ namespace JanSharp
 
             if (toggle == activePermissionGroupToggle)
                 SetActivePermissionGroupToggle(GetPermissionGroupToggle(permissionManager.DefaultPermissionGroup));
+        }
+
+        [PermissionsPagesEvent(PermissionsPagesEventType.OnPermissionGroupDeletedDenied)]
+        public void OnPermissionGroupDeletedDenied()
+        {
+            if (!isInitialized)
+                return;
+            if (lockstep.SendingPlayerId != localPlayerId || !permissionsPagesManager.WouldLoseEditPermissions)
+                return;
+            menuManager.ShowPopupAtItsAnchor(
+                wouldLoseEditPermissionsDueToDeletionPopup,
+                this,
+                nameof(OnWouldLoseEditPermissionsDueToDeletionPopupClosed));
+        }
+
+        public void OnWouldLoseEditPermissionsDueToDeletionPopupClosed()
+        {
+            wouldLoseEditPermissionsDueToDeletionPopup.SetParent(popupsParent, worldPositionStays: false);
         }
 
         public void OnRowValueChanged(PermissionsPermissionRow row)

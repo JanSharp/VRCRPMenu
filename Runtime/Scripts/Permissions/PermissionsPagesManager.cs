@@ -46,15 +46,28 @@ namespace JanSharp.Internal
         [LockstepInputAction(nameof(deletePermissionGroupIAId))]
         public void OnDeletePermissionGroupIA()
         {
-            if (!permissionManager.PlayerHasPermission(playerDataManager.SendingPlayerData, editPermissionsPermissionDef))
-                return;
             uint groupId = lockstep.ReadSmallUInt();
-            uint groupToMovePlayersToId = lockstep.ReadSmallUInt();
             if (!permissionManager.TryGetPermissionGroup(groupId, out PermissionGroup group))
                 return;
+
+            CorePlayerData sendingPlayerData = playerDataManager.SendingPlayerData;
+            if (!permissionManager.PlayerHasPermission(sendingPlayerData, editPermissionsPermissionDef))
+            {
+                RaiseOnPermissionGroupDeletedDenied(group, wouldLoseEditPermissions: false);
+                return;
+            }
+
+            uint groupToMovePlayersToId = lockstep.ReadSmallUInt();
             if (!permissionManager.TryGetPermissionGroup(groupToMovePlayersToId, out PermissionGroup groupToMovePlayersTo))
                 return;
-            permissionManager.DeletePermissionGroupInGS(group, groupToMovePlayersTo);
+
+            if (permissionManager.GetPermissionsPlayerData(sendingPlayerData).permissionGroup != group
+                || groupToMovePlayersTo.permissionValues[editPermissionsPermissionDef.index])
+            {
+                permissionManager.DeletePermissionGroupInGS(group, groupToMovePlayersTo);
+            }
+            else
+                RaiseOnPermissionGroupDeletedDenied(group, wouldLoseEditPermissions: true);
         }
 
         public override void SendRenamePermissionGroupIA(PermissionGroup group, string newGroupName)
@@ -152,6 +165,7 @@ namespace JanSharp.Internal
 
         #region EventDispatcher
 
+        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onPermissionGroupDeletedDeniedListeners;
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onPermissionGroupRenameDeniedListeners;
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onPlayerPermissionGroupChangeDeniedListeners;
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onPermissionValueChangeDeniedListeners;
@@ -164,6 +178,16 @@ namespace JanSharp.Internal
         public override uint PersistentIdAttemptedToBeAffected => persistentIdAttemptedToBeAffected;
         private PermissionDefinition permissionAttemptedToBeAffected;
         public override PermissionDefinition PermissionAttemptedToBeAffected => permissionAttemptedToBeAffected;
+
+        private void RaiseOnPermissionGroupDeletedDenied(PermissionGroup permissionGroupAttemptedToBeAffected, bool wouldLoseEditPermissions)
+        {
+            this.permissionGroupAttemptedToBeAffected = permissionGroupAttemptedToBeAffected;
+            this.wouldLoseEditPermissions = wouldLoseEditPermissions;
+            // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
+            JanSharp.CustomRaisedEvents.Raise(ref onPermissionGroupDeletedDeniedListeners, nameof(PermissionsPagesEventType.OnPermissionGroupDeletedDenied));
+            this.permissionGroupAttemptedToBeAffected = null; // To prevent misuse of the API.
+            this.wouldLoseEditPermissions = false; // To prevent misuse of the API.
+        }
 
         private void RaiseOnPermissionGroupRenameDenied(PermissionGroup permissionGroupAttemptedToBeAffected)
         {

@@ -29,7 +29,9 @@ namespace JanSharp
         private float permissionGroupToggleHeight;
 
         public Button deleteGroupButton;
+        public Selectable deleteGroupButtonLabel;
         public TMP_InputField groupNameField;
+        public Selectable groupNameFieldText;
         public TextMeshProUGUI playersInGroupCountsText;
         private string playersInGroupCountsFormat;
 
@@ -176,7 +178,9 @@ namespace JanSharp
             groupNameField.text = group.groupName;
             bool isNotDefault = !group.isDefault;
             groupNameField.interactable = isNotDefault;
+            groupNameFieldText.interactable = isNotDefault;
             deleteGroupButton.interactable = isNotDefault;
+            deleteGroupButtonLabel.interactable = isNotDefault;
 
             UpdatePermissionGroupDetailsExceptNameField();
         }

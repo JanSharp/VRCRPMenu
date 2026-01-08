@@ -48,6 +48,13 @@ namespace JanSharp
         private PermissionsPermissionGroupToggle activePermissionGroupToggle;
 
         private uint localPlayerId;
+        /// <summary>
+        /// <para>Since this is set to <see langword="true"/> in <see cref="LockstepEventType.OnInit"/> and
+        /// not <see cref="PlayerDataEventType.OnPrePlayerDataManagerInit"/> the majority of event listeners
+        /// end up having to check if <see cref="isInitialized"/> is <see langword="true"/> before doing
+        /// anything, since the player data system can raise events before this script gets
+        /// <see cref="LockstepEventType.OnInit"/>.</para>
+        /// </summary>
         private bool isInitialized = false;
 
         [MenuManagerEvent(MenuManagerEventType.OnMenuManagerStart)]
@@ -55,23 +62,22 @@ namespace JanSharp
         {
             localPlayerId = (uint)Networking.LocalPlayer.playerId;
             permissionGroupToggleHeight = permissionGroupPrefabLayoutElement.preferredHeight;
+            InitPlayersInGroupCounts();
         }
 
         [LockstepEvent(LockstepEventType.OnInit)]
         public void OnInit()
         {
-            InitPlayersInGroupCounts();
             RebuildPermissionGroupToggles();
-            SetActivePermissionGroupToggle(GetPermissionGroupToggle(permissionManager.DefaultPermissionGroup));
+            SetActivePermissionGroupToggle(GetPermissionGroupToggle(permissionManager.DefaultPermissionGroup.id));
             isInitialized = true;
         }
 
         [LockstepEvent(LockstepEventType.OnClientBeginCatchUp)]
         public void OnClientBeginCatchUp()
         {
-            InitPlayersInGroupCounts();
             RebuildPermissionGroupToggles();
-            SetActivePermissionGroupToggle(GetPermissionGroupToggle(permissionManager.DefaultPermissionGroup));
+            SetActivePermissionGroupToggle(GetPermissionGroupToggle(permissionManager.DefaultPermissionGroup.id));
             isInitialized = true;
         }
 
@@ -91,9 +97,13 @@ namespace JanSharp
             {
                 RebuildPermissionGroupToggles();
                 if (activePermissionGroupToggle.permissionGroup == null || activePermissionGroupToggle.permissionGroup.isDeleted)
-                    SetActivePermissionGroupToggle(GetPermissionGroupToggle(permissionManager.DefaultPermissionGroup));
+                    SetActivePermissionGroupToggle(GetPermissionGroupToggle(permissionManager.DefaultPermissionGroup.id));
                 else
+                {
+                    // Permission groups never get renamed during imports, only created or deleted, so this
+                    // does not need to change the input field text value.
                     UpdatePermissionGroupDetailsExceptNameField();
+                }
             }
         }
 
@@ -190,11 +200,6 @@ namespace JanSharp
             return (PermissionsPermissionGroupToggle)pgTogglesById[permissionGroupId].Reference;
         }
 
-        private PermissionsPermissionGroupToggle GetPermissionGroupToggle(PermissionGroup permissionGroup)
-        {
-            return (PermissionsPermissionGroupToggle)pgTogglesById[permissionGroup.id].Reference;
-        }
-
         // NOTE: This has a lot of copy paste from PlayersBackendPage.cs
 
         private bool TryGetPermissionGroupToggle(uint permissionGroupId, out PermissionsPermissionGroupToggle toggle)
@@ -219,7 +224,7 @@ namespace JanSharp
             if (!isInitialized)
                 return;
             PermissionGroup renamedGroup = permissionManager.RenamedPermissionGroup;
-            if (TryGetPermissionGroupToggle(renamedGroup.id, out var toggle))
+            if (TryGetPermissionGroupToggle(renamedGroup.id, out PermissionsPermissionGroupToggle toggle))
                 UpdatePermissionGroupToggleLabel(toggle);
 
             if (renamedGroup == activePermissionGroupToggle.permissionGroup)
@@ -229,8 +234,7 @@ namespace JanSharp
         [PermissionsPagesEvent(PermissionsPagesEventType.OnPermissionGroupRenameDenied)]
         public void OnPermissionGroupRenameDenied()
         {
-            if (!isInitialized)
-                return;
+            // No need for an isInitialized check, this can only trigger through an input action, not any GS safe context.
             if (lockstep.SendingPlayerId != localPlayerId)
                 return; // Only the sending player has to reset their latency state back to game state.
             PermissionGroup group = permissionsPagesManager.PermissionGroupAttemptedToBeAffected;
@@ -271,7 +275,7 @@ namespace JanSharp
         {
             if (!isInitialized)
                 return;
-            if (!TryGetPermissionGroupToggle(permissionManager.DeletedPermissionGroup.id, out var toggle))
+            if (!TryGetPermissionGroupToggle(permissionManager.DeletedPermissionGroup.id, out PermissionsPermissionGroupToggle toggle))
                 return;
             toggle.gameObject.SetActive(false);
             toggle.transform.SetAsLastSibling();
@@ -280,14 +284,13 @@ namespace JanSharp
             CalculatePermissionGroupsContentHeight();
 
             if (toggle == activePermissionGroupToggle)
-                SetActivePermissionGroupToggle(GetPermissionGroupToggle(permissionManager.DefaultPermissionGroup));
+                SetActivePermissionGroupToggle(GetPermissionGroupToggle(permissionManager.DefaultPermissionGroup.id));
         }
 
         [PermissionsPagesEvent(PermissionsPagesEventType.OnPermissionGroupDeletedDenied)]
         public void OnPermissionGroupDeletedDenied()
         {
-            if (!isInitialized)
-                return;
+            // No need for an isInitialized check, this can only trigger through an input action, not any GS safe context.
             if (lockstep.SendingPlayerId != localPlayerId || !permissionsPagesManager.WouldLoseEditPermissions)
                 return;
             menuManager.ShowPopupAtItsAnchor(
@@ -324,8 +327,7 @@ namespace JanSharp
         [PermissionsPagesEvent(PermissionsPagesEventType.OnPermissionValueChangeDenied)]
         public void OnPermissionValueChangeDenied()
         {
-            if (!isInitialized)
-                return;
+            // No need for a isInitialized check, this can only trigger through an input action, not any GS safe context.
 
             if (lockstep.SendingPlayerId == localPlayerId && permissionsPagesManager.WouldLoseEditPermissions)
                 menuManager.ShowPopupAtItsAnchor(
@@ -354,15 +356,14 @@ namespace JanSharp
 
             pgTogglesById.Clear();
             ArrList.AddRange(ref unusedPGToggles, ref unusedPGTogglesCount, pgToggles, pgTogglesCount);
-            if (newCount < pgTogglesCount)
-                for (int i = 0; i < pgTogglesCount - newCount; i++)
-                {
-                    // Disable the low index ones, the higher ones will be reused from the unusedRows "stack".
-                    PermissionsPermissionGroupToggle toggle = pgToggles[i];
-                    toggle.gameObject.SetActive(false);
-                    toggle.toggle.SetIsOnWithoutNotify(false);
-                    toggle.transform.SetAsLastSibling();
-                }
+            for (int i = 0; i < pgTogglesCount - newCount; i++)
+            {
+                // Disable the low index ones, the higher ones will be reused from the unusedPGToggles "stack".
+                PermissionsPermissionGroupToggle toggle = pgToggles[i];
+                toggle.gameObject.SetActive(false);
+                toggle.toggle.SetIsOnWithoutNotify(false);
+                toggle.transform.SetAsLastSibling();
+            }
 
             ArrList.Clear(ref pgToggles, ref pgTogglesCount);
             ArrList.EnsureCapacity(ref pgToggles, newCount);
@@ -374,6 +375,7 @@ namespace JanSharp
                 PermissionsPermissionGroupToggle toggle = CreatePermissionGroupToggle(group);
                 InsertSortPermissionGroupToggle(toggle);
                 pgTogglesById.Add(group.id, toggle);
+
                 bool isActiveToggle = group == activeGroup;
                 toggle.toggle.SetIsOnWithoutNotify(isActiveToggle);
                 if (isActiveToggle)
@@ -426,7 +428,7 @@ namespace JanSharp
                 ArrList.Add(ref pgToggles, ref pgTogglesCount, toggle);
                 return;
             }
-            int index = pgTogglesCount; // Not -1 because the new row is not in the list yet.
+            int index = pgTogglesCount; // Not -1 because the toggle is not in the list yet.
             do
             {
                 if (pgToggles[index - 1].sortablePermissionGroupName.CompareTo(toggle.sortablePermissionGroupName) <= 0)

@@ -500,14 +500,13 @@ namespace JanSharp
 
             pgButtonsById.Clear();
             ArrList.AddRange(ref unusedPGButtons, ref unusedPGButtonsCount, pgButtons, pgButtonsCount);
-            if (newCount < pgButtonsCount)
-                for (int i = 0; i < pgButtonsCount - newCount; i++)
-                {
-                    // Disable the low index ones, the higher ones will be reused from the unusedRows "stack".
-                    PlayersBackendPermissionGroupButton button = pgButtons[i];
-                    button.gameObject.SetActive(false);
-                    button.transform.SetAsLastSibling();
-                }
+            for (int i = 0; i < pgButtonsCount - newCount; i++)
+            {
+                // Disable the low index ones, the higher ones will be reused from the unusedRows "stack".
+                PlayersBackendPermissionGroupButton button = pgButtons[i];
+                button.gameObject.SetActive(false);
+                button.transform.SetAsLastSibling();
+            }
 
             ArrList.Clear(ref pgButtons, ref pgButtonsCount);
             ArrList.EnsureCapacity(ref pgButtons, newCount);

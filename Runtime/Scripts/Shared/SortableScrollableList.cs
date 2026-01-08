@@ -130,23 +130,22 @@ namespace JanSharp
                 OnPreRebuildRows();
                 HideAllCurrentlyVisibleRows();
                 ArrList.AddRange(ref unusedRows, ref unusedRowsCount, rows, rowsCount);
-
-                rowsCount = newRowsCount;
-                ArrList.EnsureCapacity(ref rows, rowsCount);
-                OnRowsCountChanged();
+                ArrList.EnsureCapacity(ref rows, newRowsCount);
+                rowsCount = 0; // Prevent ShowOnlyRowsVisibleInViewport from messing with stuff since this is spread out across frames.
             }
 
             suspensionSw.Restart();
-            while (suspendedIndexInArray < rowsCount)
+            while (suspendedIndexInArray < newRowsCount)
             {
                 if (LogicIsRunningLong())
                     return;
-                SortableScrollableRow row = RebuildRow(suspendedIndexInArray);
-                rows[suspendedIndexInArray] = row;
+                rows[suspendedIndexInArray] = RebuildRow(suspendedIndexInArray);
                 suspendedIndexInArray++;
             }
             suspendedIndexInArray = 0;
 
+            rowsCount = newRowsCount;
+            OnRowsCountChanged(); // rows must be populated by this point, as this could call ShowOnlyRowsVisibleInViewport.
             SortAll();
         }
 

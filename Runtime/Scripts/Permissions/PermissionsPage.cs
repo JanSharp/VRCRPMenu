@@ -1,5 +1,4 @@
-﻿using System.Text.RegularExpressions;
-using TMPro;
+﻿using TMPro;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
@@ -241,12 +240,9 @@ namespace JanSharp
 
         public void OnDuplicateClick()
         {
-            // Group 0 is the entire matching string. 1 is the first user defined group.
-            string prefix = Regex.Match(activePermissionGroupToggle.permissionGroup.groupName, @"^(.*?)(\s+\d+)?$").Groups[1].Value + " ";
-            int postfix = 1;
-            while (permissionManager.GetPermissionGroup(prefix + postfix) != null)
-                postfix++;
-            permissionsPagesManager.SendDuplicatePermissionGroupIA(prefix + postfix, activePermissionGroupToggle.permissionGroup);
+            PermissionGroup group = activePermissionGroupToggle.permissionGroup;
+            string groupName = permissionManager.GetFirstUnusedGroupName(group.groupName);
+            permissionsPagesManager.SendDuplicatePermissionGroupIA(groupName, group);
         }
 
         [PermissionsEvent(PermissionsEventType.OnPermissionGroupDuplicated)]

@@ -36,6 +36,10 @@ namespace JanSharp
         private string playersInGroupCountsFormat;
 
         public Transform popupsParent;
+        public RectTransform deleteConfirmationPopup;
+        public TextMeshProUGUI deleteConfirmationInfoText;
+        private string deleteConfirmationInfoFormat;
+        private PermissionGroup groupAwaitingDeleteConfirmation;
         public RectTransform wouldLoseEditPermissionsDueToEditPopup;
         public RectTransform wouldLoseEditPermissionsDueToDeletionPopup;
 
@@ -86,6 +90,8 @@ namespace JanSharp
         [LockstepEvent(LockstepEventType.OnImportStart)]
         public void OnImportStart()
         {
+            if (groupAwaitingDeleteConfirmation != null)
+                menuManager.ClosePopup(deleteConfirmationPopup, doCallback: true);
             if (wouldLoseEditPermissionsDueToEditPopup.parent != popupsParent)
                 menuManager.ClosePopup(wouldLoseEditPermissionsDueToEditPopup, doCallback: true);
             if (wouldLoseEditPermissionsDueToDeletionPopup.parent != popupsParent)
@@ -114,6 +120,7 @@ namespace JanSharp
         private void InitPlayersInGroupCounts()
         {
             playersInGroupCountsFormat = playersInGroupCountsText.text;
+            deleteConfirmationInfoFormat = deleteConfirmationInfoText.text;
         }
 
         private void UpdatePlayersInGroupCounts()
@@ -233,6 +240,9 @@ namespace JanSharp
 
             if (renamedGroup == activePermissionGroupToggle.permissionGroup)
                 groupNameField.SetTextWithoutNotify(renamedGroup.groupName);
+
+            if (renamedGroup == groupAwaitingDeleteConfirmation)
+                UpdateDeleteConfirmationInfoText();
         }
 
         [PermissionsPagesEvent(PermissionsPagesEventType.OnPermissionGroupRenameDenied)]
@@ -271,7 +281,28 @@ namespace JanSharp
 
         public void OnDeleteClick()
         {
-            permissionsPagesManager.SendDeletePermissionGroupIA(activePermissionGroupToggle.permissionGroup, permissionManager.DefaultPermissionGroup);
+            groupAwaitingDeleteConfirmation = activePermissionGroupToggle.permissionGroup;
+            UpdateDeleteConfirmationInfoText();
+            menuManager.ShowPopupAtItsAnchor(deleteConfirmationPopup, this, nameof(OnDeleteConfirmationPopupClosed));
+        }
+
+        private void UpdateDeleteConfirmationInfoText()
+        {
+            deleteConfirmationInfoText.text = string.Format(deleteConfirmationInfoFormat, groupAwaitingDeleteConfirmation.groupName);
+        }
+
+        public void OnDeleteConfirmationPopupClosed()
+        {
+            deleteConfirmationPopup.SetParent(popupsParent, worldPositionStays: false);
+            groupAwaitingDeleteConfirmation = null;
+        }
+
+        public void OnConfirmDeleteClick()
+        {
+            if (groupAwaitingDeleteConfirmation == null || groupAwaitingDeleteConfirmation.isDeleted)
+                return;
+            permissionsPagesManager.SendDeletePermissionGroupIA(groupAwaitingDeleteConfirmation, permissionManager.DefaultPermissionGroup);
+            menuManager.ClosePopup(deleteConfirmationPopup, doCallback: true); // Clears groupAwaitingDeleteConfirmation.
         }
 
         [PermissionsEvent(PermissionsEventType.OnPermissionGroupDeleted)]
@@ -279,6 +310,9 @@ namespace JanSharp
         {
             if (!isInitialized)
                 return;
+            PermissionGroup deletedGroup = permissionManager.DeletedPermissionGroup;
+            if (deletedGroup == groupAwaitingDeleteConfirmation)
+                menuManager.ClosePopup(deleteConfirmationPopup, doCallback: true);
             if (!TryGetPermissionGroupToggle(permissionManager.DeletedPermissionGroup.id, out PermissionsPermissionGroupToggle toggle))
                 return;
             toggle.gameObject.SetActive(false);

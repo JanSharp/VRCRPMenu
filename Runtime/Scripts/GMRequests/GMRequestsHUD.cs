@@ -1,5 +1,4 @@
-﻿using TMPro;
-using UdonSharp;
+﻿using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -40,7 +39,7 @@ namespace JanSharp
         public GameObject responderUrgentRoot;
         public Image responderRegularImage;
         public Image responderUrgentImage;
-        public TextMeshProUGUI responderCountText;
+        public Text responderCountText;
         private Color responderRegularBaseColor;
         private Color responderUrgentBaseColor;
         private bool responderHUDIsShown = false;

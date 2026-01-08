@@ -26,13 +26,14 @@ namespace JanSharp.Internal
         [LockstepInputAction(nameof(duplicatePermissionGroupIAId))]
         public void OnDuplicatePermissionGroupIA()
         {
-            if (!permissionManager.PlayerHasPermission(playerDataManager.SendingPlayerData, editPermissionsPermissionDef))
+            CorePlayerData sendingPlayerData = playerDataManager.SendingPlayerData;
+            if (!permissionManager.PlayerHasPermission(sendingPlayerData, editPermissionsPermissionDef))
                 return;
             string groupName = lockstep.ReadString();
             uint groupId = lockstep.ReadSmallUInt();
             if (!permissionManager.TryGetPermissionGroup(groupId, out PermissionGroup group))
                 return;
-            permissionManager.DuplicatePermissionGroupInGS(groupName, group);
+            permissionManager.DuplicatePermissionGroupInGS(groupName, group, sendingPlayerData);
         }
 
         public override void SendDeletePermissionGroupIA(PermissionGroup group, PermissionGroup groupToMovePlayersTo)

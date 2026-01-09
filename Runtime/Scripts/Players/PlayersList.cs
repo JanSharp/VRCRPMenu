@@ -83,7 +83,7 @@ namespace JanSharp
             RemoveRow((SortableScrollableRow)row);
         }
 
-        public void RebuildRows() => RebuildRows(playerDataManager.AllCorePlayerDataCount); // TODO: Only online players!
+        public void RebuildRows() => RebuildRows(selectionManager.allOnlinePlayersCount);
 
         protected override void OnRowCreated(SortableScrollableRow row) { }
 
@@ -94,7 +94,7 @@ namespace JanSharp
 
         protected override SortableScrollableRow RebuildRow(int index)
         {
-            CorePlayerData core = playerDataManager.GetCorePlayerDataAt(index);
+            CorePlayerData core = selectionManager.allOnlinePlayers[index];
             PlayersRow row = CreateRowForPlayer(core);
             rowsByPersistentId.Add(core.persistentId, row);
             return row;

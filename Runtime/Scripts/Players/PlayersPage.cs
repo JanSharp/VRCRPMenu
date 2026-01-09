@@ -160,8 +160,10 @@ namespace JanSharp
         {
             // No need for an isInitialized check, this can only trigger through an input action, not any GS safe context.
             CorePlayerData core = playerDataManager.PlayerDataForEvent;
-            // if (core.isOffline) // DEBUG: Uncomment this once done implementing and testing.
-            //     return;
+#if !RP_MENU_SHOW_OFFLINE_PLAYERS_IN_PLAYER_LIST
+            if (core.isOffline)
+                return;
+#endif
             rowsList.CreateRow(core);
         }
 

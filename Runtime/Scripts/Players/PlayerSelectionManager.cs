@@ -109,7 +109,17 @@ namespace JanSharp
         [PlayerDataEvent(PlayerDataEventType.OnPlayerDataDeleted)]
         public void OnPlayerDataDeleted()
         {
-            ArrList.Remove(ref allOnlinePlayers, ref allOnlinePlayersCount, playerDataManager.PlayerDataForEvent);
+            RemovePlayerForEvent();
+        }
+
+        private void RemovePlayerForEvent()
+        {
+            CorePlayerData player = playerDataManager.PlayerDataForEvent;
+            ArrList.Remove(ref allOnlinePlayers, ref allOnlinePlayersCount, player);
+            if (!selectedPlayersLut.Remove(player))
+                return;
+            ArrList.Remove(ref selectedPlayers, ref selectedPlayersCount, player);
+            RaiseOnOnePlayerSelectionChanged(player);
         }
 
 #if !RP_MENU_SHOW_OFFLINE_PLAYERS_IN_PLAYER_LIST
@@ -124,7 +134,7 @@ namespace JanSharp
         [PlayerDataEvent(PlayerDataEventType.OnPlayerDataWentOffline)]
         public void OnPlayerDataWentOffline()
         {
-            ArrList.Remove(ref allOnlinePlayers, ref allOnlinePlayersCount, playerDataManager.PlayerDataForEvent);
+            RemovePlayerForEvent();
         }
 #endif
 
@@ -136,6 +146,9 @@ namespace JanSharp
             allOnlinePlayersCount = playerDataManager.AllCorePlayerDataCount;
             ArrList.EnsureCapacity(ref allOnlinePlayers, allOnlinePlayersCount);
             System.Array.Copy(players, allOnlinePlayers, allOnlinePlayersCount);
+            // At the time of writing this the player data system does not delete existing offline player data
+            // during imports even if tha player data was not part of the import, thus there is no need to
+            // check if any players must be removed from the current selection.
         }
 #endif
 

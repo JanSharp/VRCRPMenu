@@ -10,7 +10,7 @@ namespace JanSharp.Internal
     [CustomRaisedEventsDispatcher(typeof(GMRequestsEventAttribute), typeof(GMRequestsEventType))]
     public class GMRequestsManager : GMRequestsManagerAPI
     {
-        public override string GameStateInternalName => "rp-menu.gm-requests";
+        public override string GameStateInternalName => "jansharp.rp-menu-gm-requests";
         public override string GameStateDisplayName => "GM Requests";
         public override bool GameStateSupportsImportExport => false;
         public override uint GameStateDataVersion => 0u;

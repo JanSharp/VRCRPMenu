@@ -1,5 +1,6 @@
 ﻿using UdonSharp;
 using UnityEngine;
+using VRC.SDK3.Data;
 using VRC.SDKBase;
 
 namespace JanSharp
@@ -11,6 +12,7 @@ namespace JanSharp
         [HideInInspector][SerializeField][SingletonReference] private PlayersBackendManagerAPI playersBackendManager;
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
         [HideInInspector][SerializeField][SingletonReference] private PlayersFavoritesManagerAPI playersFavoritesManager;
+        [HideInInspector][SerializeField][SingletonReference] private PlayerSelectionManager selectionManager;
 
         public PlayersList rowsList;
         public PlayersRow rowPrefabScript;
@@ -264,7 +266,29 @@ namespace JanSharp
 
         public void OnSelectValueChanged(PlayersRow row)
         {
-            // TODO: impl
+            selectionManager.SetPlayerSelectionState(row.rpPlayerData.core, row.selectToggle.isOn);
+        }
+
+        [PlayerSelectionEvent(PlayerSelectionEventType.OnOnePlayerSelectionChanged)]
+        public void OnOnePlayerSelectionChanged()
+        {
+            CorePlayerData player = selectionManager.ChangedPlayerForEvent;
+            if (!TryGetRow(selectionManager.ChangedPlayerForEvent.persistentId, out PlayersRow row))
+                return; // Some system did something weird.
+            row.selectToggle.SetIsOnWithoutNotify(selectionManager.selectedPlayersLut.ContainsKey(player));
+        }
+
+        [PlayerSelectionEvent(PlayerSelectionEventType.OnMultiplePlayerSelectionChanged)]
+        public void OnMultiplePlayerSelectionChanged()
+        {
+            DataDictionary selectedPlayersLut = selectionManager.selectedPlayersLut;
+            PlayersRow[] rows = rowsList.Rows;
+            int count = rowsList.RowsCount;
+            for (int i = 0; i < count; i++)
+            {
+                PlayersRow row = rows[i];
+                row.selectToggle.SetIsOnWithoutNotify(selectedPlayersLut.ContainsKey(row.rpPlayerData.core));
+            }
         }
 
         #endregion

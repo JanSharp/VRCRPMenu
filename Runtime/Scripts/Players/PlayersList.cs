@@ -11,6 +11,7 @@ namespace JanSharp
     {
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
         [HideInInspector][SerializeField][SingletonReference] private PlayersBackendManagerAPI playersBackendManager;
+        [HideInInspector][SerializeField][SingletonReference] private PlayerSelectionManager selectionManager;
 
         private int rpPlayerDataIndex;
 
@@ -110,18 +111,19 @@ namespace JanSharp
             bool isFavorite = localPlayer.favoritePlayersOutgoingLut.ContainsKey(rpPlayerData);
             string playerName = rpPlayerData.PlayerDisplayName;
             string characterName = rpPlayerData.characterName;
+            bool isSelected = selectionManager.selectedPlayersLut.ContainsKey(core);
 
             row.isFavorite = isFavorite;
             row.sortablePlayerName = playerName.ToLower();
             row.sortableCharacterName = characterName.ToLower();
             row.sortableProximity = 0f; // TODO: if the current sort order is by proximity, do something here probably.
-            row.sortableSelection = 0; // TODO: impl
+            row.sortableSelection = isSelected ? 1 : 0;
 
             row.favoriteToggle.SetIsOnWithoutNotify(isFavorite);
             row.playerNameLabel.text = playerName;
             row.characterNameLabel.text = characterName;
             row.proximityLabel.text = "-"; // TODO: if the current sort order is by proximity, do something here probably.
-            row.selectToggle.SetIsOnWithoutNotify(false); // TODO: impl
+            row.selectToggle.SetIsOnWithoutNotify(isSelected);
 
             return row;
         }

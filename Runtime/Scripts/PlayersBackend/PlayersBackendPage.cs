@@ -474,6 +474,8 @@ namespace JanSharp
         public void OnPermissionGroupDuplicated()
         {
             PermissionGroup group = permissionManager.CreatedPermissionGroup;
+            if (group.isDeleted)
+                return;
             PlayersBackendPermissionGroupButton button = CreatePermissionGroupButton(group);
             pgButtonsById.Add(group.id, button);
             InsertSortPermissionGroupButton(button);

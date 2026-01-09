@@ -269,6 +269,8 @@ namespace JanSharp
             if (!isInitialized)
                 return;
             PermissionGroup group = permissionManager.CreatedPermissionGroup;
+            if (group.isDeleted)
+                return;
             PermissionsPermissionGroupToggle toggle = CreatePermissionGroupToggle(group);
             pgTogglesById.Add(group.id, toggle);
             InsertSortPermissionGroupToggle(toggle);

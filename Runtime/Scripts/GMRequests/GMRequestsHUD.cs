@@ -45,17 +45,17 @@ namespace JanSharp
         private bool responderHUDIsShown = false;
 
         [Space]
-        [PermissionDefinitionReference(nameof(requestGMPermissionDef))]
+        [PermissionDefinitionReference(nameof(requestGMPDef))]
         public string requestGMPermissionAsset; // A guid.
-        [HideInInspector][SerializeField] private PermissionDefinition requestGMPermissionDef;
+        [HideInInspector][SerializeField] private PermissionDefinition requestGMPDef;
 
-        [PermissionDefinitionReference(nameof(requestGMUrgentlyPermissionDef))]
+        [PermissionDefinitionReference(nameof(requestGMUrgentlyPDef))]
         public string requestGMUrgentlyPermissionAsset; // A guid.
-        [HideInInspector][SerializeField] private PermissionDefinition requestGMUrgentlyPermissionDef;
+        [HideInInspector][SerializeField] private PermissionDefinition requestGMUrgentlyPDef;
 
-        [PermissionDefinitionReference(nameof(viewAndEditGMRequestsPermissionDef))]
+        [PermissionDefinitionReference(nameof(viewAndEditGMRequestsPDef))]
         public string viewAndEditGMRequestsPermissionAsset; // A guid.
-        [HideInInspector][SerializeField] private PermissionDefinition viewAndEditGMRequestsPermissionDef;
+        [HideInInspector][SerializeField] private PermissionDefinition viewAndEditGMRequestsPDef;
 
         private bool cannotRequestRegular = false;
         private bool cannotRequestUrgent = false;
@@ -247,9 +247,9 @@ namespace JanSharp
 
         public override void Resolve()
         {
-            cannotRequestRegular = !requestGMPermissionDef.valueForLocalPlayer;
-            cannotRequestUrgent = !requestGMUrgentlyPermissionDef.valueForLocalPlayer;
-            cannotViewAndEdit = !viewAndEditGMRequestsPermissionDef.valueForLocalPlayer;
+            cannotRequestRegular = !requestGMPDef.valueForLocalPlayer;
+            cannotRequestUrgent = !requestGMUrgentlyPDef.valueForLocalPlayer;
+            cannotViewAndEdit = !viewAndEditGMRequestsPDef.valueForLocalPlayer;
             UpdateHUD();
         }
 

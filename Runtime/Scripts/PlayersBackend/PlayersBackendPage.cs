@@ -32,21 +32,21 @@ namespace JanSharp
         private float permissionGroupButtonHeight;
         private float maxPermissionGroupsPopupHeight;
 
-        [PermissionDefinitionReference(nameof(editDisplayNamePermissionDef))]
+        [PermissionDefinitionReference(nameof(editDisplayNamePDef))]
         public string editDisplayNamePermissionAsset; // A guid.
-        [HideInInspector][SerializeField] private PermissionDefinition editDisplayNamePermissionDef;
+        [HideInInspector][SerializeField] private PermissionDefinition editDisplayNamePDef;
 
-        [PermissionDefinitionReference(nameof(editCharacterNamePermissionDef))]
+        [PermissionDefinitionReference(nameof(editCharacterNamePDef))]
         public string editCharacterNamePermissionAsset; // A guid.
-        [HideInInspector][SerializeField] private PermissionDefinition editCharacterNamePermissionDef;
+        [HideInInspector][SerializeField] private PermissionDefinition editCharacterNamePDef;
 
-        [PermissionDefinitionReference(nameof(editPermissionsPermissionDef))]
+        [PermissionDefinitionReference(nameof(editPermissionsPDef))]
         public string editPermissionsPermissionAsset; // A guid.
-        [HideInInspector][SerializeField] private PermissionDefinition editPermissionsPermissionDef;
+        [HideInInspector][SerializeField] private PermissionDefinition editPermissionsPDef;
 
-        [PermissionDefinitionReference(nameof(deleteOfflinePlayerDataPermissionDef))]
+        [PermissionDefinitionReference(nameof(deleteOfflinePlayerDataPDef))]
         public string deleteOfflinePlayerDataPermissionAsset; // A guid.
-        [HideInInspector][SerializeField] private PermissionDefinition deleteOfflinePlayerDataPermissionDef;
+        [HideInInspector][SerializeField] private PermissionDefinition deleteOfflinePlayerDataPDef;
 
         /// <summary>
         /// <para><see cref="uint"/> permissionGroupId => <see cref="PlayersBackendPermissionGroupButton"/> button</para>
@@ -151,10 +151,10 @@ namespace JanSharp
 
         public override void Resolve()
         {
-            bool displayNameValue = editDisplayNamePermissionDef.valueForLocalPlayer;
-            bool characterNameValue = editCharacterNamePermissionDef.valueForLocalPlayer;
-            bool permissionGroupValue = editPermissionsPermissionDef.valueForLocalPlayer;
-            bool deleteValue = deleteOfflinePlayerDataPermissionDef.valueForLocalPlayer;
+            bool displayNameValue = editDisplayNamePDef.valueForLocalPlayer;
+            bool characterNameValue = editCharacterNamePDef.valueForLocalPlayer;
+            bool permissionGroupValue = editPermissionsPDef.valueForLocalPlayer;
+            bool deleteValue = deleteOfflinePlayerDataPDef.valueForLocalPlayer;
 
             rowsList.SortOnPermissionChange(displayNameValue, characterNameValue, permissionGroupValue);
 

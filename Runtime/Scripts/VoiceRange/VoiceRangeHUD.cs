@@ -19,9 +19,9 @@ namespace JanSharp
         private VoiceRangeHUDIcon activeIcon;
         private VoiceRangeVisualizationType activeVisualType;
 
-        [PermissionDefinitionReference(nameof(voiceRangeHUDSettingsPermissionDef))]
+        [PermissionDefinitionReference(nameof(voiceRangeHUDSettingsPDef))]
         public string voiceRangeHUDSettingsPermissionAsset; // A guid.
-        [HideInInspector][SerializeField] private PermissionDefinition voiceRangeHUDSettingsPermissionDef;
+        [HideInInspector][SerializeField] private PermissionDefinition voiceRangeHUDSettingsPDef;
 
         private int shownCounter = 0;
 
@@ -78,7 +78,7 @@ namespace JanSharp
         {
             if (!isInitialized)
                 return;
-            activeVisualType = voiceRangeHUDSettingsPermissionDef.valueForLocalPlayer
+            activeVisualType = voiceRangeHUDSettingsPDef.valueForLocalPlayer
                 ? localPlayer.latencyHUDVisualType
                 : voiceRangeManager.DefaultHUDVisualType;
             if (activeIcon != null)
@@ -90,7 +90,7 @@ namespace JanSharp
             if (!isInitialized)
                 return;
             int index = localPlayer.latencyVoiceRangeIndex;
-            uint showMask = voiceRangeHUDSettingsPermissionDef.valueForLocalPlayer
+            uint showMask = voiceRangeHUDSettingsPDef.valueForLocalPlayer
                 ? localPlayer.latencyShowInHUDMask
                 : voiceRangeManager.DefaultShowInHUDMask;
             VoiceRangeDefinition def = voiceRangeManager.GetVoiceRangeDefinition(index);

@@ -85,17 +85,17 @@ namespace JanSharp.Internal
 
         #region Permissions
 
-        [PermissionDefinitionReference(nameof(requestGMPermissionDef))]
+        [PermissionDefinitionReference(nameof(requestGMPDef))]
         public string requestGMPermissionAsset; // A guid.
-        [HideInInspector][SerializeField] private PermissionDefinition requestGMPermissionDef;
+        [HideInInspector][SerializeField] private PermissionDefinition requestGMPDef;
 
-        [PermissionDefinitionReference(nameof(requestGMUrgentlyPermissionDef))]
+        [PermissionDefinitionReference(nameof(requestGMUrgentlyPDef))]
         public string requestGMUrgentlyPermissionAsset; // A guid.
-        [HideInInspector][SerializeField] private PermissionDefinition requestGMUrgentlyPermissionDef;
+        [HideInInspector][SerializeField] private PermissionDefinition requestGMUrgentlyPDef;
 
-        [PermissionDefinitionReference(nameof(viewAndEditGMRequestsPermissionDef))]
+        [PermissionDefinitionReference(nameof(viewAndEditGMRequestsPDef))]
         public string viewAndEditGMRequestsPermissionAsset; // A guid.
-        [HideInInspector][SerializeField] private PermissionDefinition viewAndEditGMRequestsPermissionDef;
+        [HideInInspector][SerializeField] private PermissionDefinition viewAndEditGMRequestsPDef;
 
         private bool HasCreatePermission(CorePlayerData actingPlayer, CorePlayerData requestingPlayer, GMRequestType requestType)
         {
@@ -104,9 +104,9 @@ namespace JanSharp.Internal
             switch (requestType)
             {
                 case GMRequestType.Regular:
-                    return permissionManager.PlayerHasPermission(actingPlayer, requestGMPermissionDef);
+                    return permissionManager.PlayerHasPermission(actingPlayer, requestGMPDef);
                 case GMRequestType.Urgent:
-                    return permissionManager.PlayerHasPermission(actingPlayer, requestGMUrgentlyPermissionDef);
+                    return permissionManager.PlayerHasPermission(actingPlayer, requestGMUrgentlyPDef);
                 default:
                     return false;
             }
@@ -119,7 +119,7 @@ namespace JanSharp.Internal
 
         private bool HasEditPermission(CorePlayerData actingPlayer)
         {
-            return permissionManager.PlayerHasPermission(actingPlayer, viewAndEditGMRequestsPermissionDef);
+            return permissionManager.PlayerHasPermission(actingPlayer, viewAndEditGMRequestsPDef);
         }
 
         private bool HasDeletePermission(CorePlayerData actingPlayer, GMRequest request)

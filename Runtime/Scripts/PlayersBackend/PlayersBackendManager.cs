@@ -13,21 +13,21 @@ namespace JanSharp.Internal
 
         private int rpPlayerDataIndex;
 
-        [PermissionDefinitionReference(nameof(editDisplayNamePermissionDef))]
+        [PermissionDefinitionReference(nameof(editDisplayNamePDef))]
         public string editDisplayNamePermissionAsset; // A guid.
-        [HideInInspector][SerializeField] private PermissionDefinition editDisplayNamePermissionDef;
+        [HideInInspector][SerializeField] private PermissionDefinition editDisplayNamePDef;
 
-        [PermissionDefinitionReference(nameof(editCharacterNamePermissionDef))]
+        [PermissionDefinitionReference(nameof(editCharacterNamePDef))]
         public string editCharacterNamePermissionAsset; // A guid.
-        [HideInInspector][SerializeField] private PermissionDefinition editCharacterNamePermissionDef;
+        [HideInInspector][SerializeField] private PermissionDefinition editCharacterNamePDef;
 
-        [PermissionDefinitionReference(nameof(deleteOfflinePlayerDataPermissionDef))]
+        [PermissionDefinitionReference(nameof(deleteOfflinePlayerDataPDef))]
         public string deleteOfflinePlayerDataPermissionAsset; // A guid.
-        [HideInInspector][SerializeField] private PermissionDefinition deleteOfflinePlayerDataPermissionDef;
+        [HideInInspector][SerializeField] private PermissionDefinition deleteOfflinePlayerDataPDef;
 
-        [PermissionDefinitionReference(nameof(editPermissionsPermissionDef))]
+        [PermissionDefinitionReference(nameof(editPermissionsPDef))]
         public string editPermissionsPermissionAsset; // A guid.
-        [HideInInspector][SerializeField] private PermissionDefinition editPermissionsPermissionDef;
+        [HideInInspector][SerializeField] private PermissionDefinition editPermissionsPDef;
 
         [PlayerDataEvent(PlayerDataEventType.OnRegisterCustomPlayerData)]
         public void OnRegisterCustomPlayerData()
@@ -70,7 +70,7 @@ namespace JanSharp.Internal
             if (!TryGetRPPlayerData(persistentId, out RPPlayerData rpPlayerData))
                 return;
 
-            if (permissionManager.PlayerHasPermission(playerDataManager.SendingPlayerData, editDisplayNamePermissionDef))
+            if (permissionManager.PlayerHasPermission(playerDataManager.SendingPlayerData, editDisplayNamePDef))
                 SetOverriddenDisplayNameInGS(rpPlayerData, overriddenDisplayName);
             else
                 RaiseOnRPPlayerDataOverriddenDisplayNameChangeDenied(rpPlayerData);
@@ -107,7 +107,7 @@ namespace JanSharp.Internal
             if (!TryGetRPPlayerData(persistentId, out RPPlayerData rpPlayerData))
                 return;
 
-            if (permissionManager.PlayerHasPermission(playerDataManager.SendingPlayerData, editCharacterNamePermissionDef))
+            if (permissionManager.PlayerHasPermission(playerDataManager.SendingPlayerData, editCharacterNamePDef))
                 SetCharacterNameInGS(rpPlayerData, characterName);
             else
                 RaiseOnRPPlayerDataCharacterNameChangeDenied(rpPlayerData);
@@ -138,7 +138,7 @@ namespace JanSharp.Internal
         public void OnDeleteOfflinePlayerDataIA()
         {
             uint persistentId = lockstep.ReadSmallUInt();
-            if (!permissionManager.PlayerHasPermission(playerDataManager.SendingPlayerData, deleteOfflinePlayerDataPermissionDef))
+            if (!permissionManager.PlayerHasPermission(playerDataManager.SendingPlayerData, deleteOfflinePlayerDataPDef))
             {
                 RaiseOnDeleteOfflinePlayerDataDenied(persistentId, isLastPlayerWhoCanEditPermissions: false);
                 return;
@@ -155,14 +155,14 @@ namespace JanSharp.Internal
         private bool AnyOtherPlayerHasEditPermissions(CorePlayerData playerBeingDeleted)
         {
             PermissionGroup group = permissionManager.GetPermissionsPlayerData(playerBeingDeleted).permissionGroup;
-            if (group.playersInGroupCount != 1 || !group.permissionValues[editPermissionsPermissionDef.index])
+            if (group.playersInGroupCount != 1 || !group.permissionValues[editPermissionsPDef.index])
                 return true;
             PermissionGroup[] groups = permissionManager.PermissionGroupsRaw;
             int count = permissionManager.PermissionGroupsCount;
             for (int i = 0; i < count; i++)
             {
                 PermissionGroup otherGroup = groups[i];
-                if (otherGroup != group && otherGroup.playersInGroupCount != 0 && otherGroup.permissionValues[editPermissionsPermissionDef.index])
+                if (otherGroup != group && otherGroup.playersInGroupCount != 0 && otherGroup.permissionValues[editPermissionsPDef.index])
                     return true;
             }
             return false;

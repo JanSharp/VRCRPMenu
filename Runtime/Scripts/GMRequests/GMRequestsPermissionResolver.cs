@@ -9,15 +9,15 @@ namespace JanSharp
         [HideInInspector][SerializeField][SingletonReference] private GMRequestsManagerAPI requestsManager;
 
         public GMRequestType requestType;
-        [PermissionDefinitionReference(nameof(associatedRequestPermissionDef))]
+        [PermissionDefinitionReference(nameof(associatedRequestPDef))]
         public string associatedRequestPermissionAsset; // A guid.
-        [HideInInspector][SerializeField] private PermissionDefinition associatedRequestPermissionDef;
+        [HideInInspector][SerializeField] private PermissionDefinition associatedRequestPDef;
 
         public override void InitializeInstantiated() { }
 
         public override void Resolve()
         {
-            if (associatedRequestPermissionDef.valueForLocalPlayer)
+            if (associatedRequestPDef.valueForLocalPlayer)
                 return;
             GMRequest[] requests = requestsManager.ActiveLocalRequestsRaw;
             int count = requestsManager.ActiveLocalRequestsCount;

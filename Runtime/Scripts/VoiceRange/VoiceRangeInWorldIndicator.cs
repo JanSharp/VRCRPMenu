@@ -25,9 +25,9 @@ namespace JanSharp
         private int middleRadiusPropId;
         private int outerRadiusPropId;
 
-        [PermissionDefinitionReference(nameof(voiceRangeWorldSettingsPermissionDef))]
+        [PermissionDefinitionReference(nameof(voiceRangeWorldSettingsPDef))]
         public string voiceRangeWorldSettingsPermissionAsset; // A guid.
-        [HideInInspector][SerializeField] private PermissionDefinition voiceRangeWorldSettingsPermissionDef;
+        [HideInInspector][SerializeField] private PermissionDefinition voiceRangeWorldSettingsPDef;
 
         private Color[] minColors;
         private Color[] maxColors;
@@ -246,7 +246,7 @@ namespace JanSharp
         {
             if (!isInitialized)
                 return;
-            SetVisualType(voiceRangeWorldSettingsPermissionDef.valueForLocalPlayer
+            SetVisualType(voiceRangeWorldSettingsPDef.valueForLocalPlayer
                 ? localPlayer.latencyWorldVisualType
                 : voiceRangeManager.DefaultWorldVisualType);
         }
@@ -256,7 +256,7 @@ namespace JanSharp
             if (!isInitialized)
                 return;
             int index = localPlayer.latencyVoiceRangeIndex;
-            uint showMask = voiceRangeWorldSettingsPermissionDef.valueForLocalPlayer
+            uint showMask = voiceRangeWorldSettingsPDef.valueForLocalPlayer
                 ? localPlayer.latencyShowInWorldMask
                 : voiceRangeManager.DefaultShowInWorldMask;
             VoiceRangeDefinition nextActiveDef = voiceRangeManager.GetVoiceRangeDefinition(index);

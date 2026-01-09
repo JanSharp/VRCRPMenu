@@ -11,9 +11,9 @@ namespace JanSharp.Internal
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
         [HideInInspector][SerializeField][SingletonReference] private PermissionManagerAPI permissionManager;
 
-        [PermissionDefinitionReference(nameof(editPermissionsPermissionDef))]
+        [PermissionDefinitionReference(nameof(editPermissionsPDef))]
         public string editPermissionsPermissionAsset; // A guid.
-        [HideInInspector][SerializeField] private PermissionDefinition editPermissionsPermissionDef;
+        [HideInInspector][SerializeField] private PermissionDefinition editPermissionsPDef;
 
         public override void SendDuplicatePermissionGroupIA(string groupName, PermissionGroup toDuplicate)
         {
@@ -27,7 +27,7 @@ namespace JanSharp.Internal
         public void OnDuplicatePermissionGroupIA()
         {
             CorePlayerData sendingPlayerData = playerDataManager.SendingPlayerData;
-            if (!permissionManager.PlayerHasPermission(sendingPlayerData, editPermissionsPermissionDef))
+            if (!permissionManager.PlayerHasPermission(sendingPlayerData, editPermissionsPDef))
                 return;
             string groupName = lockstep.ReadString();
             uint groupId = lockstep.ReadSmallUInt();
@@ -52,7 +52,7 @@ namespace JanSharp.Internal
                 return;
 
             CorePlayerData sendingPlayerData = playerDataManager.SendingPlayerData;
-            if (!permissionManager.PlayerHasPermission(sendingPlayerData, editPermissionsPermissionDef))
+            if (!permissionManager.PlayerHasPermission(sendingPlayerData, editPermissionsPDef))
             {
                 RaiseOnPermissionGroupDeletedDenied(group, wouldLoseEditPermissions: false);
                 return;
@@ -63,7 +63,7 @@ namespace JanSharp.Internal
                 return;
 
             if (permissionManager.GetPermissionsPlayerData(sendingPlayerData).permissionGroup != group
-                || groupToMovePlayersTo.permissionValues[editPermissionsPermissionDef.index])
+                || groupToMovePlayersTo.permissionValues[editPermissionsPDef.index])
             {
                 permissionManager.DeletePermissionGroupInGS(group, groupToMovePlayersTo);
             }
@@ -86,7 +86,7 @@ namespace JanSharp.Internal
             if (!permissionManager.TryGetPermissionGroup(groupId, out PermissionGroup group))
                 return;
 
-            if (!permissionManager.PlayerHasPermission(playerDataManager.SendingPlayerData, editPermissionsPermissionDef))
+            if (!permissionManager.PlayerHasPermission(playerDataManager.SendingPlayerData, editPermissionsPDef))
             {
                 RaiseOnPermissionGroupRenameDenied(group);
                 return;
@@ -110,7 +110,7 @@ namespace JanSharp.Internal
             uint persistentId = lockstep.ReadSmallUInt();
 
             CorePlayerData sendingPlayerData = playerDataManager.SendingPlayerData;
-            if (!permissionManager.PlayerHasPermission(sendingPlayerData, editPermissionsPermissionDef))
+            if (!permissionManager.PlayerHasPermission(sendingPlayerData, editPermissionsPDef))
             {
                 RaiseOnPlayerPermissionGroupChangeDenied(persistentId, wouldLoseEditPermissions: false);
                 return;
@@ -122,7 +122,7 @@ namespace JanSharp.Internal
             if (!permissionManager.TryGetPermissionGroup(groupId, out PermissionGroup group))
                 return;
 
-            if (corePlayerData != sendingPlayerData || group.permissionValues[editPermissionsPermissionDef.index])
+            if (corePlayerData != sendingPlayerData || group.permissionValues[editPermissionsPDef.index])
                 permissionManager.SetPlayerPermissionGroupInGS(corePlayerData, group);
             else
                 RaiseOnPlayerPermissionGroupChangeDenied(persistentId, wouldLoseEditPermissions: true);
@@ -147,7 +147,7 @@ namespace JanSharp.Internal
             PermissionDefinition permissionDef = permissionManager.PermissionDefinitions[defIndex];
 
             CorePlayerData sendingPlayerData = playerDataManager.SendingPlayerData;
-            if (!permissionManager.PlayerHasPermission(sendingPlayerData, editPermissionsPermissionDef))
+            if (!permissionManager.PlayerHasPermission(sendingPlayerData, editPermissionsPDef))
             {
                 RaiseOnPermissionValueChangeDenied(group, permissionDef, wouldLoseEditPermissions: false);
                 return;
@@ -155,7 +155,7 @@ namespace JanSharp.Internal
 
             lockstep.ReadFlags(out bool value);
             if (value
-                || permissionDef != editPermissionsPermissionDef
+                || permissionDef != editPermissionsPDef
                 || group != permissionManager.GetPermissionsPlayerData(sendingPlayerData).permissionGroup)
             {
                 permissionManager.SetPermissionValueInGS(group, permissionDef, value);

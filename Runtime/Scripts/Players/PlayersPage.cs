@@ -10,9 +10,7 @@ namespace JanSharp
         [HideInInspector][SerializeField][SingletonReference] private LockstepAPI lockstep;
         [HideInInspector][SerializeField][SingletonReference] private PlayersBackendManagerAPI playersBackendManager;
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
-        [HideInInspector][SerializeField][SingletonReference] private PermissionManagerAPI permissionManager;
-        [HideInInspector][SerializeField][SingletonReference] private PermissionsPagesManagerAPI permissionsPagesManager;
-        [HideInInspector][SerializeField][FindInParent] private MenuManagerAPI menuManager;
+        [HideInInspector][SerializeField][SingletonReference] private PlayersFavoritesManagerAPI playersFavoritesManager;
 
         public PlayersList rowsList;
         public PlayersRow rowPrefabScript;
@@ -35,6 +33,18 @@ namespace JanSharp
 
         private uint localPlayerId;
         private bool isInitialized = false;
+
+        private RPPlayerData localPlayer;
+
+        /// <summary>
+        /// <para>To avoid having to do this using OnInit would be required, which makes putting a rebuild
+        /// rows call into OnInit and checking isInitialized in every event handler.</para>
+        /// </summary>
+        private void FetchLocalPlayer()
+        {
+            localPlayerId = (uint)Networking.LocalPlayer.playerId;
+            localPlayer = playersBackendManager.GetRPPlayerData(playerDataManager.GetCorePlayerDataForPlayerId(localPlayerId));
+        }
 
         [MenuManagerEvent(MenuManagerEventType.OnMenuManagerStart)]
         public void OnMenuManagerStart()
@@ -148,7 +158,7 @@ namespace JanSharp
         {
             // No need for an isInitialized check, this can only trigger through an input action, not any GS safe context.
             CorePlayerData core = playerDataManager.PlayerDataForEvent;
-            // if (core.isOffline)
+            // if (core.isOffline) // DEBUG: Uncomment this once done implementing and testing.
             //     return;
             rowsList.CreateRow(core);
         }
@@ -175,7 +185,34 @@ namespace JanSharp
 
         public void OnFavoriteValueChanged(PlayersRow row)
         {
-            // TODO: impl
+            if (localPlayer == null)
+                FetchLocalPlayer();
+            bool isFavorite = row.favoriteToggle.isOn;
+            if (isFavorite)
+                playersFavoritesManager.SendAddFavoritePlayerIA(localPlayer, row.rpPlayerData);
+            else
+                playersFavoritesManager.SendRemoveFavoritePlayerIA(localPlayer, row.rpPlayerData);
+            // Latency hiding.
+            row.isFavorite = isFavorite;
+            rowsList.PotentiallySortChangedFavoriteRow(row);
+        }
+
+        [PlayersFavoritesEvent(PlayersFavoritesEventType.OnPlayerFavoriteAdded)]
+        public void OnPlayerFavoriteAdded() => OnPlayerFavoriteChanged(true);
+
+        [PlayersFavoritesEvent(PlayersFavoritesEventType.OnPlayerFavoriteRemoved)]
+        public void OnPlayerFavoriteRemoved() => OnPlayerFavoriteChanged(false);
+
+        private void OnPlayerFavoriteChanged(bool isFavorite)
+        {
+            // No need for an isInitialized check, this can only trigger through an input action, not any GS safe context.
+            if (!playersFavoritesManager.SourcePlayerForEvent.core.isLocal)
+                return;
+            if (!TryGetRow(playersFavoritesManager.TargetPlayerForEvent.core.persistentId, out PlayersRow row))
+                return;
+            row.isFavorite = isFavorite;
+            row.favoriteToggle.SetIsOnWithoutNotify(isFavorite);
+            rowsList.PotentiallySortChangedFavoriteRow(row);
         }
 
         #endregion

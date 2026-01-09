@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using VRC.SDK3.Data;
+using VRC.SDKBase;
 
 namespace JanSharp
 {
@@ -9,6 +10,7 @@ namespace JanSharp
     public class PlayersList : SortableScrollableList
     {
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
+        [HideInInspector][SerializeField][SingletonReference] private PlayersBackendManagerAPI playersBackendManager;
 
         private int rpPlayerDataIndex;
 
@@ -28,6 +30,9 @@ namespace JanSharp
         public PlayersRow[] Rows => (PlayersRow[])rows;
         public int RowsCount => rowsCount;
 
+        private uint localPlayerId;
+        private RPPlayerData localPlayer;
+
         public override void Initialize()
         {
             base.Initialize();
@@ -36,6 +41,12 @@ namespace JanSharp
             currentSortOrderImage = sortPlayerNameAscendingImage;
             currentSortOrderImage.enabled = true;
             someRowsAreOutOfSortOrder = false;
+        }
+
+        private void FetchLocalPlayer()
+        {
+            localPlayerId = (uint)Networking.LocalPlayer.playerId;
+            localPlayer = playersBackendManager.GetRPPlayerData(playerDataManager.GetCorePlayerDataForPlayerId(localPlayerId));
         }
 
         [PlayerDataEvent(PlayerDataEventType.OnAllCustomPlayerDataRegistered)]
@@ -71,7 +82,7 @@ namespace JanSharp
             RemoveRow((SortableScrollableRow)row);
         }
 
-        public void RebuildRows() => RebuildRows(playerDataManager.AllCorePlayerDataCount);
+        public void RebuildRows() => RebuildRows(playerDataManager.AllCorePlayerDataCount); // TODO: Only online players!
 
         protected override void OnRowCreated(SortableScrollableRow row) { }
 
@@ -94,16 +105,19 @@ namespace JanSharp
             RPPlayerData rpPlayerData = (RPPlayerData)core.customPlayerData[rpPlayerDataIndex];
             row.rpPlayerData = rpPlayerData;
 
+            if (localPlayer == null)
+                FetchLocalPlayer();
+            bool isFavorite = localPlayer.favoritePlayersOutgoingLut.ContainsKey(rpPlayerData);
             string playerName = rpPlayerData.PlayerDisplayName;
             string characterName = rpPlayerData.characterName;
 
-            row.isFavorite = false; // TODO: impl
+            row.isFavorite = isFavorite;
             row.sortablePlayerName = playerName.ToLower();
             row.sortableCharacterName = characterName.ToLower();
             row.sortableProximity = 0f; // TODO: if the current sort order is by proximity, do something here probably.
             row.sortableSelection = 0; // TODO: impl
 
-            row.favoriteToggle.SetIsOnWithoutNotify(false); // TODO: impl
+            row.favoriteToggle.SetIsOnWithoutNotify(isFavorite);
             row.playerNameLabel.text = playerName;
             row.characterNameLabel.text = characterName;
             row.proximityLabel.text = "-"; // TODO: if the current sort order is by proximity, do something here probably.
@@ -214,6 +228,11 @@ namespace JanSharp
                 currentSortOrderImage.enabled = true;
                 SortAll();
             }
+        }
+
+        public void PotentiallySortChangedFavoriteRow(PlayersRow row)
+        {
+            UpdateSortPositionDueToValueChange(row);
         }
 
         public void PotentiallySortChangedPlayerNameRow(PlayersRow row)

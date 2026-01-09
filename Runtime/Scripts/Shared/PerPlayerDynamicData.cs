@@ -7,8 +7,8 @@ namespace JanSharp
         public abstract string DynamicDataClassName { get; }
 
         #region GameState
-        private DynamicData[] localDynamicData = new DynamicData[ArrList.MinCapacity];
-        private int localDynamicDataCount = 0;
+        [System.NonSerialized] public DynamicData[] localDynamicData = new DynamicData[ArrList.MinCapacity];
+        [System.NonSerialized] public int localDynamicDataCount = 0;
         #endregion
 
         public override bool PersistPlayerDataWhileOffline()

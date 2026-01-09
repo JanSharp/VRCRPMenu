@@ -40,7 +40,7 @@ namespace JanSharp
 
         private void Start()
         {
-            SendCustomEvent(nameof(StartDelayed));
+            SendCustomEventDelayedFrames(nameof(StartDelayed), 1);
         }
 
         public void StartDelayed()

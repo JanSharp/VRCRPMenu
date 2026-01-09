@@ -326,8 +326,7 @@ namespace JanSharp
             if (left.isFavorite != right.isFavorite)
                 leftSortsFirst = left.isFavorite;
             else
-                leftSortsFirst = left.sortableProximity
-                    .CompareTo(right.sortableProximity) <= 0;
+                leftSortsFirst = left.sortableProximity <= right.sortableProximity;
         }
         public void CompareRowProximityDescending()
         {
@@ -336,8 +335,7 @@ namespace JanSharp
             if (left.isFavorite != right.isFavorite)
                 leftSortsFirst = left.isFavorite;
             else
-                leftSortsFirst = left.sortableProximity
-                    .CompareTo(right.sortableProximity) >= 0;
+                leftSortsFirst = left.sortableProximity >= right.sortableProximity;
         }
 
         public void CompareRowSelectionAscending()
@@ -347,8 +345,7 @@ namespace JanSharp
             if (left.isFavorite != right.isFavorite)
                 leftSortsFirst = left.isFavorite;
             else
-                leftSortsFirst = left.sortableSelection
-                    .CompareTo(right.sortableSelection) <= 0;
+                leftSortsFirst = left.sortableSelection <= right.sortableSelection;
         }
         public void CompareRowSelectionDescending()
         {
@@ -357,8 +354,7 @@ namespace JanSharp
             if (left.isFavorite != right.isFavorite)
                 leftSortsFirst = left.isFavorite;
             else
-                leftSortsFirst = left.sortableSelection
-                    .CompareTo(right.sortableSelection) >= 0;
+                leftSortsFirst = left.sortableSelection >= right.sortableSelection;
         }
 
         #endregion

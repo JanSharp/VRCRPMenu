@@ -273,6 +273,15 @@ namespace JanSharp
             }
         }
 
+        public void PotentiallySortChangedSelectionRows()
+        {
+            if (currentSortOrderFunction == nameof(CompareRowSelectionAscending)
+                || currentSortOrderFunction == nameof(CompareRowSelectionDescending))
+            {
+                UpdateSortPositionsDueToMultipleValueChanges();
+            }
+        }
+
         #endregion
 
         #region MergeSortComparators

@@ -1,4 +1,5 @@
-﻿using UdonSharp;
+﻿using TMPro;
+using UdonSharp;
 using UnityEngine;
 using VRC.SDK3.Data;
 using VRC.SDKBase;
@@ -16,6 +17,8 @@ namespace JanSharp
 
         public PlayersList rowsList;
         public PlayersRow rowPrefabScript;
+        public TextMeshProUGUI selectionSortHeaderLabel;
+        private string selectionSortHeaderFormat;
 
         [PermissionDefinitionReference(nameof(viewCharacterNamePDef))]
         public string viewCharacterNamePermissionAsset; // A guid.
@@ -52,6 +55,8 @@ namespace JanSharp
         public void OnMenuManagerStart()
         {
             localPlayerId = (uint)Networking.LocalPlayer.playerId;
+            selectionSortHeaderFormat = selectionSortHeaderLabel.text;
+            UpdateSortHeaderLabel();
         }
 
         [PlayerDataEvent(PlayerDataEventType.OnPrePlayerDataManagerInit)]
@@ -271,26 +276,39 @@ namespace JanSharp
             selectionManager.SetPlayerSelectionState(row.rpPlayerData.core, row.selectToggle.isOn);
         }
 
+        private void UpdateSortHeaderLabel()
+        {
+            selectionSortHeaderLabel.text = string.Format(selectionSortHeaderFormat, selectionManager.selectedPlayersCount);
+        }
+
         [PlayerSelectionEvent(PlayerSelectionEventType.OnOnePlayerSelectionChanged)]
         public void OnOnePlayerSelectionChanged()
         {
+            UpdateSortHeaderLabel();
             CorePlayerData player = selectionManager.ChangedPlayerForEvent;
             if (!TryGetRow(selectionManager.ChangedPlayerForEvent.persistentId, out PlayersRow row))
                 return; // Some system did something weird.
-            row.selectToggle.SetIsOnWithoutNotify(selectionManager.selectedPlayersLut.ContainsKey(player));
+            bool isSelected = selectionManager.selectedPlayersLut.ContainsKey(player);
+            row.sortableSelection = isSelected ? 1 : 0;
+            row.selectToggle.SetIsOnWithoutNotify(isSelected);
+            rowsList.PotentiallySortChangedSelectionRow(row);
         }
 
         [PlayerSelectionEvent(PlayerSelectionEventType.OnMultiplePlayerSelectionChanged)]
         public void OnMultiplePlayerSelectionChanged()
         {
+            UpdateSortHeaderLabel();
             DataDictionary selectedPlayersLut = selectionManager.selectedPlayersLut;
             PlayersRow[] rows = rowsList.Rows;
             int count = rowsList.RowsCount;
             for (int i = 0; i < count; i++)
             {
                 PlayersRow row = rows[i];
-                row.selectToggle.SetIsOnWithoutNotify(selectedPlayersLut.ContainsKey(row.rpPlayerData.core));
+                bool isSelected = selectedPlayersLut.ContainsKey(row.rpPlayerData.core);
+                row.sortableSelection = isSelected ? 1 : 0;
+                row.selectToggle.SetIsOnWithoutNotify(isSelected);
             }
+            rowsList.PotentiallySortChangedSelectionRows();
         }
 
         #endregion

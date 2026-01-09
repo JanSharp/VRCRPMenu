@@ -340,12 +340,12 @@ namespace JanSharp
         private void SetSelectedRowForPopup(PlayersBackendRow row)
         {
             selectedRowForPopup = row;
-            selectedRowForPopup.activeRowHighlightImage.CrossFadeAlpha(1f, 0.1f, ignoreTimeScale: true);
+            selectedRowForPopup.activeRowHighlight.interactable = true;
         }
 
         private void UnsetSelectedRowForPopup()
         {
-            selectedRowForPopup.activeRowHighlightImage.CrossFadeAlpha(0f, 0.1f, ignoreTimeScale: true);
+            selectedRowForPopup.activeRowHighlight.interactable = false;
             selectedRowForPopup = null;
         }
 

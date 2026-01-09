@@ -4059,6 +4059,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6979504802073574666}
+  - {fileID: 1570921442199368012}
   m_Father: {fileID: 6137668208908307660}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &984351823334881953
@@ -10711,6 +10712,71 @@ MonoBehaviour:
   controlFillOrigin: 1
   controlFillAmount: 1
   controlClockwise: 1
+--- !u!1 &2391132433691117567
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1570921442199368012}
+  - component: {fileID: 6751571746280685069}
+  m_Layer: 17
+  m_Name: selectable-active-row-highlight
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1570921442199368012
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2391132433691117567}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4840434692889111192}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6751571746280685069
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2391132433691117567}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3aa988bd5cfdfb708b1724df46849da0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  profileName: selectable-active-row-highlight
+  interactable: 1
+  transition: 1
+  normalColor: main-highlight
+  highlightedColor: main-highlight
+  pressedColor: main-highlight
+  selectedColor: main-highlight
+  disabledColor: main-highlight-invisible
+  colorMultiplier: 1
+  fadeDuration: 0.1
+  highlightedSprite: 
+  pressedSprite: 
+  selectedSprite: 
+  disabledSprite: 
+  navigation:
+    m_Mode: 0
+    m_WrapAround: 0
+    m_SelectOnUp: {fileID: 0}
+    m_SelectOnDown: {fileID: 0}
+    m_SelectOnLeft: {fileID: 0}
+    m_SelectOnRight: {fileID: 0}
 --- !u!1 &2467551075168474255
 GameObject:
   m_ObjectHideFlags: 0
@@ -15740,6 +15806,8 @@ MonoBehaviour:
   colors:
   - name: popup-background
     color: {r: 0, g: 0, b: 0, a: 0.5019608}
+  - name: popup-background-invisible
+    color: {r: 0, g: 0, b: 0, a: 0}
   - name: sidebar-icon
     color: {r: 1, g: 1, b: 1, a: 1}
   - name: invisible-button-normal
@@ -15762,6 +15830,8 @@ MonoBehaviour:
     color: {r: 0.6, g: 0.6, b: 0.6, a: 1}
   - name: main-highlight
     color: {r: 0.5019608, g: 0.83137256, b: 1, a: 0.4}
+  - name: main-highlight-invisible
+    color: {r: 0.5019608, g: 0.83137256, b: 1, a: 0}
   - name: regular-gm-request-highlight
     color: {r: 0.5019608, g: 0.83137256, b: 1, a: 0.2509804}
   - name: urgent-highlight
@@ -44491,6 +44561,12 @@ PrefabInstance:
       propertyPath: permissionDefs.Array.size
       value: 4
       objectReference: {fileID: 0}
+    - target: {fileID: 2405121483074857818, guid: d32347e25c7e9c459b824e5189665f5b,
+        type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 2405121483074857818, guid: d32347e25c7e9c459b824e5189665f5b,
+        type: 3}
     - target: {fileID: 2625357884399355990, guid: d32347e25c7e9c459b824e5189665f5b,
         type: 3}
       propertyPath: m_Pivot.x
@@ -44591,6 +44667,12 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3247171944530307054, guid: d32347e25c7e9c459b824e5189665f5b,
+        type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 3247171944530307054, guid: d32347e25c7e9c459b824e5189665f5b,
+        type: 3}
     - target: {fileID: 3332999366354394483, guid: d32347e25c7e9c459b824e5189665f5b,
         type: 3}
       propertyPath: serializationData.Prefab
@@ -44696,6 +44778,12 @@ PrefabInstance:
       propertyPath: permissionDefs.Array.size
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5847871198024888711, guid: d32347e25c7e9c459b824e5189665f5b,
+        type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 5847871198024888711, guid: d32347e25c7e9c459b824e5189665f5b,
+        type: 3}
     - target: {fileID: 5939066031904122558, guid: d32347e25c7e9c459b824e5189665f5b,
         type: 3}
       propertyPath: serializationData.Prefab
@@ -45208,6 +45296,12 @@ PrefabInstance:
       propertyPath: serializationData.Prefab
       value: 
       objectReference: {fileID: 4549237410496144050, guid: 3a67ef387aa3e3e84a5fdfa168d7ae99,
+        type: 3}
+    - target: {fileID: 5292931384223449764, guid: 3a67ef387aa3e3e84a5fdfa168d7ae99,
+        type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 5292931384223449764, guid: 3a67ef387aa3e3e84a5fdfa168d7ae99,
         type: 3}
     - target: {fileID: 6226518676069619445, guid: 3a67ef387aa3e3e84a5fdfa168d7ae99,
         type: 3}

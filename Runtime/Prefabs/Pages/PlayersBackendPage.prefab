@@ -7442,6 +7442,8 @@ GameObject:
   - component: {fileID: 3236415480225767451}
   - component: {fileID: 2176596731626904073}
   - component: {fileID: 218016218894404251}
+  - component: {fileID: 3414530204958005079}
+  - component: {fileID: 980577222914709113}
   - component: {fileID: 3092968808483708024}
   m_Layer: 17
   m_Name: ActiveRowHighlight
@@ -7519,7 +7521,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 2100000, guid: 35630e38b4e5ffb40b44ec5348b4333f, type: 2}
-  m_Color: {r: 0.5019608, g: 0.83137256, b: 1, a: 0.4}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -7527,7 +7529,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_Sprite: {fileID: 0}
-  m_Type: 1
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -7548,7 +7550,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a4b5978b64b4bfb2a03616a40e976f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  profileName: image-active-row-highlight
+  profileName: image-none-tintable
   controlSourceImage: 1
   controlColor: 1
   controlMaterial: 1
@@ -7567,6 +7569,74 @@ MonoBehaviour:
   controlFillOrigin: 1
   controlFillAmount: 1
   controlClockwise: 1
+--- !u!114 &3414530204958005079
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4583553681507883932}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a98125502f715b4b83cfb77b434e436, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Navigation:
+    m_Mode: 0
+    m_WrapAround: 0
+    m_SelectOnUp: {fileID: 0}
+    m_SelectOnDown: {fileID: 0}
+    m_SelectOnLeft: {fileID: 0}
+    m_SelectOnRight: {fileID: 0}
+  m_Transition: 1
+  m_Colors:
+    m_NormalColor: {r: 0.5019608, g: 0.83137256, b: 1, a: 0.4}
+    m_HighlightedColor: {r: 0.5019608, g: 0.83137256, b: 1, a: 0.4}
+    m_PressedColor: {r: 0.5019608, g: 0.83137256, b: 1, a: 0.4}
+    m_SelectedColor: {r: 0.5019608, g: 0.83137256, b: 1, a: 0.4}
+    m_DisabledColor: {r: 0.5019608, g: 0.83137256, b: 1, a: 0}
+    m_ColorMultiplier: 1
+    m_FadeDuration: 0.1
+  m_SpriteState:
+    m_HighlightedSprite: {fileID: 0}
+    m_PressedSprite: {fileID: 0}
+    m_SelectedSprite: {fileID: 0}
+    m_DisabledSprite: {fileID: 0}
+  m_AnimationTriggers:
+    m_NormalTrigger: Normal
+    m_HighlightedTrigger: Highlighted
+    m_PressedTrigger: Pressed
+    m_SelectedTrigger: Selected
+    m_DisabledTrigger: Disabled
+  m_Interactable: 0
+  m_TargetGraphic: {fileID: 2176596731626904073}
+--- !u!114 &980577222914709113
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4583553681507883932}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1f3c00a2a5a6c9e3a1be8f8e3abdba1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  profileName: selectable-active-row-highlight
+  controlInteractable: 0
+  controlTransition: 1
+  controlNormalColor: 1
+  controlHighlightedColor: 1
+  controlPressedColor: 1
+  controlSelectedColor: 1
+  controlDisabledColor: 1
+  controlColorMultiplier: 1
+  controlFadeDuration: 1
+  controlHighlightedSprite: 1
+  controlPressedSprite: 1
+  controlSelectedSprite: 1
+  controlDisabledSprite: 1
+  controlNavigation: 1
 --- !u!114 &3092968808483708024
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10390,13 +10460,13 @@ MonoBehaviour:
   permissionGroupButtonSiblingIndexBaseOffset: 1
   permissionGroupsScrollRect: {fileID: 5303168573966162158}
   editDisplayNamePermissionAsset: 90af794bc490466609d6f9a484ec70c1
-  editDisplayNamePermissionDef: {fileID: 0}
+  editDisplayNamePDef: {fileID: 0}
   editCharacterNamePermissionAsset: 2e415fb8570687e1e849f16e2e3a9874
-  editCharacterNamePermissionDef: {fileID: 0}
+  editCharacterNamePDef: {fileID: 0}
   editPermissionsPermissionAsset: ce2cefb7c53d64e3286a81c4f729b45b
-  editPermissionsPermissionDef: {fileID: 0}
+  editPermissionsPDef: {fileID: 0}
   deleteOfflinePlayerDataPermissionAsset: a68619f51fb8e31f9a7f715c7a9c6b2f
-  deleteOfflinePlayerDataPermissionDef: {fileID: 0}
+  deleteOfflinePlayerDataPDef: {fileID: 0}
 --- !u!114 &3025566243340837444
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11022,7 +11092,7 @@ MonoBehaviour:
   deleteButton: {fileID: 4248698136083520254}
   deleteLabel: {fileID: 7330940095208787124}
   confirmDeletePopupLocation: {fileID: 3647515481523523400}
-  activeRowHighlightImage: {fileID: 2176596731626904073}
+  activeRowHighlight: {fileID: 3414530204958005079}
   overriddenDisplayNameRoot: {fileID: 8615507508166222983}
   characterNameRoot: {fileID: 8400174662050802528}
   permissionGroupRoot: {fileID: 194317880979877891}

@@ -27,7 +27,7 @@ namespace JanSharp
         public Button deleteButton;
         public Selectable deleteLabel;
         public Transform confirmDeletePopupLocation;
-        public Image activeRowHighlightImage;
+        public Selectable activeRowHighlight;
         public GameObject overriddenDisplayNameRoot;
         public GameObject characterNameRoot;
         public GameObject permissionGroupRoot;

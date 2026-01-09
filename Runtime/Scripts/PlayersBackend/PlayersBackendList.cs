@@ -78,7 +78,7 @@ namespace JanSharp
         protected override void OnRowCreated(SortableScrollableRow row)
         {
             PlayersBackendRow actualRow = (PlayersBackendRow)row;
-            actualRow.activeRowHighlightImage.CrossFadeAlpha(0f, 0f, ignoreTimeScale: true);
+            actualRow.activeRowHighlight.interactable = false;
         }
 
         protected override void OnPreRebuildRows()

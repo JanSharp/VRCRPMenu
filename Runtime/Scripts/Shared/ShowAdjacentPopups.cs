@@ -4,7 +4,7 @@ using UnityEngine;
 namespace JanSharp
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-    public class ShowAdjacentPopups : PermissionResolver
+    public abstract class ShowAdjacentPopups : PermissionResolver
     {
         [HideInInspector][SerializeField][FindInParent] private MenuManagerAPI menuManager;
 
@@ -17,17 +17,8 @@ namespace JanSharp
         public RectTransform sidePopup;
         public bool showSidePopupOnLeft;
         public float popupSpacing;
-        public float popupVerticalOffset;
 
         private bool popupsAreShown = false;
-
-        [PermissionDefinitionReference(nameof(showMainPDef), Optional = true)]
-        public string showMainPermissionAsset; // A guid.
-        [HideInInspector][SerializeField] protected PermissionDefinition showMainPDef;
-
-        [PermissionDefinitionReference(nameof(showSidePDef), Optional = true)]
-        public string showSidePermissionAsset; // A guid.
-        [HideInInspector][SerializeField] protected PermissionDefinition showSidePDef;
 
         [MenuManagerEvent(MenuManagerEventType.OnMenuManagerStart)]
         public void OnMenuManagerStart()
@@ -58,21 +49,28 @@ namespace JanSharp
         {
             if (!UpdatePopupParentingAndPositioning(out float x))
                 return;
-            helperTransform.anchoredPosition = new Vector2(x, popupVerticalOffset);
+            helperTransform.anchoredPosition = new Vector2(x, 0f);
             popupsAreShown = true;
-            menuManager.ShowPopupAtCurrentPosition(helperTransform, this, nameof(OnPopupsClosed), minDistanceFromPageEdge: popupSpacing);
+            menuManager.ShowPopupAtCurrentPosition(helperTransform, this, nameof(OnPopupsClosedInternal), minDistanceFromPageEdge: popupSpacing);
         }
 
-        public void OnPopupsClosed()
+        public void OnPopupsClosedInternal()
         {
             popupsAreShown = false;
             helperTransform.SetParent(popupsParent, worldPositionStays: false);
+            OnPopupsClosed();
         }
+
+        protected abstract void OnPopupsClosed();
+
+        protected abstract bool DoShowMain();
+
+        protected abstract bool DoShowSide();
 
         private bool UpdatePopupParentingAndPositioning(out float helperXPosition)
         {
-            bool doShowMain = showMainPDef == null || showMainPDef.valueForLocalPlayer;
-            bool doShowSide = showSidePDef == null || showSidePDef.valueForLocalPlayer;
+            bool doShowMain = DoShowMain();
+            bool doShowSide = DoShowSide();
 
             if (!doShowMain && !doShowSide)
             {

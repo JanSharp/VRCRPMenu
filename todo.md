@@ -88,4 +88,4 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [x] the cross fade alpha api for UI graphics is unreliable when objects get disabled. Either don't use it at all - and use like a selectable instead for example - or find all the edge cases and handle them
 - [x] check if permission groups are deleted already when getting the created event
 - [ ] change popup buttons to use the correct layout element style
-- [ ] change all texts which get dimmed (disabled) through selectables to use the tintable style
+- [x] change all texts which get dimmed (disabled) through selectables to use the tintable style

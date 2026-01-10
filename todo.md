@@ -87,5 +87,5 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [x] importing the 1000 players, the loading UI closed too soon, it was still running OnImportFinishingUp. This could be a lockstep with the IsImporting flag or a menu system bug
 - [x] the cross fade alpha api for UI graphics is unreliable when objects get disabled. Either don't use it at all - and use like a selectable instead for example - or find all the edge cases and handle them
 - [x] check if permission groups are deleted already when getting the created event
-- [ ] change popup buttons to use the correct layout element style
+- [x] change popup buttons to use the correct layout element style
 - [x] change all texts which get dimmed (disabled) through selectables to use the tintable style

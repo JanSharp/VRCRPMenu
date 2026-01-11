@@ -34,8 +34,8 @@ namespace JanSharp
         /// <para><see cref="uint"/> dataId => <see cref="DynamicDataPopupListButton"/> button</para>
         /// </summary>
         private DataDictionary buttonsById = new DataDictionary();
-        private DynamicDataPopupListButton[] buttons = new DynamicDataPopupListButton[ArrList.MinCapacity];
-        private int buttonsCount = 0;
+        protected DynamicDataPopupListButton[] buttons = new DynamicDataPopupListButton[ArrList.MinCapacity];
+        protected int buttonsCount = 0;
         private DynamicDataPopupListButton[] unusedButtons = new DynamicDataPopupListButton[ArrList.MinCapacity];
         private int unusedButtonsCount = 0;
 

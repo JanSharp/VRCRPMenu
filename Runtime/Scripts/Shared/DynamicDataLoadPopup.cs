@@ -64,7 +64,16 @@ namespace JanSharp
         public void OnPopupClosed()
         {
             popupRoot.SetParent(popupLocation, worldPositionStays: false);
-            // TODO: Send delete input actions.
+
+            DynamicDataLoadDeleteButton[] loadButtons = (DynamicDataLoadDeleteButton[])buttons;
+            for (int i = 0; i < buttonsCount; i++)
+            {
+                DynamicDataLoadDeleteButton button = loadButtons[i];
+                if (!button.markedForDeletion)
+                    continue;
+                dynamicDataManager.SendDeleteIA(button.dynamicData);
+                SetMarkForDeletion(button, false);
+            }
         }
 
         public void OnLoadButtonClick(DynamicDataLoadDeleteButton button)
@@ -76,7 +85,16 @@ namespace JanSharp
 
         public void OnDeleteButtonClick(DynamicDataLoadDeleteButton button)
         {
-            // TODO: Toggle being marked for deletion.
+            SetMarkForDeletion(button, !button.markedForDeletion);
+        }
+
+        private void SetMarkForDeletion(DynamicDataLoadDeleteButton button, bool marked)
+        {
+            button.markedForDeletion = marked;
+            button.button.interactable = !marked;
+            button.labelSelectable.interactable = !marked;
+            button.deleteIconSelectable.interactable = !marked;
+            button.undeleteIconSelectable.interactable = marked;
         }
 
         protected override bool ShouldShowLocalButtons() => localLoadPDef.valueForLocalPlayer || localDeletePDef.valueForLocalPlayer;
@@ -91,7 +109,8 @@ namespace JanSharp
             loadButton.deleteButtonRootGo.SetActive(isGlobal
                 ? globalDeletePDef.valueForLocalPlayer
                 : localDeletePDef.valueForLocalPlayer);
-            // TODO: Ensure it is not marked for deletion.
+            if (loadButton.markedForDeletion)
+                SetMarkForDeletion(loadButton, false);
         }
     }
 }

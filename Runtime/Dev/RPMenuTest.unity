@@ -690,6 +690,7 @@ MonoBehaviour:
   _udonSharpBackingUdonBehaviour: {fileID: 116434566}
   wannaBeClasses: {fileID: 481679906}
   lockstep: {fileID: 988687136}
+  selectionManager: {fileID: 1797107132}
 --- !u!4 &116434568
 Transform:
   m_ObjectHideFlags: 0
@@ -3523,7 +3524,7 @@ PrefabInstance:
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
       propertyPath: inputActionHandlerInstances.Array.size
-      value: 47
+      value: 48
       objectReference: {fileID: 0}
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
@@ -3533,7 +3534,7 @@ PrefabInstance:
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
       propertyPath: inputActionHandlerEventNames.Array.size
-      value: 47
+      value: 48
       objectReference: {fileID: 0}
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
@@ -3844,7 +3845,7 @@ PrefabInstance:
         type: 3}
       propertyPath: inputActionHandlerInstances.Array.data[39]
       value: 
-      objectReference: {fileID: 2136946506}
+      objectReference: {fileID: 1797107132}
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
       propertyPath: inputActionHandlerInstances.Array.data[40]
@@ -3869,7 +3870,7 @@ PrefabInstance:
         type: 3}
       propertyPath: inputActionHandlerInstances.Array.data[44]
       value: 
-      objectReference: {fileID: 3805926219095462884}
+      objectReference: {fileID: 2136946506}
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
       propertyPath: inputActionHandlerInstances.Array.data[45]
@@ -3878,6 +3879,11 @@ PrefabInstance:
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
       propertyPath: inputActionHandlerInstances.Array.data[46]
+      value: 
+      objectReference: {fileID: 3805926219095462884}
+    - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
+        type: 3}
+      propertyPath: inputActionHandlerInstances.Array.data[47]
       value: 
       objectReference: {fileID: 3805926219095462884}
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
@@ -4083,41 +4089,46 @@ PrefabInstance:
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
       propertyPath: inputActionHandlerEventNames.Array.data[39]
-      value: OnDuplicatePermissionGroupIA
+      value: OnDeleteIA
       objectReference: {fileID: 0}
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
       propertyPath: inputActionHandlerEventNames.Array.data[40]
-      value: OnDeletePermissionGroupIA
+      value: OnDuplicatePermissionGroupIA
       objectReference: {fileID: 0}
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
       propertyPath: inputActionHandlerEventNames.Array.data[41]
-      value: OnRenamePermissionGroupIA
+      value: OnDeletePermissionGroupIA
       objectReference: {fileID: 0}
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
       propertyPath: inputActionHandlerEventNames.Array.data[42]
-      value: OnSetPlayerPermissionGroupIA
+      value: OnRenamePermissionGroupIA
       objectReference: {fileID: 0}
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
       propertyPath: inputActionHandlerEventNames.Array.data[43]
-      value: OnSetPermissionValueIA
+      value: OnSetPlayerPermissionGroupIA
       objectReference: {fileID: 0}
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
       propertyPath: inputActionHandlerEventNames.Array.data[44]
-      value: OnSetVoiceRangeIndexIA
+      value: OnSetPermissionValueIA
       objectReference: {fileID: 0}
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
       propertyPath: inputActionHandlerEventNames.Array.data[45]
-      value: OnSetInWorldSettingsIA
+      value: OnSetVoiceRangeIndexIA
       objectReference: {fileID: 0}
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
       propertyPath: inputActionHandlerEventNames.Array.data[46]
+      value: OnSetInWorldSettingsIA
+      objectReference: {fileID: 0}
+    - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
+        type: 3}
+      propertyPath: inputActionHandlerEventNames.Array.data[47]
       value: OnSetInHUDSettingsIA
       objectReference: {fileID: 0}
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
@@ -4278,7 +4289,7 @@ PrefabInstance:
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
       propertyPath: inputActionHandlersRequireTimeTracking.Array.size
-      value: 47
+      value: 48
       objectReference: {fileID: 0}
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
@@ -32398,6 +32409,11 @@ PrefabInstance:
       objectReference: {fileID: 988687136}
     - target: {fileID: 3109387888789597150, guid: 95263ec555dec07b5914eaca0c50884a,
         type: 3}
+      propertyPath: deleteIAId
+      value: 39
+      objectReference: {fileID: 0}
+    - target: {fileID: 3109387888789597150, guid: 95263ec555dec07b5914eaca0c50884a,
+        type: 3}
       propertyPath: localAddPDef
       value: 
       objectReference: {fileID: 1215459894}
@@ -32469,12 +32485,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3109387888789597150, guid: 95263ec555dec07b5914eaca0c50884a,
         type: 3}
+      propertyPath: onSelectionGroupDeletedListeners.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3109387888789597150, guid: 95263ec555dec07b5914eaca0c50884a,
+        type: 3}
       propertyPath: onSelectionGroupAddedListeners.Array.data[0]
       value: 
       objectReference: {fileID: 732452988}
     - target: {fileID: 3109387888789597150, guid: 95263ec555dec07b5914eaca0c50884a,
         type: 3}
       propertyPath: onSelectionGroupAddedListeners.Array.data[1]
+      value: 
+      objectReference: {fileID: 1500681299}
+    - target: {fileID: 3109387888789597150, guid: 95263ec555dec07b5914eaca0c50884a,
+        type: 3}
+      propertyPath: onSelectionGroupDeletedListeners.Array.data[0]
+      value: 
+      objectReference: {fileID: 732452988}
+    - target: {fileID: 3109387888789597150, guid: 95263ec555dec07b5914eaca0c50884a,
+        type: 3}
+      propertyPath: onSelectionGroupDeletedListeners.Array.data[1]
       value: 
       objectReference: {fileID: 1500681299}
     - target: {fileID: 3109387888789597150, guid: 95263ec555dec07b5914eaca0c50884a,
@@ -32654,17 +32685,17 @@ PrefabInstance:
     - target: {fileID: 3941206064067425395, guid: 2c883c84a21e7a786a9cb7778e7a00fb,
         type: 3}
       propertyPath: setInHUDSettingsIAId
-      value: 46
+      value: 47
       objectReference: {fileID: 0}
     - target: {fileID: 3941206064067425395, guid: 2c883c84a21e7a786a9cb7778e7a00fb,
         type: 3}
       propertyPath: setInWorldSettingsIAId
-      value: 45
+      value: 46
       objectReference: {fileID: 0}
     - target: {fileID: 3941206064067425395, guid: 2c883c84a21e7a786a9cb7778e7a00fb,
         type: 3}
       propertyPath: setVoiceRangeIndexIAId
-      value: 44
+      value: 45
       objectReference: {fileID: 0}
     - target: {fileID: 3941206064067425395, guid: 2c883c84a21e7a786a9cb7778e7a00fb,
         type: 3}
@@ -37219,7 +37250,7 @@ PrefabInstance:
     - target: {fileID: 6829561960850755519, guid: bec13509efe353dd3bc14b2853c828cf,
         type: 3}
       propertyPath: setPermissionValueIAId
-      value: 43
+      value: 44
       objectReference: {fileID: 0}
     - target: {fileID: 6829561960850755519, guid: bec13509efe353dd3bc14b2853c828cf,
         type: 3}
@@ -37230,17 +37261,17 @@ PrefabInstance:
     - target: {fileID: 6829561960850755519, guid: bec13509efe353dd3bc14b2853c828cf,
         type: 3}
       propertyPath: deletePermissionGroupIAId
-      value: 40
-      objectReference: {fileID: 0}
-    - target: {fileID: 6829561960850755519, guid: bec13509efe353dd3bc14b2853c828cf,
-        type: 3}
-      propertyPath: renamePermissionGroupIAId
       value: 41
       objectReference: {fileID: 0}
     - target: {fileID: 6829561960850755519, guid: bec13509efe353dd3bc14b2853c828cf,
         type: 3}
+      propertyPath: renamePermissionGroupIAId
+      value: 42
+      objectReference: {fileID: 0}
+    - target: {fileID: 6829561960850755519, guid: bec13509efe353dd3bc14b2853c828cf,
+        type: 3}
       propertyPath: duplicatePermissionGroupIAId
-      value: 39
+      value: 40
       objectReference: {fileID: 0}
     - target: {fileID: 6829561960850755519, guid: bec13509efe353dd3bc14b2853c828cf,
         type: 3}
@@ -37250,7 +37281,7 @@ PrefabInstance:
     - target: {fileID: 6829561960850755519, guid: bec13509efe353dd3bc14b2853c828cf,
         type: 3}
       propertyPath: setPlayerPermissionGroupIAId
-      value: 42
+      value: 43
       objectReference: {fileID: 0}
     - target: {fileID: 6829561960850755519, guid: bec13509efe353dd3bc14b2853c828cf,
         type: 3}

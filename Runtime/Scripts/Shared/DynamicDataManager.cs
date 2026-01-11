@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using VRC.SDK3.Data;
-using VRC.SDKBase;
 
 namespace JanSharp
 {
@@ -29,10 +28,6 @@ namespace JanSharp
         public string localOverwritePermissionAsset; // A guid.
         [HideInInspector][SerializeField] protected PermissionDefinition localOverwritePDef;
 
-        [PermissionDefinitionReference(nameof(localLoadPDef))]
-        public string localLoadPermissionAsset; // A guid.
-        [HideInInspector][SerializeField] protected PermissionDefinition localLoadPDef;
-
         [PermissionDefinitionReference(nameof(localDeletePDef))]
         public string localDeletePermissionAsset; // A guid.
         [HideInInspector][SerializeField] protected PermissionDefinition localDeletePDef;
@@ -49,10 +44,6 @@ namespace JanSharp
         public string globalOverwritePermissionAsset; // A guid.
         [HideInInspector][SerializeField] protected PermissionDefinition globalOverwritePDef;
 
-        [PermissionDefinitionReference(nameof(globalLoadPDef))]
-        public string globalLoadPermissionAsset; // A guid.
-        [HideInInspector][SerializeField] protected PermissionDefinition globalLoadPDef;
-
         [PermissionDefinitionReference(nameof(globalDeletePDef))]
         public string globalDeletePermissionAsset; // A guid.
         [HideInInspector][SerializeField] protected PermissionDefinition globalDeletePDef;
@@ -65,10 +56,15 @@ namespace JanSharp
         /// </summary>
         private uint nextId = 1u;
         /// <summary>
+        /// <para><see cref="uint"/> id => <see cref="DynamicData"/> data</para>
+        /// <para>Has global and all local data. Literally all data part of the game state.</para>
+        /// </summary>
+        [System.NonSerialized] public DataDictionary allDynamicDataById = new DataDictionary();
+        /// <summary>
         /// <para><see cref="string"/> dataName => <see cref="DynamicData"/> data</para>
         /// </summary>
         [System.NonSerialized] public DataDictionary globalDynamicDataByName = new DataDictionary();
-        [System.NonSerialized] public DynamicData[] globalDynamicData = new DynamicData[ArrList.MinCapacity];
+        [System.NonSerialized] public DynamicData[] globalDynamicData = new DynamicData[WannaBeArrList.MinCapacity];
         [System.NonSerialized] public int globalDynamicDataCount = 0;
         #endregion
 
@@ -173,7 +169,9 @@ namespace JanSharp
             string dataName = data.dataName.Trim();
             if (dataName == "" || dataByName.ContainsKey(dataName))
                 return;
+            allDynamicDataById.Add(data.id, data);
             dataByName.Add(dataName, data);
+            // Already is a strong reference, do not increment refs counter when adding, do not use WannaBeArrList.
             ArrList.Add(ref list, ref count, data);
             RaiseOnDataAdded(data);
         }
@@ -217,6 +215,8 @@ namespace JanSharp
             DynamicData toOverwrite = (DynamicData)toOverwriteToken.Reference;
             int index = ArrList.IndexOf(ref list, ref count, toOverwrite);
             list[index] = data;
+            allDynamicDataById.Remove(toOverwrite.id);
+            allDynamicDataById.Add(data.id, data);
             dataByName[dataName] = data;
             if (!isUndo && sendingPlayerData.isLocal)
             {
@@ -250,9 +250,49 @@ namespace JanSharp
             RaiseOnOverwriteUndoStackChanged();
         }
 
+        public void SendDeleteIA(DynamicData data)
+        {
+            lockstep.WriteSmallUInt(data.id);
+            lockstep.SendInputAction(deleteIAId);
+        }
+
+        [HideInInspector][SerializeField] private uint deleteIAId;
+        [LockstepInputAction(nameof(deleteIAId))]
+        public void OnDeleteIA()
+        {
+            uint id = lockstep.ReadSmallUInt();
+            if (!allDynamicDataById.TryGetValue(id, out DataToken dataToken))
+                return;
+            DynamicData data = (DynamicData)dataToken.Reference;
+            PerPlayerDynamicData p = GetPlayerData(data.owningPlayer); // A rare single letter variable name!
+            if (data.isGlobal)
+                OnDeleteIAInternal(globalDeletePDef, globalDynamicDataByName, ref globalDynamicData, ref globalDynamicDataCount, data);
+            else
+                OnDeleteIAInternal(localDeletePDef, p.localDynamicDataByName, ref p.localDynamicData, ref p.localDynamicDataCount, data);
+        }
+
+        private void OnDeleteIAInternal(
+            PermissionDefinition deletePDef,
+            DataDictionary dataByName,
+            ref DynamicData[] list,
+            ref int count,
+            DynamicData data)
+        {
+            CorePlayerData sendingPlayerData = playerDataManager.SendingPlayerData;
+            if (!permissionManager.PlayerHasPermission(sendingPlayerData, deletePDef))
+                return;
+            allDynamicDataById.Remove(data.id);
+            dataByName.Remove(data.dataName);
+            ArrList.Remove(ref list, ref count, data);
+            RaiseOnDataDeleted(data);
+            data.DecrementRefsCount();
+        }
+
         protected abstract void RaiseOnDataAdded(DynamicData data);
 
         protected abstract void RaiseOnDataOverwritten(DynamicData data, DynamicData overwrittenData);
+
+        protected abstract void RaiseOnDataDeleted(DynamicData data);
 
         protected abstract void RaiseOnOverwriteUndoStackChanged();
 
@@ -272,6 +312,7 @@ namespace JanSharp
             for (int i = 0; i < globalDynamicDataCount; i++)
             {
                 DynamicData data = (DynamicData)lockstep.ReadCustomClass(DynamicDataClassName);
+                allDynamicDataById.Add(data.id, data);
                 globalDynamicDataByName.Add(data.dataName, data);
                 globalDynamicData[i] = data;
             }

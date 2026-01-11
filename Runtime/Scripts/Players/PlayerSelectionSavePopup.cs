@@ -64,6 +64,12 @@ namespace JanSharp
             OnDynamicDataOverwritten(selectionManager.SelectionGroupForEvent, selectionManager.OverwrittenSelectionGroupForEvent);
         }
 
+        [PlayerSelectionEvent(PlayerSelectionEventType.OnSelectionGroupDeleted)]
+        public void OnSelectionGroupDeleted()
+        {
+            OnDynamicDataDeleted(selectionManager.SelectionGroupForEvent);
+        }
+
         [PlayerSelectionEvent(PlayerSelectionEventType.OnSelectionGroupUndoOverwriteStackChanged)]
         public void OnSelectionGroupUndoOverwriteStackChanged()
         {

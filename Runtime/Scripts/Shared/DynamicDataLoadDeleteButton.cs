@@ -7,6 +7,7 @@ namespace JanSharp
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class DynamicDataLoadDeleteButton : DynamicDataPopupListButton
     {
+        [System.NonSerialized] public bool markedForDeletion;
         public DynamicDataLoadPopup popupScript;
         public override DynamicDataPopupList PopupScript => popupScript;
         public Selectable labelSelectable;

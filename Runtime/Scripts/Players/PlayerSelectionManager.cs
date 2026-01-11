@@ -12,6 +12,7 @@ namespace JanSharp
         OnSelectionGroupPlayerRemoved,
         OnSelectionGroupAdded,
         OnSelectionGroupOverwritten,
+        OnSelectionGroupDeleted,
         OnSelectionGroupUndoOverwriteStackChanged,
     }
 
@@ -212,6 +213,7 @@ namespace JanSharp
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onSelectionGroupPlayerRemovedListeners;
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onSelectionGroupAddedListeners;
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onSelectionGroupOverwrittenListeners;
+        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onSelectionGroupDeletedListeners;
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onSelectionGroupUndoOverwriteStackChangedListeners;
 
         private CorePlayerData playerDataForEvent;
@@ -258,6 +260,13 @@ namespace JanSharp
             CustomRaisedEvents.Raise(ref onSelectionGroupOverwrittenListeners, nameof(PlayerSelectionEventType.OnSelectionGroupOverwritten));
             selectionGroupForEvent = null; // To prevent misuse of the API.
             overwrittenSelectionGroupForEvent = null; // To prevent misuse of the API.
+        }
+
+        protected override void RaiseOnDataDeleted(DynamicData data)
+        {
+            selectionGroupForEvent = (PlayerSelectionGroup)data;
+            CustomRaisedEvents.Raise(ref onSelectionGroupDeletedListeners, nameof(PlayerSelectionEventType.OnSelectionGroupDeleted));
+            selectionGroupForEvent = null; // To prevent misuse of the API.
         }
 
         protected override void RaiseOnOverwriteUndoStackChanged()

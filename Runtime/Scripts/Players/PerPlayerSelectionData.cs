@@ -1,4 +1,5 @@
 ﻿using UdonSharp;
+using UnityEngine;
 
 namespace JanSharp
 {
@@ -9,6 +10,9 @@ namespace JanSharp
         public override string PlayerDataDisplayName => "Player Selection Data";
         public override uint DataVersion => 0u;
         public override uint LowestSupportedDataVersion => 0u;
+
+        [HideInInspector][SerializeField][SingletonReference] protected PlayerSelectionManager selectionManager;
+        public override DynamicDataManager DataManager => selectionManager;
 
         public override string DynamicDataClassName => nameof(PlayerSelectionGroup);
     }

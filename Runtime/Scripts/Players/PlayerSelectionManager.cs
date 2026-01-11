@@ -1,6 +1,7 @@
 ﻿using UdonSharp;
 using UnityEngine;
 using VRC.SDK3.Data;
+using VRC.SDKBase;
 
 namespace JanSharp
 {
@@ -8,6 +9,8 @@ namespace JanSharp
     {
         OnOnePlayerSelectionChanged,
         OnMultiplePlayerSelectionChanged,
+        OnSelectionGroupPlayerRemoved,
+        OnSelectionGroupAdded,
     }
 
     [System.AttributeUsage(System.AttributeTargets.Method, Inherited = true, AllowMultiple = false)]
@@ -51,6 +54,26 @@ namespace JanSharp
         [System.NonSerialized] public DataDictionary selectedPlayersLut = new DataDictionary();
         [System.NonSerialized] public CorePlayerData[] selectedPlayers = new CorePlayerData[ArrList.MinCapacity];
         [System.NonSerialized] public int selectedPlayersCount = 0;
+
+        public PlayerSelectionGroup SelectionGroupForSerialization => (PlayerSelectionGroup)dataForSerialization;
+
+        private uint localPlayerId;
+        private PerPlayerSelectionData localPlayer;
+        public PerPlayerSelectionData LocalPlayer
+        {
+            get
+            {
+                if (localPlayer == null)
+                    localPlayer = (PerPlayerSelectionData)playerDataManager.GetCorePlayerDataForPlayerId(localPlayerId).customPlayerData[playerDataIndex];
+                return localPlayer;
+            }
+        }
+
+        protected override void Start()
+        {
+            base.Start();
+            localPlayerId = (uint)Networking.LocalPlayer.playerId;
+        }
 
         public void SetPlayerSelectionState(CorePlayerData player, bool isSelected)
         {
@@ -110,6 +133,34 @@ namespace JanSharp
         public void OnPlayerDataDeleted()
         {
             RemovePlayerForEvent();
+
+            CorePlayerData deletedPlayer = playerDataManager.PlayerDataForEvent;
+            CorePlayerData[] players = playerDataManager.AllCorePlayerDataRaw;
+            int playersCount = playerDataManager.AllCorePlayerDataCount;
+            for (int i = 0; i < playersCount; i++)
+            {
+                PerPlayerSelectionData player = (PerPlayerSelectionData)players[i].customPlayerData[playerDataIndex];
+                RemoveDeletedPlayerFromGroups((PlayerSelectionGroup[])player.localDynamicData, player.localDynamicDataCount, deletedPlayer);
+            }
+            RemoveDeletedPlayerFromGroups((PlayerSelectionGroup[])globalDynamicData, globalDynamicDataCount, deletedPlayer);
+        }
+
+        private void RemoveDeletedPlayerFromGroups(PlayerSelectionGroup[] groups, int groupsCount, CorePlayerData deletedPlayer)
+        {
+            for (int i = 0; i < groupsCount; i++)
+            {
+                PlayerSelectionGroup group = groups[i];
+                CorePlayerData[] selectedPlayers = group.selectedPlayers;
+                int length = selectedPlayers.Length;
+                int index = System.Array.IndexOf(selectedPlayers, deletedPlayer);
+                if (index == -1)
+                    continue;
+                CorePlayerData[] newSelectedPlayers = new CorePlayerData[length - 1];
+                System.Array.Copy(selectedPlayers, 0, newSelectedPlayers, 0, index);
+                System.Array.Copy(selectedPlayers, index + 1, newSelectedPlayers, index, length - index - 1);
+                group.selectedPlayers = newSelectedPlayers;
+                RaiseOnSelectionGroupPlayerRemoved(group, deletedPlayer);
+            }
         }
 
         private void RemovePlayerForEvent()
@@ -156,20 +207,41 @@ namespace JanSharp
 
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onOnePlayerSelectionChangedListeners;
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onMultiplePlayerSelectionChangedListeners;
+        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onSelectionGroupPlayerRemovedListeners;
+        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onSelectionGroupAddedListeners;
 
-        private CorePlayerData changedPlayerForEvent;
-        public CorePlayerData ChangedPlayerForEvent => changedPlayerForEvent;
+        private CorePlayerData playerDataForEvent;
+        public CorePlayerData PlayerDataForEvent => playerDataForEvent;
+
+        private PlayerSelectionGroup selectionGroupForEvent;
+        public PlayerSelectionGroup SelectionGroupForEvent => selectionGroupForEvent;
 
         private void RaiseOnOnePlayerSelectionChanged(CorePlayerData changedPlayerForEvent)
         {
-            this.changedPlayerForEvent = changedPlayerForEvent;
+            this.playerDataForEvent = changedPlayerForEvent;
             CustomRaisedEvents.Raise(ref onOnePlayerSelectionChangedListeners, nameof(PlayerSelectionEventType.OnOnePlayerSelectionChanged));
-            this.changedPlayerForEvent = null; // To prevent misuse of the API.
+            this.playerDataForEvent = null; // To prevent misuse of the API.
         }
 
         private void RaiseOnMultiplePlayerSelectionChanged()
         {
             CustomRaisedEvents.Raise(ref onMultiplePlayerSelectionChangedListeners, nameof(PlayerSelectionEventType.OnMultiplePlayerSelectionChanged));
+        }
+
+        private void RaiseOnSelectionGroupPlayerRemoved(PlayerSelectionGroup selectionGroupForEvent, CorePlayerData playerDataForEvent)
+        {
+            this.selectionGroupForEvent = selectionGroupForEvent;
+            this.playerDataForEvent = playerDataForEvent;
+            CustomRaisedEvents.Raise(ref onSelectionGroupPlayerRemovedListeners, nameof(PlayerSelectionEventType.OnSelectionGroupPlayerRemoved));
+            this.selectionGroupForEvent = null; // To prevent misuse of the API.
+            this.playerDataForEvent = null; // To prevent misuse of the API.
+        }
+
+        protected override void RaiseOnDataAdded(DynamicData data)
+        {
+            selectionGroupForEvent = (PlayerSelectionGroup)data;
+            CustomRaisedEvents.Raise(ref onSelectionGroupAddedListeners, nameof(PlayerSelectionEventType.OnSelectionGroupAdded));
+            selectionGroupForEvent = null; // To prevent misuse of the API.
         }
 
         #endregion

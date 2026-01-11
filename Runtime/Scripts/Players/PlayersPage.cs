@@ -285,8 +285,8 @@ namespace JanSharp
         public void OnOnePlayerSelectionChanged()
         {
             UpdateSortHeaderLabel();
-            CorePlayerData player = selectionManager.ChangedPlayerForEvent;
-            if (!TryGetRow(selectionManager.ChangedPlayerForEvent.persistentId, out PlayersRow row))
+            CorePlayerData player = selectionManager.PlayerDataForEvent;
+            if (!TryGetRow(selectionManager.PlayerDataForEvent.persistentId, out PlayersRow row))
                 return; // Some system did something weird.
             bool isSelected = selectionManager.selectedPlayersLut.ContainsKey(player);
             row.sortableSelection = isSelected ? 1 : 0;

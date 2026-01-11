@@ -241,7 +241,7 @@ namespace JanSharp
             ArrList.Insert(ref buttons, ref buttonsCount, button, index);
         }
 
-        private void UpdateDueToChangedButtonCount()
+        protected virtual void UpdateDueToChangedButtonCount()
         {
             ShowHideNoDynamicDataInfo();
             CalculateDynamicDataPopupHeight();

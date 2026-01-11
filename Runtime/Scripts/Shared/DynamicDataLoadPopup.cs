@@ -5,6 +5,8 @@ namespace JanSharp
 {
     public abstract class DynamicDataLoadPopup : DynamicDataPopupList
     {
+        public Button mainButton;
+        public Selectable mainButtonLabel;
         public Selectable localLabelStyle;
         public Selectable globalLabelStyle;
         public Transform popupLocation;
@@ -115,6 +117,17 @@ namespace JanSharp
                 : localDeletePDef.valueForLocalPlayer);
             if (loadButton.markedForDeletion)
                 SetMarkForDeletion(loadButton, false);
+        }
+
+        protected override void UpdateDueToChangedButtonCount()
+        {
+            base.UpdateDueToChangedButtonCount();
+            bool interactable = buttonsCount != 0;
+            mainButton.interactable = interactable;
+            mainButtonLabel.interactable = interactable;
+            // Not closing the popup if it is open as it is more informative to the user to see the "no data"
+            // label rater than the popup suddenly closing on its own. Also prevents accidental clicks through
+            // the UI if the user tries to interact with it right as it closes.
         }
     }
 }

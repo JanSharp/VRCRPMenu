@@ -12,5 +12,7 @@ namespace JanSharp
         public DynamicDataSavePopup popupScript;
         public Button button;
         public TextMeshProUGUI label;
+
+        public void OnClick() => popupScript.OnOverwriteButtonClick(this);
     }
 }

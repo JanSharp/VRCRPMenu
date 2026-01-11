@@ -94,10 +94,19 @@ namespace JanSharp
             return false;
         }
 
-        protected void OnDynamicDataOverwritten(DynamicData data)
+        public abstract void OnOverwriteButtonClick(DynamicDataOverwriteButton button);
+
+        public abstract void OnUndoOverwriteClick();
+
+        protected void OnDynamicDataOverwritten(DynamicData data, DynamicData overwrittenData)
         {
-            if (TryGetDynamicDataButton(data.id, out DynamicDataOverwriteButton button))
-                UpdateDynamicDataButtonLabel(button);
+            if (!buttonsById.Remove(overwrittenData.id, out DataToken buttonToken))
+                return; // Should be impossible.
+            DynamicDataOverwriteButton button = (DynamicDataOverwriteButton)buttonToken.Reference;
+            button.dynamicData = data;
+            buttonsById.Add(data.id, button);
+            // No need to set sortableDataName because overwritten groups have the same name.
+            UpdateDynamicDataButtonLabel(button); // But the label could differ even with the same name.
         }
 
         protected void OnDynamicDataAdded(DynamicData data)

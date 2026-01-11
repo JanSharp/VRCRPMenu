@@ -17,6 +17,10 @@ namespace JanSharp
         public TMP_InputField groupNameField;
         public TextMeshProUGUI groupNameFieldPlaceholder;
         private string groupNameFieldPlaceholderNormalText;
+        public Button undoOverwriteButton;
+        public Selectable undoOverwriteLabelSelectable;
+        public TextMeshProUGUI undoOverwriteLabel;
+        private string undoOverwriteLabelNormalText;
 
         private bool isHoveringLocalSaveButton;
 
@@ -24,6 +28,7 @@ namespace JanSharp
         {
             base.OnMenuManagerStart();
             groupNameFieldPlaceholderNormalText = groupNameFieldPlaceholder.text;
+            undoOverwriteLabelNormalText = undoOverwriteLabel.text;
         }
 
         public void OnGroupNameValueChanged()
@@ -82,6 +87,66 @@ namespace JanSharp
             groupNameFieldPlaceholder.text = groupNameFieldPlaceholderNormalText;
         }
 
+        public override void OnOverwriteButtonClick(DynamicDataOverwriteButton button)
+        {
+            menuManager.ClosePopup(popupRoot, doCallback: true);
+            PlayerSelectionGroup toOverwrite = (PlayerSelectionGroup)button.dynamicData;
+            PlayerSelectionGroup group = selectionManager.SelectionGroupForSerialization;
+
+            CorePlayerData[] players = new CorePlayerData[selectionManager.selectedPlayersCount];
+            System.Array.Copy(selectionManager.selectedPlayers, players, players.Length);
+            group.selectedPlayers = players;
+
+            group.dataName = toOverwrite.dataName;
+            group.isGlobal = toOverwrite.isGlobal;
+            group.owningPlayer = playerDataManager.LocalPlayerData;
+            selectionManager.SendOverwriteIA(group, isUndo: false);
+        }
+
+        public override void OnUndoOverwriteClick()
+        {
+            PlayerSelectionGroup toRestore = (PlayerSelectionGroup)selectionManager.GetTopFromOverwriteUndoStack();
+            if (toRestore == null)
+                return;
+            PlayerSelectionGroup group = selectionManager.SelectionGroupForSerialization;
+
+            CorePlayerData[] selectedPlayers = toRestore.selectedPlayers;
+            int nullCount = 0;
+            foreach (CorePlayerData player in selectedPlayers)
+                if (player == null || player.isDeleted)
+                    nullCount++;
+            if (nullCount == 0)
+                group.selectedPlayers = selectedPlayers;
+            else
+            {
+                CorePlayerData[] newPlayers = new CorePlayerData[selectedPlayers.Length - nullCount];
+                int i = 0;
+                foreach (CorePlayerData player in selectedPlayers)
+                    if (player != null && !player.isDeleted)
+                        newPlayers[i++] = player;
+                group.selectedPlayers = newPlayers;
+            }
+
+            group.dataName = toRestore.dataName;
+            group.isGlobal = toRestore.isGlobal;
+            group.owningPlayer = toRestore.owningPlayer;
+            selectionManager.SendOverwriteIA(group, isUndo: true);
+            selectionManager.PopFromOverwriteUndoStack();
+
+            // Give some kind of instant feedback, since this is not latency hidden.
+            undoOverwriteLabel.text = "Undoing...";
+            resetUndoOverwriteLabelTextCount++;
+            SendCustomEventDelayedSeconds(nameof(ResetUndoOverwriteLabelText), 0.25f);
+        }
+
+        private int resetUndoOverwriteLabelTextCount;
+        public void ResetUndoOverwriteLabelText()
+        {
+            if (--resetUndoOverwriteLabelTextCount != 0)
+                return;
+            undoOverwriteLabel.text = undoOverwriteLabelNormalText;
+        }
+
         private string GetFirstUnusedLocalGroupName()
         {
             return selectionManager.GetFirstUnusedDataName(
@@ -109,6 +174,20 @@ namespace JanSharp
         {
             if (TryGetDynamicDataButton(selectionManager.SelectionGroupForEvent.id, out DynamicDataOverwriteButton button))
                 UpdateDynamicDataButtonLabel(button);
+        }
+
+        [PlayerSelectionEvent(PlayerSelectionEventType.OnSelectionGroupOverwritten)]
+        public void OnSelectionGroupOverwritten()
+        {
+            OnDynamicDataOverwritten(selectionManager.SelectionGroupForEvent, selectionManager.OverwrittenSelectionGroupForEvent);
+        }
+
+        [PlayerSelectionEvent(PlayerSelectionEventType.OnSelectionGroupUndoOverwriteStackChanged)]
+        public void OnSelectionGroupUndoOverwriteStackChanged()
+        {
+            bool interactable = selectionManager.OverwriteUndoStackSize != 0;
+            undoOverwriteButton.interactable = interactable;
+            undoOverwriteLabelSelectable.interactable = interactable;
         }
 
         protected override string GetDynamicDataLabel(DynamicData data)

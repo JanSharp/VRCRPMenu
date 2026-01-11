@@ -11,6 +11,8 @@ namespace JanSharp
         OnMultiplePlayerSelectionChanged,
         OnSelectionGroupPlayerRemoved,
         OnSelectionGroupAdded,
+        OnSelectionGroupOverwritten,
+        OnSelectionGroupUndoOverwriteStackChanged,
     }
 
     [System.AttributeUsage(System.AttributeTargets.Method, Inherited = true, AllowMultiple = false)]
@@ -209,12 +211,17 @@ namespace JanSharp
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onMultiplePlayerSelectionChangedListeners;
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onSelectionGroupPlayerRemovedListeners;
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onSelectionGroupAddedListeners;
+        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onSelectionGroupOverwrittenListeners;
+        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onSelectionGroupUndoOverwriteStackChangedListeners;
 
         private CorePlayerData playerDataForEvent;
         public CorePlayerData PlayerDataForEvent => playerDataForEvent;
 
         private PlayerSelectionGroup selectionGroupForEvent;
         public PlayerSelectionGroup SelectionGroupForEvent => selectionGroupForEvent;
+
+        private PlayerSelectionGroup overwrittenSelectionGroupForEvent;
+        public PlayerSelectionGroup OverwrittenSelectionGroupForEvent => overwrittenSelectionGroupForEvent;
 
         private void RaiseOnOnePlayerSelectionChanged(CorePlayerData changedPlayerForEvent)
         {
@@ -242,6 +249,20 @@ namespace JanSharp
             selectionGroupForEvent = (PlayerSelectionGroup)data;
             CustomRaisedEvents.Raise(ref onSelectionGroupAddedListeners, nameof(PlayerSelectionEventType.OnSelectionGroupAdded));
             selectionGroupForEvent = null; // To prevent misuse of the API.
+        }
+
+        protected override void RaiseOnDataOverwritten(DynamicData data, DynamicData overwrittenData)
+        {
+            selectionGroupForEvent = (PlayerSelectionGroup)data;
+            overwrittenSelectionGroupForEvent = (PlayerSelectionGroup)overwrittenData;
+            CustomRaisedEvents.Raise(ref onSelectionGroupOverwrittenListeners, nameof(PlayerSelectionEventType.OnSelectionGroupOverwritten));
+            selectionGroupForEvent = null; // To prevent misuse of the API.
+            overwrittenSelectionGroupForEvent = null; // To prevent misuse of the API.
+        }
+
+        protected override void RaiseOnOverwriteUndoStackChanged()
+        {
+            CustomRaisedEvents.Raise(ref onSelectionGroupUndoOverwriteStackChangedListeners, nameof(PlayerSelectionEventType.OnSelectionGroupUndoOverwriteStackChanged));
         }
 
         #endregion

@@ -473,7 +473,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 8106338873236486154}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 6584734643084640089}
+        m_TargetAssemblyTypeName: 
+        m_MethodName: SendCustomEvent
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: OnClick
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &8466810795888635400
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1388,12 +1400,8 @@ MonoBehaviour:
   dynamicDataScrollRect: {fileID: 5338251655120690793}
   noDynamicDataInfoGo: {fileID: 5404685539826244605}
   noDynamicDataInfoLayoutElement: {fileID: 7823500713225001828}
-  localAddPermissionAsset: 4d4024005f243db7fac4a86d7d082ca6
-  localAddPDef: {fileID: 0}
   localOverwritePermissionAsset: 5a1858670c7829453915515de963f63f
   localOverwritePDef: {fileID: 0}
-  globalAddPermissionAsset: 3fd65df366e3ae6f9a9ab96eaa6478bf
-  globalAddPDef: {fileID: 0}
   globalOverwritePermissionAsset: 6ec10a27a44b08934a3efbafeaac8897
   globalOverwritePDef: {fileID: 0}
   selectionManager: {fileID: 0}
@@ -1402,6 +1410,9 @@ MonoBehaviour:
   saveAsGlobalLabel: {fileID: 6756265087070552296}
   groupNameField: {fileID: 5185081002988628800}
   groupNameFieldPlaceholder: {fileID: 8746731225764795514}
+  undoOverwriteButton: {fileID: 5095206958576955727}
+  undoOverwriteLabelSelectable: {fileID: 266037746633384666}
+  undoOverwriteLabel: {fileID: 3287339876264938633}
 --- !u!114 &752550168579418315
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5586,7 +5597,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1285996455985099775}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 752550168579418315}
+        m_TargetAssemblyTypeName: 
+        m_MethodName: SendCustomEvent
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: OnUndoOverwriteClick
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &4611293474552418737
 MonoBehaviour:
   m_ObjectHideFlags: 0

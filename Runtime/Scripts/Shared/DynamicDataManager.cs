@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using VRC.SDK3.Data;
+using VRC.SDKBase;
 
 namespace JanSharp
 {
@@ -71,8 +72,20 @@ namespace JanSharp
         [System.NonSerialized] public int globalDynamicDataCount = 0;
         #endregion
 
-        private DynamicData[] overwriteUndoStack = new DynamicData[ArrList.MinCapacity];
+        /// <summary>
+        /// <para>Holds strong references.</para>
+        /// </summary>
+        private DynamicData[] overwriteUndoStack = new DynamicData[WannaBeArrList.MinCapacity];
         private int overwriteUndoStackCount = 0;
+        public int OverwriteUndoStackSize => overwriteUndoStackCount;
+        private const float UndoStackTimeoutSeconds = 60f;
+        /// <summary>
+        /// <para>Holds weak references.</para>
+        /// </summary>
+        private DynamicData[] overwriteUndoTimeoutQueue = new DynamicData[ArrQueue.MinCapacity];
+        // cSpell:ignore outq
+        private int outqStartIndex = 0;
+        private int outqCount = 0;
 
         [System.NonSerialized] public DynamicData dataForSerialization;
 
@@ -155,7 +168,7 @@ namespace JanSharp
             ref int count,
             DynamicData data)
         {
-            if (!permissionManager.PlayerHasPermission(data.owningPlayer, addPDef))
+            if (!permissionManager.PlayerHasPermission(playerDataManager.SendingPlayerData, addPDef))
                 return;
             string dataName = data.dataName.Trim();
             if (dataName == "" || dataByName.ContainsKey(dataName))
@@ -165,7 +178,83 @@ namespace JanSharp
             RaiseOnDataAdded(data);
         }
 
+        public void SendOverwriteIA(DynamicData dataToSend, bool isUndo)
+        {
+            dataToSend.id = 0u;
+            lockstep.WriteCustomClass(dataToSend);
+            lockstep.WriteFlags(isUndo);
+            lockstep.SendInputAction(overwriteIAId);
+        }
+
+        [HideInInspector][SerializeField] private uint overwriteIAId;
+        [LockstepInputAction(nameof(overwriteIAId))]
+        public void OnOverwriteIA()
+        {
+            DynamicData data = (DynamicData)lockstep.ReadCustomClass(DynamicDataClassName);
+            lockstep.ReadFlags(out bool isUndo);
+            data.id = nextId++;
+            PerPlayerDynamicData p = GetPlayerData(data.owningPlayer); // A rare single letter variable name!
+            if (data.isGlobal)
+                OnOverwriteIAInternal(globalAddPDef, globalDynamicDataByName, ref globalDynamicData, ref globalDynamicDataCount, data, isUndo);
+            else
+                OnOverwriteIAInternal(localAddPDef, p.localDynamicDataByName, ref p.localDynamicData, ref p.localDynamicDataCount, data, isUndo);
+        }
+
+        private void OnOverwriteIAInternal(
+            PermissionDefinition overwritePDef,
+            DataDictionary dataByName,
+            ref DynamicData[] list,
+            ref int count,
+            DynamicData data,
+            bool isUndo)
+        {
+            CorePlayerData sendingPlayerData = playerDataManager.SendingPlayerData;
+            if (!permissionManager.PlayerHasPermission(sendingPlayerData, overwritePDef))
+                return;
+            string dataName = data.dataName;
+            if (!dataByName.TryGetValue(dataName, out DataToken toOverwriteToken))
+                return;
+            DynamicData toOverwrite = (DynamicData)toOverwriteToken.Reference;
+            int index = ArrList.IndexOf(ref list, ref count, toOverwrite);
+            list[index] = data;
+            dataByName[dataName] = data;
+            if (!isUndo && sendingPlayerData.isLocal)
+            {
+                // Already is a strong reference, do not increment refs counter when adding, do not use WannaBeArrList.
+                ArrList.Add(ref overwriteUndoStack, ref overwriteUndoStackCount, toOverwrite);
+                ArrQueue.Enqueue(ref overwriteUndoTimeoutQueue, ref outqStartIndex, ref outqCount, toOverwrite);
+                SendCustomEventDelayedSeconds(nameof(OnOverwriteUndoTimedOut), UndoStackTimeoutSeconds);
+                RaiseOnOverwriteUndoStackChanged();
+            }
+            RaiseOnDataOverwritten(data, toOverwrite);
+        }
+
+        public void PopFromOverwriteUndoStack()
+        {
+            WannaBeArrList.RemoveAt(ref overwriteUndoStack, ref overwriteUndoStackCount, overwriteUndoStackCount - 1);
+            RaiseOnOverwriteUndoStackChanged();
+        }
+
+        public DynamicData GetTopFromOverwriteUndoStack()
+        {
+            return overwriteUndoStackCount == 0 ? null : overwriteUndoStack[overwriteUndoStackCount - 1];
+        }
+
+        public void OnOverwriteUndoTimedOut()
+        {
+            DynamicData timedOut = ArrQueue.Dequeue(ref overwriteUndoTimeoutQueue, ref outqStartIndex, ref outqCount);
+            if (timedOut == null) // Weak references, could be deleted already.
+                return;
+            if (WannaBeArrList.Remove(ref overwriteUndoStack, ref overwriteUndoStackCount, timedOut) == -1)
+                return;
+            RaiseOnOverwriteUndoStackChanged();
+        }
+
         protected abstract void RaiseOnDataAdded(DynamicData data);
+
+        protected abstract void RaiseOnDataOverwritten(DynamicData data, DynamicData overwrittenData);
+
+        protected abstract void RaiseOnOverwriteUndoStackChanged();
 
         public override void SerializeGameState(bool isExport, LockstepGameStateOptionsData exportOptions)
         {

@@ -73,7 +73,7 @@ namespace JanSharp
         protected override string GetDynamicDataLabel(DynamicData data)
         {
             PlayerSelectionGroup group = (PlayerSelectionGroup)data;
-            return $"{group.dataName}  ({group.selectedPlayers.Length})";
+            return $"{base.GetDynamicDataLabel(data)} ({group.selectedPlayers.Length})";
         }
     }
 }

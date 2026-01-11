@@ -350,13 +350,14 @@ namespace JanSharp
             return go.GetComponent<DynamicDataOverwriteButton>();
         }
 
-        protected abstract string GetDynamicDataLabel(DynamicData data);
+        protected virtual string GetDynamicDataLabel(DynamicData data)
+        {
+            return data.isGlobal ? data.dataName + " [G]" : data.dataName;
+        }
 
         protected void UpdateDynamicDataButtonLabel(DynamicDataOverwriteButton button)
         {
-            DynamicData data = button.dynamicData;
-            string label = GetDynamicDataLabel(data);
-            button.label.text = data.isGlobal ? label + " [G]" : label;
+            button.label.text = GetDynamicDataLabel(button.dynamicData);
         }
 
         private void InsertSortDynamicDataButton(DynamicDataOverwriteButton button)

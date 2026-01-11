@@ -91,4 +91,4 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [x] change all texts which get dimmed (disabled) through selectables to use the tintable style
 - [x] the ShowAdjacentPopups script should not be a permission resolver, it should be other scripts telling it which popups are shown or not. Case and point, there's 2 permissions for each of those popups, local and global, so it cannot even handle the current use case right now
 - [ ] maybe close the save selection group popup upon closing the menu in VR
-- [ ] change the postfix for selection groups labels to put the \[G\] before the (#)
+- [x] change the postfix for selection groups labels to put the \[G\] before the (#)

@@ -13,6 +13,7 @@ namespace JanSharp
         private DynamicDataManager dynamicDataManager;
         protected abstract DynamicDataManager GetDynamicDataManager();
 
+        public RectTransform popupRoot;
         public RectTransform overwritePopupRect;
         public float headerHeight;
         public GameObject dynamicDataPrefab;
@@ -31,6 +32,18 @@ namespace JanSharp
         public GameObject noDynamicDataInfoGo;
         public LayoutElement noDynamicDataInfoLayoutElement;
         private float noDynamicDataInfoHeight;
+
+        public Button saveAsGlobalButton;
+        public Selectable saveAsGlobalLabel;
+        public TMP_InputField dataNameField;
+        public TextMeshProUGUI dataNameFieldPlaceholder;
+        private string dataNameFieldPlaceholderNormalText;
+        public Button undoOverwriteButton;
+        public Selectable undoOverwriteLabelSelectable;
+        public TextMeshProUGUI undoOverwriteLabel;
+        private string undoOverwriteLabelNormalText;
+
+        private bool isHoveringLocalSaveButton;
 
         [PermissionDefinitionReference(nameof(localOverwritePDef))]
         public string localOverwritePermissionAsset; // A guid.
@@ -52,12 +65,14 @@ namespace JanSharp
         private bool isInitialized = false;
 
         [MenuManagerEvent(MenuManagerEventType.OnMenuManagerStart)]
-        public virtual void OnMenuManagerStart()
+        public void OnMenuManagerStart()
         {
             dynamicDataManager = GetDynamicDataManager();
             dynamicDataButtonHeight = dynamicDataPrefabLayoutElement.preferredHeight;
             maxDynamicDataPopupHeight = overwritePopupRect.sizeDelta.y;
             noDynamicDataInfoHeight = noDynamicDataInfoLayoutElement.preferredHeight;
+            dataNameFieldPlaceholderNormalText = dataNameFieldPlaceholder.text;
+            undoOverwriteLabelNormalText = undoOverwriteLabel.text;
         }
 
         [LockstepEvent(LockstepEventType.OnInit)]
@@ -83,6 +98,122 @@ namespace JanSharp
             RebuildDynamicDataButtons();
         }
 
+        public void OnDataNameValueChanged()
+        {
+            UpdateSaveAsGlobalInteractable();
+        }
+
+        private void UpdateSaveAsGlobalInteractable()
+        {
+            bool interactable = !string.IsNullOrWhiteSpace(dataNameField.text);
+            saveAsGlobalButton.interactable = interactable;
+            saveAsGlobalLabel.interactable = interactable;
+        }
+
+        public void OnSaveAsLocalClick()
+        {
+            menuManager.ClosePopup(popupRoot, doCallback: true);
+            SendAddIA(isGlobal: false);
+        }
+
+        public void OnSaveAsGlobalClick()
+        {
+            menuManager.ClosePopup(popupRoot, doCallback: true);
+            SendAddIA(isGlobal: true);
+        }
+
+        public void OnSaveAsLocalPointerEnter()
+        {
+            isHoveringLocalSaveButton = true;
+            PreviewDataNameInPlaceholder();
+        }
+
+        public void OnSaveAsLocalPointerExit()
+        {
+            isHoveringLocalSaveButton = false;
+            dataNameFieldPlaceholder.text = dataNameFieldPlaceholderNormalText;
+        }
+
+        private void SendAddIA(bool isGlobal)
+        {
+            DynamicData data = dynamicDataManager.dataForSerialization;
+
+            string dataName = dataNameField.text.Trim();
+            dataNameField.SetTextWithoutNotify("");
+            UpdateSaveAsGlobalInteractable();
+            if (!isGlobal && dataName == "")
+                dataName = GetFirstUnusedLocalDataName();
+            data.dataName = dataName;
+
+            data.isGlobal = isGlobal;
+            data.owningPlayer = playerDataManager.LocalPlayerData;
+            PopulateDataForAdd(data);
+            dynamicDataManager.SendAddIA(data);
+        }
+
+        protected abstract void PopulateDataForAdd(DynamicData data);
+
+        public void OnOverwriteButtonClick(DynamicDataOverwriteButton button)
+        {
+            menuManager.ClosePopup(popupRoot, doCallback: true);
+            DynamicData toOverwrite = button.dynamicData;
+            DynamicData data = dynamicDataManager.dataForSerialization;
+
+            data.dataName = toOverwrite.dataName;
+            data.isGlobal = toOverwrite.isGlobal;
+            data.owningPlayer = playerDataManager.LocalPlayerData;
+            PopulateDataForOverwrite(data, toOverwrite);
+            dynamicDataManager.SendOverwriteIA(data, isUndo: false);
+        }
+
+        protected abstract void PopulateDataForOverwrite(DynamicData data, DynamicData toOverwrite);
+
+        public void OnUndoOverwriteClick()
+        {
+            DynamicData toRestore = dynamicDataManager.GetTopFromOverwriteUndoStack();
+            if (toRestore == null)
+                return;
+            DynamicData data = dynamicDataManager.dataForSerialization;
+
+            data.dataName = toRestore.dataName;
+            data.isGlobal = toRestore.isGlobal;
+            data.owningPlayer = toRestore.owningPlayer;
+            PopulateDataForUndoOverwrite(data, toRestore);
+            dynamicDataManager.SendOverwriteIA(data, isUndo: true);
+            dynamicDataManager.PopFromOverwriteUndoStack();
+
+            // Give some kind of instant feedback, since this is not latency hidden.
+            undoOverwriteLabel.text = "Undoing...";
+            resetUndoOverwriteLabelTextCount++;
+            SendCustomEventDelayedSeconds(nameof(ResetUndoOverwriteLabelText), 0.3f);
+        }
+
+        protected abstract void PopulateDataForUndoOverwrite(DynamicData data, DynamicData toRestore);
+
+        private int resetUndoOverwriteLabelTextCount;
+        public void ResetUndoOverwriteLabelText()
+        {
+            if (--resetUndoOverwriteLabelTextCount != 0)
+                return;
+            undoOverwriteLabel.text = undoOverwriteLabelNormalText;
+        }
+
+        private string GetFirstUnusedLocalDataName()
+        {
+            return dynamicDataManager.GetFirstUnusedDataName(
+                dynamicDataManager.GetPlayerData(playerDataManager.LocalPlayerData).localDynamicDataByName,
+                DefaultBaseDataName,
+                alwaysUsePostfix: true);
+        }
+
+        protected abstract string DefaultBaseDataName { get; }
+
+        private void PreviewDataNameInPlaceholder()
+        {
+            // TODO: Update in delete event too.
+            dataNameFieldPlaceholder.text = GetFirstUnusedLocalDataName();
+        }
+
         protected bool TryGetDynamicDataButton(uint dataId, out DynamicDataOverwriteButton button)
         {
             if (buttonsById.TryGetValue(dataId, out DataToken buttonToken))
@@ -94,10 +225,6 @@ namespace JanSharp
             return false;
         }
 
-        public abstract void OnOverwriteButtonClick(DynamicDataOverwriteButton button);
-
-        public abstract void OnUndoOverwriteClick();
-
         protected void OnDynamicDataOverwritten(DynamicData data, DynamicData overwrittenData)
         {
             if (!buttonsById.Remove(overwrittenData.id, out DataToken buttonToken))
@@ -105,12 +232,22 @@ namespace JanSharp
             DynamicDataOverwriteButton button = (DynamicDataOverwriteButton)buttonToken.Reference;
             button.dynamicData = data;
             buttonsById.Add(data.id, button);
-            // No need to set sortableDataName because overwritten groups have the same name.
+            // No need to set sortableDataName because overwritten data has the same name.
             UpdateDynamicDataButtonLabel(button); // But the label could differ even with the same name.
+        }
+
+        protected void OnDynamicDataUndoOverwriteStackChanged()
+        {
+            bool interactable = dynamicDataManager.OverwriteUndoStackSize != 0;
+            undoOverwriteButton.interactable = interactable;
+            undoOverwriteLabelSelectable.interactable = interactable;
         }
 
         protected void OnDynamicDataAdded(DynamicData data)
         {
+            if (isHoveringLocalSaveButton)
+                PreviewDataNameInPlaceholder();
+
             // if (data.isDeleted)
             //     return;
             if (!data.isGlobal && !data.owningPlayer.isLocal)

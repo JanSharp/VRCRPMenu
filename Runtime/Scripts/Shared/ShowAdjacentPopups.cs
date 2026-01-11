@@ -16,7 +16,7 @@ namespace JanSharp
         public RectTransform mainPopup;
         public RectTransform sidePopup;
         public bool showSidePopupOnLeft;
-        public float popupSpacing;
+        public float popupSpacing = 20f;
 
         private bool popupsAreShown = false;
 

@@ -54,7 +54,7 @@ namespace JanSharp
         [PlayerSelectionEvent(PlayerSelectionEventType.OnSelectionGroupPlayerRemoved)]
         public void OnSelectionGroupPlayerRemoved()
         {
-            if (TryGetDynamicDataButton(selectionManager.SelectionGroupForEvent.id, out DynamicDataOverwriteButton button))
+            if (TryGetDynamicDataButton(selectionManager.SelectionGroupForEvent.id, out DynamicDataPopupListButton button))
                 UpdateDynamicDataButtonLabel(button);
         }
 

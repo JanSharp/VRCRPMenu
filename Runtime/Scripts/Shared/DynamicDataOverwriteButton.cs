@@ -1,17 +1,12 @@
-using TMPro;
 using UdonSharp;
-using UnityEngine.UI;
 
 namespace JanSharp
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-    public class DynamicDataOverwriteButton : UdonSharpBehaviour
+    public class DynamicDataOverwriteButton : DynamicDataPopupListButton
     {
-        [System.NonSerialized] public DynamicData dynamicData;
-        [System.NonSerialized] public string sortableDataName;
         public DynamicDataSavePopup popupScript;
-        public Button button;
-        public TextMeshProUGUI label;
+        public override DynamicDataPopupList PopupScript => popupScript;
 
         public void OnClick() => popupScript.OnOverwriteButtonClick(this);
     }

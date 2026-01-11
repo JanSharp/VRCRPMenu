@@ -568,10 +568,14 @@ namespace JanSharp
                 ArrList.Add(ref pgButtons, ref pgButtonsCount, button);
                 return;
             }
+            string sortablePermissionGroupName = button.sortablePermissionGroupName;
+            uint id = button.permissionGroup.id;
             int index = pgButtonsCount; // Not -1 because the new row is not in the list yet.
             do
             {
-                if (pgButtons[index - 1].sortablePermissionGroupName.CompareTo(button.sortablePermissionGroupName) <= 0)
+                PlayersBackendPermissionGroupButton leftButton = pgButtons[index - 1];
+                int compared = leftButton.sortablePermissionGroupName.CompareTo(sortablePermissionGroupName);
+                if (compared < 0 || compared == 0 && leftButton.permissionGroup.id < id)
                     break;
                 index--;
             }

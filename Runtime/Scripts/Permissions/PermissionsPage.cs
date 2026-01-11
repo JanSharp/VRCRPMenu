@@ -468,10 +468,14 @@ namespace JanSharp
                 ArrList.Add(ref pgToggles, ref pgTogglesCount, toggle);
                 return;
             }
+            string sortablePermissionGroupName = toggle.sortablePermissionGroupName;
+            uint id = toggle.permissionGroup.id;
             int index = pgTogglesCount; // Not -1 because the toggle is not in the list yet.
             do
             {
-                if (pgToggles[index - 1].sortablePermissionGroupName.CompareTo(toggle.sortablePermissionGroupName) <= 0)
+                PermissionsPermissionGroupToggle leftToggle = pgToggles[index - 1];
+                int compared = leftToggle.sortablePermissionGroupName.CompareTo(sortablePermissionGroupName);
+                if (compared < 0 || compared == 0 && leftToggle.permissionGroup.id < id)
                     break;
                 index--;
             }

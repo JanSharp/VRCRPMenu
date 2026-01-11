@@ -96,6 +96,23 @@ namespace JanSharp
             RaiseOnOnePlayerSelectionChanged(player);
         }
 
+        public void SetSelectedPlayers(CorePlayerData[] players, int count)
+        {
+            selectedPlayersLut = new DataDictionary();
+            ArrList.Clear(ref selectedPlayers, ref selectedPlayersCount);
+            for (int i = 0; i < count; i++)
+            {
+                CorePlayerData player = players[i];
+#if !RP_MENU_SHOW_OFFLINE_PLAYERS_IN_PLAYER_LIST
+                if (player.isOffline)
+                    continue;
+#endif
+                selectedPlayersLut.Add(player, true);
+                ArrList.Add(ref selectedPlayers, ref selectedPlayersCount, player);
+            }
+            RaiseOnMultiplePlayerSelectionChanged();
+        }
+
         public void SelectNone()
         {
             if (selectedPlayersCount == 0)

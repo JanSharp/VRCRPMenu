@@ -79,9 +79,13 @@ namespace JanSharp
         public void OnLoadButtonClick(DynamicDataLoadDeleteButton button)
         {
             menuManager.ClosePopup(popupRoot, doCallback: true);
-            // TODO: Check permissions.
-            // TODO: Load the selection.
+            DynamicData data = button.dynamicData;
+            if (data.isGlobal ? !globalLoadPDef.valueForLocalPlayer : !localLoadPDef.valueForLocalPlayer)
+                return;
+            LoadDynamicData(data);
         }
+
+        protected abstract void LoadDynamicData(DynamicData data);
 
         public void OnDeleteButtonClick(DynamicDataLoadDeleteButton button)
         {

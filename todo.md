@@ -93,3 +93,4 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [ ] maybe close the save selection group popup upon closing the menu in VR
 - [x] change the postfix for selection groups labels to put the \[G\] before the (#)
 - [ ] make sure the "no dynamic data" texts have proper styling
+- [ ] disable load selection button when there are no selection groups

@@ -9,6 +9,12 @@ namespace JanSharp
         [HideInInspector][SerializeField][SingletonReference] private PlayerSelectionManager selectionManager;
         protected override DynamicDataManager GetDynamicDataManager() => selectionManager;
 
+        protected override void LoadDynamicData(DynamicData data)
+        {
+            CorePlayerData[] selectedPlayers = ((PlayerSelectionGroup)data).selectedPlayers;
+            selectionManager.SetSelectedPlayers(selectedPlayers, selectedPlayers.Length);
+        }
+
         [PlayerSelectionEvent(PlayerSelectionEventType.OnSelectionGroupAdded)]
         public void OnSelectionGroupAdded()
         {

@@ -36,9 +36,11 @@ namespace JanSharp
         public string playerSelectionPermissionAsset; // A guid.
         [HideInInspector][SerializeField] private PermissionDefinition playerSelectionPDef;
 
-        private uint localPlayerId;
         private bool isInitialized = false;
 
+        /// <summary>
+        /// <para>Check <see langword="null"/> and call <see cref="FetchLocalPlayer"/> before using.</para>
+        /// </summary>
         private RPPlayerData localPlayer;
 
         /// <summary>
@@ -47,14 +49,12 @@ namespace JanSharp
         /// </summary>
         private void FetchLocalPlayer()
         {
-            localPlayerId = (uint)Networking.LocalPlayer.playerId;
-            localPlayer = playersBackendManager.GetRPPlayerData(playerDataManager.GetCorePlayerDataForPlayerId(localPlayerId));
+            localPlayer = playersBackendManager.GetRPPlayerData(playerDataManager.LocalPlayerData);
         }
 
         [MenuManagerEvent(MenuManagerEventType.OnMenuManagerStart)]
         public void OnMenuManagerStart()
         {
-            localPlayerId = (uint)Networking.LocalPlayer.playerId;
             selectionSortHeaderFormat = selectionSortHeaderLabel.text;
             UpdateSortHeaderLabel();
         }
@@ -66,11 +66,6 @@ namespace JanSharp
             isInitialized = true;
         }
 
-        // [LockstepEvent(LockstepEventType.OnInit)]
-        // public void OnInit()
-        // {
-        // }
-
         [LockstepEvent(LockstepEventType.OnClientBeginCatchUp)]
         public void OnClientBeginCatchUp()
         {
@@ -81,11 +76,6 @@ namespace JanSharp
                 return;
             isInitialized = true;
         }
-
-        // [LockstepEvent(LockstepEventType.OnImportStart)]
-        // public void OnImportStart()
-        // {
-        // }
 
         [LockstepEvent(LockstepEventType.OnImportFinishingUp)]
         public void OnImportFinishingUp()
@@ -110,11 +100,6 @@ namespace JanSharp
             bool selectionValue = playerSelectionPDef.valueForLocalPlayer;
 
             rowsList.SortOnPermissionChange(characterNameValue, proximityValue, selectionValue);
-
-            // if (!permissionGroupValue)
-            //     EnsureClosedPermissionGroupPopup();
-            // if (!deleteValue)
-            //     EnsureClosedConfirmDeletePopup();
 
             bool characterNameChanged = rowPrefabScript.characterNameRoot.activeSelf != characterNameValue;
             bool teleportToChanged = rowPrefabScript.teleportToRoot.activeSelf != teleportToValue;

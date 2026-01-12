@@ -117,13 +117,17 @@ namespace JanSharp
             }
         }
 
+        private bool HasLoadPermission(DynamicData data)
+        {
+            return data.isGlobal ? globalLoadPDef.valueForLocalPlayer : localLoadPDef.valueForLocalPlayer;
+        }
+
         public void OnLoadButtonClick(DynamicDataLoadDeleteButton button)
         {
             ClosePopup(doSendDeleteIAs: true);
             DynamicData data = button.dynamicData;
-            if (data.isGlobal ? !globalLoadPDef.valueForLocalPlayer : !localLoadPDef.valueForLocalPlayer)
-                return;
-            LoadDynamicData(data);
+            if (HasLoadPermission(data))
+                LoadDynamicData(data);
         }
 
         protected abstract void LoadDynamicData(DynamicData data);
@@ -136,7 +140,7 @@ namespace JanSharp
         private void SetMarkForDeletion(DynamicDataLoadDeleteButton button, bool marked)
         {
             button.markedForDeletion = marked;
-            button.button.interactable = !marked;
+            button.button.interactable = !marked && HasLoadPermission(button.dynamicData);
             button.labelSelectable.interactable = !marked;
             button.deleteIconSelectable.interactable = !marked;
             button.undeleteIconSelectable.interactable = marked;
@@ -156,6 +160,8 @@ namespace JanSharp
                 : localDeletePDef.valueForLocalPlayer);
             if (loadButton.markedForDeletion)
                 SetMarkForDeletion(loadButton, false);
+            else
+                button.button.interactable = HasLoadPermission(button.dynamicData);
         }
 
         protected override void UpdateDueToChangedButtonCount()

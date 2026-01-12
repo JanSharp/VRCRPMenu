@@ -97,4 +97,4 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [x] disable load selection button when there are no selection groups
 - [x] close ~~save~~ (wrong, that one was already doing it) and load selection popups when losing permissions to do anything in them
 - [ ] is the fact that the save dynamic data name input field only gets cleared when sending an add IA a feature or a bug? For context closing the popup due to clicking an overwrite button, clicking outside of the popup or due to an import starting all do not clear the input field
-- [ ] when having delete permissions but not load permissions, disable the load button in the list
+- [x] when having delete permissions but not load permissions, disable the load button in the list

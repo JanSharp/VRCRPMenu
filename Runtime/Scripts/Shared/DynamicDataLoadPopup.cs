@@ -44,18 +44,21 @@ namespace JanSharp
         [LockstepEvent(LockstepEventType.OnImportStart)]
         public void OnImportStart()
         {
-            if (popupIsShown)
-            {
-                menuManager.ClosePopup(popupRoot, doCallback: false);
-                OnPopupClosedInternal();
-                ProcessAllMarkedForDeletion(doSendDeleteIAs: false);
-            }
+            ClosePopup(doSendDeleteIAs: false);
         }
 
         public override void Resolve()
         {
             UpdateDynamicDataPopupWidth();
             base.Resolve();
+            if (popupIsShown
+                && !localLoadPDef.valueForLocalPlayer
+                && !localDeletePDef.valueForLocalPlayer
+                && !globalLoadPDef.valueForLocalPlayer
+                && !globalDeletePDef.valueForLocalPlayer)
+            {
+                ClosePopup(doSendDeleteIAs: false);
+            }
         }
 
         private void UpdateDynamicDataPopupWidth()
@@ -85,6 +88,15 @@ namespace JanSharp
             ProcessAllMarkedForDeletion(doSendDeleteIAs: true);
         }
 
+        private void ClosePopup(bool doSendDeleteIAs)
+        {
+            if (!popupIsShown)
+                return;
+            menuManager.ClosePopup(popupRoot, doCallback: false);
+            OnPopupClosedInternal();
+            ProcessAllMarkedForDeletion(doSendDeleteIAs);
+        }
+
         private void OnPopupClosedInternal()
         {
             popupIsShown = false;
@@ -107,8 +119,7 @@ namespace JanSharp
 
         public void OnLoadButtonClick(DynamicDataLoadDeleteButton button)
         {
-            if (popupIsShown)
-                menuManager.ClosePopup(popupRoot, doCallback: true);
+            ClosePopup(doSendDeleteIAs: true);
             DynamicData data = button.dynamicData;
             if (data.isGlobal ? !globalLoadPDef.valueForLocalPlayer : !localLoadPDef.valueForLocalPlayer)
                 return;

@@ -31,6 +31,13 @@ namespace JanSharp
             helperTransform.pivot = new Vector2(0.5f, 0.5f);
         }
 
+        [LockstepEvent(LockstepEventType.OnImportStart)]
+        public void OnImportStart()
+        {
+            if (popupsAreShown)
+                menuManager.ClosePopup(helperTransform, doCallback: true);
+        }
+
         public override void InitializeInstantiated() { }
 
         public override void Resolve()

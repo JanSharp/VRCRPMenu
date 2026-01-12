@@ -15,6 +15,8 @@ namespace JanSharp
         private float popupWidthWithoutDeleteButtons;
         public float popupSpacingToEdge = 20f;
 
+        private bool popupIsShown = false;
+
         [PermissionDefinitionReference(nameof(localLoadPDef))]
         public string localLoadPermissionAsset; // A guid.
         [HideInInspector][SerializeField] protected PermissionDefinition localLoadPDef;
@@ -39,6 +41,17 @@ namespace JanSharp
             popupWidthWithoutDeleteButtons = popupWidthWithDeleteButtons - deleteButtonLayoutElement.preferredWidth;
         }
 
+        [LockstepEvent(LockstepEventType.OnImportStart)]
+        public void OnImportStart()
+        {
+            if (popupIsShown)
+            {
+                menuManager.ClosePopup(popupRoot, doCallback: false);
+                OnPopupClosedInternal();
+                ProcessAllMarkedForDeletion(doSendDeleteIAs: false);
+            }
+        }
+
         public override void Resolve()
         {
             UpdateDynamicDataPopupWidth();
@@ -53,34 +66,49 @@ namespace JanSharp
                 : popupWidthWithoutDeleteButtons;
             popupRoot.sizeDelta = size;
 
-            if (popupRoot.parent != popupLocation)
+            if (popupIsShown)
                 menuManager.PushShownPopupOntoPage(popupRoot, popupSpacingToEdge);
         }
 
         public void OnMainClick()
         {
+            if (popupIsShown)
+                return;
+            popupIsShown = true;
             popupRoot.anchoredPosition = Vector2.zero;
             menuManager.ShowPopupAtCurrentPosition(popupRoot, this, nameof(OnPopupClosed), popupSpacingToEdge);
         }
 
         public void OnPopupClosed()
         {
-            popupRoot.SetParent(popupLocation, worldPositionStays: false);
+            OnPopupClosedInternal();
+            ProcessAllMarkedForDeletion(doSendDeleteIAs: true);
+        }
 
+        private void OnPopupClosedInternal()
+        {
+            popupIsShown = false;
+            popupRoot.SetParent(popupLocation, worldPositionStays: false);
+        }
+
+        private void ProcessAllMarkedForDeletion(bool doSendDeleteIAs)
+        {
             DynamicDataLoadDeleteButton[] loadButtons = (DynamicDataLoadDeleteButton[])buttons;
             for (int i = 0; i < buttonsCount; i++)
             {
                 DynamicDataLoadDeleteButton button = loadButtons[i];
                 if (!button.markedForDeletion)
                     continue;
-                dynamicDataManager.SendDeleteIA(button.dynamicData);
+                if (doSendDeleteIAs)
+                    dynamicDataManager.SendDeleteIA(button.dynamicData);
                 SetMarkForDeletion(button, false);
             }
         }
 
         public void OnLoadButtonClick(DynamicDataLoadDeleteButton button)
         {
-            menuManager.ClosePopup(popupRoot, doCallback: true);
+            if (popupIsShown)
+                menuManager.ClosePopup(popupRoot, doCallback: true);
             DynamicData data = button.dynamicData;
             if (data.isGlobal ? !globalLoadPDef.valueForLocalPlayer : !localLoadPDef.valueForLocalPlayer)
                 return;

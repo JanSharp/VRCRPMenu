@@ -95,3 +95,4 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [x] change the postfix for selection groups labels to put the \[G\] before the (#)
 - [x] make sure the "no dynamic data" texts have proper styling
 - [x] disable load selection button when there are no selection groups
+- [ ] close save and load selection popups when losing permissions to do anything in them

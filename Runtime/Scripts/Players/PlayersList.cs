@@ -31,7 +31,7 @@ namespace JanSharp
         public PlayersRow[] Rows => (PlayersRow[])rows;
         public int RowsCount => rowsCount;
 
-        private uint localPlayerId;
+        private VRCPlayerApi localPlayerApi;
         private RPPlayerData localPlayer;
 
         public override void Initialize()
@@ -46,8 +46,8 @@ namespace JanSharp
 
         private void FetchLocalPlayer()
         {
-            localPlayerId = (uint)Networking.LocalPlayer.playerId;
-            localPlayer = playersBackendManager.GetRPPlayerData(playerDataManager.GetCorePlayerDataForPlayerId(localPlayerId));
+            localPlayerApi = Networking.LocalPlayer;
+            localPlayer = playersBackendManager.GetRPPlayerData(playerDataManager.LocalPlayerData);
         }
 
         [PlayerDataEvent(PlayerDataEventType.OnAllCustomPlayerDataRegistered)]
@@ -116,16 +116,53 @@ namespace JanSharp
             row.isFavorite = isFavorite;
             row.sortablePlayerName = playerName.ToLower();
             row.sortableCharacterName = characterName.ToLower();
-            row.sortableProximity = 0f; // TODO: if the current sort order is by proximity, do something here probably.
+            row.sortableProximity = -1f;
             row.sortableSelection = isSelected ? 1 : 0;
 
             row.favoriteToggle.SetIsOnWithoutNotify(isFavorite);
             row.playerNameLabel.text = playerName;
             row.characterNameLabel.text = characterName;
-            row.proximityLabel.text = "-"; // TODO: if the current sort order is by proximity, do something here probably.
+            row.proximityLabel.text = "-";
             row.selectToggle.SetIsOnWithoutNotify(isSelected);
 
             return row;
+        }
+
+        #endregion
+
+        #region Proximity
+
+        private void EvaluateAllProximity()
+        {
+            if (localPlayer == null)
+                FetchLocalPlayer();
+            Vector3 localPosition = localPlayerApi.GetPosition();
+            PlayersRow[] rows = Rows;
+            for (int i = 0; i < rowsCount; i++)
+            {
+                PlayersRow row = rows[i];
+                VRCPlayerApi player = row.rpPlayerData.core.playerApi;
+                if (player == null)
+                {
+                    row.sortableProximity = -1f;
+                    row.proximityLabel.text = "-";
+                    continue;
+                }
+                float proximity = Vector3.Distance(localPosition, player.GetPosition());
+                row.sortableProximity = proximity;
+                row.proximityLabel.text = $"{proximity:0.0} m";
+            }
+        }
+
+        private void ClearProximity()
+        {
+            PlayersRow[] rows = Rows;
+            for (int i = 0; i < rowsCount; i++)
+            {
+                PlayersRow row = rows[i];
+                row.sortableProximity = -1f;
+                row.proximityLabel.text = "-";
+            }
         }
 
         #endregion
@@ -139,6 +176,7 @@ namespace JanSharp
 
         public void OnPlayerNameSortHeaderClick()
         {
+            ClearProximity();
             currentSortOrderImage.enabled = false;
             if (!someRowsAreOutOfSortOrder && currentSortOrderFunction == nameof(CompareRowPlayerNameAscending))
             {
@@ -156,6 +194,7 @@ namespace JanSharp
 
         public void OnCharacterNameSortHeaderClick()
         {
+            ClearProximity();
             currentSortOrderImage.enabled = false;
             if (!someRowsAreOutOfSortOrder && currentSortOrderFunction == nameof(CompareRowCharacterNameAscending))
             {
@@ -173,6 +212,7 @@ namespace JanSharp
 
         public void OnProximitySortHeaderClick()
         {
+            EvaluateAllProximity();
             currentSortOrderImage.enabled = false;
             if (!someRowsAreOutOfSortOrder && currentSortOrderFunction == nameof(CompareRowProximityAscending))
             {
@@ -190,6 +230,7 @@ namespace JanSharp
 
         public void OnSelectionSortHeaderClick()
         {
+            ClearProximity();
             currentSortOrderImage.enabled = false;
             if (!someRowsAreOutOfSortOrder && currentSortOrderFunction == nameof(CompareRowSelectionDescending))
             {
@@ -214,16 +255,18 @@ namespace JanSharp
             bool proximityValue,
             bool selectionValue)
         {
+            bool isSortedByProximity = currentSortOrderFunction == nameof(CompareRowProximityAscending)
+                || currentSortOrderFunction == nameof(CompareRowProximityDescending);
             if (!characterNameValue
                 && (currentSortOrderFunction == nameof(CompareRowCharacterNameAscending)
                     || currentSortOrderFunction == nameof(CompareRowCharacterNameDescending))
-                || !proximityValue
-                && (currentSortOrderFunction == nameof(CompareRowProximityAscending)
-                    || currentSortOrderFunction == nameof(CompareRowProximityDescending))
+                || !proximityValue && isSortedByProximity
                 || !selectionValue
                 && (currentSortOrderFunction == nameof(CompareRowSelectionAscending)
                     || currentSortOrderFunction == nameof(CompareRowSelectionDescending)))
             {
+                if (isSortedByProximity)
+                    ClearProximity();
                 currentSortOrderFunction = nameof(CompareRowPlayerNameAscending);
                 currentSortOrderImage.enabled = false;
                 currentSortOrderImage = sortPlayerNameAscendingImage;
@@ -333,18 +376,34 @@ namespace JanSharp
             PlayersRow left = (PlayersRow)compareLeft;
             PlayersRow right = (PlayersRow)compareRight;
             if (left.isFavorite != right.isFavorite)
+            {
                 leftSortsFirst = left.isFavorite;
+                return;
+            }
+            // -1 always sorts last.
+            float leftProximity = left.sortableProximity;
+            float rightProximity = right.sortableProximity;
+            if (leftProximity == -1f)
+                leftSortsFirst = rightProximity == -1f;
             else
-                leftSortsFirst = left.sortableProximity <= right.sortableProximity;
+                leftSortsFirst = rightProximity == -1f || leftProximity <= rightProximity;
         }
         public void CompareRowProximityDescending()
         {
             PlayersRow left = (PlayersRow)compareLeft;
             PlayersRow right = (PlayersRow)compareRight;
             if (left.isFavorite != right.isFavorite)
+            {
                 leftSortsFirst = left.isFavorite;
+                return;
+            }
+            // -1 always sorts last.
+            float leftProximity = left.sortableProximity;
+            float rightProximity = right.sortableProximity;
+            if (leftProximity == -1f)
+                leftSortsFirst = rightProximity == -1f;
             else
-                leftSortsFirst = left.sortableProximity >= right.sortableProximity;
+                leftSortsFirst = rightProximity == -1f || leftProximity >= rightProximity;
         }
 
         public void CompareRowSelectionAscending()

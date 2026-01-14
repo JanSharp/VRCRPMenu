@@ -357,20 +357,34 @@ namespace JanSharp
             PlayersRow left = (PlayersRow)compareLeft;
             PlayersRow right = (PlayersRow)compareRight;
             if (left.isFavorite != right.isFavorite)
+            {
                 leftSortsFirst = left.isFavorite;
+                return;
+            }
+            // Empty names always sort last.
+            string leftName = left.sortableCharacterName;
+            string rightName = right.sortableCharacterName;
+            if (leftName == "")
+                leftSortsFirst = rightName == "";
             else
-                leftSortsFirst = left.sortableCharacterName
-                    .CompareTo(right.sortableCharacterName) <= 0;
+                leftSortsFirst = rightName == "" || leftName.CompareTo(rightName) <= 0;
         }
         public void CompareRowCharacterNameDescending()
         {
             PlayersRow left = (PlayersRow)compareLeft;
             PlayersRow right = (PlayersRow)compareRight;
             if (left.isFavorite != right.isFavorite)
+            {
                 leftSortsFirst = left.isFavorite;
+                return;
+            }
+            // Empty names always sort last.
+            string leftName = left.sortableCharacterName;
+            string rightName = right.sortableCharacterName;
+            if (leftName == "")
+                leftSortsFirst = rightName == "";
             else
-                leftSortsFirst = left.sortableCharacterName
-                    .CompareTo(right.sortableCharacterName) >= 0;
+                leftSortsFirst = rightName == "" || leftName.CompareTo(rightName) >= 0;
         }
 
         public void CompareRowProximityAscending()

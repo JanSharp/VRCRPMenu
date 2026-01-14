@@ -283,11 +283,25 @@ namespace JanSharp
                 .CompareTo(((PlayersBackendRow)compareRight).sortableOverriddenDisplayName) >= 0;
 
         public void CompareRowCharacterNameAscending()
-            => leftSortsFirst = ((PlayersBackendRow)compareLeft).sortableCharacterName
-                .CompareTo(((PlayersBackendRow)compareRight).sortableCharacterName) <= 0;
+        {
+            string left = ((PlayersBackendRow)compareLeft).sortableCharacterName;
+            string right = ((PlayersBackendRow)compareRight).sortableCharacterName;
+            // Empty names always sort last.
+            if (left == "")
+                leftSortsFirst = right == "";
+            else
+                leftSortsFirst = right == "" || left.CompareTo(right) <= 0;
+        }
         public void CompareRowCharacterNameDescending()
-            => leftSortsFirst = ((PlayersBackendRow)compareLeft).sortableCharacterName
-                .CompareTo(((PlayersBackendRow)compareRight).sortableCharacterName) >= 0;
+        {
+            string left = ((PlayersBackendRow)compareLeft).sortableCharacterName;
+            string right = ((PlayersBackendRow)compareRight).sortableCharacterName;
+            // Empty names always sort last.
+            if (left == "")
+                leftSortsFirst = right == "";
+            else
+                leftSortsFirst = right == "" || left.CompareTo(right) >= 0;
+        }
 
         public void CompareRowPermissionGroupAscending()
             => leftSortsFirst = ((PlayersBackendRow)compareLeft).sortablePermissionGroupName

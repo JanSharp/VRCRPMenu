@@ -30,6 +30,8 @@ namespace JanSharp
         private DataDictionary rowsByPersistentId = new DataDictionary();
         public PlayersRow[] Rows => (PlayersRow[])rows;
         public int RowsCount => rowsCount;
+        public PlayersRow[] UnusedRows => (PlayersRow[])unusedRows;
+        public int UnusedRowsCount => unusedRowsCount;
 
         private VRCPlayerApi localPlayerApi;
         private RPPlayerData localPlayer;

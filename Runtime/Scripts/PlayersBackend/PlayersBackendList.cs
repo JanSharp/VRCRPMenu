@@ -28,6 +28,8 @@ namespace JanSharp
         private DataDictionary rowsByPersistentId = new DataDictionary();
         public PlayersBackendRow[] Rows => (PlayersBackendRow[])rows;
         public int RowsCount => rowsCount;
+        public PlayersBackendRow[] UnusedRows => (PlayersBackendRow[])unusedRows;
+        public int UnusedRowsCount => unusedRowsCount;
 
         public override void Initialize()
         {

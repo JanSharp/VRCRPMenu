@@ -40,8 +40,8 @@ namespace JanSharp
 
         protected SortableScrollableRow[] rows = new SortableScrollableRow[ArrList.MinCapacity];
         protected int rowsCount = 0;
-        private SortableScrollableRow[] unusedRows = new SortableScrollableRow[ArrList.MinCapacity];
-        private int unusedRowsCount = 0;
+        protected SortableScrollableRow[] unusedRows = new SortableScrollableRow[ArrList.MinCapacity];
+        protected int unusedRowsCount = 0;
 
         protected string currentSortOrderFunction;
         /// <summary>

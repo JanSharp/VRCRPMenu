@@ -172,21 +172,24 @@ namespace JanSharp
             rowPrefabScript.permissionGroupRoot.SetActive(permissionGroupValue);
             rowPrefabScript.deleteRoot.SetActive(deleteValue);
 
-            PlayersBackendRow[] rows = rowsList.Rows;
-            int rowsCount = rowsList.RowsCount;
-            for (int i = 0; i < rowsCount; i++)
+            for (int i = 0; i < 2; i++)
             {
-                // I'm thinking that in any case where 2 permissions changed it is faster to do all 4 ifs
-                // every loop, because I have heard that Udon arrays are slow. But it's just a guess.
-                PlayersBackendRow row = rows[i];
-                if (displayNameChanged)
-                    row.overriddenDisplayNameRoot.SetActive(displayNameValue);
-                if (characterNameChanged)
-                    row.characterNameRoot.SetActive(characterNameValue);
-                if (permissionGroupChanged)
-                    row.permissionGroupRoot.SetActive(permissionGroupValue);
-                if (deleteChanged)
-                    row.deleteRoot.SetActive(deleteValue);
+                PlayersBackendRow[] rows = i == 0 ? rowsList.Rows : rowsList.UnusedRows;
+                int rowsCount = i == 0 ? rowsList.RowsCount : rowsList.UnusedRowsCount;
+                for (int j = 0; j < rowsCount; j++)
+                {
+                    // I'm thinking that in any case where 2 permissions changed it is faster to do all 4 ifs
+                    // every loop, because I have heard that Udon arrays are slow. But it's just a guess.
+                    PlayersBackendRow row = rows[j];
+                    if (displayNameChanged)
+                        row.overriddenDisplayNameRoot.SetActive(displayNameValue);
+                    if (characterNameChanged)
+                        row.characterNameRoot.SetActive(characterNameValue);
+                    if (permissionGroupChanged)
+                        row.permissionGroupRoot.SetActive(permissionGroupValue);
+                    if (deleteChanged)
+                        row.deleteRoot.SetActive(deleteValue);
+                }
             }
         }
 

@@ -2,7 +2,6 @@
 using UdonSharp;
 using UnityEngine;
 using VRC.SDK3.Data;
-using VRC.SDKBase;
 
 namespace JanSharp
 {
@@ -110,21 +109,24 @@ namespace JanSharp
             rowPrefabScript.proximityRoot.SetActive(proximityValue);
             rowPrefabScript.selectRoot.SetActive(selectionValue);
 
-            PlayersRow[] rows = rowsList.Rows;
-            int rowsCount = rowsList.RowsCount;
-            for (int i = 0; i < rowsCount; i++)
+            for (int i = 0; i < 2; i++)
             {
-                // I'm thinking that in any case where 2 permissions changed it is faster to do all 4 ifs
-                // every loop, because I have heard that Udon arrays are slow. But it's just a guess.
-                PlayersRow row = rows[i];
-                if (characterNameChanged)
-                    row.characterNameRoot.SetActive(characterNameValue);
-                if (teleportToChanged)
-                    row.teleportToRoot.SetActive(teleportToValue);
-                if (proximityChanged)
-                    row.proximityRoot.SetActive(proximityValue);
-                if (selectionChanged)
-                    row.selectRoot.SetActive(selectionValue);
+                PlayersRow[] rows = i == 0 ? rowsList.Rows : rowsList.UnusedRows;
+                int rowsCount = i == 0 ? rowsList.RowsCount : rowsList.UnusedRowsCount;
+                for (int j = 0; j < rowsCount; j++)
+                {
+                    // I'm thinking that in any case where 2 permissions changed it is faster to do all 4 ifs
+                    // every loop, because I have heard that Udon arrays are slow. But it's just a guess.
+                    PlayersRow row = rows[j];
+                    if (characterNameChanged)
+                        row.characterNameRoot.SetActive(characterNameValue);
+                    if (teleportToChanged)
+                        row.teleportToRoot.SetActive(teleportToValue);
+                    if (proximityChanged)
+                        row.proximityRoot.SetActive(proximityValue);
+                    if (selectionChanged)
+                        row.selectRoot.SetActive(selectionValue);
+                }
             }
         }
 

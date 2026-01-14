@@ -11,6 +11,13 @@
     - with auto size: 60 ms
     - without auto size: 13 ms
 - scrolling in a scroll rect does not cause the layout elements to dirty their layout groups, however it does dirty the canvas, causing batches to be built
+- toggling the active state of a canvas runs OnCanvasHierarchyChanged on every single child object recursively regardless of the active state of the children
+  - with 1000 player rows in both the players page and the players backend page (~13k text mesh pro texts to give an idea for scale) that's about 60-80 ms of a lag spike
+  - keeping the canvas active and only toggling a child which contains the entire rest of the objects...
+    - does not cause OnCanvasHierarchyChanged to run, thus does not cause a lag spike
+    - does cause the constant cost of the canvas being active, which includes batch building due to the canvas moving around, or any other trigger for it building batches, and inactive objects contribute to batch building (see note about RectTransform.SyncTransform below)
+    - therefore keeping the canvas active is a bad idea, and toggling the canvas with all of these inactive objects is a bad idea...
+      - the only solution I can see is to move large amounts of inactive objects (such as panels with large scroll rects) out of the primary canvas entirely into a permanently inactive canvas when disabling them
 
 ## Build Batches
 

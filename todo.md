@@ -98,3 +98,6 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [x] close ~~save~~ (wrong, that one was already doing it) and load selection popups when losing permissions to do anything in them
 - [ ] is the fact that the save dynamic data name input field only gets cleared when sending an add IA a feature or a bug? For context closing the popup due to clicking an overwrite button, clicking outside of the popup or due to an import starting all do not clear the input field
 - [x] when having delete permissions but not load permissions, disable the load button in the list
+- [ ] always sort actual character names first in the players backend page
+- [ ] reused rows do not respect permissions
+- [x] why does having 1000 players lag spike when opening and closing the menu? They are all inactive game objects, that should not cause any lag. Is there something else running on open and close? - see [ui-performance](ui-performance.md) about OnCanvasHierarchyChanged

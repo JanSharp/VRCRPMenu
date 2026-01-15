@@ -2,6 +2,7 @@
 using UdonSharp;
 using UnityEngine;
 using VRC.SDK3.Data;
+using VRC.SDKBase;
 
 namespace JanSharp
 {
@@ -12,6 +13,7 @@ namespace JanSharp
         [HideInInspector][SerializeField][SingletonReference] private PlayersBackendManagerAPI playersBackendManager;
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
         [HideInInspector][SerializeField][SingletonReference] private PlayersFavoritesManagerAPI playersFavoritesManager;
+        [HideInInspector][SerializeField][SingletonReference] private RPMenuTeleportManagerAPI teleportManager;
         [HideInInspector][SerializeField][SingletonReference] private PlayerSelectionManager selectionManager;
 
         public PlayersList rowsList;
@@ -251,7 +253,13 @@ namespace JanSharp
 
         public void OnTeleportToClick(PlayersRow row)
         {
-            // TODO: impl
+            CorePlayerData core = row.rpPlayerData.core;
+            if (core.isLocal)
+                return;
+            VRCPlayerApi player = core.playerApi;
+            if (!Utilities.IsValid(player))
+                return;
+            teleportManager.TeleportToPlayer(player, Vector3.back);
         }
 
         #endregion

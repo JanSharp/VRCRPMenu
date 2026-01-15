@@ -10,9 +10,9 @@ namespace JanSharp
         [HideInInspector][SerializeField][SingletonReference] private LockstepAPI lockstep;
         [HideInInspector][SerializeField][SingletonReference] private GMRequestsManagerAPI requestsManager;
         [HideInInspector][SerializeField][SingletonReference] private PlayersBackendManagerAPI playersBackendManager;
+        [HideInInspector][SerializeField][SingletonReference] private RPMenuTeleportManagerAPI teleportManager;
 
         public GMRequestsList requestsList;
-        public LayerMask localPlayerCollidingLayers;
 
         private bool isInitialized = false;
 
@@ -76,25 +76,7 @@ namespace JanSharp
             VRCPlayerApi player = request.requestingPlayer.core.playerApi;
             if (!Utilities.IsValid(player))
                 return;
-            Vector3 position = player.GetPosition() + Vector3.up * 0.15f;
-            Quaternion rotation = player.GetRotation();
-            float radius = LocalPlayerCapsule.GetRadius();
-            if (Physics.CapsuleCast(
-                position + Vector3.up * radius,
-                position + Vector3.up * (LocalPlayerCapsule.GetHeight() - radius),
-                radius,
-                rotation * Vector3.forward,
-                // out RaycastHit hit,
-                maxDistance: 1f,
-                localPlayerCollidingLayers,
-                QueryTriggerInteraction.Ignore))
-            {
-                Networking.LocalPlayer.TeleportTo(position, rotation);
-            }
-            else
-                Networking.LocalPlayer.TeleportTo(
-                    position + rotation * Vector3.forward,
-                    rotation * Quaternion.AngleAxis(180f, Vector3.up));
+            teleportManager.TeleportToPlayer(player, Vector3.forward);
         }
 
         public void OnReadToggleValueChanged(GMRequestRow row)

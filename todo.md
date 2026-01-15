@@ -101,3 +101,4 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [x] always sort actual character names first in the players backend page and players page
 - [x] reused rows do not respect permissions
 - [x] why does having 1000 players lag spike when opening and closing the menu? They are all inactive game objects, that should not cause any lag. Is there something else running on open and close? - see [ui-performance](ui-performance.md) about OnCanvasHierarchyChanged
+- [ ] what does `Lighting On` in a shader even do?

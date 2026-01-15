@@ -59,16 +59,11 @@ Shader "RP Menu/Voice Range Sphere"
             #pragma multi_compile_instancing
 
             #include "UnityCG.cginc"
-            #include "AutoLight.cginc"
-            #include "Lighting.cginc"
 
             float4 _Color;
             float _InnerRadius;
             float _MiddleRadius;
             float _OuterRadius;
-
-            sampler2D _CloudNoiseTexture; float4 _CloudNoiseTexture_TexelSize;
-            UNITY_DECLARE_TEXCUBE(_ProbeTexture); float4 _ProbeTexture_HDR;
 
             struct appdata
             {
@@ -84,7 +79,6 @@ Shader "RP Menu/Voice Range Sphere"
                 float4 depthTextureUv : TEXCOORD1;
                 float4 rayFromCamera : TEXCOORD2;
                 float4 worldPosition : TEXCOORD4;
-                SHADOW_COORDS(3)
             };
 
             UNITY_DECLARE_DEPTH_TEXTURE(_CameraDepthTexture);
@@ -126,7 +120,6 @@ Shader "RP Menu/Voice Range Sphere"
                 o.rayFromCamera.w = dot(o.pos, CalculateObliqueFrustumCorrection()); // oblique frustrum correction factor
                 o.worldPosition = worldPosition;
                 //o.vertex2 = float4(UnityObjectToViewPos(v.pos), 1.0);
-                TRANSFER_SHADOW(o);
                 UNITY_TRANSFER_INSTANCE_ID(v, o);
                 return o;
             }

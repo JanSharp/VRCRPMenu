@@ -35,35 +35,11 @@ namespace JanSharp.Internal
         private GameObject[] inactiveIndicators = new GameObject[ArrList.MinCapacity];
         private int inactiveIndicatorsCount = 0;
 
-        // // DEBUG
-        // public Transform debugLocalPlayer;
-        // public Transform[] debugPlayersToSummon;
-        // private Vector3[] debugPlayersToSummonPositions;
-
         private LayerMask localPlayerCollidingLayers;
 
         private void Start()
         {
             localPlayerCollidingLayers = teleportManager.LocalPlayerCollidingLayers;
-            // // DEBUG
-            // debugPlayersToSummonPositions = new Vector3[debugPlayersToSummon.Length];
-        }
-
-        private void Update()
-        {
-            // // DEBUG
-            // Vector3 position = localPlayer.GetPosition();
-            // FindSummonPositions(position, localPlayer.GetRotation(), debugPlayersToSummonPositions);
-            // Vector3 centerPosition = position;
-            // centerPosition.y = 0f;
-            // for (int i = 0; i < debugPlayersToSummon.Length; i++)
-            // {
-            //     Transform player = debugPlayersToSummon[i];
-            //     position = debugPlayersToSummonPositions[i];
-            //     player.position = position;
-            //     position.y = 0f;
-            //     player.rotation = Quaternion.LookRotation(position - centerPosition);
-            // }
         }
 
         private void FindSummonPositions(Vector3 center, Quaternion rotation, GameObject[] targetPositions)

@@ -370,7 +370,8 @@ namespace JanSharp
             menuManager.ShowPopupAtCurrentPosition(
                 permissionGroupPopup,
                 this,
-                nameof(OnPermissionGroupPopupClosed));
+                nameof(OnPermissionGroupPopupClosed),
+                minDistanceFromPageEdge: 0f);
         }
 
         public void OnPermissionGroupPopupClosed()

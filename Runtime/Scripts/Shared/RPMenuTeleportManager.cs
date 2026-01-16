@@ -7,17 +7,12 @@ namespace JanSharp.Internal
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class RPMenuTeleportManager : RPMenuTeleportManagerAPI
     {
-        public LayerMask localPlayerCollidingLayers;
+        [SerializeField] public LayerMask localPlayerCollidingLayers;
+        public override LayerMask LocalPlayerCollidingLayers => localPlayerCollidingLayers;
 
         // DEBUG
         public Transform debugOtherPlayer;
         public Transform debugLocalPlayer;
-
-        private const float DesiredDistanceFromOtherPlayers = 1.25f;
-        private const float MinDistanceFromOtherPlayers = 0.75f;
-        private const float MaxRelativeDownwardsDistance = 0.4f;
-        private const float SafetyDistanceFromGround = 0.015f;
-        private const float SafetyDistanceFromWalls = 0.1f;
 
         private Quaternion[] directionsToTry = new Quaternion[]
         {

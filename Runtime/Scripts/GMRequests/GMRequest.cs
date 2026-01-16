@@ -12,7 +12,7 @@ namespace JanSharp
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class GMRequest : WannaBeClass
     {
-        public DataDictionary latencyHiddenUniqueIds = new DataDictionary();
+        [System.NonSerialized] public DataDictionary latencyHiddenUniqueIds = new DataDictionary();
 
         #region LatencyState
         [System.NonSerialized] public bool isLatency;

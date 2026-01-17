@@ -69,7 +69,10 @@ namespace JanSharp
         public override void Deserialize(bool isImport, uint importedDataVersion)
         {
             if (!isImport)
+            {
                 voiceRangeIndex = (int)lockstep.ReadSmallUInt();
+                latencyVoiceRangeIndex = voiceRangeIndex;
+            }
             else
                 latencyHiddenUniqueIds.Clear(); // Empty when not importing anyway, no need to clear there.
             showInWorldMask = lockstep.ReadSmallUInt();

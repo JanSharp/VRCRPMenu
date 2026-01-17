@@ -4,7 +4,13 @@ namespace JanSharp
 {
     public enum PlayersFavoritesEventType
     {
+        /// <summary>
+        /// <para>Game state safe.</para>
+        /// </summary>
         OnPlayerFavoriteAdded,
+        /// <summary>
+        /// <para>Game state safe.</para>
+        /// </summary>
         OnPlayerFavoriteRemoved,
     }
 

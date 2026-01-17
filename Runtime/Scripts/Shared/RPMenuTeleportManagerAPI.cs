@@ -16,5 +16,6 @@ namespace JanSharp
         public abstract LayerMask LocalPlayerCollidingLayers { get; }
         public abstract void TeleportToPlayer(VRCPlayerApi otherPlayer, Vector3 desiredRelativeDirection);
         public abstract void TeleportToPlayer(Vector3 otherPosition, Quaternion otherRotation, Vector3 desiredRelativeDirection);
+        public abstract void TeleportTo(Vector3 position, Quaternion rotation);
     }
 }

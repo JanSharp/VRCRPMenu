@@ -116,5 +116,10 @@ namespace JanSharp.Internal
             otherPosition.y = 0f;
             rotation = Quaternion.LookRotation(otherPosition - positionOnYPlane);
         }
+
+        public override void TeleportTo(Vector3 position, Quaternion rotation)
+        {
+            localPlayer.TeleportTo(position, rotation);
+        }
     }
 }

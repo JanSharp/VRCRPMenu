@@ -5,6 +5,7 @@ using VRC.SDK3.Data;
 namespace JanSharp.Internal
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [CustomRaisedEventsDispatcher(typeof(PlayerSummonEventAttribute), typeof(PlayerSummonEventType))]
     public class PlayerSummonManager : PlayerSummonManagerAPI
     {
         [HideInInspector][SerializeField][SingletonReference] private LockstepAPI lockstep;
@@ -19,12 +20,23 @@ namespace JanSharp.Internal
         private const float DesiredDistanceBetweenSummonPositions = 0.4f;
         private const float AnglePerPlayerWithMinSummonRadius = 360f * (DesiredDistanceBetweenSummonPositions / (MinSummonRadius * Mathf.PI));
 
-        private const float ExtraSummonDelayToCoverLatency = 0.6f;
+        private const float ExtraSummonIndicatorDelayToCoverLatency = 0.7f;
 
         [SerializeField] private GameObject summonIndicatorPrefab;
         [SerializeField] private Transform summonIndicatorsContainer;
         [Min(0f)]
         [SerializeField] private float summonDelay = 3f;
+        private Vector3 summonTargetPosition;
+        private Quaternion summonTargetRotation;
+        private int localPlayerSummonDelayedEventCount;
+        private float summonEnqueueTime;
+        private float summonTargetTime;
+        public override float SummonDelay => summonDelay;
+        public override Vector3 SummonTargetPosition => summonTargetPosition;
+        public override Quaternion SummonTargetRotation => summonTargetRotation;
+        public override int LocalPlayerSummonDelayedEventCount => localPlayerSummonDelayedEventCount;
+        public override float SummonEnqueueTime => summonEnqueueTime;
+        public override float SummonTargetTime => summonTargetTime;
 
         [PermissionDefinitionReference(nameof(summonPlayersPDef))]
         public string summonPlayersPermissionAsset; // A guid.
@@ -157,7 +169,7 @@ namespace JanSharp.Internal
 
         public override void SummonPlayers(PlayerSummonIndicatorGroup locations, CorePlayerData[] players, DataDictionary playersToExclude)
         {
-            locations.HideDelayed(summonDelay + ExtraSummonDelayToCoverLatency);
+            locations.HideDelayed(summonDelay + ExtraSummonIndicatorDelayToCoverLatency);
             SendSummonIA(locations, players, playersToExclude);
         }
 
@@ -219,7 +231,40 @@ namespace JanSharp.Internal
 
         private void EnqueueLocalSummon(Vector3 position, Quaternion rotation)
         {
-            // TODO: Show hud, summon with delay.
+            summonTargetPosition = position;
+            summonTargetRotation = rotation;
+            summonEnqueueTime = Time.time;
+            summonTargetTime = summonEnqueueTime + summonDelay;
+            localPlayerSummonDelayedEventCount++;
+            SendCustomEventDelayedSeconds(nameof(SummonLocalPlayerDelayed), summonDelay);
+            RaiseOnLocalPlayerSummonEnqueued();
         }
+
+        public void SummonLocalPlayerDelayed()
+        {
+            if (--localPlayerSummonDelayedEventCount != 0)
+                return;
+            teleportManager.TeleportTo(summonTargetPosition, summonTargetRotation);
+            RaiseOnLocalPlayerSummoned();
+        }
+
+        #region EventDispatcher
+
+        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onLocalPlayerSummonEnqueuedListeners;
+        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onLocalPlayerSummonedListeners;
+
+        private void RaiseOnLocalPlayerSummonEnqueued()
+        {
+            // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
+            JanSharp.CustomRaisedEvents.Raise(ref onLocalPlayerSummonEnqueuedListeners, nameof(PlayerSummonEventType.OnLocalPlayerSummonEnqueued));
+        }
+
+        private void RaiseOnLocalPlayerSummoned()
+        {
+            // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
+            JanSharp.CustomRaisedEvents.Raise(ref onLocalPlayerSummonedListeners, nameof(PlayerSummonEventType.OnLocalPlayerSummoned));
+        }
+
+        #endregion
     }
 }

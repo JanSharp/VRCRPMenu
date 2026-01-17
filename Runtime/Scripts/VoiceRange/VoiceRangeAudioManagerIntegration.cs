@@ -82,16 +82,18 @@ namespace JanSharp
 
         private void UpdateAudioSettingForPlayer(VoiceRangePlayerData player)
         {
-            if (!isInitialized || player.core.isLocal)
+            CorePlayerData core = player.core;
+            if (!isInitialized || core.isLocal)
                 return;
 
-            VRCPlayerApi playerApi = player.core.playerApi;
+            VRCPlayerApi playerApi = core.playerApi;
             if (!Utilities.IsValid(playerApi))
                 return;
 
             int index = player.latencyVoiceRangeIndex;
             audioManager.RemoveAudioSetting(playerApi, VoiceRangeSettingId);
             audioManager.AddAudioSetting(playerApi, VoiceRangeSettingId, priorities[index], audioSettings[index]);
+            audioManager.ApplyAudioSetting(playerApi);
         }
     }
 }

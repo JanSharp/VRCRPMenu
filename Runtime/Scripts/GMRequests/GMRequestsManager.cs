@@ -598,12 +598,15 @@ namespace JanSharp.Internal
             request.uniqueId = lockstep.ReadULong();
             request.id = lockstep.ReadSmallUInt();
             request.requestType = (GMRequestType)lockstep.ReadByte();
+            request.latencyRequestType = request.requestType;
             lockstep.ReadFlags(out request.isRead);
+            request.latencyIsRead = request.isRead;
             request.requestedAtTick = lockstep.ReadSmallUInt();
             request.autoDeleteAtTick = request.isRead ? lockstep.ReadSmallUInt() : 0u;
             request.requestingPlayer = playersBackendManager.ReadRPPlayerDataRef();
             request.requestingCorePlayer = request.requestingPlayer == null ? null : request.requestingPlayer.core;
             request.respondingPlayer = playersBackendManager.ReadRPPlayerDataRef();
+            request.latencyRespondingPlayer = request.respondingPlayer;
             RegisterRequestInLS(request, doRaise: false);
             requestsById.Add(request.id, request);
             return request;

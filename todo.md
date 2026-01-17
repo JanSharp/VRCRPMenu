@@ -102,7 +102,9 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [x] reused rows do not respect permissions
 - [x] why does having 1000 players lag spike when opening and closing the menu? They are all inactive game objects, that should not cause any lag. Is there something else running on open and close? - see [ui-performance](ui-performance.md) about OnCanvasHierarchyChanged
 - [ ] what does `Lighting On` in a shader even do?
-- [ ] rename GMRequestsHUD prefab to GMRequestsHUDController
+- [x] rename GMRequestsHUD prefab to GMRequestsHUDController
 - [ ] spread out the order strings for all the AddHUDElement, and maybe actually expose them to the inspector
 - [x] loading in with a second player shows nothing in the players list, players backend does show some players, but not all
 - [ ] fade in and out animations for summon indicators on the summoner side
+- [ ] reset voice mode to default when a player goes offline. As funny as it is to have it remember, with the discrepancy in timing from when other players perceive a player as online until that player has finished loading for them to even know what mode they are in it's honestly effectively a bug
+- [ ] disable the save as local and save as global buttons for dynamic data when the current name in the input field is already used

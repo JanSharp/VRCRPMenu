@@ -211,7 +211,7 @@ namespace JanSharp.Internal
                 Vector3 summonPosition = lockstep.ReadVector3();
                 Vector3 summonPositionOnYPlane = summonPosition;
                 summonPositionOnYPlane.y = 0f;
-                Quaternion summonRotation = Quaternion.LookRotation(summonPositionOnYPlane - centerPosition);
+                Quaternion summonRotation = Quaternion.LookRotation(centerPosition - summonPositionOnYPlane);
                 EnqueueLocalSummon(summonPosition, summonRotation);
                 return;
             }

@@ -104,5 +104,5 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [ ] what does `Lighting On` in a shader even do?
 - [ ] rename GMRequestsHUD prefab to GMRequestsHUDController
 - [ ] spread out the order strings for all the AddHUDElement, and maybe actually expose them to the inspector
-- [ ] loading in with a second player shows nothing in the players list, players backend does show some players, but not all
+- [x] loading in with a second player shows nothing in the players list, players backend does show some players, but not all
 - [ ] fade in and out animations for summon indicators on the summoner side

@@ -141,11 +141,15 @@ namespace JanSharp
         [PlayerDataEvent(PlayerDataEventType.OnPlayerDataCreated)]
         public void OnPlayerDataCreated() => CreatePlayerRowForEvent();
 
+#if !RP_MENU_SHOW_OFFLINE_PLAYERS_IN_PLAYER_LIST
         [PlayerDataEvent(PlayerDataEventType.OnPlayerDataWentOnline)]
         public void OnPlayerDataWentOnline() => CreatePlayerRowForEvent();
+#endif
 
+#if !RP_MENU_SHOW_OFFLINE_PLAYERS_IN_PLAYER_LIST
         [PlayerDataEvent(PlayerDataEventType.OnPlayerDataWentOffline)]
         public void OnPlayerDataWentOffline() => DeletePlayerRowForEvent();
+#endif
 
         [PlayerDataEvent(PlayerDataEventType.OnPlayerDataDeleted)]
         public void OnPlayerDataDeleted() => DeletePlayerRowForEvent();

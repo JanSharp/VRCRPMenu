@@ -138,6 +138,34 @@ namespace JanSharp
             RaiseOnMultiplePlayerSelectionChanged();
         }
 
+        [LockstepEvent(LockstepEventType.OnClientBeginCatchUp, Order = -10)] // Run before row rebuilding.
+        public void OnClientBeginCatchUp()
+        {
+#if RP_MENU_SHOW_OFFLINE_PLAYERS_IN_PLAYER_LIST
+            PopulateOnlinePlayersWithAllPlayers();
+#else
+            CorePlayerData[] players = playerDataManager.AllCorePlayerDataRaw;
+            int playersCount = playerDataManager.AllCorePlayerDataCount;
+            for (int i = 0; i < playersCount; i++)
+            {
+                CorePlayerData player = players[i];
+                if (player.isOffline)
+                    continue;
+                ArrList.Add(ref allOnlinePlayers, ref allOnlinePlayersCount, player);
+            }
+#endif
+        }
+
+#if RP_MENU_SHOW_OFFLINE_PLAYERS_IN_PLAYER_LIST
+        private void PopulateOnlinePlayersWithAllPlayers()
+        {
+            CorePlayerData[] players = playerDataManager.AllCorePlayerDataRaw;
+            allOnlinePlayersCount = playerDataManager.AllCorePlayerDataCount;
+            ArrList.EnsureCapacity(ref allOnlinePlayers, allOnlinePlayersCount);
+            System.Array.Copy(players, allOnlinePlayers, allOnlinePlayersCount);
+        }
+#endif
+
         [PlayerDataEvent(PlayerDataEventType.OnPlayerDataCreated)]
         public void OnPlayerDataCreated()
         {
@@ -153,8 +181,34 @@ namespace JanSharp
         public void OnPlayerDataDeleted()
         {
             RemovePlayerForEvent();
+        }
 
+#if !RP_MENU_SHOW_OFFLINE_PLAYERS_IN_PLAYER_LIST
+        [PlayerDataEvent(PlayerDataEventType.OnPlayerDataWentOnline)]
+        public void OnPlayerDataWentOnline()
+        {
+            ArrList.Add(ref allOnlinePlayers, ref allOnlinePlayersCount, playerDataManager.PlayerDataForEvent);
+        }
+#endif
+
+#if !RP_MENU_SHOW_OFFLINE_PLAYERS_IN_PLAYER_LIST
+        [PlayerDataEvent(PlayerDataEventType.OnPlayerDataWentOffline)]
+        public void OnPlayerDataWentOffline()
+        {
+            RemovePlayerForEvent();
+        }
+#endif
+
+        private void RemovePlayerForEvent()
+        {
             CorePlayerData deletedPlayer = playerDataManager.PlayerDataForEvent;
+            ArrList.Remove(ref allOnlinePlayers, ref allOnlinePlayersCount, deletedPlayer);
+            if (selectedPlayersLut.Remove(deletedPlayer))
+            {
+                ArrList.Remove(ref selectedPlayers, ref selectedPlayersCount, deletedPlayer);
+                RaiseOnOnePlayerSelectionChanged(deletedPlayer);
+            }
+
             CorePlayerData[] players = playerDataManager.AllCorePlayerDataRaw;
             int playersCount = playerDataManager.AllCorePlayerDataCount;
             for (int i = 0; i < playersCount; i++)
@@ -183,43 +237,16 @@ namespace JanSharp
             }
         }
 
-        private void RemovePlayerForEvent()
-        {
-            CorePlayerData player = playerDataManager.PlayerDataForEvent;
-            ArrList.Remove(ref allOnlinePlayers, ref allOnlinePlayersCount, player);
-            if (!selectedPlayersLut.Remove(player))
-                return;
-            ArrList.Remove(ref selectedPlayers, ref selectedPlayersCount, player);
-            RaiseOnOnePlayerSelectionChanged(player);
-        }
-
-#if !RP_MENU_SHOW_OFFLINE_PLAYERS_IN_PLAYER_LIST
-        [PlayerDataEvent(PlayerDataEventType.OnPlayerDataWentOnline)]
-        public void OnPlayerDataWentOnline()
-        {
-            ArrList.Add(ref allOnlinePlayers, ref allOnlinePlayersCount, playerDataManager.PlayerDataForEvent);
-        }
-#endif
-
-#if !RP_MENU_SHOW_OFFLINE_PLAYERS_IN_PLAYER_LIST
-        [PlayerDataEvent(PlayerDataEventType.OnPlayerDataWentOffline)]
-        public void OnPlayerDataWentOffline()
-        {
-            RemovePlayerForEvent();
-        }
-#endif
-
 #if RP_MENU_SHOW_OFFLINE_PLAYERS_IN_PLAYER_LIST
         [LockstepEvent(LockstepEventType.OnImportFinishingUp, Order = -10)] // Run before row rebuilding.
         public void OnImportFinishingUp()
         {
-            CorePlayerData[] players = playerDataManager.AllCorePlayerDataRaw;
-            allOnlinePlayersCount = playerDataManager.AllCorePlayerDataCount;
-            ArrList.EnsureCapacity(ref allOnlinePlayers, allOnlinePlayersCount);
-            System.Array.Copy(players, allOnlinePlayers, allOnlinePlayersCount);
+            PopulateOnlinePlayersWithAllPlayers();
             // At the time of writing this the player data system does not delete existing offline player data
             // during imports even if tha player data was not part of the import, thus there is no need to
             // check if any players must be removed from the current selection.
+            // This also applies to when RP_MENU_SHOW_OFFLINE_PLAYERS_IN_PLAYER_LIST is not set, which is
+            // ultimately why the event handler is preprocessed out entirely in that case.
         }
 #endif
 

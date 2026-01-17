@@ -73,10 +73,7 @@ namespace JanSharp
 #endif
             if (request.requestingPlayer == null || request.requestingPlayer.core.isLocal)
                 return;
-            VRCPlayerApi player = request.requestingPlayer.core.playerApi;
-            if (!Utilities.IsValid(player))
-                return;
-            teleportManager.TeleportToPlayer(player, Vector3.forward);
+            teleportManager.TeleportToPlayer(request.requestingPlayer.core, Vector3.forward, recordUndo: true);
         }
 
         public void OnReadToggleValueChanged(GMRequestRow row)

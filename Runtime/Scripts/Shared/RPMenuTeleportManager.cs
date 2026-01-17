@@ -5,6 +5,7 @@ using VRC.SDKBase;
 namespace JanSharp.Internal
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [CustomRaisedEventsDispatcher(typeof(RPMenuTeleportEventAttribute), typeof(RPMenuTeleportEventType))]
     public class RPMenuTeleportManager : RPMenuTeleportManagerAPI
     {
         [SerializeField] public LayerMask localPlayerCollidingLayers;
@@ -25,6 +26,33 @@ namespace JanSharp.Internal
         };
         private int directionsToTryCount;
 
+        private bool hasUndoData;
+        /// <summary>
+        /// <para>When <see langword="false"/> it means "is at redo able location".</para>
+        /// </summary>
+        private bool isAtUndoAbleLocation;
+        private float undoAbleActionTakenAtTime;
+
+        private bool redoAbleLocationIsPlayer;
+        private CorePlayerData redoAblePlayer;
+        private Vector3 redoAbleDesiredRelativeDirection;
+        private Vector3 redoAblePosition;
+        private Quaternion redoAbleRotation;
+
+        private Vector3 undoAblePosition;
+        private Quaternion undoAbleRotation;
+
+        public override bool HasUndoData => hasUndoData;
+        public override bool IsAtUndoAbleLocation => isAtUndoAbleLocation;
+        public override float UndoAbleActionTakenAtTime => undoAbleActionTakenAtTime;
+        public override bool RedoAbleLocationIsPlayer => redoAbleLocationIsPlayer;
+        public override CorePlayerData RedoAblePlayer => redoAblePlayer;
+        public override Vector3 RedoAbleDesiredRelativeDirection => redoAbleDesiredRelativeDirection;
+        public override Vector3 RedoAblePosition => redoAblePosition;
+        public override Quaternion RedoAbleRotation => redoAbleRotation;
+        public override Vector3 UndoAblePosition => undoAblePosition;
+        public override Quaternion UndoAbleRotation => undoAbleRotation;
+
         private VRCPlayerApi localPlayer;
 
         private void Start()
@@ -40,15 +68,44 @@ namespace JanSharp.Internal
             debugLocalPlayer.SetPositionAndRotation(position, rotation);
         }
 
-        public override void TeleportToPlayer(VRCPlayerApi otherPlayer, Vector3 desiredRelativeDirection)
+        private void RecordTeleportToPlayerUndo(Vector3 currentPosition, Quaternion currentRotation, CorePlayerData otherPlayer, Vector3 desiredRelativeDirection)
         {
-            TeleportToPlayer(otherPlayer.GetPosition(), otherPlayer.GetRotation(), desiredRelativeDirection);
+            hasUndoData = true;
+            isAtUndoAbleLocation = true;
+            undoAbleActionTakenAtTime = Time.time;
+            redoAbleLocationIsPlayer = true;
+            redoAblePlayer = otherPlayer;
+            redoAbleDesiredRelativeDirection = desiredRelativeDirection;
+            undoAblePosition = currentPosition;
+            undoAbleRotation = currentRotation;
+            RaiseOnRPMenuTeleportUndoRedoStateChanged();
         }
 
-        public override void TeleportToPlayer(Vector3 otherPosition, Quaternion otherRotation, Vector3 desiredRelativeDirection)
+        private void RecordTeleportToLocation(Vector3 currentPosition, Quaternion currentRotation, Vector3 otherPosition, Quaternion otherRotation)
         {
-            FindTarget(otherPosition, otherRotation, desiredRelativeDirection, out Vector3 position, out Quaternion rotation);
-            localPlayer.TeleportTo(position, rotation);
+            hasUndoData = true;
+            isAtUndoAbleLocation = true;
+            undoAbleActionTakenAtTime = Time.time;
+            redoAbleLocationIsPlayer = false;
+            redoAblePosition = otherPosition;
+            redoAbleRotation = otherRotation;
+            undoAblePosition = currentPosition;
+            undoAbleRotation = currentRotation;
+            RaiseOnRPMenuTeleportUndoRedoStateChanged();
+        }
+
+        public override void TeleportToPlayer(CorePlayerData otherPlayer, Vector3 desiredRelativeDirection, bool recordUndo = false)
+        {
+            VRCPlayerApi playerApi = otherPlayer.playerApi;
+            if (!Utilities.IsValid(playerApi))
+                return;
+            FindTarget(playerApi.GetPosition(), playerApi.GetRotation(), desiredRelativeDirection, out Vector3 position, out Quaternion rotation);
+
+            Vector3 currentPosition = localPlayer.GetPosition();
+            Quaternion currentRotation = localPlayer.GetRotation();
+            TeleportWithoutLerp(position, rotation);
+            if (recordUndo)
+                RecordTeleportToPlayerUndo(currentPosition, currentRotation, otherPlayer, desiredRelativeDirection);
         }
 
         public void FindTarget(
@@ -117,9 +174,62 @@ namespace JanSharp.Internal
             rotation = Quaternion.LookRotation(otherPosition - positionOnYPlane);
         }
 
-        public override void TeleportTo(Vector3 position, Quaternion rotation)
+        public override void TeleportTo(Vector3 position, Quaternion rotation, bool recordUndo = false)
         {
-            localPlayer.TeleportTo(position, rotation);
+            Vector3 currentPosition = localPlayer.GetPosition();
+            Quaternion currentRotation = localPlayer.GetRotation();
+            TeleportWithoutLerp(position, rotation);
+            if (recordUndo)
+                RecordTeleportToLocation(currentPosition, currentRotation, position, rotation);
         }
+
+        public override void UndoTeleport()
+        {
+            if (!hasUndoData || !isAtUndoAbleLocation)
+                return;
+            isAtUndoAbleLocation = false;
+            TeleportWithoutLerp(undoAblePosition, undoAbleRotation);
+            RaiseOnRPMenuTeleportUndoRedoStateChanged();
+        }
+
+        public override void RedoTeleport()
+        {
+            if (!hasUndoData || isAtUndoAbleLocation)
+                return;
+            isAtUndoAbleLocation = true;
+
+            if (!redoAbleLocationIsPlayer)
+            {
+                TeleportWithoutLerp(redoAblePosition, redoAbleRotation);
+                RaiseOnRPMenuTeleportUndoRedoStateChanged();
+                return;
+            }
+
+            if (redoAblePlayer == null || redoAblePlayer.isDeleted)
+                return;
+            VRCPlayerApi playerApi = redoAblePlayer.playerApi;
+            if (!Utilities.IsValid(playerApi))
+                return;
+            FindTarget(playerApi.GetPosition(), playerApi.GetRotation(), redoAbleDesiredRelativeDirection, out Vector3 position, out Quaternion rotation);
+            TeleportWithoutLerp(position, rotation);
+            RaiseOnRPMenuTeleportUndoRedoStateChanged();
+        }
+
+        private void TeleportWithoutLerp(Vector3 position, Quaternion rotation)
+        {
+            localPlayer.TeleportTo(position, rotation, VRC_SceneDescriptor.SpawnOrientation.AlignPlayerWithSpawnPoint, lerpOnRemote: false);
+        }
+
+        #region EventDispatcher
+
+        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onRPMenuTeleportUndoRedoStateChangedListeners;
+
+        private void RaiseOnRPMenuTeleportUndoRedoStateChanged()
+        {
+            // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
+            JanSharp.CustomRaisedEvents.Raise(ref onRPMenuTeleportUndoRedoStateChangedListeners, nameof(RPMenuTeleportEventType.OnRPMenuTeleportUndoRedoStateChanged));
+        }
+
+        #endregion
     }
 }

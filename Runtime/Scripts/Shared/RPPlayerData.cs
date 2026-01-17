@@ -38,6 +38,9 @@ namespace JanSharp
         #endregion
 
         public string PlayerDisplayName => overriddenDisplayName ?? core.displayName;
+        public string PlayerDisplayNameWithCharacterName => characterName == ""
+            ? $"[{PlayerDisplayName}]"
+            : $"[{PlayerDisplayName}]  {characterName}"; // Intentional double space.
 
         public override bool PersistPlayerDataWhileOffline()
         {

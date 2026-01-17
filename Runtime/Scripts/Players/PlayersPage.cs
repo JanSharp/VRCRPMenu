@@ -260,10 +260,7 @@ namespace JanSharp
             CorePlayerData core = row.rpPlayerData.core;
             if (core.isLocal)
                 return;
-            VRCPlayerApi player = core.playerApi;
-            if (!Utilities.IsValid(player))
-                return;
-            teleportManager.TeleportToPlayer(player, Vector3.back);
+            teleportManager.TeleportToPlayer(core, Vector3.back, recordUndo: true);
         }
 
         #endregion

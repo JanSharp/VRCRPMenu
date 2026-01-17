@@ -48,6 +48,12 @@ namespace JanSharp
             latencyHUDVisualType = hudVisualType;
         }
 
+        public override void OnPlayerDataLeft()
+        {
+            voiceRangeIndex = voiceRangeManager.DefaultVoiceRangeIndex;
+            latencyVoiceRangeIndex = voiceRangeIndex;
+        }
+
         public override bool PersistPlayerDataWhileOffline()
         {
             return showInWorldMask != voiceRangeManager.DefaultShowInWorldMask

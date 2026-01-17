@@ -43,6 +43,9 @@ namespace JanSharp
         private Color responderRegularBaseColor;
         private Color responderUrgentBaseColor;
         private bool responderHUDIsShown = false;
+        [Space]
+        public string requesterHUDOrder = "im[gm-requests]-i[requester]";
+        public string responderHUDOrder = "im[gm-requests]-e[responder]";
 
         [Space]
         [PermissionDefinitionReference(nameof(requestGMPDef))]
@@ -67,8 +70,8 @@ namespace JanSharp
             requesterUrgentBaseColor = requesterUrgentImage.color;
             responderRegularBaseColor = responderRegularImage.color;
             responderUrgentBaseColor = responderUrgentImage.color;
-            hudManager.AddHUDElement(requesterHUDRoot, "ec[gm-requests]-e[requester]", isShown: false);
-            hudManager.AddHUDElement(responderHUDRoot, "ec[gm-requests]-c[responder]", isShown: false);
+            hudManager.AddHUDElement(requesterHUDRoot, requesterHUDOrder, isShown: false);
+            hudManager.AddHUDElement(responderHUDRoot, responderHUDOrder, isShown: false);
         }
 
         private void ShowHideRequesterHUD(bool show)

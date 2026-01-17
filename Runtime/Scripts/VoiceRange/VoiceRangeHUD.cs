@@ -11,6 +11,7 @@ namespace JanSharp
 
         [SerializeField] private Transform hudRoot;
         [SerializeField] private VoiceRangeHUDIcon[] icons;
+        public string hudOrder = "um[voice-range]";
         /// <summary>
         /// <para>Matches the <see cref="VoiceRangeDefinition.index"/>.</para>
         /// <para>Can contain <see langword="null"/>.</para>
@@ -30,7 +31,7 @@ namespace JanSharp
 
         private void Start()
         {
-            hudManager.AddHUDElement(hudRoot, "oc[voice-range]", isShown: false);
+            hudManager.AddHUDElement(hudRoot, hudOrder, isShown: false);
         }
 
         private void Initialize()

@@ -17,6 +17,7 @@ namespace JanSharp
 
         public Transform hudRoot;
         public Image progressImage;
+        public string hudOrder = "em[players]-m[summon]";
 
         private bool isShown = false;
         private float passedTime;
@@ -24,7 +25,7 @@ namespace JanSharp
 
         private void Start()
         {
-            hudManager.AddHUDElement(hudRoot, "bc[players]-e[summon]", isShown: false);
+            hudManager.AddHUDElement(hudRoot, hudOrder, isShown: false);
         }
 
         public void CustomUpdate()

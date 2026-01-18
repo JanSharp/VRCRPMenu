@@ -107,6 +107,7 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [x] loading in with a second player shows nothing in the players list, players backend does show some players, but not all
 - [ ] fade in and out animations for summon indicators on the summoner side
 - [x] reset voice mode to default when a player goes offline. As funny as it is to have it remember, with the discrepancy in timing from when other players perceive a player as online until that player has finished loading for them to even know what mode they are in it's honestly effectively a bug
-- [ ] disable the save as local and save as global buttons for dynamic data when the current name in the input field is already used
+- [x] disable the save as local and save as global buttons for dynamic data when the current name in the input field is already used
 - [ ] maybe make gm request text color match icon color
 - [ ] change gm request hud color to orange/amber when there's a larger number piling up
+- [ ] maybe add a lockstep master preference slider to the settings page, probably with its own permission to be viewable and usable

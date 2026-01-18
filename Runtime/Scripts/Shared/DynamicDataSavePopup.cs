@@ -8,6 +8,8 @@ namespace JanSharp
     {
         public TextMeshProUGUI localLabelStyle;
         public TextMeshProUGUI globalLabelStyle;
+        public Button saveAsLocalButton;
+        public Selectable saveAsLocalLabel;
         public Button saveAsGlobalButton;
         public Selectable saveAsGlobalLabel;
         public TMP_InputField dataNameField;
@@ -39,13 +41,43 @@ namespace JanSharp
         public void OnDataNameValueChanged()
         {
             UpdateSaveAsGlobalInteractable();
+            UpdateSaveAsLocalInteractable();
+        }
+
+        private void SetDataNameFieldText(string text)
+        {
+            dataNameField.SetTextWithoutNotify(text);
+            UpdateSaveAsGlobalInteractable();
+            UpdateSaveAsLocalInteractable();
         }
 
         private void UpdateSaveAsGlobalInteractable()
         {
-            bool interactable = !string.IsNullOrWhiteSpace(dataNameField.text);
+            string name = dataNameField.text.Trim();
+            if (name == "")
+            {
+                saveAsGlobalButton.interactable = false;
+                saveAsGlobalLabel.interactable = false;
+                return;
+            }
+            bool interactable = !dynamicDataManager.globalDynamicDataByName.ContainsKey(name);
             saveAsGlobalButton.interactable = interactable;
             saveAsGlobalLabel.interactable = interactable;
+        }
+
+        private void UpdateSaveAsLocalInteractable()
+        {
+            string name = dataNameField.text.Trim();
+            if (name == "")
+            {
+                saveAsLocalButton.interactable = true;
+                saveAsLocalLabel.interactable = true;
+                return;
+            }
+            PerPlayerDynamicData localPlayer = dynamicDataManager.GetPlayerData(playerDataManager.LocalPlayerData);
+            bool interactable = !localPlayer.localDynamicDataByName.ContainsKey(name);
+            saveAsLocalButton.interactable = interactable;
+            saveAsLocalLabel.interactable = interactable;
         }
 
         public void OnSaveAsLocalClick()
@@ -77,8 +109,7 @@ namespace JanSharp
             DynamicData data = dynamicDataManager.dataForSerialization;
 
             string dataName = dataNameField.text.Trim();
-            dataNameField.SetTextWithoutNotify("");
-            UpdateSaveAsGlobalInteractable();
+            SetDataNameFieldText("");
             if (!isGlobal && dataName == "")
                 dataName = GetFirstUnusedLocalDataName();
             data.dataName = dataName;
@@ -166,6 +197,12 @@ namespace JanSharp
         {
             if (isHoveringLocalSaveButton)
                 PreviewDataNameInPlaceholder();
+
+            if (data.isGlobal)
+                UpdateSaveAsGlobalInteractable();
+            else
+                UpdateSaveAsLocalInteractable();
+
             base.OnDynamicDataAdded(data);
         }
 
@@ -173,6 +210,12 @@ namespace JanSharp
         {
             if (isHoveringLocalSaveButton)
                 PreviewDataNameInPlaceholder();
+
+            if (data.isGlobal)
+                UpdateSaveAsGlobalInteractable();
+            else
+                UpdateSaveAsLocalInteractable();
+
             base.OnDynamicDataDeleted(data);
         }
 

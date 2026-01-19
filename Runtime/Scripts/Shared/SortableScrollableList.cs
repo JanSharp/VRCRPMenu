@@ -75,14 +75,13 @@ namespace JanSharp
         {
             rowHeight = rowPrefabScript.rowRect.sizeDelta.y;
             negativeRowHeight = -rowHeight;
-
-            menuManager.RegisterOnMenuActivePageChanged(this);
-            menuManager.RegisterOnMenuOpenStateChanged(this);
             StartStopUpdateLoop();
         }
 
+        [MenuManagerEvent(MenuManagerEventType.OnMenuActivePageChanged)]
         public void OnMenuActivePageChanged() => StartStopUpdateLoop();
 
+        [MenuManagerEvent(MenuManagerEventType.OnMenuOpenStateChanged)]
         public void OnMenuOpenStateChanged() => StartStopUpdateLoop();
 
         private void StartStopUpdateLoop()

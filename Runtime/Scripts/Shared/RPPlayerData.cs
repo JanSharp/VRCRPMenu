@@ -42,11 +42,6 @@ namespace JanSharp
             ? $"[{PlayerDisplayName}]"
             : $"[{PlayerDisplayName}]  {characterName}"; // Intentional double space.
 
-        public override bool PersistPlayerDataWhileOffline()
-        {
-            return overriddenDisplayName != null || characterName != "";
-        }
-
         public override void OnPlayerDataInit(bool isAboutToBeImported)
         {
             if (isAboutToBeImported)
@@ -57,6 +52,11 @@ namespace JanSharp
         public override void OnPlayerDataUninit(bool force)
         {
             ((Internal.PlayersFavoritesManager)playersFavoritesManager).OnPlayerDataUnInit(this);
+        }
+
+        public override bool PersistPlayerDataWhileOffline()
+        {
+            return overriddenDisplayName != null || characterName != "";
         }
 
         public override void Serialize(bool isExport)

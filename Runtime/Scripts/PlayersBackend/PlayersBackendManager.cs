@@ -10,6 +10,7 @@ namespace JanSharp.Internal
         [HideInInspector][SerializeField][SingletonReference] private LockstepAPI lockstep;
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
         [HideInInspector][SerializeField][SingletonReference] private PermissionManagerAPI permissionManager;
+        [HideInInspector][SerializeField][SingletonReference] private MenuInputHandler menuInputHandler;
 
         private int rpPlayerDataIndex;
 
@@ -41,22 +42,11 @@ namespace JanSharp.Internal
             rpPlayerDataIndex = playerDataManager.GetPlayerDataClassNameIndex<RPPlayerData>(nameof(RPPlayerData));
         }
 
-        private bool TryGetRPPlayerData(uint persistentId, out RPPlayerData rpPlayerData)
-        {
-            if (playerDataManager.TryGetCorePlayerDataForPersistentId(persistentId, out CorePlayerData core))
-            {
-                rpPlayerData = (RPPlayerData)core.customPlayerData[rpPlayerDataIndex];
-                return true;
-            }
-            rpPlayerData = null;
-            return false;
-        }
-
         public override void SendSetOverriddenDisplayNameIA(RPPlayerData rpPlayerData, string overriddenDisplayName)
         {
             if (overriddenDisplayName != null)
                 overriddenDisplayName = overriddenDisplayName.Trim();
-            lockstep.WriteSmallUInt(rpPlayerData.core.persistentId);
+            WriteRPPlayerDataRef(rpPlayerData);
             lockstep.WriteString(overriddenDisplayName);
             lockstep.SendInputAction(setOverriddenDisplayNameIAId);
         }
@@ -65,9 +55,9 @@ namespace JanSharp.Internal
         [LockstepInputAction(nameof(setOverriddenDisplayNameIAId))]
         public void OnSetOverriddenDisplayNameIA()
         {
-            uint persistentId = lockstep.ReadSmallUInt();
+            RPPlayerData rpPlayerData = ReadRPPlayerDataRef();
             string overriddenDisplayName = lockstep.ReadString();
-            if (!TryGetRPPlayerData(persistentId, out RPPlayerData rpPlayerData))
+            if (rpPlayerData == null)
                 return;
 
             if (permissionManager.PlayerHasPermission(playerDataManager.SendingPlayerData, editDisplayNamePDef))
@@ -93,7 +83,7 @@ namespace JanSharp.Internal
         {
             if (characterName != null) // Just reducing network data, not like it makes literally any difference.
                 characterName = characterName.Trim();
-            lockstep.WriteSmallUInt(rpPlayerData.core.persistentId);
+            WriteRPPlayerDataRef(rpPlayerData);
             lockstep.WriteString(characterName);
             lockstep.SendInputAction(setCharacterNameIAId);
         }
@@ -102,9 +92,9 @@ namespace JanSharp.Internal
         [LockstepInputAction(nameof(setCharacterNameIAId))]
         public void OnSetCharacterNameIA()
         {
-            uint persistentId = lockstep.ReadSmallUInt();
+            RPPlayerData rpPlayerData = ReadRPPlayerDataRef();
             string characterName = lockstep.ReadString();
-            if (!TryGetRPPlayerData(persistentId, out RPPlayerData rpPlayerData))
+            if (rpPlayerData == null)
                 return;
 
             if (permissionManager.PlayerHasPermission(playerDataManager.SendingPlayerData, editCharacterNamePDef))

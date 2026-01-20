@@ -117,6 +117,6 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
   - [ ] make sure the prefab overrides that deleted those existing show page by permission scripts get undone
 - [ ] probably combine all of the local dynamic data permissions (so selection groups and custom locations) into one permission rather than 4 separate ones. It is nonsensical for them to be split
 - [x] ~~maybe add a permission to only allow deleting global dynamic data "owned" by the local player (the one who created or overwrite it)~~ no likely best not
-- [ ] make default page setting actually do something
+- [x] make default page setting actually do something
 - [ ] show the open close key bind and menu position settings in VR only
   - [ ] add show in VR only and show in desktop only scripts

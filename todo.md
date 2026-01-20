@@ -118,5 +118,5 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [ ] probably combine all of the local dynamic data permissions (so selection groups and custom locations) into one permission rather than 4 separate ones. It is nonsensical for them to be split
 - [x] ~~maybe add a permission to only allow deleting global dynamic data "owned" by the local player (the one who created or overwrite it)~~ no likely best not
 - [x] make default page setting actually do something
-- [ ] show the open close key bind and menu position settings in VR only
-  - [ ] add show in VR only and show in desktop only scripts
+- [x] show the open close key bind and menu position settings in VR only
+  - [x] add show in VR only and show in desktop only scripts

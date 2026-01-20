@@ -112,9 +112,9 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [ ] change gm request hud color to orange/amber when there's a larger number piling up
 - [ ] maybe add a lockstep master preference slider to the settings page, probably with its own permission to be viewable and usable
 - [ ] probably add undo redo teleport buttons to GM requests page
-- [ ] actually add the "ignore show page by permission in children" script
-  - [ ] add a show page by permission script to every module
-  - [ ] make sure the prefab overrides that deleted those existing show page by permission scripts get undone
+- [x] actually add the "ignore show page by permission in children" script
+  - [x] add a show page by permission script to every module
+  - [x] make sure the prefab overrides that deleted those existing show page by permission scripts get undone
 - [ ] probably combine all of the local dynamic data permissions (so selection groups and custom locations) into one permission rather than 4 separate ones. It is nonsensical for them to be split
 - [x] ~~maybe add a permission to only allow deleting global dynamic data "owned" by the local player (the one who created or overwrite it)~~ no likely best not
 - [x] make default page setting actually do something

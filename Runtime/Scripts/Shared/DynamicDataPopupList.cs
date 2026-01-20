@@ -105,7 +105,7 @@ namespace JanSharp
             //     return;
             if (!data.isGlobal && !data.owningPlayer.isLocal)
                 return;
-            if (data.isGlobal ? !ShouldShowLocalButtons() : !ShouldShowGlobalButtons())
+            if (data.isGlobal ? !ShouldShowGlobalButtons() : !ShouldShowLocalButtons())
                 return;
             DynamicDataPopupListButton button = CreateDynamicDataButton(data);
             buttonsById.Add(data.id, button);

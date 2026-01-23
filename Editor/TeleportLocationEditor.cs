@@ -58,7 +58,7 @@ namespace JanSharp
 
             conditionsList = new PermissionConditionsList(
                 targets: targets,
-                header: new GUIContent("Conditions"),
+                header: new GUIContent("Conditions", "Empty Conditions are treated as a match"),
                 logicalAndsFieldName: "logicalAnds",
                 invertsFieldName: "inverts",
                 assetGuidsFieldName: "assetGuids",

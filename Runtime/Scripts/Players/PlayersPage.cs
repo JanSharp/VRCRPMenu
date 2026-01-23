@@ -37,7 +37,7 @@ namespace JanSharp
         public string playerSelectionPermissionAsset; // A guid.
         [HideInInspector][SerializeField] private PermissionDefinition playerSelectionPDef;
 
-        private bool isInitialized = false;
+        // private bool isInitialized = false;
 
         /// <summary>
         /// <para>Check <see langword="null"/> and call <see cref="FetchLocalPlayer"/> before using.</para>
@@ -64,7 +64,7 @@ namespace JanSharp
         public void OnPrePlayerDataManagerInit()
         {
             rowsList.Initialize();
-            isInitialized = true;
+            // isInitialized = true;
         }
 
         [LockstepEvent(LockstepEventType.OnClientBeginCatchUp)]
@@ -75,7 +75,7 @@ namespace JanSharp
             RebuildRows();
             if (lockstep.FlaggedToContinueNextFrame)
                 return;
-            isInitialized = true;
+            // isInitialized = true;
         }
 
         [LockstepEvent(LockstepEventType.OnImportFinishingUp)]

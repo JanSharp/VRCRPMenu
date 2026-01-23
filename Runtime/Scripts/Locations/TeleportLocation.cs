@@ -15,6 +15,8 @@ namespace JanSharp
         public string CategoryName => categoryName;
         public int Order => order;
 
+        [System.NonSerialized] public int indexInShownList;
+
         public WhenConditionsAreMetType whenConditionsAreMet;
 
         public bool[] logicalAnds;
@@ -34,11 +36,10 @@ namespace JanSharp
                 if (locationShouldBeShown == value)
                     return;
                 locationShouldBeShown = value;
-                // TODO: Inform teleportLocationsManager about this location getting shown or hidden.
-                // if (value)
-                //     menuPageRoot.IncrementShouldBeShown();
-                // else
-                //     menuPageRoot.DecrementShouldBeShown();
+                if (value)
+                    teleportLocationsManager.LocationBecomeShown(this);
+                else
+                    teleportLocationsManager.LocationBecameHidden(this);
             }
         }
 

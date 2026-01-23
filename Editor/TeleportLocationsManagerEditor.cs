@@ -31,14 +31,22 @@ namespace JanSharp
             data.CollectAllData(allLocations);
             data.ApplyChanges();
             int order = 1;
-            foreach (TeleportLocation location in manager.Locations)
+            List<TeleportLocation> nonEditorOnlyLocations = new();
+            foreach (TeleportLocation location in manager.AllLocations)
             {
                 if (EditorUtil.IsEditorOnly(location))
                     continue;
+                nonEditorOnlyLocations.Add(location);
                 SerializedObject locationSo = new(location);
                 locationSo.FindProperty("order").intValue = order++;
                 locationSo.ApplyModifiedProperties();
             }
+            SerializedObject so = new(manager);
+            EditorUtil.SetArrayProperty(
+                so.FindProperty("locations"),
+                nonEditorOnlyLocations,
+                (p, v) => p.objectReferenceValue = v);
+            so.ApplyModifiedProperties();
             return true;
         }
     }
@@ -87,7 +95,7 @@ namespace JanSharp
         public List<TeleportLocationsCategory> categories = new();
         public List<string> categoryNames = new();
         public Dictionary<string, TeleportLocationsCategory> categoriesByName;
-        public TeleportLocationsCategoriesList categoriesList;
+        public TeleportLocationsCategoriesEditorList categoriesList;
 
         public TeleportLocationsEditorData(TeleportLocationsManager manager)
         {
@@ -97,7 +105,7 @@ namespace JanSharp
 
         public void CollectAllData(IEnumerable<TeleportLocation> allLocations)
         {
-            TeleportLocation[] knownLocations = manager.Locations;
+            TeleportLocation[] knownLocations = manager.AllLocations;
             // Cannot rely on the order in which category names appear in the locations list, as that could
             // perceivably randomly change the order of categories when a location's category got changed.
             string[] knownCategoryNames = manager.CategoryNames;
@@ -193,7 +201,7 @@ namespace JanSharp
 
             managerSo.Update();
             EditorUtil.SetArrayProperty(
-                managerSo.FindProperty("locations"),
+                managerSo.FindProperty("allLocations"),
                 allLocations,
                 (p, v) => p.objectReferenceValue = v);
             EditorUtil.SetArrayProperty(
@@ -208,7 +216,7 @@ namespace JanSharp
     {
         public string categoryName;
         public List<TeleportLocation> locations;
-        public TeleportLocationsList list;
+        public TeleportLocationsEditorList list;
 
         public TeleportLocationsCategory(string categoryName, List<TeleportLocation> locations)
         {
@@ -224,9 +232,9 @@ namespace JanSharp
 
     internal class TeleportLocationsCategoriesDummy : DummyForDraggableList<string> { }
 
-    internal class TeleportLocationsCategoriesList : DraggableList<TeleportLocationsCategoriesDummy, string>
+    internal class TeleportLocationsCategoriesEditorList : DraggableList<TeleportLocationsCategoriesDummy, string>
     {
-        public TeleportLocationsCategoriesList(string header, List<string> entries) : base(header, entries) { }
+        public TeleportLocationsCategoriesEditorList(string header, List<string> entries) : base(header, entries) { }
 
         protected override void DrawListElement(Rect rect, int index, bool isActive, bool isFocused)
         {
@@ -237,9 +245,9 @@ namespace JanSharp
 
     internal class TeleportLocationsDummy : DummyForDraggableList<TeleportLocation> { }
 
-    internal class TeleportLocationsList : DraggableList<TeleportLocationsDummy, TeleportLocation>
+    internal class TeleportLocationsEditorList : DraggableList<TeleportLocationsDummy, TeleportLocation>
     {
-        public TeleportLocationsList(string header, List<TeleportLocation> entries) : base(header, entries) { }
+        public TeleportLocationsEditorList(string header, List<TeleportLocation> entries) : base(header, entries) { }
 
         protected override void DrawListElement(Rect rect, int index, bool isActive, bool isFocused)
         {

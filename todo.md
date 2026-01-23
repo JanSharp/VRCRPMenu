@@ -120,3 +120,7 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [x] make default page setting actually do something
 - [x] show the open close key bind and menu position settings in VR only
   - [x] add show in VR only and show in desktop only scripts
+- [ ] close the menu when clicking a location teleport button?
+- [ ] close the menu when clicking a custom location teleport button?
+  - [ ] could make these a setting... but what's a good default and would the default be good enough for a setting to be overkill anyway?
+- [ ] maybe add info text stating that the list is empty in the GM requests list and teleport locations list

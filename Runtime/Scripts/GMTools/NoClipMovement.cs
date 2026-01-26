@@ -69,7 +69,8 @@ namespace JanSharp
             {
                 currentPosition = localPlayer.GetPosition();
                 var origin = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Origin);
-                currentOffsetWithinPlaySpace = CalculateOffsetWithinPlaySpace(origin);
+                var head = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
+                currentOffsetWithinPlaySpace = CalculateOffsetWithinPlaySpace(origin, head.position);
                 updateManager.Register(this);
             }
             else
@@ -98,11 +99,12 @@ namespace JanSharp
         public void CustomUpdate()
         {
             var origin = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Origin);
-            Vector3 offsetWithinPlaySpace = CalculateOffsetWithinPlaySpace(origin);
+            var head = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
+            Vector3 offsetWithinPlaySpace = CalculateOffsetWithinPlaySpace(origin, head.position);
             Vector3 movementWithinPlaySpace = origin.rotation * (offsetWithinPlaySpace - currentOffsetWithinPlaySpace);
             currentOffsetWithinPlaySpace = offsetWithinPlaySpace;
 
-            Quaternion headRotation = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head).rotation;
+            Quaternion headRotation = head.rotation;
             Vector3 forward = headRotation * Vector3.forward;
             Vector3 right = headRotation * Vector3.right;
             currentPosition += (forward * verticalInput + right * horizontalInput) * speed * Mathf.Min(Time.deltaTime, 0.2f)
@@ -117,9 +119,13 @@ namespace JanSharp
             localPlayer.SetVelocity(Vector3.zero);
         }
 
-        private Vector3 CalculateOffsetWithinPlaySpace(VRCPlayerApi.TrackingData origin)
+        private Vector3 CalculateOffsetWithinPlaySpace(VRCPlayerApi.TrackingData origin, Vector3 headPosition)
         {
-            return Quaternion.Inverse(origin.rotation) * (localPlayer.GetPosition() - origin.position);
+            // Must use the head tracking data, using player.GetPosition() is
+            // unreliable due to that position getting pushed around by colliders.
+            Vector3 offset = headPosition - origin.position;
+            offset.y = 0f;
+            return Quaternion.Inverse(origin.rotation) * offset;
         }
     }
 }

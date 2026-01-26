@@ -133,3 +133,5 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [ ] Q E and Shift support for desktop no clip
 - [ ] maybe a little smooth in and tiny smooth out when staring and stopping moving in no clip in desktop
 - [ ] maybe keep a collider under the player while they are using no clip to have grounded be true, if possible
+- [ ] make PR for sylan's no clip to also keep track of the position within the play space, it is so weird without it
+- [ ] test the play space offset tracking with full body, I guess

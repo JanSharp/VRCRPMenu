@@ -27,6 +27,19 @@ namespace JanSharp.Internal
         public override float LatencyNoClipSpeed => latencyNoClipSpeed;
         #endregion
 
+        private bool isNoClipActive;
+        public override bool IsNoClipActive
+        {
+            get => isNoClipActive;
+            set
+            {
+                if (isNoClipActive == value || (value && !latencyNoClipEnabled))
+                    return;
+                isNoClipActive = value;
+                RaiseOnIsNoClipActiveChanged();
+            }
+        }
+
         [PlayerDataEvent(PlayerDataEventType.OnRegisterCustomPlayerData)]
         public void OnRegisterCustomPlayerData()
         {
@@ -54,6 +67,8 @@ namespace JanSharp.Internal
             {
                 latencyNoClipEnabled = localData.noClipEnabled;
                 latencyNoClipSpeed = localData.noClipSpeed;
+                if (!latencyNoClipEnabled)
+                    IsNoClipActive = false;
             }
             else
             {
@@ -108,6 +123,8 @@ namespace JanSharp.Internal
                 return;
             latencyNoClipEnabled = noClipEnabled;
             RaiseOnLocalLatencyNoClipEnabledChanged();
+            if (!latencyNoClipEnabled)
+                IsNoClipActive = false;
         }
 
         public override void SendSetNoClipSpeedIA(NoClipPlayerData data, float noClipSpeed)
@@ -170,6 +187,7 @@ namespace JanSharp.Internal
 
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onLocalLatencyNoClipEnabledChangedListeners;
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onLocalLatencyNoClipSpeedChangedListeners;
+        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onIsNoClipActiveChangedListeners;
 
         private void RaiseOnLocalLatencyNoClipEnabledChanged()
         {
@@ -181,6 +199,12 @@ namespace JanSharp.Internal
         {
             // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
             JanSharp.CustomRaisedEvents.Raise(ref onLocalLatencyNoClipSpeedChangedListeners, nameof(NoClipEventType.OnLocalLatencyNoClipSpeedChanged));
+        }
+
+        private void RaiseOnIsNoClipActiveChanged()
+        {
+            // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
+            JanSharp.CustomRaisedEvents.Raise(ref onIsNoClipActiveChangedListeners, nameof(NoClipEventType.OnIsNoClipActiveChanged));
         }
 
         #endregion

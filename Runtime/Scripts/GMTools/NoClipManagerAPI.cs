@@ -14,6 +14,10 @@ namespace JanSharp
         /// <para>Not game state safe.</para>
         /// </summary>
         OnLocalLatencyNoClipSpeedChanged,
+        /// <summary>
+        /// <para>Not game state safe.</para>
+        /// </summary>
+        OnIsNoClipActiveChanged,
     }
 
     [System.AttributeUsage(System.AttributeTargets.Method, Inherited = true, AllowMultiple = false)]
@@ -42,6 +46,8 @@ namespace JanSharp
 
         public abstract bool LatencyNoClipEnabled { get; }
         public abstract float LatencyNoClipSpeed { get; }
+
+        public abstract bool IsNoClipActive { get; set; }
 
         public abstract void SendSetNoClipEnabledIA(NoClipPlayerData data, bool noClipEnabled);
         public abstract void SendSetNoClipSpeedIA(NoClipPlayerData data, float noClipSpeed);

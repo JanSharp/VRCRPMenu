@@ -130,3 +130,6 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [ ] maybe try implementing "sliding" support to the segmented slider, effectively starting a drag on one of the segments and it changing the value so long as the pointer is held down
 - [x] disabled segmented slider must disable interactable on the buttons, or ignore the click event... that'd actually be easier
 - [ ] probably add lines between the buttons in the toolbar for the players list
+- [ ] Q E and Shift support for desktop no clip
+- [ ] maybe a little smooth in and tiny smooth out when staring and stopping moving in no clip in desktop
+- [ ] maybe keep a collider under the player while they are using no clip to have grounded be true, if possible

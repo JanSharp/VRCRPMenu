@@ -218,11 +218,39 @@ namespace JanSharp.Internal
         private void TeleportWithoutLerp(Vector3 position, Quaternion rotation)
         {
             localPlayer.TeleportTo(position, rotation, VRC_SceneDescriptor.SpawnOrientation.AlignPlayerWithSpawnPoint, lerpOnRemote: false);
+            RaiseOnLocalPlayerTeleported();
+        }
+
+        public override Quaternion ProjectOntoYPlane(Quaternion rotation)
+        {
+            Vector3 projectedForward = Vector3.ProjectOnPlane(rotation * Vector3.forward, Vector3.up);
+            return projectedForward == Vector3.zero // Facing straight up or down?
+                ? Quaternion.LookRotation(rotation * Vector3.down) // Imagine a head facing staring up. The chin is down.
+                : Quaternion.LookRotation(projectedForward.normalized);
+        }
+
+        public override void MoveAndRetainHeadRotation(VRCPlayerApi player, Vector3 teleportPosition)
+        {
+            // TODO: Fix the jumping of rotation at that halfway downward angle.
+            // Get head rotation => teleport => get head rotation again => calculate offset induced by teleport => corrective teleport.
+            Quaternion playerRotation = player.GetRotation();
+            Quaternion preHeadRotation = ProjectOntoYPlane(player.GetTrackingData(VRCPlayerApi.TrackingDataType.Head).rotation);
+            player.TeleportTo(teleportPosition, playerRotation, VRC_SceneDescriptor.SpawnOrientation.AlignPlayerWithSpawnPoint, lerpOnRemote: true);
+            Quaternion postHeadRotation = ProjectOntoYPlane(player.GetTrackingData(VRCPlayerApi.TrackingDataType.Head).rotation);
+            Quaternion headRotationOffset = Quaternion.Inverse(postHeadRotation) * preHeadRotation;
+            player.TeleportTo(teleportPosition, headRotationOffset * playerRotation, VRC_SceneDescriptor.SpawnOrientation.AlignPlayerWithSpawnPoint, lerpOnRemote: true);
         }
 
         #region EventDispatcher
 
+        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onLocalPlayerTeleportedListeners;
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onRPMenuTeleportUndoRedoStateChangedListeners;
+
+        private void RaiseOnLocalPlayerTeleported()
+        {
+            // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
+            JanSharp.CustomRaisedEvents.Raise(ref onLocalPlayerTeleportedListeners, nameof(RPMenuTeleportEventType.OnLocalPlayerTeleported));
+        }
 
         private void RaiseOnRPMenuTeleportUndoRedoStateChanged()
         {

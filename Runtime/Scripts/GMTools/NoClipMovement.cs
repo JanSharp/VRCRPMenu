@@ -21,6 +21,7 @@ namespace JanSharp
         private float speed;
 
         private Vector3 currentPosition;
+        private Vector3 currentOffsetWithinPlaySpace;
 
         private VRCPlayerApi localPlayer;
 
@@ -67,6 +68,8 @@ namespace JanSharp
             if (noClipManager.IsNoClipActive)
             {
                 currentPosition = localPlayer.GetPosition();
+                var origin = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Origin);
+                currentOffsetWithinPlaySpace = CalculateOffsetWithinPlaySpace(origin);
                 updateManager.Register(this);
             }
             else
@@ -94,11 +97,16 @@ namespace JanSharp
 
         public void CustomUpdate()
         {
+            var origin = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Origin);
+            Vector3 offsetWithinPlaySpace = CalculateOffsetWithinPlaySpace(origin);
+            Vector3 movementWithinPlaySpace = origin.rotation * (offsetWithinPlaySpace - currentOffsetWithinPlaySpace);
+            currentOffsetWithinPlaySpace = offsetWithinPlaySpace;
+
             Quaternion headRotation = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head).rotation;
             Vector3 forward = headRotation * Vector3.forward;
             Vector3 right = headRotation * Vector3.right;
-            currentPosition += (forward * verticalInput + right * horizontalInput) * speed * Mathf.Min(Time.deltaTime, 0.2f);
-            // TODO: Track relative position within play space.
+            currentPosition += (forward * verticalInput + right * horizontalInput) * speed * Mathf.Min(Time.deltaTime, 0.2f)
+                + movementWithinPlaySpace;
             // TODO: Use different movement method (not teleportation) while not inside of a collider.
             // TODO: Force use different movement method even while in collider when menu is open, while standing still.
             teleportManager.MoveAndRetainHeadRotation(localPlayer, currentPosition);
@@ -107,6 +115,11 @@ namespace JanSharp
             // which is ultimately noticeable by the dummy canvases around you in desktop while having the UI open flickering.
             // If there is a collider kept under the player this might not be required.
             localPlayer.SetVelocity(Vector3.zero);
+        }
+
+        private Vector3 CalculateOffsetWithinPlaySpace(VRCPlayerApi.TrackingData origin)
+        {
+            return Quaternion.Inverse(origin.rotation) * (localPlayer.GetPosition() - origin.position);
         }
     }
 }

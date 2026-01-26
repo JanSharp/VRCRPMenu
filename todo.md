@@ -128,3 +128,5 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [ ] add a ShowPageByPermission script to the settings that are supposed to be visible at all times, simply leave the conditions empty
   - [ ] remove the ignore ShowPageByPermission in children from the settings page in doing so
 - [ ] maybe try implementing "sliding" support to the segmented slider, effectively starting a drag on one of the segments and it changing the value so long as the pointer is held down
+- [x] disabled segmented slider must disable interactable on the buttons, or ignore the click event... that'd actually be easier
+- [ ] probably add lines between the buttons in the toolbar for the players list

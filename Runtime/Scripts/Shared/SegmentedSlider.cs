@@ -52,6 +52,7 @@ namespace JanSharp
             }
         }
 
+        [Tooltip("Zero based")]
         [SerializeField] private uint value;
         public uint Value
         {
@@ -90,11 +91,14 @@ namespace JanSharp
         private void OnDisable()
         {
             isHovering = false;
-            UpdateSegments();
+            if (interactable)
+                UpdateSegments();
         }
 
         public void OnClick(SegmentedSliderSegment segment)
         {
+            if (!interactable)
+                return;
             Value = segment.index;
         }
 
@@ -102,7 +106,8 @@ namespace JanSharp
         {
             isHovering = true;
             hoveredValue = segment.index;
-            UpdateSegments();
+            if (interactable)
+                UpdateSegments();
         }
 
         public void OnPointerExit(SegmentedSliderSegment segment)
@@ -110,7 +115,8 @@ namespace JanSharp
             if (hoveredValue != segment.index)
                 return;
             isHovering = false;
-            UpdateSegments();
+            if (interactable)
+                UpdateSegments();
         }
 
         private void UpdateSegments()

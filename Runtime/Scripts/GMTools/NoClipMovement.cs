@@ -74,11 +74,13 @@ namespace JanSharp
                 var origin = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Origin);
                 var head = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
                 currentOffsetWithinPlaySpace = CalculateOffsetWithinPlaySpace(origin, head.position);
+                localPlayer.SetGravityStrength(0f);
                 updateManager.Register(this);
             }
             else
             {
                 fakeGround.gameObject.SetActive(false);
+                localPlayer.SetGravityStrength(1f);
                 localPlayer.SetVelocity(Vector3.zero); // TODO: Maybe track velocity and apply it here?
                 updateManager.Deregister(this);
             }

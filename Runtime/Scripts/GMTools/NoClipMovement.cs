@@ -120,7 +120,7 @@ namespace JanSharp
             // TODO: Force use different movement method even while in collider when menu is open, while standing still.
             // TODO: figure out if there is anything that can be done to prevent this weird state of the
             // player's avatar being suck constantly moving, where cancelling no clip clearly makes you move to the side.
-            teleportManager.MoveAndRetainHeadRotation(localPlayer, currentPosition);
+            teleportManager.MoveAndRetainHeadRotation(currentPosition);
 
             // // Must set this every frame, otherwise even though it is not visible the player does constantly fall,
             // // which is ultimately noticeable by the dummy canvases around you in desktop while having the UI open flickering.

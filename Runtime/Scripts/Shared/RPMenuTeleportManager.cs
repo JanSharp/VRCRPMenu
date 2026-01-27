@@ -229,16 +229,62 @@ namespace JanSharp.Internal
                 : Quaternion.LookRotation(projectedForward.normalized);
         }
 
-        public override void MoveAndRetainHeadRotation(VRCPlayerApi player, Vector3 teleportPosition)
+        private const int MaxTPIterations = 7;
+
+        public override void MoveAndRetainHeadRotation(Vector3 targetPosition)
         {
-            // TODO: Fix the jumping of rotation at that halfway downward angle.
+            var origin = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Origin);
             // Get head rotation => teleport => get head rotation again => calculate offset induced by teleport => corrective teleport.
-            Quaternion playerRotation = player.GetRotation();
-            Quaternion preHeadRotation = ProjectOntoYPlane(player.GetTrackingData(VRCPlayerApi.TrackingDataType.Head).rotation);
-            player.TeleportTo(teleportPosition, playerRotation, VRC_SceneDescriptor.SpawnOrientation.AlignPlayerWithSpawnPoint, lerpOnRemote: true);
-            Quaternion postHeadRotation = ProjectOntoYPlane(player.GetTrackingData(VRCPlayerApi.TrackingDataType.Head).rotation);
-            Quaternion headRotationOffset = Quaternion.Inverse(postHeadRotation) * preHeadRotation;
-            player.TeleportTo(teleportPosition, headRotationOffset * playerRotation, VRC_SceneDescriptor.SpawnOrientation.AlignPlayerWithSpawnPoint, lerpOnRemote: true);
+            var initialHead = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
+            Quaternion initialHeadRotation = initialHead.rotation;
+            Quaternion localPlayerRotation = localPlayer.GetRotation();
+            localPlayer.TeleportTo(targetPosition, localPlayerRotation, VRC_SceneDescriptor.SpawnOrientation.AlignPlayerWithSpawnPoint, lerpOnRemote: true);
+            Quaternion postHeadRotation = ProjectOntoYPlane(localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head).rotation);
+            Quaternion headRotationOffset = Quaternion.Inverse(postHeadRotation) * ProjectOntoYPlane(initialHeadRotation);
+            localPlayer.TeleportTo(targetPosition, headRotationOffset * localPlayerRotation, VRC_SceneDescriptor.SpawnOrientation.AlignPlayerWithSpawnPoint, lerpOnRemote: true);
+            if (localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head).rotation == initialHeadRotation)
+                return;
+            // The above returns successfully 99.9% of the time. However when the head is tilted to the left
+            // or right, when looking up and down there is a single frame at some threshold where it requires
+            // multiple iterations to fully undo unintentional movement and rotation induced by teleporting.
+            // The lower the frame rate the fewer iterations it needs.
+            // The less tilted the head is the fewer iterations it needs.
+            // When setting MaxTPIterations to a lower value, such as 4 for example, it ends up doing
+            // corrective iterations spread out across 2 frames interestingly enough, though at that point the
+            // jump becomes visible and does not get cancelled out fully after the second frame either.
+            // That means there is very little benefit to lowering MaxTPIterations, even though each iteration
+            // is expensive. It takes a bit more than 1 ms on my machine with this current implementation.
+            // Basically 0.25 ms per teleport.
+
+            Vector3 headOffsetToOrigin = initialHead.position - origin.position;
+            headOffsetToOrigin.y = 0f;
+            Vector3 desiredOriginPos = targetPosition - headOffsetToOrigin;
+            Quaternion desiredOriginRot = origin.rotation;
+            Vector3 localPlayerPosition = localPlayer.GetPosition();
+            localPlayerRotation = localPlayer.GetRotation(); // Reusing the initial value resulted in almost always doing all MaxTPIterations.
+            int iterationCount = 0;
+            for (int i = 0; i < MaxTPIterations; i++)
+            {
+                iterationCount = i + 1;
+                // If this logic makes any sense to you, good job. I could not explain what this does.
+                // I wrote this 6 months ago with tons of trial and error in an attempt at getting platform
+                // attachment to work, see there for git history... though that won't explain much either.
+                localPlayer.TeleportTo(localPlayerPosition, localPlayerRotation, VRC_SceneDescriptor.SpawnOrientation.AlignPlayerWithSpawnPoint, lerpOnRemote: true);
+                origin = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Origin);
+                Vector3 posDiff = origin.position - desiredOriginPos;
+                Quaternion rotDiff = Quaternion.Inverse(desiredOriginRot) * origin.rotation;
+                Vector3 almostFinalPosition = localPlayerPosition - posDiff;
+                Quaternion finalRotation = localPlayerRotation * Quaternion.Inverse(rotDiff);
+                localPlayer.TeleportTo(almostFinalPosition, finalRotation, VRC_SceneDescriptor.SpawnOrientation.AlignPlayerWithSpawnPoint, lerpOnRemote: true);
+                origin = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Origin);
+                Vector3 posDiff2 = origin.position - desiredOriginPos;
+                localPlayer.TeleportTo(desiredOriginPos, desiredOriginRot, VRC_SceneDescriptor.SpawnOrientation.AlignRoomWithSpawnPoint, lerpOnRemote: true);
+                localPlayer.TeleportTo(almostFinalPosition - posDiff2, finalRotation, VRC_SceneDescriptor.SpawnOrientation.AlignPlayerWithSpawnPoint, lerpOnRemote: true);
+                origin = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Origin);
+                if (origin.position == desiredOriginPos && desiredOriginRot == origin.rotation)
+                    break;
+            }
+            Debug.Log($"[RPMenuDebug] RPMenuTeleportManager  MoveAndRetainHeadRotation (inner) - iterationCount: {iterationCount}");
         }
 
         #region EventDispatcher

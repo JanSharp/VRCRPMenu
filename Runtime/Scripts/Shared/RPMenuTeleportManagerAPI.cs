@@ -106,6 +106,6 @@ namespace JanSharp
         /// quickly, some of that rotation can also get cancelled out, which is presumably jarring. It seems
         /// rare however.</para>
         /// </summary>
-        public abstract void MoveAndRetainHeadRotation(VRCPlayerApi player, Vector3 teleportPosition);
+        public abstract void MoveAndRetainHeadRotation(Vector3 movement);
     }
 }

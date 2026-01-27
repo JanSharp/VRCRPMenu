@@ -135,3 +135,6 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [ ] maybe keep a collider under the player while they are using no clip to have grounded be true, if possible
 - [ ] make PR for sylan's no clip to also keep track of the position within the play space, it is so weird without it
 - [ ] test the play space offset tracking with full body, I guess
+- [ ] test grounded with and without the collider under you
+- [ ] maybe make it so that when holding jump, moving forward and back actually moves you up and down in no clip
+- [ ] maybe make the RPMenu prefab invisible in the scene by default

@@ -20,6 +20,7 @@ namespace JanSharp
         private float verticalInput;
         private float speed;
 
+        [SerializeField] private Transform fakeGround;
         private Vector3 currentPosition;
         private Vector3 currentOffsetWithinPlaySpace;
 
@@ -68,6 +69,8 @@ namespace JanSharp
             if (noClipManager.IsNoClipActive)
             {
                 currentPosition = localPlayer.GetPosition();
+                fakeGround.position = currentPosition;
+                fakeGround.gameObject.SetActive(true);
                 var origin = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Origin);
                 var head = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
                 currentOffsetWithinPlaySpace = CalculateOffsetWithinPlaySpace(origin, head.position);
@@ -75,6 +78,7 @@ namespace JanSharp
             }
             else
             {
+                fakeGround.gameObject.SetActive(false);
                 localPlayer.SetVelocity(Vector3.zero); // TODO: Maybe track velocity and apply it here?
                 updateManager.Deregister(this);
             }
@@ -109,14 +113,17 @@ namespace JanSharp
             Vector3 right = headRotation * Vector3.right;
             currentPosition += (forward * verticalInput + right * horizontalInput) * speed * Mathf.Min(Time.deltaTime, 0.2f)
                 + movementWithinPlaySpace;
+            fakeGround.position = currentPosition;
             // TODO: Use different movement method (not teleportation) while not inside of a collider.
             // TODO: Force use different movement method even while in collider when menu is open, while standing still.
+            // TODO: figure out if there is anything that can be done to prevent this weird state of the
+            // player's avatar being suck constantly moving, where cancelling no clip clearly makes you move to the side.
             teleportManager.MoveAndRetainHeadRotation(localPlayer, currentPosition);
 
-            // Must set this every frame, otherwise even though it is not visible the player does constantly fall,
-            // which is ultimately noticeable by the dummy canvases around you in desktop while having the UI open flickering.
-            // If there is a collider kept under the player this might not be required.
-            localPlayer.SetVelocity(Vector3.zero);
+            // // Must set this every frame, otherwise even though it is not visible the player does constantly fall,
+            // // which is ultimately noticeable by the dummy canvases around you in desktop while having the UI open flickering.
+            // // If there is a collider kept under the player this might not be required.
+            // localPlayer.SetVelocity(Vector3.zero);
         }
 
         private Vector3 CalculateOffsetWithinPlaySpace(VRCPlayerApi.TrackingData origin, Vector3 headPosition)

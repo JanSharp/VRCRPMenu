@@ -140,9 +140,12 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [ ] maybe make it so that when holding jump, moving forward and back actually moves you up and down in no clip
 - [ ] or maybe treat holding jump in no clip like shift on desktop
 - [ ] maybe make the RPMenu prefab invisible in the scene by default
-- [ ] must increase the radius of the local player capsule, it appears bigger than what I have tested previously when it comes to what it collides with, which is likely different than ray casts hitting it. It's a very weird kind of collider, these capsule controllers
-- [ ] make voice range sphere even less obtrusive, maybe change the opacity based on the viewing angle... we don't have the normal never mind. Still make it less obtrusive
-- [ ] apparently putting the fake ground onto the local player collider actually does not make the player stand on it... even though in the project settings it shows that it should. Probably a discrepancy in the sdk and actual VRC. Will have to keep the collider always active and near the player to be able to check for collisions reliably
+- [x] must increase the radius of the local player capsule, it appears bigger than what I have tested previously when it comes to what it collides with, which is likely different than ray casts hitting it. It's a very weird kind of collider, these capsule controllers
+- [ ] make voice range sphere even less obtrusive, maybe change the opacity based on the viewing angle... we don't have the normal vector, never mind. Still make it less obtrusive
+- [x] apparently putting the fake ground onto the local player collider actually does not make the player stand on it... even though in the project settings it shows that it should. Probably a discrepancy in the sdk and actual VRC. Will have to keep the collider always active and near the player to be able to check for collisions reliably
+  - first of all, it says in the project settings that local player does not collide with itself, so that's just wrong
+  - however it is true that adding the local player layer to the included layers on the collider does not make the local player actually be able to stand on it
+  - but whatever, lastly that last statement of having to keep the collider active and near the player, no, that is stupid. The script now checks for nearby colliders, capped at 2, and it simply ignores the fake ground collider if it is in that list of up to 2 colliders
 - [ ] maybe add a question mark button at the right of the no clip row which gives a popup of info for how no clip works. Basically like the help page would, but right there rather than separated
 - [x] figure out if there is anything that can be done to prevent this weird state of the player's avatar being suck constantly moving, where cancelling no clip clearly makes you move to the side - not using teleports and just having the collider under the player while standing still and not colliding with anything is probably the best we can do for this
 - [ ] add options for different no clip movement modes. Both for testing and maybe some will be permanent options

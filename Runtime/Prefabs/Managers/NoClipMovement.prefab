@@ -56,13 +56,11 @@ MonoBehaviour:
     PrefabModifications: []
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 4547060162448170996}
-  noClipSettingsManager: {fileID: 0}
   teleportManager: {fileID: 0}
   updateManager: {fileID: 0}
-  associatedMenuManager: {fileID: 0}
   fakeGround: {fileID: 1173335684677030888}
   fakeGroundGo: {fileID: 8454379883770409611}
-  fakeGroundCollider: {fileID: 3232560179376379252}
+  fakeGroundCollider: {fileID: 8559315827360922988}
   localPlayerLayer:
     serializedVersion: 2
     m_Bits: 1024
@@ -100,8 +98,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1173335684677030888}
+  - component: {fileID: 8559315827360922988}
+  - component: {fileID: 5717760436992794807}
   m_Layer: 0
-  m_Name: KeepThePlayerGrounded
+  m_Name: FakeGround
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -119,50 +119,16 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 8276888400536956454}
+  m_Children: []
   m_Father: {fileID: 8135050694904804255}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &9119061287615758142
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 8276888400536956454}
-  - component: {fileID: 3232560179376379252}
-  - component: {fileID: 7337192669501106433}
-  m_Layer: 0
-  m_Name: FakeGround
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &8276888400536956454
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9119061287615758142}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.005, z: 0}
-  m_LocalScale: {x: 0.2, y: 0.01, z: 0.2}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1173335684677030888}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!65 &3232560179376379252
+--- !u!65 &8559315827360922988
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9119061287615758142}
+  m_GameObject: {fileID: 8454379883770409611}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -175,15 +141,15 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!54 &7337192669501106433
+  m_Size: {x: 0.3, y: 0.01, z: 0.3}
+  m_Center: {x: 0, y: -0.005, z: 0}
+--- !u!54 &5717760436992794807
 Rigidbody:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9119061287615758142}
+  m_GameObject: {fileID: 8454379883770409611}
   serializedVersion: 4
   m_Mass: 1
   m_Drag: 0

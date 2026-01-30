@@ -6,15 +6,18 @@ namespace JanSharp
     {
         /// <summary>
         /// <para>Unlike several other systems, this does get raised for imports.</para>
+        /// <para>Only raised if the value is actually different.</para>
         /// <para>Not game state safe.</para>
         /// </summary>
         OnLocalLatencyNoClipEnabledChanged,
         /// <summary>
         /// <para>Unlike several other systems, this does get raised for imports.</para>
+        /// <para>Only raised if the value is actually different.</para>
         /// <para>Not game state safe.</para>
         /// </summary>
         OnLocalLatencyNoClipSpeedChanged,
         /// <summary>
+        /// <para>Only raised if the value is actually different.</para>
         /// <para>Not game state safe.</para>
         /// </summary>
         OnIsNoClipActiveChanged,
@@ -42,9 +45,15 @@ namespace JanSharp
     public abstract class NoClipSettingsManagerAPI : UdonSharpBehaviour
     {
         public abstract bool InitialNoClipEnabled { get; }
+        /// <summary>
+        /// <para>Meters per second.</para>
+        /// </summary>
         public abstract float InitialNoClipSpeed { get; }
 
         public abstract bool LatencyNoClipEnabled { get; }
+        /// <summary>
+        /// <para>Meters per second.</para>
+        /// </summary>
         public abstract float LatencyNoClipSpeed { get; }
 
         public abstract bool IsNoClipActive { get; set; }

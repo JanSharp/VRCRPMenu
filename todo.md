@@ -151,3 +151,4 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
   - [ ] teleport - always use teleport
 - [ ] add option for how standing still in no clip should be handled. Velocity or fake ground
 - [x] rename no clip manager to no clip settings manager
+- [ ] the IsNoClipActive flag has nothing to do with settings. Remove it from the settings manager

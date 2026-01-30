@@ -16,6 +16,9 @@ namespace JanSharp
 
         #region GameState
         [System.NonSerialized] public bool noClipEnabled;
+        /// <summary>
+        /// <para>Meters per second.</para>
+        /// </summary>
         [System.NonSerialized] public float noClipSpeed;
         #endregion
 

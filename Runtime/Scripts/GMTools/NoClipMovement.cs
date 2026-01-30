@@ -8,11 +8,8 @@ namespace JanSharp.Internal
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class NoClipMovement : NoClipMovementAPI
     {
-        [HideInInspector][SerializeField][SingletonReference] private NoClipSettingsManagerAPI noClipSettingsManager;
         [HideInInspector][SerializeField][SingletonReference] private RPMenuTeleportManagerAPI teleportManager;
         [HideInInspector][SerializeField][SingletonReference] private UpdateManager updateManager;
-        // TODO: Remove this and add an API to toggle the same behavior this is used for currently.
-        [SerializeField][FindInParent] private MenuManagerAPI associatedMenuManager;
         /// <summary>
         /// <para>Used by <see cref="UpdateManager"/>.</para>
         /// </summary>
@@ -24,6 +21,27 @@ namespace JanSharp.Internal
         /// <para>Meters per second.</para>
         /// </summary>
         private float speed;
+        public override float Speed
+        {
+            get => speed;
+            set => speed = value;
+        }
+
+        private bool isNoClipActive;
+        public override bool IsNoClipActive
+        {
+            get => isNoClipActive;
+            set
+            {
+                if (isNoClipActive == value)
+                    return;
+                isNoClipActive = value;
+                UpdateRegistration();
+            }
+        }
+
+        private uint avoidTeleportingCounter = 0u;
+        private bool avoidTeleporting = false;
 
         [SerializeField] private Transform fakeGround;
         [SerializeField] private GameObject fakeGroundGo;
@@ -48,20 +66,28 @@ namespace JanSharp.Internal
         private const float SafetyRadiusAroundPlayer = 0.3f;
 
         private VRCPlayerApi localPlayer;
-        private bool hasMenuManager;
 
         private void Start()
         {
             localPlayer = Networking.LocalPlayer;
             localPlayerCollidingLayers = teleportManager.LocalPlayerCollidingLayers & ~localPlayerLayer;
-            hasMenuManager = associatedMenuManager != null;
         }
 
-        // TODO: replace this with an api too.
-        [NoClipSettingsEvent(NoClipSettingsEventType.OnIsNoClipActiveChanged)]
-        public void OnIsNoClipActiveChanged()
+        public override void IncrementAvoidTeleporting()
         {
-            UpdateRegistration();
+            avoidTeleportingCounter++;
+            avoidTeleporting = true;
+        }
+
+        public override void DecrementAvoidTeleporting()
+        {
+            if (avoidTeleportingCounter == 0u)
+            {
+                Debug.LogError($"[RPMenu] Attempt to {nameof(DecrementAvoidTeleporting)} more often than "
+                    + $"{nameof(IncrementAvoidTeleporting)} on the {nameof(NoClipMovement)} script.");
+                return;
+            }
+            avoidTeleporting = (--avoidTeleportingCounter) != 0u;
         }
 
         [RPMenuTeleportEvent(RPMenuTeleportEventType.OnLocalPlayerTeleported)]
@@ -77,28 +103,13 @@ namespace JanSharp.Internal
             currentPosition = localPlayer.GetPosition();
         }
 
-        [LockstepEvent(LockstepEventType.OnInit)]
-        public void OnInit() => UpdateSpeed();
-
-        [LockstepEvent(LockstepEventType.OnClientBeginCatchUp)]
-        public void OnClientBeginCatchUp() => UpdateSpeed();
-
-        [NoClipSettingsEvent(NoClipSettingsEventType.OnLocalLatencyNoClipSpeedChanged)]
-        public void OnLocalLatencyNoClipSpeedChanged() => UpdateSpeed();
-
-        // TODO: replace this with an api too.
-        private void UpdateSpeed()
-        {
-            speed = noClipSettingsManager.LatencyNoClipSpeed;
-        }
-
         private void UpdateRegistration()
         {
             // Setting Immobilize to true is a bad idea, especially noticeable when using pure velocity
             // without a collider to stand on, thus being in the falling animation, where your tracking data
             // head is entirely disconnected from the actual head. Moving your head to the side does not move
             // the avatar.
-            if (noClipSettingsManager.IsNoClipActive)
+            if (isNoClipActive)
             {
                 currentPosition = localPlayer.GetPosition();
                 fakeGround.position = currentPosition;
@@ -150,7 +161,7 @@ namespace JanSharp.Internal
 
             // Force not teleporting the player while the menu is open while standing still,
             // otherwise it jumps around like crazy and is un-interactable.
-            if (currentVelocity == Vector3.zero && (!isNearColliders || (hasMenuManager && associatedMenuManager.IsMenuOpen)))
+            if (currentVelocity == Vector3.zero && (!isNearColliders || avoidTeleporting))
             {
                 currentOffsetWithinPlaySpace = CalculateOffsetWithinPlaySpace(origin, head.position);
                 currentPosition = localPlayer.GetPosition();

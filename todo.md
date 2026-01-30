@@ -131,13 +131,23 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [x] disabled segmented slider must disable interactable on the buttons, or ignore the click event... that'd actually be easier
 - [ ] probably add lines between the buttons in the toolbar for the players list
 - [ ] Q E and Shift support for desktop no clip
-- [ ] maybe a little smooth in and tiny smooth out when staring and stopping moving in no clip in desktop
-- [ ] maybe keep a collider under the player while they are using no clip to have grounded be true, if possible
+- [ ] maybe a little smooth in and tiny smooth out when staring and stopping moving in no clip in desktop, or even in VR too
+  - [ ] add option to toggle input smoothing of no clip, for testing and maybe it'll become permanent
+- [x] maybe keep a collider under the player while they are using no clip to have grounded be true, if possible
 - [ ] make PR for sylan's no clip to also keep track of the position within the play space, it is so weird without it
-- [ ] test the play space offset tracking with full body, I guess
+- [x] test the play space offset tracking with full body, I guess - it works
 - [ ] test grounded with and without the collider under you
 - [ ] maybe make it so that when holding jump, moving forward and back actually moves you up and down in no clip
 - [ ] or maybe treat holding jump in no clip like shift on desktop
 - [ ] maybe make the RPMenu prefab invisible in the scene by default
 - [ ] must increase the radius of the local player capsule, it appears bigger than what I have tested previously when it comes to what it collides with, which is likely different than ray casts hitting it. It's a very weird kind of collider, these capsule controllers
 - [ ] make voice range sphere even less obtrusive, maybe change the opacity based on the viewing angle... we don't have the normal never mind. Still make it less obtrusive
+- [ ] apparently putting the fake ground onto the local player collider actually does not make the player stand on it... even though in the project settings it shows that it should. Probably a discrepancy in the sdk and actual VRC. Will have to keep the collider always active and near the player to be able to check for collisions reliably
+- [ ] maybe add a question mark button at the right of the no clip row which gives a popup of info for how no clip works. Basically like the help page would, but right there rather than separated
+- [x] figure out if there is anything that can be done to prevent this weird state of the player's avatar being suck constantly moving, where cancelling no clip clearly makes you move to the side - not using teleports and just having the collider under the player while standing still and not colliding with anything is probably the best we can do for this
+- [ ] add options for different no clip movement modes. Both for testing and maybe some will be permanent options
+  - [ ] velocity - collides, not actually no clip
+  - [ ] combo - velocity while not in colliders, otherwise teleport
+  - [ ] teleport - always use teleport
+- [ ] add option for how standing still in no clip should be handled. Velocity or fake ground
+- [ ] rename no clip manager to no clip settings manager

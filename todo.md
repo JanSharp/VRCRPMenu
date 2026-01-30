@@ -137,4 +137,7 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [ ] test the play space offset tracking with full body, I guess
 - [ ] test grounded with and without the collider under you
 - [ ] maybe make it so that when holding jump, moving forward and back actually moves you up and down in no clip
+- [ ] or maybe treat holding jump in no clip like shift on desktop
 - [ ] maybe make the RPMenu prefab invisible in the scene by default
+- [ ] must increase the radius of the local player capsule, it appears bigger than what I have tested previously when it comes to what it collides with, which is likely different than ray casts hitting it. It's a very weird kind of collider, these capsule controllers
+- [ ] make voice range sphere even less obtrusive, maybe change the opacity based on the viewing angle... we don't have the normal never mind. Still make it less obtrusive

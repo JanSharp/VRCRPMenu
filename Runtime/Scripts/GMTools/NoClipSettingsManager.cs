@@ -5,8 +5,8 @@ using VRC.SDK3.Data;
 namespace JanSharp.Internal
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-    [CustomRaisedEventsDispatcher(typeof(NoClipEventAttribute), typeof(NoClipEventType))]
-    public class NoClipManager : NoClipManagerAPI
+    [CustomRaisedEventsDispatcher(typeof(NoClipSettingsEventAttribute), typeof(NoClipSettingsEventType))]
+    public class NoClipSettingsManager : NoClipSettingsManagerAPI
     {
         [HideInInspector][SerializeField][SingletonReference] private LockstepAPI lockstep;
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
@@ -43,13 +43,13 @@ namespace JanSharp.Internal
         [PlayerDataEvent(PlayerDataEventType.OnRegisterCustomPlayerData)]
         public void OnRegisterCustomPlayerData()
         {
-            playerDataManager.RegisterCustomPlayerData<NoClipPlayerData>(nameof(NoClipPlayerData));
+            playerDataManager.RegisterCustomPlayerData<NoClipSettingsPlayerData>(nameof(NoClipSettingsPlayerData));
         }
 
         [PlayerDataEvent(PlayerDataEventType.OnAllCustomPlayerDataRegistered)]
         public void OnAllCustomPlayerDataRegistered()
         {
-            noClipPlayerDataIndex = playerDataManager.GetPlayerDataClassNameIndex<NoClipPlayerData>(nameof(NoClipPlayerData));
+            noClipPlayerDataIndex = playerDataManager.GetPlayerDataClassNameIndex<NoClipSettingsPlayerData>(nameof(NoClipSettingsPlayerData));
         }
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace JanSharp.Internal
         /// </summary>
         /// <param name="localData"></param>
         /// <param name="suppressEvents"></param>
-        public void ResetLatencyStateToGameState(NoClipPlayerData localData, bool suppressEvents)
+        public void ResetLatencyStateToGameState(NoClipSettingsPlayerData localData, bool suppressEvents)
         {
             latencyHiddenUniqueIds.Clear();
             if (suppressEvents)
@@ -77,7 +77,7 @@ namespace JanSharp.Internal
             }
         }
 
-        private bool ShouldApplyReceivedIAToLatencyState(NoClipPlayerData settings)
+        private bool ShouldApplyReceivedIAToLatencyState(NoClipSettingsPlayerData settings)
         {
             if (settings.core.isLocal)
                 return false;
@@ -92,9 +92,9 @@ namespace JanSharp.Internal
 
         #region InputActions
 
-        public override void SendSetNoClipEnabledIA(NoClipPlayerData data, bool noClipEnabled)
+        public override void SendSetNoClipEnabledIA(NoClipSettingsPlayerData data, bool noClipEnabled)
         {
-            WriteNoClipPlayerDataRef(data);
+            WriteNoClipSettingsPlayerDataRef(data);
             lockstep.WriteFlags(noClipEnabled);
             ulong uniqueId = lockstep.SendInputAction(setNoClipEnabledIAId);
             if (!data.core.isLocal)
@@ -107,7 +107,7 @@ namespace JanSharp.Internal
         [LockstepInputAction(nameof(setNoClipEnabledIAId))]
         public void OnSetNoClipEnabledIA()
         {
-            NoClipPlayerData data = ReadNoClipPlayerDataRef();
+            NoClipSettingsPlayerData data = ReadNoClipSettingsPlayerDataRef();
             lockstep.ReadFlags(out bool noClipEnabled);
             if (data == null)
                 return; // Can skip checking latencyHiddenUniqueIds, local settings are not going to be null.
@@ -127,9 +127,9 @@ namespace JanSharp.Internal
                 IsNoClipActive = false;
         }
 
-        public override void SendSetNoClipSpeedIA(NoClipPlayerData data, float noClipSpeed)
+        public override void SendSetNoClipSpeedIA(NoClipSettingsPlayerData data, float noClipSpeed)
         {
-            WriteNoClipPlayerDataRef(data);
+            WriteNoClipSettingsPlayerDataRef(data);
             lockstep.WriteFloat(noClipSpeed);
             ulong uniqueId = lockstep.SendInputAction(setNoClipSpeedIAId);
             if (!data.core.isLocal)
@@ -142,7 +142,7 @@ namespace JanSharp.Internal
         [LockstepInputAction(nameof(setNoClipSpeedIAId))]
         public void OnSetNoClipSpeedIA()
         {
-            NoClipPlayerData data = ReadNoClipPlayerDataRef();
+            NoClipSettingsPlayerData data = ReadNoClipSettingsPlayerDataRef();
             float noClipSpeed = lockstep.ReadFloat();
             if (data == null)
                 return; // Can skip checking latencyHiddenUniqueIds, local settings are not going to be null.
@@ -164,21 +164,21 @@ namespace JanSharp.Internal
 
         #region Utilities
 
-        public override NoClipPlayerData LocalNoClipPlayerData => (NoClipPlayerData)playerDataManager.LocalPlayerData.customPlayerData[noClipPlayerDataIndex];
+        public override NoClipSettingsPlayerData LocalNoClipSettingsPlayerData => (NoClipSettingsPlayerData)playerDataManager.LocalPlayerData.customPlayerData[noClipPlayerDataIndex];
 
-        public override NoClipPlayerData SendingNoClipPlayerData => (NoClipPlayerData)playerDataManager.SendingPlayerData.customPlayerData[noClipPlayerDataIndex];
+        public override NoClipSettingsPlayerData SendingNoClipSettingsPlayerData => (NoClipSettingsPlayerData)playerDataManager.SendingPlayerData.customPlayerData[noClipPlayerDataIndex];
 
-        public override NoClipPlayerData GetNoClipPlayerData(CorePlayerData core) => (NoClipPlayerData)core.customPlayerData[noClipPlayerDataIndex];
+        public override NoClipSettingsPlayerData GetNoClipSettingsPlayerData(CorePlayerData core) => (NoClipSettingsPlayerData)core.customPlayerData[noClipPlayerDataIndex];
 
-        public override void WriteNoClipPlayerDataRef(NoClipPlayerData data)
+        public override void WriteNoClipSettingsPlayerDataRef(NoClipSettingsPlayerData data)
         {
             playerDataManager.WriteCorePlayerDataRef(data == null ? null : data.core);
         }
 
-        public override NoClipPlayerData ReadNoClipPlayerDataRef()
+        public override NoClipSettingsPlayerData ReadNoClipSettingsPlayerDataRef()
         {
             CorePlayerData core = playerDataManager.ReadCorePlayerDataRef();
-            return core == null ? null : (NoClipPlayerData)core.customPlayerData[noClipPlayerDataIndex];
+            return core == null ? null : (NoClipSettingsPlayerData)core.customPlayerData[noClipPlayerDataIndex];
         }
 
         #endregion
@@ -192,19 +192,19 @@ namespace JanSharp.Internal
         private void RaiseOnLocalLatencyNoClipEnabledChanged()
         {
             // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
-            JanSharp.CustomRaisedEvents.Raise(ref onLocalLatencyNoClipEnabledChangedListeners, nameof(NoClipEventType.OnLocalLatencyNoClipEnabledChanged));
+            JanSharp.CustomRaisedEvents.Raise(ref onLocalLatencyNoClipEnabledChangedListeners, nameof(NoClipSettingsEventType.OnLocalLatencyNoClipEnabledChanged));
         }
 
         private void RaiseOnLocalLatencyNoClipSpeedChanged()
         {
             // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
-            JanSharp.CustomRaisedEvents.Raise(ref onLocalLatencyNoClipSpeedChangedListeners, nameof(NoClipEventType.OnLocalLatencyNoClipSpeedChanged));
+            JanSharp.CustomRaisedEvents.Raise(ref onLocalLatencyNoClipSpeedChangedListeners, nameof(NoClipSettingsEventType.OnLocalLatencyNoClipSpeedChanged));
         }
 
         private void RaiseOnIsNoClipActiveChanged()
         {
             // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
-            JanSharp.CustomRaisedEvents.Raise(ref onIsNoClipActiveChangedListeners, nameof(NoClipEventType.OnIsNoClipActiveChanged));
+            JanSharp.CustomRaisedEvents.Raise(ref onIsNoClipActiveChangedListeners, nameof(NoClipSettingsEventType.OnIsNoClipActiveChanged));
         }
 
         #endregion

@@ -6852,7 +6852,7 @@ GameObject:
   - component: {fileID: 463884588}
   - component: {fileID: 463884587}
   m_Layer: 0
-  m_Name: NoClipPlayerData
+  m_Name: NoClipSettingsPlayerData
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6907,7 +6907,7 @@ MonoBehaviour:
   _udonSharpBackingUdonBehaviour: {fileID: 463884587}
   wannaBeClasses: {fileID: 481679906}
   lockstep: {fileID: 988687136}
-  noClipManager: {fileID: 990892420}
+  noClipSettingsManager: {fileID: 990892420}
 --- !u!4 &463884589
 Transform:
   m_ObjectHideFlags: 0
@@ -12803,7 +12803,7 @@ PrefabInstance:
     - target: {fileID: 851919131184770022, guid: 4fde516c38225afdf98eec7b044ed853,
         type: 3}
       propertyPath: wannaBeClassNames.Array.data[19]
-      value: NoClipPlayerData
+      value: NoClipSettingsPlayerData
       objectReference: {fileID: 0}
     - target: {fileID: 851919131184770022, guid: 4fde516c38225afdf98eec7b044ed853,
         type: 3}
@@ -13831,12 +13831,12 @@ PrefabInstance:
         type: 3}
       propertyPath: singletonInsts.Array.data[3]
       value: 
-      objectReference: {fileID: 990892420}
+      objectReference: {fileID: 878378327}
     - target: {fileID: 7739410691962261305, guid: ca749500abc5a4d4681a60a4ecadde80,
         type: 3}
       propertyPath: singletonInsts.Array.data[4]
       value: 
-      objectReference: {fileID: 878378327}
+      objectReference: {fileID: 990892420}
     - target: {fileID: 7739410691962261305, guid: ca749500abc5a4d4681a60a4ecadde80,
         type: 3}
       propertyPath: singletonInsts.Array.data[5]
@@ -13960,12 +13960,12 @@ PrefabInstance:
     - target: {fileID: 7739410691962261305, guid: ca749500abc5a4d4681a60a4ecadde80,
         type: 3}
       propertyPath: singletonClassNames.Array.data[3]
-      value: NoClipManagerAPI
+      value: NoClipMovementAPI
       objectReference: {fileID: 0}
     - target: {fileID: 7739410691962261305, guid: ca749500abc5a4d4681a60a4ecadde80,
         type: 3}
       propertyPath: singletonClassNames.Array.data[4]
-      value: NoClipMovementAPI
+      value: NoClipSettingsManagerAPI
       objectReference: {fileID: 0}
     - target: {fileID: 7739410691962261305, guid: ca749500abc5a4d4681a60a4ecadde80,
         type: 3}
@@ -17690,7 +17690,7 @@ PrefabInstance:
     - target: {fileID: 5627774114830678742, guid: 21117a51120db00258006c8192882928,
         type: 3}
       propertyPath: m_Name
-      value: NoClipManager
+      value: NoClipSettingsManager
       objectReference: {fileID: 0}
     - target: {fileID: 5942847259297023965, guid: 21117a51120db00258006c8192882928,
         type: 3}
@@ -25223,7 +25223,7 @@ PrefabInstance:
     - target: {fileID: 733954666466056520, guid: 28a5e083347ce2753aa92dfda01bef32,
         type: 3}
       propertyPath: internalNameByClassNameKeys.Array.data[1]
-      value: NoClipPlayerData
+      value: NoClipSettingsPlayerData
       objectReference: {fileID: 0}
     - target: {fileID: 733954666466056520, guid: 28a5e083347ce2753aa92dfda01bef32,
         type: 3}
@@ -25328,7 +25328,7 @@ PrefabInstance:
     - target: {fileID: 733954666466056520, guid: 28a5e083347ce2753aa92dfda01bef32,
         type: 3}
       propertyPath: internalNameByClassNameValues.Array.data[1]
-      value: jansharp.rp-menu-no-clip
+      value: jansharp.rp-menu-no-clip-settings
       objectReference: {fileID: 0}
     - target: {fileID: 733954666466056520, guid: 28a5e083347ce2753aa92dfda01bef32,
         type: 3}
@@ -50379,6 +50379,11 @@ PrefabInstance:
       objectReference: {fileID: 990892420}
     - target: {fileID: 2008872639877841138, guid: c1a26f964e70d51e3a4af28632b3910f,
         type: 3}
+      propertyPath: noClipSettingsManager
+      value: 
+      objectReference: {fileID: 990892420}
+    - target: {fileID: 2008872639877841138, guid: c1a26f964e70d51e3a4af28632b3910f,
+        type: 3}
       propertyPath: serializationData.Prefab
       value: 
       objectReference: {fileID: 2008872639877841138, guid: c1a26f964e70d51e3a4af28632b3910f,
@@ -51615,6 +51620,11 @@ PrefabInstance:
       propertyPath: associatedMenuManager
       value: 
       objectReference: {fileID: 1838584613}
+    - target: {fileID: 4175769522923212554, guid: c1a26f964e70d51e3a4af28632b3910f,
+        type: 3}
+      propertyPath: noClipSettingsManager
+      value: 
+      objectReference: {fileID: 990892420}
     - target: {fileID: 4175769522923212554, guid: c1a26f964e70d51e3a4af28632b3910f,
         type: 3}
       propertyPath: serializationData.Prefab
@@ -53503,6 +53513,11 @@ PrefabInstance:
     - target: {fileID: 7577611804977437943, guid: c1a26f964e70d51e3a4af28632b3910f,
         type: 3}
       propertyPath: noClipManager
+      value: 
+      objectReference: {fileID: 990892420}
+    - target: {fileID: 7577611804977437943, guid: c1a26f964e70d51e3a4af28632b3910f,
+        type: 3}
+      propertyPath: noClipSettingsManager
       value: 
       objectReference: {fileID: 990892420}
     - target: {fileID: 7577611804977437943, guid: c1a26f964e70d51e3a4af28632b3910f,

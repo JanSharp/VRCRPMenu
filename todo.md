@@ -150,4 +150,4 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
   - [ ] combo - velocity while not in colliders, otherwise teleport
   - [ ] teleport - always use teleport
 - [ ] add option for how standing still in no clip should be handled. Velocity or fake ground
-- [ ] rename no clip manager to no clip settings manager
+- [x] rename no clip manager to no clip settings manager

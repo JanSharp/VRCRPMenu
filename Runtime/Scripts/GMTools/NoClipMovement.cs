@@ -8,7 +8,7 @@ namespace JanSharp.Internal
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class NoClipMovement : NoClipMovementAPI
     {
-        [HideInInspector][SerializeField][SingletonReference] private NoClipManagerAPI noClipManager;
+        [HideInInspector][SerializeField][SingletonReference] private NoClipSettingsManagerAPI noClipSettingsManager;
         [HideInInspector][SerializeField][SingletonReference] private RPMenuTeleportManagerAPI teleportManager;
         [HideInInspector][SerializeField][SingletonReference] private UpdateManager updateManager;
         // TODO: Remove this and add an API to toggle the same behavior this is used for currently.
@@ -58,7 +58,7 @@ namespace JanSharp.Internal
         }
 
         // TODO: replace this with an api too.
-        [NoClipEvent(NoClipEventType.OnIsNoClipActiveChanged)]
+        [NoClipSettingsEvent(NoClipSettingsEventType.OnIsNoClipActiveChanged)]
         public void OnIsNoClipActiveChanged()
         {
             UpdateRegistration();
@@ -83,12 +83,13 @@ namespace JanSharp.Internal
         [LockstepEvent(LockstepEventType.OnClientBeginCatchUp)]
         public void OnClientBeginCatchUp() => UpdateSpeed();
 
-        [NoClipEvent(NoClipEventType.OnLocalLatencyNoClipSpeedChanged)]
+        [NoClipSettingsEvent(NoClipSettingsEventType.OnLocalLatencyNoClipSpeedChanged)]
         public void OnLocalLatencyNoClipSpeedChanged() => UpdateSpeed();
 
+        // TODO: replace this with an api too.
         private void UpdateSpeed()
         {
-            speed = noClipManager.LatencyNoClipSpeed;
+            speed = noClipSettingsManager.LatencyNoClipSpeed;
         }
 
         private void UpdateRegistration()
@@ -97,7 +98,7 @@ namespace JanSharp.Internal
             // without a collider to stand on, thus being in the falling animation, where your tracking data
             // head is entirely disconnected from the actual head. Moving your head to the side does not move
             // the avatar.
-            if (noClipManager.IsNoClipActive)
+            if (noClipSettingsManager.IsNoClipActive)
             {
                 currentPosition = localPlayer.GetPosition();
                 fakeGround.position = currentPosition;

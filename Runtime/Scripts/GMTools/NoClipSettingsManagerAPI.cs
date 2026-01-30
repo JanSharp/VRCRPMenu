@@ -2,7 +2,7 @@ using UdonSharp;
 
 namespace JanSharp
 {
-    public enum NoClipEventType
+    public enum NoClipSettingsEventType
     {
         /// <summary>
         /// <para>Unlike several other systems, this does get raised for imports.</para>
@@ -21,7 +21,7 @@ namespace JanSharp
     }
 
     [System.AttributeUsage(System.AttributeTargets.Method, Inherited = true, AllowMultiple = false)]
-    public sealed class NoClipEventAttribute : CustomRaisedEventBaseAttribute
+    public sealed class NoClipSettingsEventAttribute : CustomRaisedEventBaseAttribute
     {
         /// <summary>
         /// <para>The method this attribute gets applied to must be public.</para>
@@ -33,13 +33,13 @@ namespace JanSharp
         /// <para>Disabled scripts still receive events.</para>
         /// </summary>
         /// <param name="eventType">The event to register this function as a listener to.</param>
-        public NoClipEventAttribute(NoClipEventType eventType)
+        public NoClipSettingsEventAttribute(NoClipSettingsEventType eventType)
             : base((int)eventType)
         { }
     }
 
     [SingletonScript("21117a51120db00258006c8192882928")] // Runtime/Prefabs/Managers/NoClipManager.prefab
-    public abstract class NoClipManagerAPI : UdonSharpBehaviour
+    public abstract class NoClipSettingsManagerAPI : UdonSharpBehaviour
     {
         public abstract bool InitialNoClipEnabled { get; }
         public abstract float InitialNoClipSpeed { get; }
@@ -49,13 +49,13 @@ namespace JanSharp
 
         public abstract bool IsNoClipActive { get; set; }
 
-        public abstract void SendSetNoClipEnabledIA(NoClipPlayerData data, bool noClipEnabled);
-        public abstract void SendSetNoClipSpeedIA(NoClipPlayerData data, float noClipSpeed);
+        public abstract void SendSetNoClipEnabledIA(NoClipSettingsPlayerData data, bool noClipEnabled);
+        public abstract void SendSetNoClipSpeedIA(NoClipSettingsPlayerData data, float noClipSpeed);
 
-        public abstract NoClipPlayerData LocalNoClipPlayerData { get; }
-        public abstract NoClipPlayerData SendingNoClipPlayerData { get; }
-        public abstract NoClipPlayerData GetNoClipPlayerData(CorePlayerData core);
-        public abstract void WriteNoClipPlayerDataRef(NoClipPlayerData data);
-        public abstract NoClipPlayerData ReadNoClipPlayerDataRef();
+        public abstract NoClipSettingsPlayerData LocalNoClipSettingsPlayerData { get; }
+        public abstract NoClipSettingsPlayerData SendingNoClipSettingsPlayerData { get; }
+        public abstract NoClipSettingsPlayerData GetNoClipSettingsPlayerData(CorePlayerData core);
+        public abstract void WriteNoClipSettingsPlayerDataRef(NoClipSettingsPlayerData data);
+        public abstract NoClipSettingsPlayerData ReadNoClipSettingsPlayerDataRef();
     }
 }

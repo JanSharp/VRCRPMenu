@@ -7,7 +7,7 @@ namespace JanSharp
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class NoClipSettings : UdonSharpBehaviour
     {
-        [HideInInspector][SerializeField][SingletonReference] private NoClipManagerAPI noClipManager;
+        [HideInInspector][SerializeField][SingletonReference] private NoClipSettingsManagerAPI noClipSettingsManager;
 
         public Toggle enabledToggle;
         public Toggle linkedEnabledToggle;
@@ -19,13 +19,13 @@ namespace JanSharp
         {
             bool isOn = enabledToggle.isOn;
             linkedEnabledToggle.SetIsOnWithoutNotify(isOn); // Technically redundant, but keeping it for clarity.
-            noClipManager.SendSetNoClipEnabledIA(noClipManager.LocalNoClipPlayerData, isOn);
+            noClipSettingsManager.SendSetNoClipEnabledIA(noClipSettingsManager.LocalNoClipSettingsPlayerData, isOn);
         }
 
         public void OnSpeedSliderValueChanged()
         {
             float speed = speedValues[speedSlider.Value];
-            noClipManager.SendSetNoClipSpeedIA(noClipManager.LocalNoClipPlayerData, speed);
+            noClipSettingsManager.SendSetNoClipSpeedIA(noClipSettingsManager.LocalNoClipSettingsPlayerData, speed);
         }
 
         private void MakeSettingsMatchLatencyState()
@@ -36,8 +36,8 @@ namespace JanSharp
 
         private void MakeEnabledToggleMatchLatencyState()
         {
-            enabledToggle.SetIsOnWithoutNotify(noClipManager.LatencyNoClipEnabled);
-            linkedEnabledToggle.SetIsOnWithoutNotify(noClipManager.LatencyNoClipEnabled);
+            enabledToggle.SetIsOnWithoutNotify(noClipSettingsManager.LatencyNoClipEnabled);
+            linkedEnabledToggle.SetIsOnWithoutNotify(noClipSettingsManager.LatencyNoClipEnabled);
         }
 
         private void MakeSpeedSliderMatchLatencyState()
@@ -45,7 +45,7 @@ namespace JanSharp
             int valuesCount = speedValues.Length;
             if (speedSlider == null || valuesCount == 0)
                 return;
-            float speed = noClipManager.LatencyNoClipSpeed;
+            float speed = noClipSettingsManager.LatencyNoClipSpeed;
             float smallestDifference = float.PositiveInfinity;
             int closestSpeedIndex = -1;
             for (int i = 0; i < valuesCount; i++)
@@ -65,10 +65,10 @@ namespace JanSharp
         [LockstepEvent(LockstepEventType.OnClientBeginCatchUp)]
         public void OnClientBeginCatchUp() => MakeSettingsMatchLatencyState();
 
-        [NoClipEvent(NoClipEventType.OnLocalLatencyNoClipEnabledChanged)]
+        [NoClipSettingsEvent(NoClipSettingsEventType.OnLocalLatencyNoClipEnabledChanged)]
         public void OnLocalLatencyNoClipEnabledChanged() => MakeEnabledToggleMatchLatencyState();
 
-        [NoClipEvent(NoClipEventType.OnLocalLatencyNoClipSpeedChanged)]
+        [NoClipSettingsEvent(NoClipSettingsEventType.OnLocalLatencyNoClipSpeedChanged)]
         public void OnLocalLatencyNoClipSpeedChanged() => MakeSpeedSliderMatchLatencyState();
     }
 }

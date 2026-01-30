@@ -7,7 +7,7 @@ namespace JanSharp
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class NoClipActivation : UdonSharpBehaviour
     {
-        [HideInInspector][SerializeField][SingletonReference] private NoClipManagerAPI noClipManager;
+        [HideInInspector][SerializeField][SingletonReference] private NoClipSettingsManagerAPI noClipSettingsManager;
 
         private const float DoubleClickInterval = 0.4f;
 
@@ -30,12 +30,12 @@ namespace JanSharp
 
         private void DidDoubleJump()
         {
-            noClipManager.IsNoClipActive = !noClipManager.IsNoClipActive;
+            noClipSettingsManager.IsNoClipActive = !noClipSettingsManager.IsNoClipActive;
         }
 
         private void UpdateNoClipEnabled()
         {
-            noClipEnabled = noClipManager.LatencyNoClipEnabled;
+            noClipEnabled = noClipSettingsManager.LatencyNoClipEnabled;
             if (!noClipEnabled)
                 lastJumpInputTime = -1f; // For extra cleanliness.
         }
@@ -46,7 +46,7 @@ namespace JanSharp
         [LockstepEvent(LockstepEventType.OnClientBeginCatchUp)]
         public void OnClientBeginCatchUp() => UpdateNoClipEnabled();
 
-        [NoClipEvent(NoClipEventType.OnLocalLatencyNoClipEnabledChanged)]
+        [NoClipSettingsEvent(NoClipSettingsEventType.OnLocalLatencyNoClipEnabledChanged)]
         public void OnLocalLatencyNoClipEnabledChanged() => UpdateNoClipEnabled();
     }
 }

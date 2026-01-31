@@ -114,6 +114,8 @@ namespace JanSharp.Internal
                 currentPosition = localPlayer.GetPosition();
                 fakeGround.position = currentPosition;
                 fakeGroundGo.SetActive(true);
+                wasMoving = false;
+                currentY = currentPosition.y;
                 var origin = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Origin);
                 var head = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
                 currentOffsetWithinPlaySpace = CalculateOffsetWithinPlaySpace(origin, head.position);
@@ -189,7 +191,7 @@ namespace JanSharp.Internal
                 currentPosition += currentVelocity * Mathf.Min(deltaTime, MaxAcknowledgedTimeBetweenFrames) + movementWithinPlaySpace;
                 fakeGround.position = currentPosition;
                 teleportManager.MoveAndRetainHeadRotation(currentPosition);
-                if (localPlayer.GetVelocity() != Vector3.zero)
+                if (localPlayer.GetVelocity() != Vector3.zero) // TODO: Test this and check for this log message.
                     Debug.Log("[RPMenuDebug] NoClipMovement  CustomUpdate (inner) - non zero velocity after teleport moving");
             }
             else

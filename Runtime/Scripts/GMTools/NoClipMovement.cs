@@ -46,12 +46,14 @@ namespace JanSharp.Internal
         [SerializeField] private Transform fakeGround;
         [SerializeField] private GameObject fakeGroundGo;
         [SerializeField] private Collider fakeGroundCollider;
+        [SerializeField] private float moveFakeGroundEveryDistance;
         [SerializeField] private LayerMask localPlayerLayer;
         private LayerMask localPlayerCollidingLayers;
         private Vector3 currentPosition;
         private Vector3 currentOffsetWithinPlaySpace;
         private bool wasMoving;
         private float currentY;
+        private Vector3 currentFakeGroundPosition;
         private Collider[] overlappingColliders = new Collider[2];
         private Vector3 currentVelocity;
 
@@ -109,25 +111,25 @@ namespace JanSharp.Internal
             // without a collider to stand on, thus being in the falling animation, where your tracking data
             // head is entirely disconnected from the actual head. Moving your head to the side does not move
             // the avatar.
+            // Not touching gravity scale in order to not conflict with external systems.
             if (isNoClipActive)
             {
                 currentPosition = localPlayer.GetPosition();
-                fakeGround.position = currentPosition;
-                fakeGroundGo.SetActive(true);
                 wasMoving = false;
                 currentY = currentPosition.y;
+                currentFakeGroundPosition = currentPosition;
+                fakeGround.position = currentFakeGroundPosition;
+                fakeGroundGo.SetActive(true);
                 var origin = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Origin);
                 var head = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
                 currentOffsetWithinPlaySpace = CalculateOffsetWithinPlaySpace(origin, head.position);
                 currentVelocity = localPlayer.GetVelocity(); // In case it registers and deregisters within the same frame.
-                localPlayer.SetGravityStrength(0f); // TODO: Abstract this away into some manager.
                 averageDeltaTime = Time.deltaTime;
                 updateManager.Register(this);
             }
             else
             {
                 fakeGroundGo.SetActive(false);
-                localPlayer.SetGravityStrength(1f);
                 localPlayer.SetVelocity(currentVelocity);
                 updateManager.Deregister(this);
             }
@@ -149,10 +151,21 @@ namespace JanSharp.Internal
             verticalInput = value;
         }
 
+        public override void InputJump(bool value, UdonInputEventArgs args)
+        {
+            if (!isNoClipActive || !value)
+                return;
+            // Preferring this to cancel jumping rather than setting jump impulse to 0 in order to not
+            // conflict with any external systems which take control of the player's jump impulse,
+            // avoiding forcing said systems to interact with the manager the RP menu would be using.
+            Vector3 velocity = localPlayer.GetVelocity();
+            velocity.y = 0f;
+            localPlayer.SetVelocity(velocity);
+        }
+
         public void CustomUpdate()
         {
-            float deltaTime = Time.deltaTime;
-            averageDeltaTime = averageDeltaTime * AverageDeltaTimePrevFraction + deltaTime * AverageDeltaTimeNewFraction;
+            averageDeltaTime = averageDeltaTime * AverageDeltaTimePrevFraction + Time.deltaTime * AverageDeltaTimeNewFraction;
 
             var origin = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Origin);
             var head = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
@@ -164,35 +177,61 @@ namespace JanSharp.Internal
             // Force not teleporting the player while the menu is open while standing still,
             // otherwise it jumps around like crazy and is un-interactable.
             if (currentVelocity == Vector3.zero && (!isNearColliders || avoidTeleporting))
+                UpdateWhileStandingStill(origin, head);
+            else
             {
-                currentOffsetWithinPlaySpace = CalculateOffsetWithinPlaySpace(origin, head.position);
-                currentPosition = localPlayer.GetPosition();
-                if (wasMoving)
-                {
-                    fakeGroundGo.SetActive(true);
-                    wasMoving = false;
-                    currentY = currentPosition.y;
-                }
-                else
-                    currentPosition.y = currentY;
-                fakeGround.position = currentPosition;
-                // TODO: does setting velocity to zero every frame even while standing on the ground have any side effects?
-                localPlayer.SetVelocity(Vector3.zero); // Cancel jumping.
-                return;
+                wasMoving = true;
+                UpdateWhileMoving(origin, head, isNearColliders);
             }
-            wasMoving = true;
+        }
 
+        private void UpdateWhileStandingStill(VRCPlayerApi.TrackingData origin, VRCPlayerApi.TrackingData head)
+        {
+            currentOffsetWithinPlaySpace = CalculateOffsetWithinPlaySpace(origin, head.position);
+            currentPosition = localPlayer.GetPosition();
+            if (wasMoving)
+            {
+                fakeGroundGo.SetActive(true);
+                wasMoving = false;
+                currentY = currentPosition.y;
+                currentFakeGroundPosition = currentPosition;
+                fakeGround.position = currentFakeGroundPosition;
+                localPlayer.SetVelocity(Vector3.zero);
+            }
+            else
+            {
+                currentPosition.y = currentY;
+                if (Vector3.Distance(currentPosition, currentFakeGroundPosition) >= moveFakeGroundEveryDistance)
+                {
+                    // Moving the fake ground every frame causes the IK to flicker a ton while in full body.
+                    // Only moving it when the player has moved a notable distance still causes a one frame
+                    // flicker however it is so un noticeable that people are incredibly unlike to even
+                    // realize it.
+                    // The alternative would be having 4 fake ground colliders and shuffling them around such
+                    // that the collider the player is standing on never gets moved.
+                    currentFakeGroundPosition = currentPosition;
+                    fakeGround.position = currentFakeGroundPosition;
+                }
+            }
+            // Setting velocity to 0 every frame even while standing on ground does have negative side
+            // effects, such as once you jump, getting you slightly off the ground, you never land.
+            // Setting it to a negative y value every frame puts you into the falling animation.
+            // So just leaving it untouched, and cancelling jumping using InputJump.
+        }
+
+        private void UpdateWhileMoving(VRCPlayerApi.TrackingData origin, VRCPlayerApi.TrackingData head, bool isNearColliders)
+        {
             if (isNearColliders)
             {
                 fakeGroundGo.SetActive(true);
                 Vector3 offsetWithinPlaySpace = CalculateOffsetWithinPlaySpace(origin, head.position);
                 Vector3 movementWithinPlaySpace = origin.rotation * (offsetWithinPlaySpace - currentOffsetWithinPlaySpace);
                 currentOffsetWithinPlaySpace = offsetWithinPlaySpace;
-                currentPosition += currentVelocity * Mathf.Min(deltaTime, MaxAcknowledgedTimeBetweenFrames) + movementWithinPlaySpace;
+                currentPosition += currentVelocity * Mathf.Min(Time.deltaTime, MaxAcknowledgedTimeBetweenFrames) + movementWithinPlaySpace;
                 fakeGround.position = currentPosition;
                 teleportManager.MoveAndRetainHeadRotation(currentPosition);
-                if (localPlayer.GetVelocity() != Vector3.zero) // TODO: Test this and check for this log message.
-                    Debug.Log("[RPMenuDebug] NoClipMovement  CustomUpdate (inner) - non zero velocity after teleport moving");
+                // if (localPlayer.GetVelocity() != Vector3.zero) // TODO: Test this and check for this log message. - I did, it does get printed, but what does that mean now?
+                //     Debug.Log("[RPMenuDebug] NoClipMovement  CustomUpdate (inner) - non zero velocity after teleport moving");
             }
             else
             {

@@ -65,6 +65,7 @@
 - [x] change GMRequestsHUD to use Time.deltaTime instead
 - [x] make default visualization type for hud and in world defined through inspector
 - [ ] maybe some kind of flash or indicator on the hud for when a new GM request came in. Or like a plus sign that pops up from the hud and moves upwards before fading away
+- [ ] close the menu when hitting the request GM button
 - [x] show mask settings toggle group sets flags for any definitions that do not have a toggle to off rather than using the appropriate default value
 - [x] tweak voice range shader properties or shader itself, likely to make it less obtrusive
 - [x] getting shader compile error on publish:
@@ -155,3 +156,10 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [ ] add option for how standing still in no clip should be handled. Velocity or fake ground
 - [x] rename no clip manager to no clip settings manager
 - [ ] the IsNoClipActive flag has nothing to do with settings. Remove it from the settings manager
+- [ ] design GM proxy 3d models
+- [ ] decide on GM proxy colors and do styling for the buttons
+- [ ] make sure to make it easy for users of the package to change the proxy items
+- [ ] automatically add the gm proxy entity prototype definition into the scene
+- [x] add separate permission to view who spawned a gm proxy
+- [ ] players with the "view gm proxy spawned by" permission should be allowed to steal gm proxies from other players, not because of stealing specifically but in order to be able to get the interaction text to show up which shows who created the entity. Either that or there needs to be another way to view who created the proxy. Another way would honestly be cleaner than abusing the stealing logic (said stealing logic doesn't even exist yet in the custom pickups and interacts for the record)
+- [ ] add a clear button (just an X) on the right of the input field for gm proxies

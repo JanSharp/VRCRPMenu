@@ -158,9 +158,11 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [x] rename no clip manager to no clip settings manager
 - [ ] the IsNoClipActive flag has nothing to do with settings. Remove it from the settings manager
 - [ ] design GM proxy 3d models
-- [ ] decide on GM proxy colors and do styling for the buttons
+- [x] do styling for the GM proxy spawn buttons
+- [ ] decide on GM proxy colors
 - [ ] make sure to make it easy for users of the package to change the proxy items
 - [ ] automatically add the gm proxy entity prototype definition into the scene
 - [x] add separate permission to view who spawned a gm proxy
 - [ ] players with the "view gm proxy spawned by" permission should be allowed to steal gm proxies from other players, not because of stealing specifically but in order to be able to get the interaction text to show up which shows who created the entity. Either that or there needs to be another way to view who created the proxy. Another way would honestly be cleaner than abusing the stealing logic (said stealing logic doesn't even exist yet in the custom pickups and interacts for the record)
 - [x] add a clear button (just an X) on the right of the input field for gm proxies
+- [ ] when using teleport for movement in no clip, not setting velocity means it ends up having velocity which makes the player's animator perform associated animations

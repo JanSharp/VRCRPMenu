@@ -1,5 +1,6 @@
 ﻿using UdonSharp;
 using UnityEngine;
+using VRC.SDK3.Data;
 using VRC.SDKBase;
 
 namespace JanSharp.Internal
@@ -13,11 +14,10 @@ namespace JanSharp.Internal
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
         [HideInInspector][SerializeField][SingletonReference] private PlayersBackendManagerAPI playersBackendManager;
 
-        [SerializeField] private string gmProxyEntityPrototypeName;
-
-        private VRCPlayerApi localPlayer;
-
         #region GameState
+        [SerializeField] private GMProxyDefinition[] gmProxyDefs;
+        private int gmProxyDefsCount;
+        private DataDictionary gmProxiesByInternalName = new DataDictionary();
         /// <summary>
         /// <para>While this is part of the game state, the order is non deterministic. Be very careful with
         /// how this is used to affect the game state.</para>
@@ -39,8 +39,32 @@ namespace JanSharp.Internal
 
         private void Start()
         {
-            localPlayer = Networking.LocalPlayer;
+            gmProxyDefsCount = gmProxyDefs.Length;
+            for (int i = 0; i < gmProxyDefsCount; i++)
+            {
+                GMProxyDefinition def = gmProxyDefs[i];
+                if (def == null)
+                {
+                    Debug.LogError($"[RPMenu] The GM Proxy Definitions array must not contains any nulls, "
+                        + $"got null at index {i}.", this);
+                    return;
+                }
+                if (gmProxiesByInternalName.ContainsKey(def.internalName))
+                {
+                    Debug.LogError($"[RPMenu] There are multiple GM Proxy Definitions trying to use the "
+                        + $"same internal name '{def.internalName}'.", this);
+                    return;
+                }
+                if (!entitySystem.TryGetEntityPrototype(def.entityPrototypeName, out var discard))
+                {
+                    Debug.LogError($"[RPMenu] The GM Proxy Definition with the internal name '{def.internalName}' "
+                        + $"is referencing a non existent entity prototype '{def.entityPrototypeName}'.", def);
+                }
+                gmProxiesByInternalName.Add(def.internalName, def);
+            }
         }
+
+        public override GMProxyDefinition GetGMProxyDefinition(string internalName) => (GMProxyDefinition)gmProxiesByInternalName[internalName].Reference;
 
         /// <summary>
         /// <para>Internal API.</para>
@@ -114,11 +138,11 @@ namespace JanSharp.Internal
             }
         }
 
-        public override void CreateGMProxy(Vector3 position, Quaternion rotation, float scale, string displayName)
+        public override void CreateGMProxy(string gmProxyDefinition, Vector3 position, Quaternion rotation, float scale, string displayName)
         {
             if (!lockstep.IsInitialized || !spawnGMProxyPDef.valueForLocalPlayer)
                 return;
-            if (!entitySystem.TryGetEntityPrototype(gmProxyEntityPrototypeName, out EntityPrototype prototype))
+            if (!entitySystem.TryGetEntityPrototype(gmProxyDefinition, out EntityPrototype prototype))
                 return;
             lockstep.WriteString(displayName);
             lockstep.WriteFloat(scale);

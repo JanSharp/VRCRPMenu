@@ -1,6 +1,7 @@
 ﻿using TMPro;
 using UdonSharp;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace JanSharp
 {
@@ -12,6 +13,15 @@ namespace JanSharp
 
         public TMP_InputField displayNameField;
         public ToggleGroupWithFloatValues scaleToggles;
+        public Image accentColorImage;
+        public string gmProxyDefInternalName;
+        private GMProxyDefinition gmProxyDefinition;
+
+        private void Initialize()
+        {
+            gmProxyDefinition = gmProxiesManager.GetGMProxyDefinition(gmProxyDefInternalName);
+            accentColorImage.color *= gmProxyDefinition.color;
+        }
 
         public void OnClick()
         {
@@ -26,10 +36,17 @@ namespace JanSharp
         {
             object[] callbackData = (object[])itemSpawnLocationHelper.CallbackCustomData;
             gmProxiesManager.CreateGMProxy(
+                gmProxyDefinition.entityPrototypeName,
                 itemSpawnLocationHelper.DeterminedPosition,
                 itemSpawnLocationHelper.DeterminedRotation,
                 (float)callbackData[0],
                 (string)callbackData[1]);
         }
+
+        [LockstepEvent(LockstepEventType.OnInit)]
+        public void OnInit() => Initialize();
+
+        [LockstepEvent(LockstepEventType.OnClientBeginCatchUp)]
+        public void OnClientBeginCatchUp() => Initialize();
     }
 }

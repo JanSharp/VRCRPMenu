@@ -17,6 +17,11 @@ namespace JanSharp
         public Toggle movingComboToggle;
         public Toggle movingTeleportToggle;
 
+        public Toggle inputSmoothingToggle;
+        public Toggle linkedInputSmoothingToggle;
+        public Slider inputSmoothingSlider;
+        public Selectable inputSmoothingFillSelectable;
+
         private void Start()
         {
             stillToggleGroup.allowSwitchOff = true;
@@ -28,6 +33,17 @@ namespace JanSharp
             movingTeleportToggle.SetIsOnWithoutNotify(noClipMovement.ModeWhileMoving == NoClipModeWhileMoving.Teleport);
             stillToggleGroup.allowSwitchOff = false;
             movingToggleGroup.allowSwitchOff = false;
+
+            inputSmoothingToggle.SetIsOnWithoutNotify(true);
+            linkedInputSmoothingToggle.SetIsOnWithoutNotify(true);
+            inputSmoothingFillSelectable.interactable = true;
+            float value = noClipMovement.InputSmoothingDuration;
+            float min = inputSmoothingSlider.minValue;
+            float range = inputSmoothingSlider.maxValue - min;
+            value = min + value * range;
+            if (inputSmoothingSlider.wholeNumbers)
+                value = Mathf.Round(value);
+            inputSmoothingSlider.SetValueWithoutNotify(value);
         }
 
         public void OnStillToggleValueChanged()
@@ -46,6 +62,33 @@ namespace JanSharp
                 noClipMovement.ModeWhileMoving = NoClipModeWhileMoving.Combo;
             else if (movingTeleportToggle.isOn)
                 noClipMovement.ModeWhileMoving = NoClipModeWhileMoving.Teleport;
+        }
+
+        public void OnInputSmoothingToggleValueChanged()
+        {
+            linkedInputSmoothingToggle.SetIsOnWithoutNotify(inputSmoothingToggle.isOn);
+            inputSmoothingFillSelectable.interactable = inputSmoothingToggle.isOn;
+            if (inputSmoothingToggle.isOn)
+                ApplyInputSmoothingDurationFromSlider();
+            else
+                noClipMovement.InputSmoothingDuration = 0f;
+        }
+
+        public void OnInputSmoothingSliderValueChanged()
+        {
+            inputSmoothingToggle.SetIsOnWithoutNotify(true);
+            linkedInputSmoothingToggle.SetIsOnWithoutNotify(true);
+            inputSmoothingFillSelectable.interactable = true;
+            ApplyInputSmoothingDurationFromSlider();
+        }
+
+        private void ApplyInputSmoothingDurationFromSlider()
+        {
+            float value = inputSmoothingSlider.value;
+            float min = inputSmoothingSlider.minValue;
+            float range = inputSmoothingSlider.maxValue - min;
+            value = (value - min) / range;
+            noClipMovement.InputSmoothingDuration = value;
         }
     }
 }

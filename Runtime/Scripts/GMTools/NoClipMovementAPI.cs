@@ -45,6 +45,10 @@ namespace JanSharp
         public abstract float Speed { get; set; }
         public abstract NoClipModeWhileStill ModeWhileStill { get; set; }
         public abstract NoClipModeWhileMoving ModeWhileMoving { get; set; }
+        /// <summary>
+        /// <para>How many seconds it take to go from 0% speed to 100% speed.</para>
+        /// </summary>
+        public abstract float InputSmoothingDuration { get; set; }
         public abstract bool IsNoClipActive { get; set; }
         public abstract void IncrementAvoidTeleporting();
         public abstract void DecrementAvoidTeleporting();

@@ -132,8 +132,8 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [x] disabled segmented slider must disable interactable on the buttons, or ignore the click event... that'd actually be easier
 - [ ] probably add lines between the buttons in the toolbar for the players list
 - [ ] Q E and Shift support for desktop no clip
-- [ ] maybe a little smooth in and tiny smooth out when staring and stopping moving in no clip in desktop, or even in VR too
-  - [ ] add option to toggle input smoothing of no clip, for testing and maybe it'll become permanent
+- [x] maybe a little smooth in and tiny smooth out when staring and stopping moving in no clip in desktop, or even in VR too
+  - [x] add option to toggle input smoothing of no clip, for testing and maybe it'll become permanent
 - [x] maybe keep a collider under the player while they are using no clip to have grounded be true, if possible
 - [ ] make PR for sylan's no clip to also keep track of the position within the play space, it is so weird without it
 - [x] test the play space offset tracking with full body, I guess - it works

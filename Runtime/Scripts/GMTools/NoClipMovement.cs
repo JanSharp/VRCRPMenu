@@ -18,6 +18,8 @@ namespace JanSharp.Internal
 
         private float horizontalInput;
         private float verticalInput;
+        private float smoothedHorizontalInput;
+        private float smoothedVerticalInput;
         /// <summary>
         /// <para>Meters per second.</para>
         /// </summary>
@@ -57,6 +59,13 @@ namespace JanSharp.Internal
 
         private string currentModeWhileStillEventName;
         private string currentModeWhileMovingEventName;
+
+        [SerializeField] private float inputSmoothingDuration = 0.25f;
+        public override float InputSmoothingDuration
+        {
+            get => inputSmoothingDuration;
+            set => inputSmoothingDuration = value;
+        }
 
         private bool isNoClipActive;
         public override bool IsNoClipActive
@@ -153,6 +162,8 @@ namespace JanSharp.Internal
             // the avatar.
             if (isNoClipActive)
             {
+                smoothedHorizontalInput = horizontalInput;
+                smoothedVerticalInput = verticalInput;
                 currentPosition = localPlayer.GetPosition();
                 currentMoveMode = InvalidMoveModeId;
                 var origin = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Origin);
@@ -201,10 +212,12 @@ namespace JanSharp.Internal
         /// <summary>
         /// <para>Used within <see cref="CustomUpdate"/>.</para>
         /// </summary>
+        private float currentAcknowledgedDeltaTime;
+        /// <inheritdoc cref="currentAcknowledgedDeltaTime"/>
         private VRCPlayerApi.TrackingData currentOrigin;
-        /// <inheritdoc cref="currentOrigin"/>
+        /// <inheritdoc cref="currentAcknowledgedDeltaTime"/>
         private VRCPlayerApi.TrackingData currentHead;
-        /// <inheritdoc cref="currentOrigin"/>
+        /// <inheritdoc cref="currentAcknowledgedDeltaTime"/>
         private bool currentIsNearColliders;
 
         public void CustomUpdate()
@@ -216,12 +229,16 @@ namespace JanSharp.Internal
             qd.ShowForOneFrame(this, "IsPlayerGrounded", localPlayer.IsPlayerGrounded().ToString());
             qd.ShowForOneFrame(this, "GetVelocity", localPlayer.GetVelocity().ToString());
 
-            averageDeltaTime = averageDeltaTime * AverageDeltaTimePrevFraction + Time.deltaTime * AverageDeltaTimeNewFraction;
+            float deltaTime = Time.deltaTime;
+            currentAcknowledgedDeltaTime = Mathf.Min(deltaTime, MaxAcknowledgedTimeBetweenFrames);
+            averageDeltaTime = averageDeltaTime * AverageDeltaTimePrevFraction + deltaTime * AverageDeltaTimeNewFraction;
+
+            SmoothInputs(); // Uses currentDeltaTime.
 
             currentOrigin = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Origin);
             currentHead = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
 
-            currentVelocity = currentHead.rotation * ((Vector3.right * horizontalInput + Vector3.forward * verticalInput) * speed);
+            currentVelocity = currentHead.rotation * ((Vector3.right * smoothedHorizontalInput + Vector3.forward * smoothedVerticalInput) * speed);
 
             currentIsNearColliders = CheckForColliders();
 
@@ -229,6 +246,38 @@ namespace JanSharp.Internal
                 SendCustomEvent(currentModeWhileStillEventName);
             else
                 SendCustomEvent(currentModeWhileMovingEventName);
+        }
+
+        private void SmoothInputs()
+        {
+            if (inputSmoothingDuration == 0f)
+            {
+                smoothedHorizontalInput = horizontalInput;
+                smoothedVerticalInput = verticalInput;
+                return;
+            }
+
+            float maxStep = (1f / inputSmoothingDuration) * currentAcknowledgedDeltaTime;
+
+            if (smoothedHorizontalInput != horizontalInput)
+            {
+                float diff = horizontalInput - smoothedHorizontalInput;
+                float sign = Mathf.Sign(diff);
+                if (sign * diff <= maxStep)
+                    smoothedHorizontalInput = horizontalInput;
+                else
+                    smoothedHorizontalInput += sign * maxStep;
+            }
+
+            if (smoothedVerticalInput != verticalInput)
+            {
+                float diff = verticalInput - smoothedVerticalInput;
+                float sign = Mathf.Sign(diff);
+                if (sign * diff <= maxStep)
+                    smoothedVerticalInput = verticalInput;
+                else
+                    smoothedVerticalInput += sign * maxStep;
+            }
         }
 
         private void UpdateCurrentModeWhileStillEventName()
@@ -337,7 +386,7 @@ namespace JanSharp.Internal
             Vector3 offsetWithinPlaySpace = CalculateOffsetWithinPlaySpace(currentOrigin, currentHead.position);
             Vector3 movementWithinPlaySpace = currentOrigin.rotation * (offsetWithinPlaySpace - currentOffsetWithinPlaySpace);
             currentOffsetWithinPlaySpace = offsetWithinPlaySpace;
-            currentPosition += currentVelocity * Mathf.Min(Time.deltaTime, MaxAcknowledgedTimeBetweenFrames) + movementWithinPlaySpace;
+            currentPosition += currentVelocity * currentAcknowledgedDeltaTime + movementWithinPlaySpace;
             fakeGround.position = currentPosition;
             teleportManager.MoveAndRetainHeadRotation(currentPosition);
             // TODO: set velocity to zero or not depending on a flag that's part of the API, which effectively

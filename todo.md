@@ -150,11 +150,12 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
   - but whatever, lastly that last statement of having to keep the collider active and near the player, no, that is stupid. The script now checks for nearby colliders, capped at 2, and it simply ignores the fake ground collider if it is in that list of up to 2 colliders
 - [ ] maybe add a question mark button at the right of the no clip row which gives a popup of info for how no clip works. Basically like the help page would, but right there rather than separated
 - [x] figure out if there is anything that can be done to prevent this weird state of the player's avatar being suck constantly moving, where cancelling no clip clearly makes you move to the side - not using teleports and just having the collider under the player while standing still and not colliding with anything is probably the best we can do for this
-- [ ] add options for different no clip movement modes. Both for testing and maybe some will be permanent options
-  - [ ] velocity - collides, not actually no clip
-  - [ ] combo - velocity while not in colliders, otherwise teleport
-  - [ ] teleport - always use teleport
-- [ ] add option for how standing still in no clip should be handled. Velocity or fake ground
+- [x] add options for different no clip movement modes. Both for testing and maybe some will be permanent options
+  - [x] velocity - collides, not actually no clip
+  - [x] combo - velocity while not in colliders, otherwise teleport
+  - [x] teleport - always use teleport
+- [x] add option for how standing still in no clip should be handled. Velocity or fake ground
+  - [ ] must set gravity scale to 0 for the velocity approach to work here
 - [x] rename no clip manager to no clip settings manager
 - [ ] the IsNoClipActive flag has nothing to do with settings. Remove it from the settings manager
 - [ ] design GM proxy 3d models
@@ -166,3 +167,4 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [ ] players with the "view gm proxy spawned by" permission should be allowed to steal gm proxies from other players, not because of stealing specifically but in order to be able to get the interaction text to show up which shows who created the entity. Either that or there needs to be another way to view who created the proxy. Another way would honestly be cleaner than abusing the stealing logic (said stealing logic doesn't even exist yet in the custom pickups and interacts for the record)
 - [x] add a clear button (just an X) on the right of the input field for gm proxies
 - [ ] when using teleport for movement in no clip, not setting velocity means it ends up having velocity which makes the player's animator perform associated animations
+- [ ] remove the spacing between the gm proxy display name input field and the clear button

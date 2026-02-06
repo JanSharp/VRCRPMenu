@@ -42,6 +42,8 @@ namespace JanSharp
             if (menuManager.IsMenuOpen == isMenuOpen)
                 return;
             isMenuOpen = !isMenuOpen;
+            // Force not teleporting the player while the menu is open while standing still,
+            // otherwise it jumps around like crazy and is un-interactable.
             if (isMenuOpen)
                 noClipMovement.IncrementAvoidTeleporting();
             else

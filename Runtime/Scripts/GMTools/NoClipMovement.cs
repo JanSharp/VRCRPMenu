@@ -14,6 +14,7 @@ namespace JanSharp.Internal
         /// <para>Used by <see cref="UpdateManager"/>.</para>
         /// </summary>
         private int customUpdateInternalIndex;
+        [HideInInspector][SerializeField][SingletonReference] private QuickDebugUI qd;
 
         private float horizontalInput;
         private float verticalInput;
@@ -26,6 +27,36 @@ namespace JanSharp.Internal
             get => speed;
             set => speed = value;
         }
+
+        [Tooltip("Only applies when not near a collider.")]
+        [SerializeField] private NoClipModeWhileStill modeWhileStill = NoClipModeWhileStill.FakeGround;
+        public override NoClipModeWhileStill ModeWhileStill
+        {
+            get => modeWhileStill;
+            set
+            {
+                if (modeWhileStill == value)
+                    return;
+                modeWhileStill = value;
+                UpdateCurrentModeWhileStillEventName();
+                wasMoving = true; // Trigger the initialization logic of the standing still modes.
+            }
+        }
+
+        [Tooltip("Also applies when standing still but being near a collider.")]
+        [SerializeField] private NoClipModeWhileMoving modeWhileMoving = NoClipModeWhileMoving.Teleport;
+        public override NoClipModeWhileMoving ModeWhileMoving
+        {
+            get => modeWhileMoving;
+            set
+            {
+                modeWhileMoving = value;
+                UpdateCurrentModeWhileMovingEventName();
+            }
+        }
+
+        private string currentModeWhileStillEventName;
+        private string currentModeWhileMovingEventName;
 
         private bool isNoClipActive;
         public override bool IsNoClipActive
@@ -73,6 +104,8 @@ namespace JanSharp.Internal
         {
             localPlayer = Networking.LocalPlayer;
             localPlayerCollidingLayers = teleportManager.LocalPlayerCollidingLayers & ~localPlayerLayer;
+            UpdateCurrentModeWhileStillEventName();
+            UpdateCurrentModeWhileMovingEventName();
         }
 
         public override void IncrementAvoidTeleporting()
@@ -163,36 +196,77 @@ namespace JanSharp.Internal
             localPlayer.SetVelocity(velocity);
         }
 
+        /// <summary>
+        /// <para>Used within <see cref="CustomUpdate"/>.</para>
+        /// </summary>
+        private VRCPlayerApi.TrackingData currentOrigin;
+        /// <inheritdoc cref="currentOrigin"/>
+        private VRCPlayerApi.TrackingData currentHead;
+        /// <inheritdoc cref="currentOrigin"/>
+        private bool currentIsNearColliders;
+
         public void CustomUpdate()
         {
+            // Depending on what this shows while moving around using teleport, if it is false even though
+            // the collider is kept under the player then there is no reason to have the collider under the
+            // player... unless velocity is not set every frame while teleporting, then the collider is needed.
+            // Observed this to be true while moving using teleport at least in desktop, which is a good start.
+            qd.ShowForOneFrame(this, "IsPlayerGrounded", localPlayer.IsPlayerGrounded().ToString());
+            qd.ShowForOneFrame(this, "GetVelocity", localPlayer.GetVelocity().ToString());
+
             averageDeltaTime = averageDeltaTime * AverageDeltaTimePrevFraction + Time.deltaTime * AverageDeltaTimeNewFraction;
 
-            var origin = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Origin);
-            var head = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
+            currentOrigin = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Origin);
+            currentHead = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
 
-            currentVelocity = head.rotation * ((Vector3.right * horizontalInput + Vector3.forward * verticalInput) * speed);
+            currentVelocity = currentHead.rotation * ((Vector3.right * horizontalInput + Vector3.forward * verticalInput) * speed);
 
-            bool isNearColliders = CheckForColliders();
+            currentIsNearColliders = CheckForColliders();
 
-            // Force not teleporting the player while the menu is open while standing still,
-            // otherwise it jumps around like crazy and is un-interactable.
-            if (currentVelocity == Vector3.zero && (!isNearColliders || avoidTeleporting))
-                UpdateWhileStandingStill(origin, head);
+            if (currentVelocity == Vector3.zero && !currentIsNearColliders)
+                SendCustomEvent(currentModeWhileStillEventName);
             else
-            {
-                wasMoving = true;
-                UpdateWhileMoving(origin, head, isNearColliders);
-            }
+                SendCustomEvent(currentModeWhileMovingEventName);
         }
 
-        private void UpdateWhileStandingStill(VRCPlayerApi.TrackingData origin, VRCPlayerApi.TrackingData head)
+        private void UpdateCurrentModeWhileStillEventName()
         {
-            currentOffsetWithinPlaySpace = CalculateOffsetWithinPlaySpace(origin, head.position);
+            if (modeWhileStill == NoClipModeWhileStill.Velocity)
+                currentModeWhileStillEventName = nameof(UpdateWhileStillUsingVelocity);
+            else if (modeWhileStill == NoClipModeWhileStill.FakeGround)
+                currentModeWhileStillEventName = nameof(UpdateWhileStillUsingFakeGround);
+        }
+
+        private void UpdateCurrentModeWhileMovingEventName()
+        {
+            if (modeWhileMoving == NoClipModeWhileMoving.Velocity)
+                currentModeWhileMovingEventName = nameof(UpdateWhileMovingUsingVelocity);
+            else if (modeWhileMoving == NoClipModeWhileMoving.Combo)
+                currentModeWhileMovingEventName = nameof(UpdateWhileMovingUsingCombo);
+            else if (modeWhileMoving == NoClipModeWhileMoving.Teleport)
+                currentModeWhileMovingEventName = nameof(UpdateWhileMovingUsingTeleport);
+        }
+
+        public void UpdateWhileStillUsingVelocity()
+        {
+            currentOffsetWithinPlaySpace = CalculateOffsetWithinPlaySpace(currentOrigin, currentHead.position);
             currentPosition = localPlayer.GetPosition();
             if (wasMoving)
             {
-                fakeGroundGo.SetActive(true);
                 wasMoving = false;
+                fakeGroundGo.SetActive(false);
+            }
+            localPlayer.SetVelocity(Vector3.zero);
+        }
+
+        public void UpdateWhileStillUsingFakeGround()
+        {
+            currentOffsetWithinPlaySpace = CalculateOffsetWithinPlaySpace(currentOrigin, currentHead.position);
+            currentPosition = localPlayer.GetPosition();
+            if (wasMoving)
+            {
+                wasMoving = false;
+                fakeGroundGo.SetActive(true);
                 currentY = currentPosition.y;
                 currentFakeGroundPosition = currentPosition;
                 fakeGround.position = currentFakeGroundPosition;
@@ -219,27 +293,44 @@ namespace JanSharp.Internal
             // So just leaving it untouched, and cancelling jumping using InputJump.
         }
 
-        private void UpdateWhileMoving(VRCPlayerApi.TrackingData origin, VRCPlayerApi.TrackingData head, bool isNearColliders)
+        public void UpdateWhileMovingUsingVelocity()
         {
-            if (isNearColliders)
-            {
-                fakeGroundGo.SetActive(true);
-                Vector3 offsetWithinPlaySpace = CalculateOffsetWithinPlaySpace(origin, head.position);
-                Vector3 movementWithinPlaySpace = origin.rotation * (offsetWithinPlaySpace - currentOffsetWithinPlaySpace);
-                currentOffsetWithinPlaySpace = offsetWithinPlaySpace;
-                currentPosition += currentVelocity * Mathf.Min(Time.deltaTime, MaxAcknowledgedTimeBetweenFrames) + movementWithinPlaySpace;
-                fakeGround.position = currentPosition;
-                teleportManager.MoveAndRetainHeadRotation(currentPosition);
-                // if (localPlayer.GetVelocity() != Vector3.zero) // TODO: Test this and check for this log message. - I did, it does get printed, but what does that mean now?
-                //     Debug.Log("[RPMenuDebug] NoClipMovement  CustomUpdate (inner) - non zero velocity after teleport moving");
-            }
+            wasMoving = true;
+            fakeGroundGo.SetActive(false);
+            currentOffsetWithinPlaySpace = CalculateOffsetWithinPlaySpace(currentOrigin, currentHead.position);
+            currentPosition = localPlayer.GetPosition();
+            localPlayer.SetVelocity(currentVelocity);
+        }
+
+        public void UpdateWhileMovingUsingCombo()
+        {
+            if (currentIsNearColliders)
+                UpdateWhileMovingUsingTeleport();
             else
+                UpdateWhileMovingUsingVelocity();
+        }
+
+        public void UpdateWhileMovingUsingTeleport()
+        {
+            if (avoidTeleporting && currentVelocity == Vector3.zero)
             {
-                fakeGroundGo.SetActive(false);
-                currentOffsetWithinPlaySpace = CalculateOffsetWithinPlaySpace(origin, head.position);
-                localPlayer.SetVelocity(currentVelocity);
-                currentPosition = localPlayer.GetPosition();
+                // Specifically fake ground, not whatever still mode is configured, because fake ground more
+                // so matches behavior expected from teleporting, as well as being clean for UI interaction.
+                UpdateWhileStillUsingFakeGround();
+                currentY = localPlayer.GetPosition().y; // Make sure the player does not get pushed under the fake ground.
+                return;
             }
+            wasMoving = true;
+            fakeGroundGo.SetActive(true);
+            Vector3 offsetWithinPlaySpace = CalculateOffsetWithinPlaySpace(currentOrigin, currentHead.position);
+            Vector3 movementWithinPlaySpace = currentOrigin.rotation * (offsetWithinPlaySpace - currentOffsetWithinPlaySpace);
+            currentOffsetWithinPlaySpace = offsetWithinPlaySpace;
+            currentPosition += currentVelocity * Mathf.Min(Time.deltaTime, MaxAcknowledgedTimeBetweenFrames) + movementWithinPlaySpace;
+            fakeGround.position = currentPosition;
+            teleportManager.MoveAndRetainHeadRotation(currentPosition);
+            // TODO: set velocity to zero or not depending on a flag that's part of the API, which effectively
+            // enables or disables locomotion animations while teleporting... though this depends on if the
+            // is grounded flag is true or not, which has not been tested.
         }
 
         private bool CheckForColliders()

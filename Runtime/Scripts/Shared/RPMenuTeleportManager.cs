@@ -284,7 +284,9 @@ namespace JanSharp.Internal
                 if (origin.position == desiredOriginPos && desiredOriginRot == origin.rotation)
                     break;
             }
+#if RP_MENU_DEBUG
             Debug.Log($"[RPMenuDebug] RPMenuTeleportManager  MoveAndRetainHeadRotation (inner) - iterationCount: {iterationCount}");
+#endif
         }
 
         #region EventDispatcher

@@ -39,7 +39,7 @@ namespace JanSharp.Internal
                     return;
                 modeWhileStill = value;
                 UpdateCurrentModeWhileStillEventName();
-                wasMoving = true; // Trigger the initialization logic of the standing still modes.
+                currentMoveMode = InvalidMoveModeId; // Trigger the initialization logic of the standing still modes.
             }
         }
 
@@ -82,7 +82,6 @@ namespace JanSharp.Internal
         private LayerMask localPlayerCollidingLayers;
         private Vector3 currentPosition;
         private Vector3 currentOffsetWithinPlaySpace;
-        private bool wasMoving;
         private float currentY;
         private Vector3 currentFakeGroundPosition;
         private Collider[] overlappingColliders = new Collider[2];
@@ -97,6 +96,14 @@ namespace JanSharp.Internal
         /// wall.</para>
         /// </summary>
         private const float SafetyRadiusAroundPlayer = 0.3f;
+
+        private const int InvalidMoveModeId = 0;
+        private const int StillVelocityMoveModeId = 1;
+        private const int StillFakeFloorMoveModeId = 2;
+        private const int MovingVelocityMoveModeId = 3;
+        private const int MovingTeleportMoveModeId = 4;
+
+        private int currentMoveMode = InvalidMoveModeId;
 
         private VRCPlayerApi localPlayer;
 
@@ -144,15 +151,10 @@ namespace JanSharp.Internal
             // without a collider to stand on, thus being in the falling animation, where your tracking data
             // head is entirely disconnected from the actual head. Moving your head to the side does not move
             // the avatar.
-            // Not touching gravity scale in order to not conflict with external systems.
             if (isNoClipActive)
             {
                 currentPosition = localPlayer.GetPosition();
-                wasMoving = false;
-                currentY = currentPosition.y;
-                currentFakeGroundPosition = currentPosition;
-                fakeGround.position = currentFakeGroundPosition;
-                fakeGroundGo.SetActive(true);
+                currentMoveMode = InvalidMoveModeId;
                 var origin = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Origin);
                 var head = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
                 currentOffsetWithinPlaySpace = CalculateOffsetWithinPlaySpace(origin, head.position);
@@ -251,10 +253,11 @@ namespace JanSharp.Internal
         {
             currentOffsetWithinPlaySpace = CalculateOffsetWithinPlaySpace(currentOrigin, currentHead.position);
             currentPosition = localPlayer.GetPosition();
-            if (wasMoving)
+            if (currentMoveMode != StillVelocityMoveModeId)
             {
-                wasMoving = false;
+                currentMoveMode = StillVelocityMoveModeId;
                 fakeGroundGo.SetActive(false);
+                localPlayer.SetGravityStrength(0f);
             }
             localPlayer.SetVelocity(Vector3.zero);
         }
@@ -263,10 +266,11 @@ namespace JanSharp.Internal
         {
             currentOffsetWithinPlaySpace = CalculateOffsetWithinPlaySpace(currentOrigin, currentHead.position);
             currentPosition = localPlayer.GetPosition();
-            if (wasMoving)
+            if (currentMoveMode != StillFakeFloorMoveModeId)
             {
-                wasMoving = false;
+                currentMoveMode = StillFakeFloorMoveModeId;
                 fakeGroundGo.SetActive(true);
+                localPlayer.SetGravityStrength(1f);
                 currentY = currentPosition.y;
                 currentFakeGroundPosition = currentPosition;
                 fakeGround.position = currentFakeGroundPosition;
@@ -295,10 +299,14 @@ namespace JanSharp.Internal
 
         public void UpdateWhileMovingUsingVelocity()
         {
-            wasMoving = true;
-            fakeGroundGo.SetActive(false);
             currentOffsetWithinPlaySpace = CalculateOffsetWithinPlaySpace(currentOrigin, currentHead.position);
             currentPosition = localPlayer.GetPosition();
+            if (currentMoveMode != MovingVelocityMoveModeId)
+            {
+                currentMoveMode = MovingVelocityMoveModeId;
+                fakeGroundGo.SetActive(false);
+                localPlayer.SetGravityStrength(0f);
+            }
             localPlayer.SetVelocity(currentVelocity);
         }
 
@@ -320,8 +328,12 @@ namespace JanSharp.Internal
                 currentY = localPlayer.GetPosition().y; // Make sure the player does not get pushed under the fake ground.
                 return;
             }
-            wasMoving = true;
-            fakeGroundGo.SetActive(true);
+            if (currentMoveMode != MovingTeleportMoveModeId)
+            {
+                currentMoveMode = MovingTeleportMoveModeId;
+                fakeGroundGo.SetActive(true);
+                localPlayer.SetGravityStrength(1f);
+            }
             Vector3 offsetWithinPlaySpace = CalculateOffsetWithinPlaySpace(currentOrigin, currentHead.position);
             Vector3 movementWithinPlaySpace = currentOrigin.rotation * (offsetWithinPlaySpace - currentOffsetWithinPlaySpace);
             currentOffsetWithinPlaySpace = offsetWithinPlaySpace;

@@ -155,7 +155,8 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
   - [x] combo - velocity while not in colliders, otherwise teleport
   - [x] teleport - always use teleport
 - [x] add option for how standing still in no clip should be handled. Velocity or fake ground
-  - [ ] must set gravity scale to 0 for the velocity approach to work here
+  - [x] must set gravity scale to 0 for the velocity approach to work here
+    - [ ] make some kind of manager for local player settings such as their gravity strength. Could also put it on the teleport manager
 - [x] rename no clip manager to no clip settings manager
 - [ ] the IsNoClipActive flag has nothing to do with settings. Remove it from the settings manager
 - [ ] design GM proxy 3d models

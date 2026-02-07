@@ -57,6 +57,7 @@ namespace JanSharp
         /// <para>How many seconds it take to go from 0% speed to 100% speed.</para>
         /// </summary>
         public abstract float InputSmoothingDuration { get; set; }
+        public abstract bool SetVelocityToZeroWhileTeleporting { get; set; }
         public abstract bool IsNoClipActive { get; set; }
         public abstract void IncrementAvoidTeleporting();
         public abstract void DecrementAvoidTeleporting();

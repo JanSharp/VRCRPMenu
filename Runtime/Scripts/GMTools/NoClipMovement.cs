@@ -87,6 +87,13 @@ namespace JanSharp.Internal
             set => inputSmoothingDuration = value;
         }
 
+        private bool setVelocityToZeroWhileTeleporting;
+        public override bool SetVelocityToZeroWhileTeleporting
+        {
+            get => setVelocityToZeroWhileTeleporting;
+            set => setVelocityToZeroWhileTeleporting = value;
+        }
+
         private bool isNoClipActive;
         public override bool IsNoClipActive
         {
@@ -500,9 +507,8 @@ namespace JanSharp.Internal
             currentPosition += currentVelocity * currentAcknowledgedDeltaTime + movementWithinPlaySpace;
             fakeGround.position = currentPosition;
             teleportManager.MoveAndRetainHeadRotation(currentPosition);
-            // TODO: set velocity to zero or not depending on a flag that's part of the API, which effectively
-            // enables or disables locomotion animations while teleporting... though this depends on if the
-            // is grounded flag is true or not, which has not been tested.
+            if (setVelocityToZeroWhileTeleporting)
+                localPlayer.SetVelocity(Vector3.zero); // Theoretically disables locomotion animations while teleport moving. Maybe?
         }
 
         private bool CheckForColliders()

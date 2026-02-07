@@ -28,6 +28,9 @@ namespace JanSharp
         public Slider inputSmoothingSlider;
         public Selectable inputSmoothingFillSelectable;
 
+        public Toggle setVelocityToZeroWhileTeleportingToggle;
+        public Toggle linkedSetVelocityToZeroWhileTeleportingToggle;
+
         private void Start()
         {
             stillToggleGroup.allowSwitchOff = true;
@@ -57,6 +60,9 @@ namespace JanSharp
             if (inputSmoothingSlider.wholeNumbers)
                 value = Mathf.Round(value);
             inputSmoothingSlider.SetValueWithoutNotify(value);
+
+            setVelocityToZeroWhileTeleportingToggle.SetIsOnWithoutNotify(noClipMovement.SetVelocityToZeroWhileTeleporting);
+            linkedSetVelocityToZeroWhileTeleportingToggle.SetIsOnWithoutNotify(noClipMovement.SetVelocityToZeroWhileTeleporting);
         }
 
         public void OnStillToggleValueChanged()
@@ -112,6 +118,12 @@ namespace JanSharp
             float range = inputSmoothingSlider.maxValue - min;
             value = (value - min) / range;
             noClipMovement.InputSmoothingDuration = value;
+        }
+
+        public void OnSetVelocityToZeroWhileTeleportingToggleValueChanged()
+        {
+            noClipMovement.SetVelocityToZeroWhileTeleporting = setVelocityToZeroWhileTeleportingToggle.isOn;
+            linkedSetVelocityToZeroWhileTeleportingToggle.SetIsOnWithoutNotify(setVelocityToZeroWhileTeleportingToggle.isOn);
         }
     }
 }

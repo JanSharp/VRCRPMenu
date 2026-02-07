@@ -117,7 +117,6 @@ namespace JanSharp.Internal
 
         [SerializeField] private Transform fakeGround;
         [SerializeField] private GameObject fakeGroundGo;
-        [SerializeField] private Collider fakeGroundCollider;
         [SerializeField] private float moveFakeGroundEveryDistance;
         [SerializeField] private LayerMask localPlayerLayer;
         private LayerMask localPlayerCollidingLayers;
@@ -125,7 +124,6 @@ namespace JanSharp.Internal
         private Vector3 currentOffsetWithinPlaySpace;
         private float currentY;
         private Vector3 currentFakeGroundPosition;
-        private Collider[] overlappingColliders = new Collider[2];
         private Vector3 currentVelocity;
 
         private const float MaxAcknowledgedTimeBetweenFrames = 0.2f;
@@ -324,6 +322,10 @@ namespace JanSharp.Internal
                 currentVelocity = (currentHead.rotation * new Vector3(smoothedInputX, 0f, smoothedInputZ) + Vector3.up * smoothedInputY) * smoothedSpeed;
 
             currentIsNearColliders = CheckForColliders();
+#if RP_MENU_DEBUG
+            // DEBUG
+            qd.ShowForOneFrame(this, "currentIsNearColliders", currentIsNearColliders.ToString());
+#endif
 
             if (currentVelocity == Vector3.zero && !currentIsNearColliders)
                 SendCustomEvent(currentModeWhileStillEventName);
@@ -521,18 +523,17 @@ namespace JanSharp.Internal
 
         private bool CheckForColliders()
         {
+            // The fake ground collider is on the local player layer and the collider and rigid body
+            // components include the local player layer as an override such that the player still stands on
+            // it, however this logic here is not checking for the local player layer, allowing usage of the
+            // simple physics check function rather than overlap.
             float radius = LocalPlayerCapsule.GetRadius();
-            int count = Physics.OverlapCapsuleNonAlloc(
+            return Physics.CheckCapsule(
                 currentPosition + Vector3.up * radius,
                 currentPosition + Vector3.up * (LocalPlayerCapsule.GetHeight() - radius),
                 radius + SafetyRadiusAroundPlayer + currentVelocity.magnitude * averageDeltaTime,
-                overlappingColliders,
                 localPlayerCollidingLayers,
                 QueryTriggerInteraction.Ignore);
-            for (int i = 0; i < count; i++)
-                if (overlappingColliders[i] != fakeGroundCollider)
-                    return true;
-            return false;
         }
 
         private Vector3 CalculateOffsetWithinPlaySpace(VRCPlayerApi.TrackingData origin, Vector3 headPosition)

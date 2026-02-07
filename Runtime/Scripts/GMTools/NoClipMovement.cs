@@ -1,6 +1,5 @@
 ﻿using UdonSharp;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
 using VRC.SDKBase;
 using VRC.Udon.Common;
 
@@ -23,6 +22,7 @@ namespace JanSharp.Internal
         private float smoothedInputX;
         private float smoothedInputY;
         private float smoothedInputZ;
+        private const float MaxInitialSmoothedInput = 3f;
 
         private const float TopSpeedMultiplier = 2f;
         private const float SpeedSmoothingDuration = 0.25f;
@@ -185,16 +185,13 @@ namespace JanSharp.Internal
             if (isNoClipActive)
             {
                 SetupTargetSpeed();
-                // TODO: these assignments here must be smarter. It is jarring getting that instant speed change.
-                smoothedInputX = inputX;
-                smoothedInputY = inputY;
-                smoothedInputZ = inputZ;
                 currentPosition = localPlayer.GetPosition();
                 currentMoveMode = InvalidMoveModeId;
                 var origin = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Origin);
                 var head = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
                 currentOffsetWithinPlaySpace = CalculateOffsetWithinPlaySpace(origin, head.position);
                 currentVelocity = localPlayer.GetVelocity(); // In case it registers and deregisters within the same frame.
+                SetupSmoothedInputs(head.rotation); // Uses currentVelocity and targetSpeed
                 averageDeltaTime = Time.deltaTime;
                 updateManager.Register(this);
             }
@@ -210,6 +207,25 @@ namespace JanSharp.Internal
         {
             targetSpeed = CurrentlyUsingTopSpeed ? topSpeed : baseSpeed;
             smoothedSpeed = targetSpeed;
+        }
+
+        private void SetupSmoothedInputs(Quaternion headRotation)
+        {
+            // Initializing the smoothed input values like this has a high likelihood that they won't have the
+            // same value. This will cause them to reach zero (assuming no active inputs) at different points
+            // in time, which is noticeable to the user. Movement on one axis stopping before another.
+            // The likely best solution to this problem would be changing the entire smoothing logic to
+            // calculate the full target velocity vector and then lerp/smooth the current velocity to that
+            // vector... wouldn't that just overall be a cleaner solution?
+            Vector3 localVelocity = Quaternion.Inverse(headRotation) * currentVelocity;
+            smoothedInputX = Mathf.Clamp(localVelocity.x / targetSpeed, -MaxInitialSmoothedInput, MaxInitialSmoothedInput);
+            smoothedInputZ = Mathf.Clamp(localVelocity.z / targetSpeed, -MaxInitialSmoothedInput, MaxInitialSmoothedInput);
+            if (verticalMovement == NoClipVerticalMovementType.None)
+                smoothedInputY = 0f;
+            else if (verticalMovement == NoClipVerticalMovementType.HeadLocalSpace)
+                smoothedInputY = Mathf.Clamp(localVelocity.y / targetSpeed, -MaxInitialSmoothedInput, MaxInitialSmoothedInput);
+            else // if (verticalMovement == NoClipVerticalMovementType.WorldSpace)
+                smoothedInputY = Mathf.Clamp(currentVelocity.y / targetSpeed, -MaxInitialSmoothedInput, MaxInitialSmoothedInput);
         }
 
         // Have experimented with disabling the object to prevent getting these event when we do not currently

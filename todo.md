@@ -132,7 +132,7 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [x] disabled segmented slider must disable interactable on the buttons, or ignore the click event... that'd actually be easier
 - [ ] probably add lines between the buttons in the toolbar for the players list
 - [x] Q E support for desktop no clip
-- [ ] Shift support for desktop no clip
+- [x] Shift support for desktop no clip
 - [x] maybe a little smooth in and tiny smooth out when staring and stopping moving in no clip in desktop, or even in VR too
   - [x] add option to toggle input smoothing of no clip, for testing and maybe it'll become permanent
 - [x] maybe keep a collider under the player while they are using no clip to have grounded be true, if possible
@@ -140,7 +140,7 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [x] test the play space offset tracking with full body, I guess - it works
 - [x] test grounded with and without the collider under you - grounded is true while teleporting with the fake ground under you, at least in desktop. Note that in this test velocity was left untouched and gravity strength at 1
 - [x] ~~maybe make it so that when holding jump, moving forward and back actually moves you up and down in no clip~~ sounds like a bad idea
-- [ ] or maybe treat holding jump in no clip like shift on desktop
+- [x] or maybe treat holding jump in no clip like shift on desktop
 - [ ] maybe make the RPMenu prefab invisible in the scene by default
 - [x] must increase the radius of the local player capsule, it appears bigger than what I have tested previously when it comes to what it collides with, which is likely different than ray casts hitting it. It's a very weird kind of collider, these capsule controllers
 - [ ] make voice range sphere even less obtrusive, maybe change the opacity based on the viewing angle... we don't have the normal vector, never mind. Still make it less obtrusive

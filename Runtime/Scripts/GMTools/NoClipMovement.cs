@@ -1,5 +1,6 @@
 ﻿using UdonSharp;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
 using VRC.SDKBase;
 using VRC.Udon.Common;
 
@@ -22,14 +23,24 @@ namespace JanSharp.Internal
         private float smoothedInputX;
         private float smoothedInputY;
         private float smoothedInputZ;
-        /// <summary>
-        /// <para>Meters per second.</para>
-        /// </summary>
-        private float speed;
+
+        private const float TopSpeedMultiplier = 2f;
+        private const float SpeedSmoothingDuration = 0.25f;
+
+        private bool isHoldingJump;
+        private bool CurrentlyUsingTopSpeed => isInVR ? isHoldingJump : Input.GetKey(KeyCode.LeftShift);
+        private float baseSpeed;
+        private float topSpeed;
+        private float targetSpeed;
+        private float smoothedSpeed;
         public override float Speed
         {
-            get => speed;
-            set => speed = value;
+            get => baseSpeed;
+            set
+            {
+                baseSpeed = value;
+                topSpeed = value * TopSpeedMultiplier;
+            }
         }
 
         [Tooltip("Only applies when not near a collider.")]
@@ -173,6 +184,7 @@ namespace JanSharp.Internal
             // the avatar.
             if (isNoClipActive)
             {
+                SetupTargetSpeed();
                 // TODO: these assignments here must be smarter. It is jarring getting that instant speed change.
                 smoothedInputX = inputX;
                 smoothedInputY = inputY;
@@ -192,6 +204,12 @@ namespace JanSharp.Internal
                 localPlayer.SetVelocity(currentVelocity);
                 updateManager.Deregister(this);
             }
+        }
+
+        private void SetupTargetSpeed()
+        {
+            targetSpeed = CurrentlyUsingTopSpeed ? topSpeed : baseSpeed;
+            smoothedSpeed = targetSpeed;
         }
 
         // Have experimented with disabling the object to prevent getting these event when we do not currently
@@ -220,6 +238,7 @@ namespace JanSharp.Internal
 
         public override void InputJump(bool value, UdonInputEventArgs args)
         {
+            isHoldingJump = value;
             if (!isNoClipActive || !value)
                 return;
             // Preferring this to cancel jumping rather than setting jump impulse to 0 in order to not
@@ -254,20 +273,24 @@ namespace JanSharp.Internal
             currentAcknowledgedDeltaTime = Mathf.Min(deltaTime, MaxAcknowledgedTimeBetweenFrames);
             averageDeltaTime = averageDeltaTime * AverageDeltaTimePrevFraction + deltaTime * AverageDeltaTimeNewFraction;
 
-            if (!isInVR)
+            if (isInVR)
+                UpdateVRInputs();
+            else
                 ReadDesktopInputs();
 
+            SmoothSpeed(); // Uses currentDeltaTime.
             SmoothInputs(); // Uses currentDeltaTime.
 
             currentOrigin = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Origin);
             currentHead = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
 
+            // Moving diagonally can exceed smoothedSpeed, especially on desktop, but eh not a big deal.
             if (verticalMovement == NoClipVerticalMovementType.None)
-                currentVelocity = (currentHead.rotation * new Vector3(smoothedInputX, 0f, smoothedInputZ)) * speed;
+                currentVelocity = (currentHead.rotation * new Vector3(smoothedInputX, 0f, smoothedInputZ)) * smoothedSpeed;
             else if (verticalMovement == NoClipVerticalMovementType.HeadLocalSpace)
-                currentVelocity = (currentHead.rotation * new Vector3(smoothedInputX, smoothedInputY, smoothedInputZ)) * speed;
+                currentVelocity = (currentHead.rotation * new Vector3(smoothedInputX, smoothedInputY, smoothedInputZ)) * smoothedSpeed;
             else // if (verticalMovement == NoClipVerticalMovementType.WorldSpace)
-                currentVelocity = (currentHead.rotation * new Vector3(smoothedInputX, 0f, smoothedInputZ) + Vector3.up * smoothedInputY) * speed;
+                currentVelocity = (currentHead.rotation * new Vector3(smoothedInputX, 0f, smoothedInputZ) + Vector3.up * smoothedInputY) * smoothedSpeed;
 
             currentIsNearColliders = CheckForColliders();
 
@@ -277,6 +300,11 @@ namespace JanSharp.Internal
                 SendCustomEvent(currentModeWhileMovingEventName);
         }
 
+        private void UpdateVRInputs()
+        {
+            targetSpeed = isHoldingJump ? topSpeed : baseSpeed;
+        }
+
         private void ReadDesktopInputs()
         {
             // inputY could be some random value from getting the vertical look events even in desktop, which
@@ -284,6 +312,24 @@ namespace JanSharp.Internal
             inputY = Input.GetKey(KeyCode.Q) ? -1f : 0f;
             if (Input.GetKey(KeyCode.E))
                 inputY += 1f; // If both Q and E are held, cancel out to 0f.
+            targetSpeed = Input.GetKey(KeyCode.LeftShift) ? topSpeed : baseSpeed;
+        }
+
+        private void SmoothSpeed()
+        {
+            if (smoothedSpeed == targetSpeed)
+                return;
+            // Due to how this is calculated, changing the speed setting from really high to really low while
+            // no clip is active will take notably longer than SpeedSmoothingDuration to reach targetSpeed.
+            // But it's alright. Call it a feature, a gradual speed change.
+            float totalStep = topSpeed - baseSpeed;
+            float maxStep = (1f / SpeedSmoothingDuration) * totalStep * currentAcknowledgedDeltaTime;
+            float diff = targetSpeed - smoothedSpeed;
+            float sign = Mathf.Sign(diff);
+            if (sign * diff <= maxStep)
+                smoothedSpeed = targetSpeed;
+            else
+                smoothedSpeed += sign * maxStep;
         }
 
         private void SmoothInputs()

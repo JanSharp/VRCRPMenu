@@ -23,20 +23,14 @@ namespace JanSharp.Internal
         private float inputX;
         private float inputY;
         private float inputZ;
-        private float smoothedInputX;
-        private float smoothedInputY;
-        private float smoothedInputZ;
-        private const float MaxInitialSmoothedInput = 3f;
 
         private const float TopSpeedMultiplier = 2f;
-        private const float SpeedSmoothingDuration = 0.25f;
 
         private bool isHoldingJump;
         private bool CurrentlyUsingTopSpeed => isInVR ? isHoldingJump : Input.GetKey(KeyCode.LeftShift);
         private float baseSpeed;
         private float topSpeed;
         private float targetSpeed;
-        private float smoothedSpeed;
         public override float Speed
         {
             get => baseSpeed;
@@ -125,6 +119,13 @@ namespace JanSharp.Internal
         private float currentY;
         private Vector3 currentFakeGroundPosition;
         private Vector3 currentVelocity;
+        /// <summary>
+        /// <para>To prevent the player from flying off into nowhere if they ended up getting flung by
+        /// colliders and are trying to catch themselves by activating no clip. Because the velocity smoothing
+        /// logic is linear, so really high velocity would take a long time to get pulled back down without
+        /// this cap.</para>
+        /// </summary>
+        private const float MaxInitialExtraSpeedMultiplier = 3f;
 
         private const float MaxAcknowledgedTimeBetweenFrames = 0.2f;
         private const float AverageDeltaTimePrevFraction = 0.9f;
@@ -194,14 +195,15 @@ namespace JanSharp.Internal
             // the avatar.
             if (isNoClipActive)
             {
-                SetupTargetSpeed();
+                targetSpeed = CurrentlyUsingTopSpeed ? topSpeed : baseSpeed;
                 currentPosition = localPlayer.GetPosition();
                 currentMoveMode = InvalidMoveModeId;
                 var origin = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Origin);
                 var head = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
                 currentOffsetWithinPlaySpace = CalculateOffsetWithinPlaySpace(origin, head.position);
                 currentVelocity = localPlayer.GetVelocity(); // In case it registers and deregisters within the same frame.
-                SetupSmoothedInputs(head.rotation); // Uses currentVelocity and targetSpeed
+                if (currentVelocity.magnitude > targetSpeed * MaxInitialExtraSpeedMultiplier)
+                    currentVelocity = currentVelocity.normalized * targetSpeed * MaxInitialExtraSpeedMultiplier;
                 averageDeltaTime = Time.deltaTime;
                 updateManager.Register(this);
             }
@@ -211,31 +213,6 @@ namespace JanSharp.Internal
                 localPlayer.SetVelocity(currentVelocity);
                 updateManager.Deregister(this);
             }
-        }
-
-        private void SetupTargetSpeed()
-        {
-            targetSpeed = CurrentlyUsingTopSpeed ? topSpeed : baseSpeed;
-            smoothedSpeed = targetSpeed;
-        }
-
-        private void SetupSmoothedInputs(Quaternion headRotation)
-        {
-            // Initializing the smoothed input values like this has a high likelihood that they won't have the
-            // same value. This will cause them to reach zero (assuming no active inputs) at different points
-            // in time, which is noticeable to the user. Movement on one axis stopping before another.
-            // The likely best solution to this problem would be changing the entire smoothing logic to
-            // calculate the full target velocity vector and then lerp/smooth the current velocity to that
-            // vector... wouldn't that just overall be a cleaner solution?
-            Vector3 localVelocity = Quaternion.Inverse(headRotation) * currentVelocity;
-            smoothedInputX = Mathf.Clamp(localVelocity.x / targetSpeed, -MaxInitialSmoothedInput, MaxInitialSmoothedInput);
-            smoothedInputZ = Mathf.Clamp(localVelocity.z / targetSpeed, -MaxInitialSmoothedInput, MaxInitialSmoothedInput);
-            if (verticalMovement == NoClipVerticalMovementType.None)
-                smoothedInputY = 0f;
-            else if (verticalMovement == NoClipVerticalMovementType.HeadLocalSpace)
-                smoothedInputY = Mathf.Clamp(localVelocity.y / targetSpeed, -MaxInitialSmoothedInput, MaxInitialSmoothedInput);
-            else // if (verticalMovement == NoClipVerticalMovementType.WorldSpace)
-                smoothedInputY = Mathf.Clamp(currentVelocity.y / targetSpeed, -MaxInitialSmoothedInput, MaxInitialSmoothedInput);
         }
 
         // Have experimented with disabling the object to prevent getting these event when we do not currently
@@ -307,19 +284,18 @@ namespace JanSharp.Internal
             else
                 ReadDesktopInputs();
 
-            SmoothSpeed(); // Uses currentDeltaTime.
-            SmoothInputs(); // Uses currentDeltaTime.
-
             currentOrigin = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Origin);
             currentHead = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
 
-            // Moving diagonally can exceed smoothedSpeed, especially on desktop, but eh not a big deal.
+            // Moving diagonally can exceed targetSpeed, especially on desktop, but eh not a big deal.
+            Vector3 targetVelocity;
             if (verticalMovement == NoClipVerticalMovementType.None)
-                currentVelocity = (currentHead.rotation * new Vector3(smoothedInputX, 0f, smoothedInputZ)) * smoothedSpeed;
+                targetVelocity = (currentHead.rotation * new Vector3(inputX, 0f, inputZ)) * targetSpeed;
             else if (verticalMovement == NoClipVerticalMovementType.HeadLocalSpace)
-                currentVelocity = (currentHead.rotation * new Vector3(smoothedInputX, smoothedInputY, smoothedInputZ)) * smoothedSpeed;
+                targetVelocity = (currentHead.rotation * new Vector3(inputX, inputY, inputZ)) * targetSpeed;
             else // if (verticalMovement == NoClipVerticalMovementType.WorldSpace)
-                currentVelocity = (currentHead.rotation * new Vector3(smoothedInputX, 0f, smoothedInputZ) + Vector3.up * smoothedInputY) * smoothedSpeed;
+                targetVelocity = (currentHead.rotation * new Vector3(inputX, 0f, inputZ) + Vector3.up * inputY) * targetSpeed;
+            SmoothCurrentVelocity(targetVelocity);
 
             currentIsNearColliders = CheckForColliders();
 #if RP_MENU_DEBUG
@@ -348,64 +324,25 @@ namespace JanSharp.Internal
             targetSpeed = Input.GetKey(KeyCode.LeftShift) ? topSpeed : baseSpeed;
         }
 
-        private void SmoothSpeed()
+        private void SmoothCurrentVelocity(Vector3 targetVelocity)
         {
-            if (smoothedSpeed == targetSpeed)
+            if (currentVelocity == targetVelocity)
                 return;
-            // Due to how this is calculated, changing the speed setting from really high to really low while
-            // no clip is active will take notably longer than SpeedSmoothingDuration to reach targetSpeed.
-            // But it's alright. Call it a feature, a gradual speed change.
-            float totalStep = topSpeed - baseSpeed;
-            float maxStep = (1f / SpeedSmoothingDuration) * totalStep * currentAcknowledgedDeltaTime;
-            float diff = targetSpeed - smoothedSpeed;
-            float sign = Mathf.Sign(diff);
-            if (sign * diff <= maxStep)
-                smoothedSpeed = targetSpeed;
-            else
-                smoothedSpeed += sign * maxStep;
-        }
-
-        private void SmoothInputs()
-        {
             if (inputSmoothingDuration == 0f)
             {
-                smoothedInputX = inputX;
-                smoothedInputY = inputY;
-                smoothedInputZ = inputZ;
+                currentVelocity = targetVelocity;
                 return;
             }
-
-            float maxStep = (1f / inputSmoothingDuration) * currentAcknowledgedDeltaTime;
-
-            if (smoothedInputX != inputX)
-            {
-                float diff = inputX - smoothedInputX;
-                float sign = Mathf.Sign(diff);
-                if (sign * diff <= maxStep)
-                    smoothedInputX = inputX;
-                else
-                    smoothedInputX += sign * maxStep;
-            }
-
-            if (smoothedInputY != inputY)
-            {
-                float diff = inputY - smoothedInputY;
-                float sign = Mathf.Sign(diff);
-                if (sign * diff <= maxStep)
-                    smoothedInputY = inputY;
-                else
-                    smoothedInputY += sign * maxStep;
-            }
-
-            if (smoothedInputZ != inputZ)
-            {
-                float diff = inputZ - smoothedInputZ;
-                float sign = Mathf.Sign(diff);
-                if (sign * diff <= maxStep)
-                    smoothedInputZ = inputZ;
-                else
-                    smoothedInputZ += sign * maxStep;
-            }
+            // Intentionally not using lerp smoothing or a decay constant, but rather using a linear approach
+            // because the former would take so long to actually reach the target velocity, so for example not
+            // stopping movement for a long time with just the ever so slight drift at the end.
+            float maxStep = (1f / inputSmoothingDuration) * targetSpeed * currentAcknowledgedDeltaTime;
+            Vector3 diff = targetVelocity - currentVelocity;
+            float magnitude = diff.magnitude;
+            if (magnitude <= maxStep)
+                currentVelocity = targetVelocity;
+            else // The below is effectively the same as normalizing diff and then multiplying by maxStep.
+                currentVelocity += diff * (maxStep / magnitude);
         }
 
         private void UpdateCurrentModeWhileStillEventName()

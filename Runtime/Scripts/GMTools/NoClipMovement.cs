@@ -6,6 +6,7 @@ using VRC.Udon.Common;
 namespace JanSharp.Internal
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [CustomRaisedEventsDispatcher(typeof(NoClipMovementEventAttribute), typeof(NoClipMovementEventType))]
     public class NoClipMovement : NoClipMovementAPI
     {
         [HideInInspector][SerializeField][SingletonReference] private RPMenuTeleportManagerAPI teleportManager;
@@ -104,6 +105,7 @@ namespace JanSharp.Internal
                     return;
                 isNoClipActive = value;
                 UpdateRegistration();
+                RaiseOnIsNoClipActiveChanged();
             }
         }
 
@@ -535,5 +537,17 @@ namespace JanSharp.Internal
             offset.y = 0f;
             return Quaternion.Inverse(origin.rotation) * offset;
         }
+
+        #region EventDispatcher
+
+        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onIsNoClipActiveChangedListeners;
+
+        private void RaiseOnIsNoClipActiveChanged()
+        {
+            // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
+            JanSharp.CustomRaisedEvents.Raise(ref onIsNoClipActiveChangedListeners, nameof(NoClipMovementEventType.OnIsNoClipActiveChanged));
+        }
+
+        #endregion
     }
 }

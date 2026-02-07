@@ -8,10 +8,18 @@ namespace JanSharp
     public class NoClipActivation : UdonSharpBehaviour
     {
         [HideInInspector][SerializeField][SingletonReference] private NoClipSettingsManagerAPI noClipSettingsManager;
+        [HideInInspector][SerializeField][SingletonReference] private NoClipMovementAPI noClipMovement;
 
         private const float DoubleClickInterval = 0.4f;
 
-        private bool noClipEnabled;
+        /// <summary>
+        /// <para>Important for this to be <see langword="false"/> until
+        /// <see cref="LockstepEventType.OnInit"/> or <see cref="LockstepEventType.OnClientBeginCatchUp"/>,
+        /// because there is not event for the initial for when the initial value for
+        /// <see cref="NoClipSettingsManagerAPI.LatencyNoClipEnabled"/> gets set. Or well those 2 lockstep
+        /// events are the events for that, technically.</para>
+        /// </summary>
+        private bool noClipEnabled = false;
         private float lastJumpInputTime = -1f;
 
         public override void InputJump(bool value, UdonInputEventArgs args)
@@ -30,14 +38,17 @@ namespace JanSharp
 
         private void DidDoubleJump()
         {
-            noClipSettingsManager.IsNoClipActive = !noClipSettingsManager.IsNoClipActive;
+            noClipMovement.IsNoClipActive = !noClipMovement.IsNoClipActive;
         }
 
         private void UpdateNoClipEnabled()
         {
             noClipEnabled = noClipSettingsManager.LatencyNoClipEnabled;
             if (!noClipEnabled)
+            {
+                noClipMovement.IsNoClipActive = false;
                 lastJumpInputTime = -1f; // For extra cleanliness.
+            }
         }
 
         [LockstepEvent(LockstepEventType.OnInit)]

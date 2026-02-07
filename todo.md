@@ -159,7 +159,7 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
   - [x] must set gravity scale to 0 for the velocity approach to work here
     - [ ] make some kind of manager for local player settings such as their gravity strength. Could also put it on the teleport manager
 - [x] rename no clip manager to no clip settings manager
-- [ ] the IsNoClipActive flag has nothing to do with settings. Remove it from the settings manager
+- [x] the IsNoClipActive flag has nothing to do with settings. Remove it from the settings manager
 - [ ] design GM proxy 3d models
 - [x] do styling for the GM proxy spawn buttons
 - [ ] decide on GM proxy colors

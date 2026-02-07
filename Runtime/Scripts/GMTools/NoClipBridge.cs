@@ -12,12 +12,6 @@ namespace JanSharp
 
         private bool isMenuOpen;
 
-        [NoClipSettingsEvent(NoClipSettingsEventType.OnIsNoClipActiveChanged)]
-        public void OnIsNoClipActiveChanged()
-        {
-            noClipMovement.IsNoClipActive = noClipSettingsManager.IsNoClipActive;
-        }
-
         [LockstepEvent(LockstepEventType.OnInit)]
         public void OnInit() => UpdateSpeed();
 

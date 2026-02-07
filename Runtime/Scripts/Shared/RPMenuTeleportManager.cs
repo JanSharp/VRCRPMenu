@@ -61,12 +61,14 @@ namespace JanSharp.Internal
             directionsToTryCount = directionsToTry.Length;
         }
 
+#if RP_MENU_DEBUG
         private void Update()
         {
             // DEBUG
             FindTarget(debugOtherPlayer.position, debugOtherPlayer.rotation, Vector3.forward, out Vector3 position, out Quaternion rotation);
             debugLocalPlayer.SetPositionAndRotation(position, rotation);
         }
+#endif
 
         private void RecordTeleportToPlayerUndo(Vector3 currentPosition, Quaternion currentRotation, CorePlayerData otherPlayer, Vector3 desiredRelativeDirection)
         {

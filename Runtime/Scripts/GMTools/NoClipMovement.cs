@@ -15,7 +15,10 @@ namespace JanSharp.Internal
         /// <para>Used by <see cref="UpdateManager"/>.</para>
         /// </summary>
         private int customUpdateInternalIndex;
+#if RP_MENU_DEBUG
+        // DEBUG
         [HideInInspector][SerializeField][SingletonReference] private QuickDebugUI qd;
+#endif
 
         private float inputX;
         private float inputY;
@@ -287,12 +290,15 @@ namespace JanSharp.Internal
 
         public void CustomUpdate()
         {
+#if RP_MENU_DEBUG
+            // DEBUG
             // Depending on what this shows while moving around using teleport, if it is false even though
             // the collider is kept under the player then there is no reason to have the collider under the
             // player... unless velocity is not set every frame while teleporting, then the collider is needed.
             // Observed this to be true while moving using teleport at least in desktop, which is a good start.
             qd.ShowForOneFrame(this, "IsPlayerGrounded", localPlayer.IsPlayerGrounded().ToString());
             qd.ShowForOneFrame(this, "GetVelocity", localPlayer.GetVelocity().ToString());
+#endif
 
             float deltaTime = Time.deltaTime;
             currentAcknowledgedDeltaTime = Mathf.Min(deltaTime, MaxAcknowledgedTimeBetweenFrames);

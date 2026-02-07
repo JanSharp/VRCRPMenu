@@ -16,10 +16,12 @@ namespace JanSharp.Internal
         private int customUpdateInternalIndex;
         [HideInInspector][SerializeField][SingletonReference] private QuickDebugUI qd;
 
-        private float horizontalInput;
-        private float verticalInput;
-        private float smoothedHorizontalInput;
-        private float smoothedVerticalInput;
+        private float inputX;
+        private float inputY;
+        private float inputZ;
+        private float smoothedInputX;
+        private float smoothedInputY;
+        private float smoothedInputZ;
         /// <summary>
         /// <para>Meters per second.</para>
         /// </summary>
@@ -59,6 +61,13 @@ namespace JanSharp.Internal
 
         private string currentModeWhileStillEventName;
         private string currentModeWhileMovingEventName;
+
+        private NoClipVerticalMovementType verticalMovement = NoClipVerticalMovementType.HeadLocalSpace;
+        public override NoClipVerticalMovementType VerticalMovement
+        {
+            get => verticalMovement;
+            set => verticalMovement = value;
+        }
 
         [SerializeField] private float inputSmoothingDuration = 0.25f;
         public override float InputSmoothingDuration
@@ -115,10 +124,12 @@ namespace JanSharp.Internal
         private int currentMoveMode = InvalidMoveModeId;
 
         private VRCPlayerApi localPlayer;
+        private bool isInVR;
 
         private void Start()
         {
             localPlayer = Networking.LocalPlayer;
+            isInVR = localPlayer.IsUserInVR();
             localPlayerCollidingLayers = teleportManager.LocalPlayerCollidingLayers & ~localPlayerLayer;
             UpdateCurrentModeWhileStillEventName();
             UpdateCurrentModeWhileMovingEventName();
@@ -162,8 +173,10 @@ namespace JanSharp.Internal
             // the avatar.
             if (isNoClipActive)
             {
-                smoothedHorizontalInput = horizontalInput;
-                smoothedVerticalInput = verticalInput;
+                // TODO: these assignments here must be smarter. It is jarring getting that instant speed change.
+                smoothedInputX = inputX;
+                smoothedInputY = inputY;
+                smoothedInputZ = inputZ;
                 currentPosition = localPlayer.GetPosition();
                 currentMoveMode = InvalidMoveModeId;
                 var origin = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Origin);
@@ -187,14 +200,22 @@ namespace JanSharp.Internal
         // enabled, and the input value does not change thus not raising these input events, so disabling the
         // object not disabling the events avoids this issue inherently.
 
+        // Left joystick left right. A and D in desktop.
         public override void InputMoveHorizontal(float value, UdonInputEventArgs args)
         {
-            horizontalInput = value;
+            inputX = value;
         }
 
+        // Left joystick up down. W and S in desktop.
         public override void InputMoveVertical(float value, UdonInputEventArgs args)
         {
-            verticalInput = value;
+            inputZ = value;
+        }
+
+        // Right joystick up down. Mouse movement up down in desktop.
+        public override void InputLookVertical(float value, UdonInputEventArgs args)
+        {
+            inputY = value;
         }
 
         public override void InputJump(bool value, UdonInputEventArgs args)
@@ -233,12 +254,20 @@ namespace JanSharp.Internal
             currentAcknowledgedDeltaTime = Mathf.Min(deltaTime, MaxAcknowledgedTimeBetweenFrames);
             averageDeltaTime = averageDeltaTime * AverageDeltaTimePrevFraction + deltaTime * AverageDeltaTimeNewFraction;
 
+            if (!isInVR)
+                ReadDesktopInputs();
+
             SmoothInputs(); // Uses currentDeltaTime.
 
             currentOrigin = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Origin);
             currentHead = localPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
 
-            currentVelocity = currentHead.rotation * ((Vector3.right * smoothedHorizontalInput + Vector3.forward * smoothedVerticalInput) * speed);
+            if (verticalMovement == NoClipVerticalMovementType.None)
+                currentVelocity = (currentHead.rotation * new Vector3(smoothedInputX, 0f, smoothedInputZ)) * speed;
+            else if (verticalMovement == NoClipVerticalMovementType.HeadLocalSpace)
+                currentVelocity = (currentHead.rotation * new Vector3(smoothedInputX, smoothedInputY, smoothedInputZ)) * speed;
+            else // if (verticalMovement == NoClipVerticalMovementType.WorldSpace)
+                currentVelocity = (currentHead.rotation * new Vector3(smoothedInputX, 0f, smoothedInputZ) + Vector3.up * smoothedInputY) * speed;
 
             currentIsNearColliders = CheckForColliders();
 
@@ -248,35 +277,55 @@ namespace JanSharp.Internal
                 SendCustomEvent(currentModeWhileMovingEventName);
         }
 
+        private void ReadDesktopInputs()
+        {
+            // inputY could be some random value from getting the vertical look events even in desktop, which
+            // I am quite sure relate to mouse movement. Overwrite inputY here entirely.
+            inputY = Input.GetKey(KeyCode.Q) ? -1f : 0f;
+            if (Input.GetKey(KeyCode.E))
+                inputY += 1f; // If both Q and E are held, cancel out to 0f.
+        }
+
         private void SmoothInputs()
         {
             if (inputSmoothingDuration == 0f)
             {
-                smoothedHorizontalInput = horizontalInput;
-                smoothedVerticalInput = verticalInput;
+                smoothedInputX = inputX;
+                smoothedInputY = inputY;
+                smoothedInputZ = inputZ;
                 return;
             }
 
             float maxStep = (1f / inputSmoothingDuration) * currentAcknowledgedDeltaTime;
 
-            if (smoothedHorizontalInput != horizontalInput)
+            if (smoothedInputX != inputX)
             {
-                float diff = horizontalInput - smoothedHorizontalInput;
+                float diff = inputX - smoothedInputX;
                 float sign = Mathf.Sign(diff);
                 if (sign * diff <= maxStep)
-                    smoothedHorizontalInput = horizontalInput;
+                    smoothedInputX = inputX;
                 else
-                    smoothedHorizontalInput += sign * maxStep;
+                    smoothedInputX += sign * maxStep;
             }
 
-            if (smoothedVerticalInput != verticalInput)
+            if (smoothedInputY != inputY)
             {
-                float diff = verticalInput - smoothedVerticalInput;
+                float diff = inputY - smoothedInputY;
                 float sign = Mathf.Sign(diff);
                 if (sign * diff <= maxStep)
-                    smoothedVerticalInput = verticalInput;
+                    smoothedInputY = inputY;
                 else
-                    smoothedVerticalInput += sign * maxStep;
+                    smoothedInputY += sign * maxStep;
+            }
+
+            if (smoothedInputZ != inputZ)
+            {
+                float diff = inputZ - smoothedInputZ;
+                float sign = Mathf.Sign(diff);
+                if (sign * diff <= maxStep)
+                    smoothedInputZ = inputZ;
+                else
+                    smoothedInputZ += sign * maxStep;
             }
         }
 

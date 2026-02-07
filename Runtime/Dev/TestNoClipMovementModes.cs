@@ -10,12 +10,18 @@ namespace JanSharp
         [HideInInspector][SerializeField][SingletonReference] private NoClipMovementAPI noClipMovement;
 
         public ToggleGroup stillToggleGroup;
-        public ToggleGroup movingToggleGroup;
         public Toggle stillVelocityToggle;
         public Toggle stillFakeGroundToggle;
+
+        public ToggleGroup movingToggleGroup;
         public Toggle movingVelocityToggle;
         public Toggle movingComboToggle;
         public Toggle movingTeleportToggle;
+
+        public ToggleGroup verticalMovementToggleGroup;
+        public Toggle verticalMovementNoneToggle;
+        public Toggle verticalMovementHeadLocalSpaceToggle;
+        public Toggle verticalMovementWorldSpaceToggle;
 
         public Toggle inputSmoothingToggle;
         public Toggle linkedInputSmoothingToggle;
@@ -25,14 +31,21 @@ namespace JanSharp
         private void Start()
         {
             stillToggleGroup.allowSwitchOff = true;
-            movingToggleGroup.allowSwitchOff = true;
             stillVelocityToggle.SetIsOnWithoutNotify(noClipMovement.ModeWhileStill == NoClipModeWhileStill.Velocity);
             stillFakeGroundToggle.SetIsOnWithoutNotify(noClipMovement.ModeWhileStill == NoClipModeWhileStill.FakeGround);
+            stillToggleGroup.allowSwitchOff = false;
+
+            movingToggleGroup.allowSwitchOff = true;
             movingVelocityToggle.SetIsOnWithoutNotify(noClipMovement.ModeWhileMoving == NoClipModeWhileMoving.Velocity);
             movingComboToggle.SetIsOnWithoutNotify(noClipMovement.ModeWhileMoving == NoClipModeWhileMoving.Combo);
             movingTeleportToggle.SetIsOnWithoutNotify(noClipMovement.ModeWhileMoving == NoClipModeWhileMoving.Teleport);
-            stillToggleGroup.allowSwitchOff = false;
             movingToggleGroup.allowSwitchOff = false;
+
+            verticalMovementToggleGroup.allowSwitchOff = true;
+            verticalMovementNoneToggle.SetIsOnWithoutNotify(noClipMovement.VerticalMovement == NoClipVerticalMovementType.None);
+            verticalMovementHeadLocalSpaceToggle.SetIsOnWithoutNotify(noClipMovement.VerticalMovement == NoClipVerticalMovementType.HeadLocalSpace);
+            verticalMovementWorldSpaceToggle.SetIsOnWithoutNotify(noClipMovement.VerticalMovement == NoClipVerticalMovementType.WorldSpace);
+            verticalMovementToggleGroup.allowSwitchOff = false;
 
             inputSmoothingToggle.SetIsOnWithoutNotify(true);
             linkedInputSmoothingToggle.SetIsOnWithoutNotify(true);
@@ -62,6 +75,16 @@ namespace JanSharp
                 noClipMovement.ModeWhileMoving = NoClipModeWhileMoving.Combo;
             else if (movingTeleportToggle.isOn)
                 noClipMovement.ModeWhileMoving = NoClipModeWhileMoving.Teleport;
+        }
+
+        public void OnVerticalMovementToggleValueChanged()
+        {
+            if (verticalMovementNoneToggle.isOn)
+                noClipMovement.VerticalMovement = NoClipVerticalMovementType.None;
+            else if (verticalMovementHeadLocalSpaceToggle.isOn)
+                noClipMovement.VerticalMovement = NoClipVerticalMovementType.HeadLocalSpace;
+            else if (verticalMovementWorldSpaceToggle.isOn)
+                noClipMovement.VerticalMovement = NoClipVerticalMovementType.WorldSpace;
         }
 
         public void OnInputSmoothingToggleValueChanged()

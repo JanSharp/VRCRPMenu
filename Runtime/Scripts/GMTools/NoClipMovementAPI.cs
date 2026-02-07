@@ -36,6 +36,13 @@ namespace JanSharp
         Teleport,
     }
 
+    public enum NoClipVerticalMovementType
+    {
+        None,
+        HeadLocalSpace,
+        WorldSpace,
+    }
+
     [SingletonScript("a208660966802b7a19b48fcd51d32afa")] // Runtime/Prefabs/Managers/NoClipMovement.prefab
     public abstract class NoClipMovementAPI : UdonSharpBehaviour
     {
@@ -45,6 +52,7 @@ namespace JanSharp
         public abstract float Speed { get; set; }
         public abstract NoClipModeWhileStill ModeWhileStill { get; set; }
         public abstract NoClipModeWhileMoving ModeWhileMoving { get; set; }
+        public abstract NoClipVerticalMovementType VerticalMovement { get; set; }
         /// <summary>
         /// <para>How many seconds it take to go from 0% speed to 100% speed.</para>
         /// </summary>

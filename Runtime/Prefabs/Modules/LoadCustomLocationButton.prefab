@@ -8,12 +8,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 321142316161071780, guid: 188c0222b726a2e59a18b839597e0cc6,
+        type: 3}
+      propertyPath: serializedProgramAsset
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 1017309467744994785, guid: 188c0222b726a2e59a18b839597e0cc6,
         type: 3}
       propertyPath: serializationData.Prefab
       value: 
       objectReference: {fileID: 1017309467744994785, guid: 188c0222b726a2e59a18b839597e0cc6,
         type: 3}
+    - target: {fileID: 1995713020950409852, guid: 188c0222b726a2e59a18b839597e0cc6,
+        type: 3}
+      propertyPath: profileName
+      value: layout-elem-locations-page-footer-button
+      objectReference: {fileID: 0}
     - target: {fileID: 2408333305280697997, guid: 188c0222b726a2e59a18b839597e0cc6,
         type: 3}
       propertyPath: popupScript
@@ -71,10 +81,30 @@ PrefabInstance:
       propertyPath: m_Name
       value: LoadCustomLocationButton
       objectReference: {fileID: 0}
+    - target: {fileID: 3705245003881835956, guid: 188c0222b726a2e59a18b839597e0cc6,
+        type: 3}
+      propertyPath: serializedProgramAsset
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 3869841229588043162, guid: 188c0222b726a2e59a18b839597e0cc6,
         type: 3}
       propertyPath: m_text
       value: Teleport To Custom Location
+      objectReference: {fileID: 0}
+    - target: {fileID: 3869841229588043162, guid: 188c0222b726a2e59a18b839597e0cc6,
+        type: 3}
+      propertyPath: m_fontSize
+      value: 32
+      objectReference: {fileID: 0}
+    - target: {fileID: 3869841229588043162, guid: 188c0222b726a2e59a18b839597e0cc6,
+        type: 3}
+      propertyPath: m_fontSizeMax
+      value: 32
+      objectReference: {fileID: 0}
+    - target: {fileID: 3869841229588043162, guid: 188c0222b726a2e59a18b839597e0cc6,
+        type: 3}
+      propertyPath: m_fontSizeMin
+      value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 4046881445688192223, guid: 188c0222b726a2e59a18b839597e0cc6,
         type: 3}
@@ -233,6 +263,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 7069884478242858578, guid: 188c0222b726a2e59a18b839597e0cc6,
         type: 3}
+    - target: {fileID: 8132557679991208669, guid: 188c0222b726a2e59a18b839597e0cc6,
+        type: 3}
+      propertyPath: profileName
+      value: text-invisible-button-tall
+      objectReference: {fileID: 0}
     - target: {fileID: 8682626461632954959, guid: 188c0222b726a2e59a18b839597e0cc6,
         type: 3}
       propertyPath: m_Name
@@ -482,7 +517,7 @@ MonoBehaviour:
   SynchronizePosition: 0
   AllowCollisionOwnershipTransfer: 0
   Reliable: 0
-  _syncMethod: 2
+  _syncMethod: 1
   serializedProgramAsset: {fileID: 0}
   programSource: {fileID: 11400000, guid: 63d584c3b95ec4f059377bb0e6ed2c3f, type: 2}
   serializedPublicVariablesBytesString: Ai8AAAAAATIAAABWAFIAQwAuAFUAZABvAG4ALgBDAG8AbQBtAG8AbgAuAFUAZABvAG4AVgBhAHIAaQBhAGIAbABlAFQAYQBiAGwAZQAsACAAVgBSAEMALgBVAGQAbwBuAC4AQwBvAG0AbQBvAG4AAAAAAAYBAAAAAAAAACcBBAAAAHQAeQBwAGUAAWgAAABTAHkAcwB0AGUAbQAuAEMAbwBsAGwAZQBjAHQAaQBvAG4AcwAuAEcAZQBuAGUAcgBpAGMALgBMAGkAcwB0AGAAMQBbAFsAVgBSAEMALgBVAGQAbwBuAC4AQwBvAG0AbQBvAG4ALgBJAG4AdABlAHIAZgBhAGMAZQBzAC4ASQBVAGQAbwBuAFYAYQByAGkAYQBiAGwAZQAsACAAVgBSAEMALgBVAGQAbwBuAC4AQwBvAG0AbQBvAG4AXQBdACwAIABtAHMAYwBvAHIAbABpAGIAAQEJAAAAVgBhAHIAaQBhAGIAbABlAHMALwEAAAABaAAAAFMAeQBzAHQAZQBtAC4AQwBvAGwAbABlAGMAdABpAG8AbgBzAC4ARwBlAG4AZQByAGkAYwAuAEwAaQBzAHQAYAAxAFsAWwBWAFIAQwAuAFUAZABvAG4ALgBDAG8AbQBtAG8AbgAuAEkAbgB0AGUAcgBmAGEAYwBlAHMALgBJAFUAZABvAG4AVgBhAHIAaQBhAGIAbABlACwAIABWAFIAQwAuAFUAZABvAG4ALgBDAG8AbQBtAG8AbgBdAF0ALAAgAG0AcwBjAG8AcgBsAGkAYgABAAAABgEAAAAAAAAAAi8CAAAAAUkAAABWAFIAQwAuAFUAZABvAG4ALgBDAG8AbQBtAG8AbgAuAFUAZABvAG4AVgBhAHIAaQBhAGIAbABlAGAAMQBbAFsAUwB5AHMAdABlAG0ALgBJAG4AdAAzADIALAAgAG0AcwBjAG8AcgBsAGkAYgBdAF0ALAAgAFYAUgBDAC4AVQBkAG8AbgAuAEMAbwBtAG0AbwBuAAIAAAAGAgAAAAAAAAAnAQQAAAB0AHkAcABlAAEXAAAAUwB5AHMAdABlAG0ALgBTAHQAcgBpAG4AZwAsACAAbQBzAGMAbwByAGwAaQBiACcBCgAAAFMAeQBtAGIAbwBsAE4AYQBtAGUAAR8AAABfAF8AXwBVAGQAbwBuAFMAaABhAHIAcABCAGUAaABhAHYAaQBvAHUAcgBWAGUAcgBzAGkAbwBuAF8AXwBfACcBBAAAAHQAeQBwAGUAARYAAABTAHkAcwB0AGUAbQAuAEkAbgB0ADMAMgAsACAAbQBzAGMAbwByAGwAaQBiABcBBQAAAFYAYQBsAHUAZQACAAAABwUHBQcF

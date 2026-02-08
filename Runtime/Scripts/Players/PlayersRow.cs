@@ -18,6 +18,8 @@ namespace JanSharp
         public Toggle favoriteToggle;
         public TextMeshProUGUI playerNameLabel;
         public TextMeshProUGUI characterNameLabel;
+        public Button teleportToButton;
+        public Selectable teleportToLabel;
         public TextMeshProUGUI proximityLabel;
         public Toggle selectToggle;
         public GameObject characterNameRoot;

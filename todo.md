@@ -172,4 +172,4 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [x] when using teleport for movement in no clip, not setting velocity means it ends up having velocity which makes the player's animator perform associated animations
   - [ ] test this in VR
 - [x] remove the spacing between the gm proxy display name input field and the clear button
-- [ ] maybe disable the teleport to button for the local player row
+- [x] maybe disable the teleport to button for the local player row

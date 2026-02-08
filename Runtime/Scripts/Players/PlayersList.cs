@@ -126,6 +126,8 @@ namespace JanSharp
             row.characterNameLabel.text = characterName;
             row.proximityLabel.text = "-";
             row.selectToggle.SetIsOnWithoutNotify(isSelected);
+            row.teleportToButton.interactable = !core.isLocal;
+            row.teleportToLabel.interactable = !core.isLocal;
 
             return row;
         }

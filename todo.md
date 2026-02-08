@@ -171,4 +171,4 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [x] add a clear button (just an X) on the right of the input field for gm proxies
 - [x] when using teleport for movement in no clip, not setting velocity means it ends up having velocity which makes the player's animator perform associated animations
   - [ ] test this in VR
-- [ ] remove the spacing between the gm proxy display name input field and the clear button
+- [x] remove the spacing between the gm proxy display name input field and the clear button

@@ -8,6 +8,7 @@ namespace JanSharp
     public abstract class RPMenuUndoRedoTPButton : UdonSharpBehaviour
     {
         public TextMeshProUGUI label;
+        public bool singleLine;
         protected string baseLabelText;
 
         protected VRCPlayerApi localPlayer;
@@ -26,7 +27,7 @@ namespace JanSharp
                 formattedElapsedSeconds = FormatTime(seconds);
             }
             float distance = Vector3.Distance(localPlayer.GetPosition(), positionForTooltip);
-            label.text = $"{baseLabelText}\n{formattedElapsedSeconds} ago, {distance:0.0} m";
+            label.text = $"{baseLabelText}{(singleLine ? " - " : "\n")}{formattedElapsedSeconds} ago, {distance:0.0} m";
         }
 
         protected string FormatTime(uint seconds)

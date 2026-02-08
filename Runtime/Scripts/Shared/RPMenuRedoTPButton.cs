@@ -179,7 +179,7 @@ namespace JanSharp
         private void UpdateTooltip()
         {
             if (redoAbleLocationIsPlayer)
-                label.text = $"{baseLabelText}\n{playerInTooltip.PlayerDisplayNameWithCharacterName}";
+                label.text = $"{baseLabelText}{(singleLine ? " - " : "\n")}{playerInTooltip.PlayerDisplayNameWithCharacterName}";
             else
                 UpdateTimeAndDistanceTooltip();
         }

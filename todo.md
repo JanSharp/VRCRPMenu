@@ -112,7 +112,8 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [ ] maybe make gm request text color match icon color
 - [ ] change gm request hud color to orange/amber when there's a larger number piling up
 - [ ] maybe add a lockstep master preference slider to the settings page, probably with its own permission to be viewable and usable
-- [ ] probably add undo redo teleport buttons to GM requests page
+- [x] probably add undo redo teleport buttons to GM requests page
+  - [ ] test how that single line styling looks
 - [x] actually add the "ignore show page by permission in children" script
   - [x] add a show page by permission script to every module
   - [x] make sure the prefab overrides that deleted those existing show page by permission scripts get undone

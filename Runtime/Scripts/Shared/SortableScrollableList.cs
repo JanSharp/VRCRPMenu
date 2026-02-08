@@ -37,6 +37,7 @@ namespace JanSharp
         [Min(0f)]
         [Tooltip("Units per second, so kind of like pixels per second.")]
         public float minScrollRectVelocity = 20f;
+        public GameObject emptyListInfo;
 
         protected SortableScrollableRow[] rows = new SortableScrollableRow[ArrList.MinCapacity];
         protected int rowsCount = 0;
@@ -173,6 +174,8 @@ namespace JanSharp
         private void OnRowsCountChanged()
         {
             currentRowsContentHeight = rowsCount * rowHeight;
+            if (emptyListInfo != null) // Content height should remain zero anyway, otherwise the alternating background starts drawing.
+                emptyListInfo.SetActive(rowsCount == 0);
             rowsContent.sizeDelta = new Vector2(0f, currentRowsContentHeight);
             if (prevFirstVisibleRowIndex >= rowsCount) // Prevent from going out of bounds, causing updates to oob rows.
                 prevFirstVisibleRowIndex = System.Math.Max(0, rowsCount - 1);

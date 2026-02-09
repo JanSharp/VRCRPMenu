@@ -41,8 +41,17 @@ namespace JanSharp
         public Image responderUrgentImage;
         public Text responderCountText;
         public Transform responderScaleRoot;
-        private Color responderRegularBaseColor;
-        private Color responderUrgentBaseColor;
+        [UIStyleColor(nameof(responderRegularColor))]
+        public string responderRegularColorName;
+        public Color responderRegularColor;
+        [UIStyleColor(nameof(responderManyRegularColor))]
+        public string responderManyRegularColorName;
+        public Color responderManyRegularColor;
+        [UIStyleColor(nameof(responderUrgentColor))]
+        public string responderUrgentColorName;
+        public Color responderUrgentColor;
+        private const int ResponderManyRegularThreshold = 5;
+        private const float ResponderRegularImageCrossFadeDuration = 0.2f;
         private bool responderHUDIsShown = false;
         private bool responderIsInNewRequestAnimation = false;
         private float responderFractionWithinNewRequestAnimation;
@@ -73,8 +82,6 @@ namespace JanSharp
         {
             requesterRegularBaseColor = requesterRegularImage.color;
             requesterUrgentBaseColor = requesterUrgentImage.color;
-            responderRegularBaseColor = responderRegularImage.color;
-            responderUrgentBaseColor = responderUrgentImage.color;
             hudManager.AddHUDElement(requesterHUDRoot, requesterHUDOrder, isShown: false);
             hudManager.AddHUDElement(responderHUDRoot, responderHUDOrder, isShown: false);
         }
@@ -215,6 +222,11 @@ namespace JanSharp
             }
         }
 
+        private bool HasManyActiveRequests()
+        {
+            return requestsManager.ActiveRequestsCount >= ResponderManyRegularThreshold;
+        }
+
         private void UpdateResponderHUD(bool hasNewRequest)
         {
             if (cannotViewAndEdit)
@@ -248,18 +260,24 @@ namespace JanSharp
             responderCountText.text = count.ToString();
             responderRegularRoot.SetActive(!anyUrgent);
             responderUrgentRoot.SetActive(anyUrgent);
-            SetPresentAsUrgent(anyPresentAsUrgent);
+            // Important to be called after SetActive to prevent instantly cancelling a cross fade.
+            // And important to be called before ShowHideResponderHUD to use the correct fade duration.
+            UpdateResponderImageColor(anyPresentAsUrgent);
 
             if (hasNewRequest)
                 StartResponderNewRequestAnimation();
             ShowHideResponderHUD(true);
         }
 
-        private void SetPresentAsUrgent(bool presentAsUrgent)
+        private void UpdateResponderImageColor(bool presentAsUrgent)
         {
-            responderRegularImage.color = presentAsUrgent
-                ? responderUrgentBaseColor
-                : responderRegularBaseColor;
+            responderRegularImage.CrossFadeColor(
+                presentAsUrgent ? responderUrgentColor
+                    : HasManyActiveRequests() ? responderManyRegularColor
+                    : responderRegularColor,
+                responderHUDIsShown ? ResponderRegularImageCrossFadeDuration : 0f,
+                ignoreTimeScale: true,
+                useAlpha: true);
         }
 
         private void StartResponderNewRequestAnimation()
@@ -342,7 +360,7 @@ namespace JanSharp
         {
             GMRequest request = requestsManager.RequestForEvent;
             if (!request.latencyIsRead && request.latencyRequestType == GMRequestType.Regular)
-                SetPresentAsUrgent(true);
+                UpdateResponderImageColor(presentAsUrgent: true);
         }
 
         [GMRequestsEvent(GMRequestsEventType.OnGMRequestChangedInLatency)]

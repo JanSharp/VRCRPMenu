@@ -4169,9 +4169,11 @@ MonoBehaviour:
     color: {r: 1, g: 1, b: 1, a: 0.7490196}
   - name: hud-main-highlight
     color: {r: 0.5019608, g: 0.83137256, b: 1, a: 0.7490196}
+  - name: hud-warning-highlight
+    color: {r: 1, g: 0.7323529, b: 0.35000002, a: 0.7490196}
   - name: hud-urgent-highlight
     color: {r: 1, g: 0, b: 0, a: 0.7490196}
-  - name: favorite-fillsed
+  - name: favorite-filled
     color: {r: 1, g: 1, b: 1, a: 1}
   - name: favorite-highlighted
     color: {r: 0.5, g: 0.5, b: 0.5, a: 0.14901961}
@@ -6583,7 +6585,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   profileName: image-favorite-full-selected
   sourceImage: favorite-full
-  color: favorite-fillsed
+  color: favorite-filled
   material: {fileID: 2100000, guid: 35630e38b4e5ffb40b44ec5348b4333f, type: 2}
   raycastTarget: 0
   raycastPaddingLeft: 0
@@ -11086,6 +11088,69 @@ MonoBehaviour:
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
+--- !u!1 &8995297305552802049
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3697107133196699294}
+  - component: {fileID: 3133866130061491731}
+  m_Layer: 17
+  m_Name: image-gm-request-regular-icon-tintable
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3697107133196699294
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8995297305552802049}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7521404726449737656}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3133866130061491731
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8995297305552802049}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d93d7530f4c07f2c9076f8387e524b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  profileName: image-gm-request-regular-icon-tintable
+  sourceImage: gm-request-regular
+  color: 
+  material: {fileID: 2100000, guid: 9f7c962d598aa432ab2baa480c5d7272, type: 2}
+  raycastTarget: 0
+  raycastPaddingLeft: 0
+  raycastPaddingBottom: 0
+  raycastPaddingRight: 0
+  raycastPaddingTop: 0
+  maskable: 1
+  imageType: 0
+  useSpriteMesh: 0
+  preserveAspect: 0
+  fillCenter: 1
+  pixelsPerUnitMultiplier: 1
+  fillMethod: 4
+  fillOrigin: 12
+  fillAmount: 1
+  clockwise: 1
 --- !u!1 &9002269482544402056
 GameObject:
   m_ObjectHideFlags: 0
@@ -12152,6 +12217,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 4462023021011515052}
+    - targetCorrespondingSourceObject: {fileID: 6496738037252997729, guid: b30c0489bc1cef59baba23f87dd71436,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3697107133196699294}
     - targetCorrespondingSourceObject: {fileID: 6496738037252997729, guid: b30c0489bc1cef59baba23f87dd71436,
         type: 3}
       insertIndex: -1

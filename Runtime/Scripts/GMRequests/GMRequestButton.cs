@@ -2,6 +2,7 @@
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
+using VRC.SDKBase;
 
 namespace JanSharp
 {
@@ -9,6 +10,7 @@ namespace JanSharp
     public class GMRequestButton : UdonSharpBehaviour
     {
         [HideInInspector][SerializeField][SingletonReference] private GMRequestsManagerAPI requestsManager;
+        [HideInInspector][SerializeField][FindInParent] private MenuManagerAPI menuManager;
 
         public GMRequestType requestType;
         public Toggle toggle;
@@ -31,6 +33,9 @@ namespace JanSharp
         {
             bool isOn = toggle.isOn;
             label.text = isOn ? onText : offText;
+
+            if (isOn && Networking.LocalPlayer.IsUserInVR())
+                menuManager.IsMenuOpen = false;
 
             GMRequest latestRequest = requestsManager.GetLatestActiveLocalRequest();
 

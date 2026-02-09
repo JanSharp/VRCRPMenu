@@ -28,7 +28,7 @@ namespace JanSharp
         private bool requesterHUDIsShown = false;
         private GMRequest prevActiveLocalRequest = null;
         private bool requesterIsInFadeOutAnimation = false;
-        private float elapsedTimeInAnimation;
+        private float requesterElapsedTimeInAnimation;
         private const float RequesterFadeOutTotalTime = 3f;
         private const float RequesterFadeOutPulseStartTime = 2f;
         private const float RequesterFadeOutPulsesPerSecondWithTAU = 3.5f * TAU;
@@ -74,6 +74,8 @@ namespace JanSharp
             hudManager.AddHUDElement(responderHUDRoot, responderHUDOrder, isShown: false);
         }
 
+        #region Requester
+
         private void ShowHideRequesterHUD(bool show)
         {
 #if RP_MENU_DEBUG
@@ -89,17 +91,6 @@ namespace JanSharp
                 hudManager.HideHUDElement(requesterHUDRoot);
                 StopFadeOutAnimation();
             }
-        }
-
-        private void ShowHideResponderHUD(bool show)
-        {
-            if (show == responderHUDIsShown)
-                return;
-            responderHUDIsShown = show;
-            if (responderHUDIsShown)
-                hudManager.ShowHUDElement(responderHUDRoot);
-            else
-                hudManager.HideHUDElement(responderHUDRoot);
         }
 
         private void UpdateRequesterHUD()
@@ -151,7 +142,7 @@ namespace JanSharp
 #if RP_MENU_DEBUG
             Debug.Log($"[RPMenuDebug] GMRequestsHUD  PotentiallyStartFadeOutAnimation (inner) - starting fade out animation");
 #endif
-            requesterIsInFadeOutAnimation = true;
+            SetRequesterIsInFadeOutAnimation(true);
 
             bool isRegular = prevActiveLocalRequest.latencyRequestType == GMRequestType.Regular;
             requesterCurrentImage = isRegular
@@ -162,7 +153,7 @@ namespace JanSharp
                 : requesterUrgentBaseColor;
             requesterCurrentPulseColor = requesterCurrentBaseColor;
             requesterCurrentPulseColor.a *= 0.1f;
-            elapsedTimeInAnimation = 0f;
+            requesterElapsedTimeInAnimation = 0f;
             updateManager.Register(this);
         }
 
@@ -173,26 +164,47 @@ namespace JanSharp
 #if RP_MENU_DEBUG
             Debug.Log($"[RPMenuDebug] GMRequestsHUD  StopFadeOutAnimation (inner) - stopping fade out animation");
 #endif
-            requesterIsInFadeOutAnimation = false;
+            SetRequesterIsInFadeOutAnimation(false);
             requesterCurrentImage.color = requesterCurrentBaseColor;
             prevActiveLocalRequest = null;
             updateManager.Deregister(this);
         }
 
-        public void CustomUpdate()
+        private void SetRequesterIsInFadeOutAnimation(bool value)
         {
-            elapsedTimeInAnimation += Time.deltaTime;
-            if (elapsedTimeInAnimation >= RequesterFadeOutTotalTime)
+            requesterIsInFadeOutAnimation = value;
+            UpdateUpdateManagerRegistration();
+        }
+
+        private void UpdateRequesterFadeOutAnimation()
+        {
+            requesterElapsedTimeInAnimation += Time.deltaTime;
+            if (requesterElapsedTimeInAnimation >= RequesterFadeOutTotalTime)
             {
                 ShowHideRequesterHUD(false);
                 return;
             }
-            if (elapsedTimeInAnimation < RequesterFadeOutPulseStartTime)
+            if (requesterElapsedTimeInAnimation < RequesterFadeOutPulseStartTime)
                 return;
-            float timeInPulses = elapsedTimeInAnimation - RequesterFadeOutPulseStartTime;
+            float timeInPulses = requesterElapsedTimeInAnimation - RequesterFadeOutPulseStartTime;
             float t = (Mathf.Cos(timeInPulses * RequesterFadeOutPulsesPerSecondWithTAU) + 1f) / 2f;
             // t is 1 when timeInAnimation is 0.
             requesterCurrentImage.color = Color.Lerp(requesterCurrentPulseColor, requesterCurrentBaseColor, t);
+        }
+
+        #endregion
+
+        #region Responder
+
+        private void ShowHideResponderHUD(bool show)
+        {
+            if (show == responderHUDIsShown)
+                return;
+            responderHUDIsShown = show;
+            if (responderHUDIsShown)
+                hudManager.ShowHUDElement(responderHUDRoot);
+            else
+                hudManager.HideHUDElement(responderHUDRoot);
         }
 
         private void UpdateResponderHUD()
@@ -238,6 +250,22 @@ namespace JanSharp
             responderRegularImage.color = presentAsUrgent
                 ? responderUrgentBaseColor
                 : responderRegularBaseColor;
+        }
+
+        #endregion
+
+        private void UpdateUpdateManagerRegistration()
+        {
+            if (requesterIsInFadeOutAnimation)
+                updateManager.Register(this);
+            else
+                updateManager.Deregister(this);
+        }
+
+        public void CustomUpdate()
+        {
+            if (requesterIsInFadeOutAnimation)
+                UpdateRequesterFadeOutAnimation();
         }
 
         private void UpdateHUD()

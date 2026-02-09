@@ -64,7 +64,7 @@
 - [x] which ones of these layout elements actually need layout priority 2? something with the input fields afaik
 - [x] change GMRequestsHUD to use Time.deltaTime instead
 - [x] make default visualization type for hud and in world defined through inspector
-- [ ] maybe some kind of flash or indicator on the hud for when a new GM request came in. Or like a plus sign that pops up from the hud and moves upwards before fading away
+- [x] maybe some kind of flash or indicator on the hud for when a new GM request came in. Or like a plus sign that pops up from the hud and moves upwards before fading away
 - [ ] close the menu when hitting the request GM button
 - [x] show mask settings toggle group sets flags for any definitions that do not have a toggle to off rather than using the appropriate default value
 - [x] tweak voice range shader properties or shader itself, likely to make it less obtrusive

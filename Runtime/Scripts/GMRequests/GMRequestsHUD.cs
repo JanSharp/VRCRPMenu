@@ -40,9 +40,14 @@ namespace JanSharp
         public Image responderRegularImage;
         public Image responderUrgentImage;
         public Text responderCountText;
+        public Transform responderScaleRoot;
         private Color responderRegularBaseColor;
         private Color responderUrgentBaseColor;
         private bool responderHUDIsShown = false;
+        private bool responderIsInNewRequestAnimation = false;
+        private float responderFractionWithinNewRequestAnimation;
+        private const float ResponderNewRequestTotalTime = 0.5f;
+        private const float ResponderNewRequestScaleIncrease = 0.25f;
         [Space]
         public string requesterHUDOrder = "im[gm-requests]-i[requester]";
         public string responderHUDOrder = "im[gm-requests]-e[responder]";
@@ -204,10 +209,13 @@ namespace JanSharp
             if (responderHUDIsShown)
                 hudManager.ShowHUDElement(responderHUDRoot);
             else
+            {
                 hudManager.HideHUDElement(responderHUDRoot);
+                StopResponderNewRequestAnimation();
+            }
         }
 
-        private void UpdateResponderHUD()
+        private void UpdateResponderHUD(bool hasNewRequest)
         {
             if (cannotViewAndEdit)
             {
@@ -242,6 +250,8 @@ namespace JanSharp
             responderUrgentRoot.SetActive(anyUrgent);
             SetPresentAsUrgent(anyPresentAsUrgent);
 
+            if (hasNewRequest)
+                StartResponderNewRequestAnimation();
             ShowHideResponderHUD(true);
         }
 
@@ -252,11 +262,46 @@ namespace JanSharp
                 : responderRegularBaseColor;
         }
 
+        private void StartResponderNewRequestAnimation()
+        {
+            if (!responderIsInNewRequestAnimation)
+                responderFractionWithinNewRequestAnimation = 0f;
+            else if (responderFractionWithinNewRequestAnimation > 0.5f) // Mirror around 0.5f, basically.
+                responderFractionWithinNewRequestAnimation = 1f - responderFractionWithinNewRequestAnimation;
+            SetResponderIsInNewRequestAnimation(true);
+        }
+
+        private void StopResponderNewRequestAnimation()
+        {
+            if (!responderIsInNewRequestAnimation)
+                return;
+            SetResponderIsInNewRequestAnimation(false);
+            responderScaleRoot.localScale = Vector3.one;
+        }
+
+        private void SetResponderIsInNewRequestAnimation(bool value)
+        {
+            responderIsInNewRequestAnimation = value;
+            UpdateUpdateManagerRegistration();
+        }
+
+        private void UpdateResponderNewRequestAnimation()
+        {
+            responderFractionWithinNewRequestAnimation += Time.deltaTime / ResponderNewRequestTotalTime;
+            if (responderFractionWithinNewRequestAnimation >= 1f)
+            {
+                StopResponderNewRequestAnimation();
+                return;
+            }
+            float scale = 1f + Mathf.Sin(responderFractionWithinNewRequestAnimation * Mathf.PI) * ResponderNewRequestScaleIncrease;
+            responderScaleRoot.localScale = Vector3.one * scale;
+        }
+
         #endregion
 
         private void UpdateUpdateManagerRegistration()
         {
-            if (requesterIsInFadeOutAnimation)
+            if (requesterIsInFadeOutAnimation || responderIsInNewRequestAnimation)
                 updateManager.Register(this);
             else
                 updateManager.Deregister(this);
@@ -266,12 +311,14 @@ namespace JanSharp
         {
             if (requesterIsInFadeOutAnimation)
                 UpdateRequesterFadeOutAnimation();
+            if (responderIsInNewRequestAnimation)
+                UpdateResponderNewRequestAnimation();
         }
 
-        private void UpdateHUD()
+        private void UpdateHUD(bool hasNewRequest = false)
         {
             UpdateRequesterHUD();
-            UpdateResponderHUD();
+            UpdateResponderHUD(hasNewRequest);
         }
 
         public override void InitializeInstantiated() { }
@@ -288,7 +335,7 @@ namespace JanSharp
         public void OnClientBeginCatchUp() => UpdateHUD();
 
         [GMRequestsEvent(GMRequestsEventType.OnGMRequestCreatedInLatency)]
-        public void OnGMRequestCreatedInLatency() => UpdateHUD();
+        public void OnGMRequestCreatedInLatency() => UpdateHUD(hasNewRequest: true);
 
         [GMRequestsEvent(GMRequestsEventType.OnGMRequestShouldPresetAsUrgentChanged)]
         public void OnGMRequestShouldPresetAsUrgentChanged()
@@ -299,7 +346,7 @@ namespace JanSharp
         }
 
         [GMRequestsEvent(GMRequestsEventType.OnGMRequestChangedInLatency)]
-        public void OnGMRequestChangedInLatency() => UpdateHUD();
+        public void OnGMRequestChangedInLatency() => UpdateHUD(); // Changing the request type does not count as a "new request".
 
         [GMRequestsEvent(GMRequestsEventType.OnGMRequestDeletedInLatency)]
         public void OnGMRequestDeletedInLatency() => UpdateHUD();

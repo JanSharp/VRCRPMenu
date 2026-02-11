@@ -162,9 +162,11 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
     - [ ] make some kind of manager for local player settings such as their gravity strength. Could also put it on the teleport manager
 - [x] rename no clip manager to no clip settings manager
 - [x] the IsNoClipActive flag has nothing to do with settings. Remove it from the settings manager
-- [ ] design GM proxy 3d models
+- [x] design GM proxy 3d models - good enough for now
+  - [ ] maybe, probably, try and see what they look like with the frames being white and just the inner part being colored
 - [x] do styling for the GM proxy spawn buttons
 - [ ] decide on GM proxy colors
+- [ ] use filamented shaders for GM proxies... would be best if this was configurable by the user of the package easily actually
 - [x] make sure to make it easy for users of the package to change the proxy items
 - [x] automatically add the gm proxy entity prototype into the scene
 - [x] add separate permission to view who spawned a gm proxy

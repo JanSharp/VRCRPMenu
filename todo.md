@@ -46,7 +46,8 @@
 - [x] rename the RequestGMButtons prefab to GMRequestButtons
 - [x] very most likely change gm requests page to make calls to an external teleports manager
 - [ ] maybe, probably, make the count slightly smaller for GM requests HUD to make it feel less squished into that spot. Though would be good to test in VR first
-- [ ] add the crazy ideas for requesting GM without opening the menu, see gm-menu-requirements.md in menu-system
+- [x] add the crazy ideas for requesting GM without opening the menu, see gm-menu-requirements.md in menu-system
+  - [ ] should there be a key for this in desktop? with the RP_MENU_DEBUG define set you can hold R right now, but that'd of course not be the case in production
 - [x] How to truly prevent locking yourself out of permissions to edit permissions
   - editing the permission values themselves could lock you out
     - [x] disallow removing the edit permissions permission if the actively edited group is the group you yourself are in

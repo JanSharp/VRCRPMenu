@@ -10,14 +10,20 @@ namespace JanSharp
         [HideInInspector][SerializeField][SingletonReference] private GMRequestsManagerAPI requestsManager;
         [HideInInspector][SerializeField][SingletonReference] private UpdateManager updateManager;
         [HideInInspector][SerializeField][SingletonReference] private HUDManagerAPI hudManager;
+        [HideInInspector][SerializeField][SingletonReference(Optional = true)] private GMRequestQuickInputManagerAPI requestQuickInputManager;
         /// <summary>
         /// <para>Used by <see cref="UpdateManager"/>.</para>
         /// </summary>
         private int customUpdateInternalIndex;
 
         public Transform requesterHUDRoot;
-        public GameObject requesterRegularRoot;
-        public GameObject requesterUrgentRoot;
+        public GameObject requesterNoProgressContainer;
+        public GameObject requesterProgressContainer;
+        public GameObject requesterRegularGo;
+        public GameObject requesterUrgentGo;
+        public GameObject requesterRegularWithProgressGo;
+        public GameObject requesterUrgentWithProgressGo;
+        public Image requesterProgressImage;
         public Image requesterRegularImage;
         public Image requesterUrgentImage;
         private Color requesterRegularBaseColor;
@@ -27,6 +33,7 @@ namespace JanSharp
         private Image requesterCurrentImage;
         private bool requesterHUDIsShown = false;
         private GMRequest prevActiveLocalRequest = null;
+        private bool requesterHasActiveRequest = false;
         private bool requesterIsInFadeOutAnimation = false;
         private float requesterElapsedTimeInAnimation;
         private const float RequesterFadeOutTotalTime = 3f;
@@ -62,6 +69,7 @@ namespace JanSharp
         public string responderHUDOrder = "im[gm-requests]-e[responder]";
 
         [Space]
+
         [PermissionDefinitionReference(nameof(requestGMPDef))]
         public string requestGMPermissionAsset; // A guid.
         [HideInInspector][SerializeField] private PermissionDefinition requestGMPDef;
@@ -105,11 +113,53 @@ namespace JanSharp
             }
         }
 
+        private bool HideRequesterHUDIfMissingPermissionForRequest(GMRequest request)
+        {
+            bool isRegular = request.latencyRequestType == GMRequestType.Regular;
+            if (isRegular ? cannotRequestRegular : cannotRequestUrgent)
+            {
+                ShowHideRequesterHUD(false);
+                return true;
+            }
+            return false;
+        }
+
+        private bool isUpdatingRequesterHUD = false;
+        private bool mustUpdateRequesterHUDAgain = false;
+        /// <summary>
+        /// <para>Can be called recursively.</para>
+        /// </summary>
         private void UpdateRequesterHUD()
+        {
+            if (isUpdatingRequesterHUD)
+            {
+                mustUpdateRequesterHUDAgain = true;
+                return;
+            }
+            isUpdatingRequesterHUD = true;
+            UpdateRequesterHUDLogic();
+            isUpdatingRequesterHUD = false;
+            if (!mustUpdateRequesterHUDAgain)
+                return;
+            mustUpdateRequesterHUDAgain = false;
+            UpdateRequesterHUD();
+        }
+
+        private void UpdateRequesterHUDLogic()
         {
             if (cannotRequestRegular && cannotRequestUrgent)
             {
                 ShowHideRequesterHUD(false);
+                return;
+            }
+
+            bool isInProgress = requestQuickInputManager.IsInProgress;
+            requesterNoProgressContainer.SetActive(!isInProgress);
+            requesterProgressContainer.SetActive(isInProgress);
+            if (isInProgress)
+            {
+                StopFadeOutAnimation();
+                UpdateRequesterHUDWithProgress();
                 return;
             }
 
@@ -120,19 +170,43 @@ namespace JanSharp
                 return;
             }
 
-            bool isRegular = request.latencyRequestType == GMRequestType.Regular;
-            if (isRegular ? cannotRequestRegular : cannotRequestUrgent)
-            {
-                ShowHideRequesterHUD(false);
+            if (HideRequesterHUDIfMissingPermissionForRequest(request))
                 return;
-            }
 
             StopFadeOutAnimation();
             prevActiveLocalRequest = request;
-            requesterRegularRoot.SetActive(isRegular);
-            requesterUrgentRoot.SetActive(!isRegular);
+
+            bool isRegular = request.latencyRequestType == GMRequestType.Regular;
+            requesterRegularGo.SetActive(isRegular);
+            requesterUrgentGo.SetActive(!isRegular);
 
             ShowHideRequesterHUD(true);
+        }
+
+        private void UpdateRequesterHUDWithProgress()
+        {
+            GMRequest request = requestsManager.GetLatestActiveLocalRequest();
+            requesterHasActiveRequest = request != null;
+            if (requesterHasActiveRequest && HideRequesterHUDIfMissingPermissionForRequest(request))
+                return;
+
+            bool showUrgent = requesterHasActiveRequest
+                ? request.latencyRequestType == GMRequestType.Urgent
+                : cannotRequestRegular;
+            requesterRegularWithProgressGo.SetActive(!showUrgent);
+            requesterUrgentWithProgressGo.SetActive(showUrgent);
+            requesterProgressImage.color = showUrgent ? requesterUrgentBaseColor : requesterRegularBaseColor;
+            UpdateRequesterProgress();
+
+            ShowHideRequesterHUD(true);
+        }
+
+        private void UpdateRequesterProgress()
+        {
+            float progress = requestQuickInputManager.Progress;
+            if (requesterHasActiveRequest)
+                progress = 1f - progress;
+            requesterProgressImage.fillAmount = progress;
         }
 
         private void PotentiallyStartFadeOutAnimation()
@@ -184,8 +258,15 @@ namespace JanSharp
 
         private void SetRequesterIsInFadeOutAnimation(bool value)
         {
+            if (requesterIsInFadeOutAnimation == value)
+                return;
             requesterIsInFadeOutAnimation = value;
             UpdateUpdateManagerRegistration();
+            if (requestQuickInputManager != null)
+                if (value)
+                    requestQuickInputManager.IncrementIgnoreInput();
+                else
+                    requestQuickInputManager.DecrementIgnoreInput();
         }
 
         private void UpdateRequesterFadeOutAnimation()
@@ -371,5 +452,17 @@ namespace JanSharp
 
         [GMRequestsEvent(GMRequestsEventType.OnGMRequestUnDeletedInLatency)]
         public void OnGMRequestUnDeletedInLatency() => UpdateHUD();
+
+        [GMRequestsQuickInputEvent(GMRequestsQuickInputEventType.OnGMRequestQuickInputBegin)]
+        public void OnGMRequestQuickInputBegin() => UpdateRequesterHUD();
+
+        [GMRequestsQuickInputEvent(GMRequestsQuickInputEventType.OnGMRequestQuickInputAborted)]
+        public void OnGMRequestQuickInputAborted() => UpdateRequesterHUD();
+
+        [GMRequestsQuickInputEvent(GMRequestsQuickInputEventType.OnGMRequestQuickInputCompleted)]
+        public void OnGMRequestQuickInputCompleted() => UpdateRequesterHUD();
+
+        [GMRequestsQuickInputEvent(GMRequestsQuickInputEventType.OnGMRequestQuickInputUpdate)]
+        public void OnGMRequestQuickInputUpdate() => UpdateRequesterProgress();
     }
 }

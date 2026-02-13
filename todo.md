@@ -176,3 +176,10 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
   - [ ] test this in VR
 - [x] remove the spacing between the gm proxy display name input field and the clear button
 - [x] maybe disable the teleport to button for the local player row
+- [x] import export page
+  - [x] styling
+  - [ ] implementation
+- [ ] items page
+  - [ ] custom keyboard
+- [ ] help page
+- [ ] ui sounds

@@ -187,9 +187,14 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
   - [x] flip the order of import and export game state permissions
   - [x] add the gs info to export and autosave, over in lockstep and then here
   - [x] add comments stating how there's a ton of copy paste from the GameStatesUI
+  - [ ] consider adding the input prevention to the generic value editors since they can be scrollable thus should block UI open close inputs. Though whether that input consuming feature as a whole is a good idea is still up in the air
   - [ ] make generic value editor styling match
   - [ ] think about import export options profiles
 - [ ] items page
+  - [x] styling
   - [ ] custom keyboard
+  - [ ] filterable list
+  - [ ] category support for entities, somehow
+  - [ ] favorites
 - [ ] help page
 - [ ] ui sounds

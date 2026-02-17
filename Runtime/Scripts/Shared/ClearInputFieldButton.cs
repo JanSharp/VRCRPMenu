@@ -5,26 +5,25 @@ using UnityEngine.UI;
 namespace JanSharp
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-    public class GMProxiesDisplayNameField : UdonSharpBehaviour
+    public class ClearInputFieldButton : UdonSharpBehaviour
     {
-        public TMP_InputField displayNameField;
+        public TMP_InputField inputField;
         public Button clearButton;
         public Selectable clearButtonIcon;
 
-        public void OnDisplayNameValueChanged()
+        public void OnInputFieldValueChanged()
         {
             UpdateInteractable();
         }
 
         public void OnClearClick()
         {
-            displayNameField.SetTextWithoutNotify("");
-            UpdateInteractable();
+            inputField.text = "";
         }
 
         private void UpdateInteractable()
         {
-            bool interactable = displayNameField.text != "";
+            bool interactable = inputField.text != "";
             clearButton.interactable = interactable;
             clearButtonIcon.interactable = interactable;
         }

@@ -12,6 +12,7 @@ namespace JanSharp
 
         private VRCPlayerApi localPlayer;
 
+        [MenuManagerEvent(MenuManagerEventType.OnMenuManagerStart)]
         public override void OnMenuManagerStart()
         {
             localPlayer = Networking.LocalPlayer;

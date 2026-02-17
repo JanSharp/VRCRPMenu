@@ -178,7 +178,17 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [x] maybe disable the teleport to button for the local player row
 - [x] import export page
   - [x] styling
-  - [ ] implementation
+  - [x] implementation
+  - [x] when losing export game state permissions, stop autosaving, and resume autosaving if it was enabled and permission is regained
+  - [x] autosave timer does not update, and is shown/hidden incorrectly hierarchy wise
+  - [x] delete the game states UI
+  - [x] make sure the default state of the tabs is properly enforced/set in OnMenuManagerStart
+  - [x] put character limit on export name, matching GameStatesUI
+  - [x] flip the order of import and export game state permissions
+  - [x] add the gs info to export and autosave, over in lockstep and then here
+  - [x] add comments stating how there's a ton of copy paste from the GameStatesUI
+  - [ ] make generic value editor styling match
+  - [ ] think about import export options profiles
 - [ ] items page
   - [ ] custom keyboard
 - [ ] help page

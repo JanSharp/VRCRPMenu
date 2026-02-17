@@ -87,7 +87,7 @@ namespace JanSharp
 
         private void StartStopUpdateLoop()
         {
-            pageIsVisible = menuManager.IsMenuOpen && menuManager.ActivePageInternalName == menuPageRoot.PageInternalName;
+            pageIsVisible = menuManager.IsMenuOpen && menuManager.ActivePage == menuPageRoot;
             if (pageIsVisible)
                 OnPageWentVisible();
             else

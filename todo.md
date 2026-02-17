@@ -192,7 +192,8 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
   - [ ] think about import export options profiles
 - [ ] items page
   - [x] styling
-  - [ ] custom keyboard
+  - [x] custom keyboard
+    - [ ] maybe add holding down keys to repeat their input, especially backspace, if that is doable with the EventTrigger component
   - [ ] filterable list
   - [ ] category support for entities, somehow
   - [ ] favorites

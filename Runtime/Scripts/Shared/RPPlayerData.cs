@@ -15,6 +15,8 @@ namespace JanSharp
 
         [HideInInspector][SerializeField][SingletonReference] private PlayersBackendManagerAPI playersBackendManager;
         [HideInInspector][SerializeField][SingletonReference] private PlayersFavoritesManagerAPI playersFavoritesManager;
+        [HideInInspector][SerializeField][SingletonReference] private ItemsFavoritesManagerAPI itemsFavoritesManager;
+        [HideInInspector][SerializeField][SingletonReference] private EntitySystem entitySystem;
 
         #region GameState
         /// <summary>
@@ -35,7 +37,16 @@ namespace JanSharp
         [System.NonSerialized] public int favoritePlayersOutgoingCount = 0;
         [System.NonSerialized] public RPPlayerData[] favoritePlayersIncoming = new RPPlayerData[ArrList.MinCapacity];
         [System.NonSerialized] public int favoritePlayersIncomingCount = 0;
+
+        /// <summary>
+        /// <para><see cref="uint"/> entityPrototypeId => <see langword="true"/></para>
+        /// </summary>
+        [System.NonSerialized] public DataDictionary favoriteItemIdsLut = new DataDictionary();
+        [System.NonSerialized] public EntityPrototype[] favoriteItems = new EntityPrototype[ArrList.MinCapacity];
+        [System.NonSerialized] public int favoriteItemsCount = 0;
         #endregion
+
+        [System.NonSerialized] public uint[] importedFavoriteItemIds;
 
         public string PlayerDisplayName => overriddenDisplayName ?? core.displayName;
         public string PlayerDisplayNameWithCharacterName => characterName == ""
@@ -59,10 +70,43 @@ namespace JanSharp
             return overriddenDisplayName != null || characterName != "";
         }
 
+        private void WriteFavoriteItems()
+        {
+            lockstep.WriteSmallUInt((uint)favoriteItemsCount);
+            for (int i = 0; i < favoriteItemsCount; i++)
+                lockstep.WriteSmallUInt(favoriteItems[i].Id);
+        }
+
+        private void ReadFavoriteItems(bool isImport)
+        {
+            if (isImport)
+            {
+                int count = (int)lockstep.ReadSmallUInt();
+                importedFavoriteItemIds = new uint[count];
+                for (int i = 0; i < count; i++)
+                    importedFavoriteItemIds[i] = lockstep.ReadSmallUInt();
+                ((Internal.ItemsFavoritesManager)itemsFavoritesManager).OnPlayerDataImported(this);
+            }
+            else
+            {
+                favoriteItemsCount = (int)lockstep.ReadSmallUInt();
+                ArrList.EnsureCapacity(ref favoriteItems, favoriteItemsCount);
+                for (int i = 0; i < favoriteItemsCount; i++)
+                {
+                    uint id = lockstep.ReadSmallUInt();
+                    favoriteItems[i] = entitySystem.GetEntityPrototype(id);
+                    favoriteItemIdsLut.Add(id, true);
+                }
+            }
+        }
+
         public override void Serialize(bool isExport)
         {
             lockstep.WriteString(overriddenDisplayName);
             lockstep.WriteString(characterName);
+
+            WriteFavoriteItems();
+
             if (isExport)
                 return;
 
@@ -80,13 +124,20 @@ namespace JanSharp
         {
             overriddenDisplayName = lockstep.ReadString();
             characterName = lockstep.ReadString();
+
+            ReadFavoriteItems(isImport);
+
             if (isImport)
                 return;
 
             favoritePlayersOutgoingCount = (int)lockstep.ReadSmallUInt();
             ArrList.EnsureCapacity(ref favoritePlayersOutgoing, favoritePlayersOutgoingCount);
             for (int i = 0; i < favoritePlayersOutgoingCount; i++)
-                favoritePlayersOutgoing[i] = playersBackendManager.ReadRPPlayerDataRef();
+            {
+                RPPlayerData player = playersBackendManager.ReadRPPlayerDataRef();
+                favoritePlayersOutgoing[i] = player;
+                favoritePlayersOutgoingLut.Add(player, true);
+            }
 
             favoritePlayersIncomingCount = (int)lockstep.ReadSmallUInt();
             ArrList.EnsureCapacity(ref favoritePlayersIncoming, favoritePlayersIncomingCount);

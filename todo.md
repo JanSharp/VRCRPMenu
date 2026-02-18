@@ -196,6 +196,6 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
     - [ ] maybe add holding down keys to repeat their input, especially backspace, if that is doable with the EventTrigger component
   - [ ] filterable list
   - [ ] category support for entities, somehow
-  - [ ] favorites
+  - [x] favorites
 - [ ] help page
 - [ ] ui sounds

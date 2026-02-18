@@ -41,6 +41,8 @@ namespace JanSharp
 
         protected SortableScrollableRow[] rows = new SortableScrollableRow[ArrList.MinCapacity];
         protected int rowsCount = 0;
+        protected SortableScrollableRow[] hiddenRows = new SortableScrollableRow[ArrList.MinCapacity];
+        protected int hiddenRowsCount = 0;
         protected SortableScrollableRow[] unusedRows = new SortableScrollableRow[ArrList.MinCapacity];
         protected int unusedRowsCount = 0;
 
@@ -130,8 +132,10 @@ namespace JanSharp
                 OnPreRebuildRows();
                 HideAllCurrentlyVisibleRows();
                 ArrList.AddRange(ref unusedRows, ref unusedRowsCount, rows, rowsCount);
+                ArrList.AddRange(ref unusedRows, ref unusedRowsCount, hiddenRows, hiddenRowsCount);
                 ArrList.EnsureCapacity(ref rows, newRowsCount);
                 rowsCount = 0; // Prevent ShowOnlyRowsVisibleInViewport from messing with stuff since this is spread out across frames.
+                hiddenRowsCount = 0;
             }
 
             suspensionSw.Restart();
@@ -139,31 +143,54 @@ namespace JanSharp
             {
                 if (LogicIsRunningLong())
                     return;
-                rows[suspendedIndexInArray] = RebuildRow(suspendedIndexInArray);
+                SortableScrollableRow row = RebuildRow(suspendedIndexInArray);
+                if (row.hidden)
+                    ArrList.Add(ref hiddenRows, ref hiddenRowsCount, row);
+                else
+                    rows[rowsCount++] = row;
                 suspendedIndexInArray++;
             }
             suspendedIndexInArray = 0;
 
-            rowsCount = newRowsCount;
             OnRowsCountChanged(); // rows must be populated by this point, as this could call ShowOnlyRowsVisibleInViewport.
             SortAll();
         }
 
+        /// <summary>
+        /// <para>The returned row always has <see cref="SortableScrollableRow.hidden"/> set to
+        /// <see langword="false"/>.</para>
+        /// </summary>
+        /// <returns></returns>
         protected SortableScrollableRow CreateRow()
         {
+            SortableScrollableRow row;
             if (unusedRowsCount != 0)
-                return ArrList.RemoveAt(ref unusedRows, ref unusedRowsCount, unusedRowsCount - 1);
+            {
+                row = ArrList.RemoveAt(ref unusedRows, ref unusedRowsCount, unusedRowsCount - 1);
+                row.hidden = false;
+                return row;
+            }
             GameObject go = Instantiate(rowPrefab);
             go.transform.SetParent(rowsContent, worldPositionStays: false);
-            SortableScrollableRow row = go.GetComponent<SortableScrollableRow>();
+            row = go.GetComponent<SortableScrollableRow>();
             OnRowCreated(row);
             return row;
         }
 
         protected void RemoveRow(SortableScrollableRow row)
         {
-            row.rowGo.SetActive(false);
             ArrList.Add(ref unusedRows, ref unusedRowsCount, row);
+            if (row.hidden)
+            {
+                RemoveFromHiddenRows(row);
+                return;
+            }
+            row.rowGo.SetActive(false);
+            RemoveFromRows(row);
+        }
+
+        private void RemoveFromRows(SortableScrollableRow row)
+        {
             int index = row.index;
             ArrList.RemoveAt(ref rows, ref rowsCount, index);
             OnRowsCountChanged();
@@ -257,14 +284,108 @@ namespace JanSharp
 
         #endregion
 
+        #region HideShowAPI
+
+        protected virtual bool EvaluateHiddenCallback(SortableScrollableRow row) => false;
+
+        protected void UpdateAllHiddenStates()
+        {
+            int totalCount = rowsCount + hiddenRowsCount;
+            int length = ArrList.MinCapacity;
+            if (length < totalCount)
+            {
+                do
+                    length *= 2;
+                while (length < totalCount);
+            }
+            SortableScrollableRow[] newRows = new SortableScrollableRow[length];
+            int newRowsCount = 0;
+            SortableScrollableRow[] newHiddenRows = new SortableScrollableRow[length];
+            int newHiddenRowsCount = 0;
+
+            for (int i = 0; i < 2; i++)
+            {
+                SortableScrollableRow[] currentRows = i == 0 ? rows : hiddenRows;
+                int currentRowsCount = i == 0 ? rowsCount : hiddenRowsCount;
+                for (int j = 0; j < currentRowsCount; j++)
+                {
+                    SortableScrollableRow row = currentRows[j];
+                    bool hidden = EvaluateHiddenCallback(row);
+                    row.hidden = hidden;
+                    row.rowGo.SetActive(!hidden);
+                    if (hidden)
+                    {
+                        row.index = newHiddenRowsCount;
+                        ArrList.Add(ref newHiddenRows, ref newHiddenRowsCount, row);
+                    }
+                    else
+                    {
+                        row.index = newRowsCount;
+                        ArrList.Add(ref newRows, ref newRowsCount, row);
+                    }
+                }
+            }
+
+            rows = newRows;
+            rowsCount = newRowsCount;
+            hiddenRows = newHiddenRows;
+            hiddenRowsCount = newHiddenRowsCount;
+            OnRowsCountChanged();
+            SortAll();
+        }
+
+        protected void HideRow(SortableScrollableRow row)
+        {
+            if (row.hidden)
+                return;
+            row.hidden = true;
+            row.rowGo.SetActive(false);
+            RemoveFromRows(row);
+            AddToHiddenRows(row);
+        }
+
+        protected void ShowRow(SortableScrollableRow row)
+        {
+            if (!row.hidden)
+                return;
+            row.hidden = false;
+            RemoveFromHiddenRows(row);
+            InsertSortNewRow(row);
+            row.rowGo.SetActive(true);
+        }
+
+        private void AddToHiddenRows(SortableScrollableRow row)
+        {
+            row.index = hiddenRowsCount;
+            ArrList.Add(ref hiddenRows, ref hiddenRowsCount, row);
+        }
+
+        private void RemoveFromHiddenRows(SortableScrollableRow row)
+        {
+            int index = row.index;
+            if ((--hiddenRowsCount) == index)
+                return;
+            SortableScrollableRow top = hiddenRows[hiddenRowsCount];
+            top.index = index;
+            hiddenRows[index] = top;
+        }
+
+        #endregion
+
         #region SortAPI
 
         /// <summary>
-        /// <para>Adds <paramref name="row"/> to <see cref="rows"/>.</para>
+        /// <para>Adds <paramref name="row"/> to <see cref="rows"/> or <see cref="hiddenRows"/>.</para>
         /// </summary>
         /// <param name="row"></param>
         protected void InsertSortNewRow(SortableScrollableRow row)
         {
+            if (row.hidden)
+            {
+                row.rowGo.SetActive(false);
+                AddToHiddenRows(row);
+                return;
+            }
             if (rowsCount == 0)
             {
                 ArrList.Add(ref rows, ref rowsCount, row);
@@ -291,6 +412,8 @@ namespace JanSharp
 
         protected void UpdateSortPositionDueToValueChange(SortableScrollableRow row)
         {
+            if (row.hidden)
+                return;
             if (!pageIsVisible)
             {
                 SortOne(row);

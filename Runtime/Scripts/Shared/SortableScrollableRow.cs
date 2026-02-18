@@ -7,6 +7,7 @@ namespace JanSharp
     public class SortableScrollableRow : UdonSharpBehaviour
     {
         [System.NonSerialized] public int index;
+        [System.NonSerialized] public bool hidden;
         public GameObject rowGo;
         public RectTransform rowRect;
     }

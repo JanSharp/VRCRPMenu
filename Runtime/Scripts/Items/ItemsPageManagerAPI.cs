@@ -1,11 +1,14 @@
 using UdonSharp;
 using UnityEngine;
+using VRC.SDK3.Data;
 
 namespace JanSharp
 {
     [SingletonScript("74781a00b310a9b848f04b3f0c276d2d")] // Runtime/Prefabs/Managers/ItemsPageManager.prefab
     public abstract class ItemsPageManagerAPI : UdonSharpBehaviour
     {
+        public abstract DataDictionary ItemPrototypeNamesLut { get; }
+
         /// <summary>
         /// <para>A direct reference to the internal array, which is an <see cref="ArrList"/>, which is to say
         /// that the <see cref="System.Array.Length"/> of this array cannot be trusted.</para>

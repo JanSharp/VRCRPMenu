@@ -1,5 +1,6 @@
 ﻿using UdonSharp;
 using UnityEngine;
+using VRC.SDK3.Data;
 
 namespace JanSharp.Internal
 {
@@ -10,6 +11,12 @@ namespace JanSharp.Internal
         [HideInInspector][SerializeField][SingletonReference] private EntitySystem entitySystem;
         [HideInInspector][SerializeField][SingletonReference] private PermissionManagerAPI permissionManager;
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
+
+        /// <summary>
+        /// <para><see cref="string"/> entityPrototypeName => <see langword="true"/></para>
+        /// </summary>
+        private DataDictionary itemPrototypeNamesLut = new DataDictionary();
+        public override DataDictionary ItemPrototypeNamesLut => itemPrototypeNamesLut;
 
         private EntityPrototype[] itemPrototypes = new EntityPrototype[ArrList.MinCapacity];
         private int itemPrototypesCount = 0;
@@ -30,6 +37,7 @@ namespace JanSharp.Internal
                 if (System.Array.IndexOf(classNames, nameof(ItemExtensionData)) != -1
                     && System.Array.IndexOf(classNames, nameof(GMProxyExtensionData)) == -1)
                 {
+                    itemPrototypeNamesLut.Add(prototype.PrototypeName, true);
                     ArrList.Add(ref itemPrototypes, ref itemPrototypesCount, prototype);
                 }
             }

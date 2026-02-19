@@ -199,6 +199,6 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
     - [x] search query logic
   - [ ] category support for entities, somehow
   - [x] favorites
-  - [ ] when importing favorites, ignore entities which are no longer items
+  - [x] when importing favorites, ignore entities which are no longer items
 - [ ] help page
 - [ ] ui sounds

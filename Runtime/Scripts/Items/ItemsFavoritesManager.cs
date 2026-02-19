@@ -9,6 +9,7 @@ namespace JanSharp.Internal
     {
         [HideInInspector][SerializeField][SingletonReference] private LockstepAPI lockstep;
         [HideInInspector][SerializeField][SingletonReference] private PlayersBackendManagerAPI playersBackendManager;
+        [HideInInspector][SerializeField][SingletonReference] private ItemsPageManagerAPI itemsPageManager;
         [HideInInspector][SerializeField][SingletonReference] private EntitySystem entitySystem;
 
         private RPPlayerData[] importedPlayers = new RPPlayerData[ArrList.MinCapacity];
@@ -22,6 +23,7 @@ namespace JanSharp.Internal
         [LockstepEvent(LockstepEventType.OnImportFinishingUp, Order = -100)]
         public void OnImportFinishingUp()
         {
+            DataDictionary itemPrototypeNamesLut = itemsPageManager.ItemPrototypeNamesLut;
             for (int i = 0; i < importedPlayersCount; i++)
             {
                 RPPlayerData player = importedPlayers[i];
@@ -35,7 +37,7 @@ namespace JanSharp.Internal
                 for (int j = 0; j < count; j++)
                 {
                     EntityPrototype entityPrototype = entitySystem.GetImportedPrototypeMetadata(ids[j]).entityPrototype;
-                    if (entityPrototype == null)
+                    if (entityPrototype == null || !itemPrototypeNamesLut.ContainsKey(entityPrototype.PrototypeName))
                         continue;
                     ArrList.Add(ref favoriteItems, ref favoriteItemsCount, entityPrototype);
                     favoriteItemIdsLut.Add(entityPrototype.Id, true);

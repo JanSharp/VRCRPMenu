@@ -288,9 +288,9 @@ namespace JanSharp
 
         protected virtual bool EvaluateHiddenCallback(SortableScrollableRow row) => false;
 
-        protected void UpdateAllHiddenStates()
+        protected void UpdateAllHiddenStates(bool onlyUpdateShown = false)
         {
-            int totalCount = rowsCount + hiddenRowsCount;
+            int totalCount = rowsCount + (onlyUpdateShown ? 0 : hiddenRowsCount);
             int length = ArrList.MinCapacity;
             if (length < totalCount)
             {
@@ -300,10 +300,10 @@ namespace JanSharp
             }
             SortableScrollableRow[] newRows = new SortableScrollableRow[length];
             int newRowsCount = 0;
-            SortableScrollableRow[] newHiddenRows = new SortableScrollableRow[length];
-            int newHiddenRowsCount = 0;
+            SortableScrollableRow[] newHiddenRows = onlyUpdateShown ? hiddenRows : new SortableScrollableRow[length];
+            int newHiddenRowsCount = onlyUpdateShown ? hiddenRowsCount : 0;
 
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < (onlyUpdateShown ? 1 : 2); i++)
             {
                 SortableScrollableRow[] currentRows = i == 0 ? rows : hiddenRows;
                 int currentRowsCount = i == 0 ? rowsCount : hiddenRowsCount;

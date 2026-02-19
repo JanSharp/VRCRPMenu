@@ -12,7 +12,6 @@ namespace JanSharp
         [HideInInspector][SerializeField][SingletonReference] private ItemsPageManagerAPI itemsPageManager;
         [HideInInspector][SerializeField][SingletonReference] private ItemsFavoritesManagerAPI itemsFavoritesManager;
         [HideInInspector][SerializeField][SingletonReference] private ItemSpawnLocationHelperAPI itemSpawnLocationHelper;
-        [HideInInspector][SerializeField][SingletonReference] private EntitySystem entitySystem;
 
         public ItemsList rowsList;
         public ItemsRow rowPrefabScript;

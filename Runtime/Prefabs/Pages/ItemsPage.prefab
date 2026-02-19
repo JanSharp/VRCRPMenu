@@ -4607,6 +4607,18 @@ MonoBehaviour:
           m_StringArgument: OnInputFieldValueChanged
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 1396109078644102461}
+        m_TargetAssemblyTypeName: 
+        m_MethodName: SendCustomEvent
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: OnSearchFieldValueChanged
+          m_BoolArgument: 0
+        m_CallState: 2
   m_OnTouchScreenKeyboardStatusChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -8152,6 +8164,7 @@ MonoBehaviour:
   sortItemNameDescendingImage: {fileID: 2121241103804522498}
   sortCategoryAscendingImage: {fileID: 8242204228428417018}
   sortCategoryDescendingImage: {fileID: 5412575629615751347}
+  searchInputField: {fileID: 1189287165844911273}
 --- !u!114 &1396109078644102461
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10870,7 +10883,6 @@ MonoBehaviour:
   itemsPageManager: {fileID: 0}
   itemsFavoritesManager: {fileID: 0}
   itemSpawnLocationHelper: {fileID: 0}
-  entitySystem: {fileID: 0}
   rowsList: {fileID: 73265649320745545}
   rowPrefabScript: {fileID: 5167109297467791914}
   itemSizeToggles: {fileID: 2403219355146054047}

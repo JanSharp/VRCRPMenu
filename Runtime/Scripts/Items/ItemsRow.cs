@@ -22,6 +22,13 @@ namespace JanSharp
         public GameObject categoryRoot;
         public GameObject overlayRoot;
 
+        [System.NonSerialized] public string[] words;
+        [System.NonSerialized] public int totalWordsLetterCount;
+        [System.NonSerialized] public int firstMatchingLetterIndex;
+        [System.NonSerialized] public int longestConsecutiveMatch;
+        [System.NonSerialized] public bool anyMatchesAreBeginningsOfWords;
+        [System.NonSerialized] public bool allMatchesAreBeginningsOfWords;
+
         public void OnFavoriteValueChanged() => page.OnFavoriteValueChanged(this);
         public void OnSpawnToggleValueChanged() => page.OnSpawnToggleValueChanged(this);
         public void OnConfirmSpawnClick() => page.OnConfirmSpawnClick(this);

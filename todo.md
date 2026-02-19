@@ -194,9 +194,11 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
   - [x] styling
   - [x] custom keyboard
     - [ ] maybe add holding down keys to repeat their input, especially backspace, if that is doable with the EventTrigger component
+    - [ ] add num pad
   - [x] filterable list
-    - [ ] search query logic
+    - [x] search query logic
   - [ ] category support for entities, somehow
   - [x] favorites
+  - [ ] when importing favorites, ignore entities which are no longer items
 - [ ] help page
 - [ ] ui sounds

@@ -516,6 +516,8 @@ namespace JanSharp
             MergeSort(currentSortOrderFunction);
             for (int i = 0; i < rowsCount; i++)
                 SetRowIndex(rows[i], i);
+            if (currentSortOrderImage != null)
+                currentSortOrderImage.enabled = true;
             someRowsAreOutOfSortOrder = false;
             ShowOnlyRowsVisibleInViewport();
         }

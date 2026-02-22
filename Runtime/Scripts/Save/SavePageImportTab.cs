@@ -122,8 +122,13 @@ namespace JanSharp
 
             LabelWidgetData mainInfoLabel = importOptionsUI.Info.AddChild(importOptionsUI.WidgetManager.NewLabel(""));
 
-            FoldOutWidgetData gsFoldOut = importOptionsUI.Info.AddChild(importOptionsUI.WidgetManager.NewFoldOutScope("Game States", true));
-            gsFoldOut.AddChild(importOptionsUI.WidgetManager.NewLabel(BuildImportedGameStatesMsg(out int canImportCount)).StdMoveWidget());
+            string importedGameStatesMsg = BuildImportedGameStatesMsg(out int canImportCount, out bool anyWarnings);
+            if (anyWarnings)
+                importOptionsUI.Info.FoldedOut = true; // Else retain state, don't set to false.
+
+            FoldOutWidgetData gsFoldOut = importOptionsUI.Info.AddChild(
+                importOptionsUI.WidgetManager.NewFoldOutScope("Game States", foldedOut: anyWarnings));
+            gsFoldOut.AddChild(importOptionsUI.WidgetManager.NewLabel(importedGameStatesMsg).StdMoveWidget());
             gsFoldOut.DecrementRefsCount();
             anyImportedGSHasNoErrors = canImportCount != 0;
 
@@ -142,13 +147,15 @@ namespace JanSharp
             UpdateImportButton();
         }
 
-        private string BuildImportedGameStatesMsg(out int canImportCount)
+        private string BuildImportedGameStatesMsg(out int canImportCount, out bool anyWarnings)
         {
             DataDictionary importedGSByInternalName = new DataDictionary();
             foreach (object[] importedGS in importedGameStates)
                 importedGSByInternalName.Add(LockstepImportedGS.GetInternalName(importedGS), new DataToken(importedGS));
 
             canImportCount = 0;
+            anyWarnings = false;
+
             StringBuilder sb = new StringBuilder();
             sb.Append("<size=80%>");
             bool isFirstLine = true;
@@ -162,9 +169,15 @@ namespace JanSharp
 
                 sb.Append(gameState.GameStateDisplayName);
                 if (!importedGSByInternalName.TryGetValue(gameState.GameStateInternalName, out DataToken importedGSToken))
-                    sb.Append(gameState.GameStateSupportsImportExport
-                        ? " - <color=#888888>not in imported data</color>"
-                        : " - <color=#888888>does not support import</color>");
+                {
+                    if (!gameState.GameStateSupportsImportExport)
+                        sb.Append(" - <color=#888888>does not support import</color>");
+                    else
+                    {
+                        sb.Append(" - <color=#ffff99>not in imported data</color>");
+                        anyWarnings = true;
+                    }
+                }
                 else
                 {
                     object[] importedGS = (object[])importedGSToken.Reference;
@@ -174,6 +187,7 @@ namespace JanSharp
                         sb.Append(" - <color=#ffaaaa>");
                         sb.Append(errorMsg);
                         sb.Append("</color>");
+                        anyWarnings = true;
                     }
                     else
                     {
@@ -198,6 +212,7 @@ namespace JanSharp
                 sb.Append(" - <color=#ffaaaa>");
                 sb.Append(LockstepImportedGS.GetErrorMsg(importedGS));
                 sb.Append("</color>");
+                anyWarnings = true;
             }
 
             return sb.ToString();

@@ -121,6 +121,7 @@ namespace JanSharp
                     "Currently using export options for autosaves. Modifying is disabled to prevent "
                         + "accidentally confusing exports vs autosaves.");
                 autosaveOptionsUI.Info.AddChild(autosaveUsingExportInfoLabel);
+                autosaveOptionsUI.Info.FoldedOut = true; // Ensure this info message is visible.
             }
             autosaveOptionsUI.Draw();
         }

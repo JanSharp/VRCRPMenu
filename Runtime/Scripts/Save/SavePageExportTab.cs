@@ -12,6 +12,7 @@ namespace JanSharp
     public class SavePageExportTab : SavePageTab
     {
         [SerializeField][HideInInspector][SingletonReference] private LockstepAPI lockstep;
+        [SerializeField][HideInInspector][SingletonReference] private WidgetManager widgetManager;
 
         [SerializeField] private LockstepOptionsEditorUI exportOptionsUI;
         [SerializeField] private TMP_InputField exportNameField;
@@ -22,6 +23,9 @@ namespace JanSharp
         [SerializeField] private TextMeshProUGUI exportedDataSizeText;
         private string exportedDataSizeTextFormat;
         [SerializeField] private TMP_InputField serializedOutputField;
+
+        private FoldOutWidgetData exportGameStatesFoldOut;
+        private LabelWidgetData exportGameStatesInfoLabel;
 
         private bool anySupportImportExport;
         private bool isInitialized = false;
@@ -102,11 +106,20 @@ namespace JanSharp
             return sb.ToString();
         }
 
+        /// <summary>
+        /// <para>The widgets this adds can only be used by one options UI concurrently.</para>
+        /// </summary>
+        /// <param name="optionsUI"></param>
         public void AddGameStatesToExportToInfoWidget(LockstepOptionsEditorUI optionsUI)
         {
-            FoldOutWidgetData gsFoldOut = optionsUI.Info.AddChild(optionsUI.WidgetManager.NewFoldOutScope("Game States", true));
-            gsFoldOut.AddChild(optionsUI.WidgetManager.NewLabel(BuildGameStatesToExportMsg()).StdMoveWidget());
-            gsFoldOut.DecrementRefsCount();
+            // By reusing the fold out widget data it remembers the fold out state.
+            exportGameStatesFoldOut = exportGameStatesFoldOut ?? widgetManager.NewFoldOutScope("Game States", false);
+            exportGameStatesInfoLabel = exportGameStatesInfoLabel ?? widgetManager.NewLabel("");
+            // Clear and readd the child in case any other system decided to add something to this widget.
+            exportGameStatesFoldOut.ClearChildren();
+            exportGameStatesFoldOut.AddChild(exportGameStatesInfoLabel);
+            exportGameStatesInfoLabel.Label = BuildGameStatesToExportMsg();
+            optionsUI.Info.AddChild(exportGameStatesFoldOut);
         }
 
         private bool CanExport() => isInitialized && anySupportImportExport && !lockstep.IsExporting && !lockstep.IsImporting;

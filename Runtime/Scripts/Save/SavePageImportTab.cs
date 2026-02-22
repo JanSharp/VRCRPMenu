@@ -174,7 +174,7 @@ namespace JanSharp
                         sb.Append(" - <color=#888888>does not support import</color>");
                     else
                     {
-                        sb.Append(" - <color=#ffff99>not in imported data</color>");
+                        sb.Append(" - <color=#ffaaaa>not in imported data</color>");
                         anyWarnings = true;
                     }
                 }

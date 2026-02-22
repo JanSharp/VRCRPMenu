@@ -27,10 +27,12 @@ namespace JanSharp
         public override void InitFromPreInstantiated(EntityExtension entityExtension)
         {
             gmProxyDisplayName = ((GMProxyExtension)entityExtension).pickup.interactText;
+            ((Internal.GMProxiesManager)gmProxiesManager).RegisterGMProxy(this);
         }
 
         public override void InitBeforeDeserialization()
         {
+            ((Internal.GMProxiesManager)gmProxiesManager).RegisterGMProxy(this);
         }
 
         public override void OnEntityExtensionDataCreated()
@@ -51,8 +53,6 @@ namespace JanSharp
         public override void Deserialize(bool isImport, uint importedDataVersion)
         {
             gmProxyDisplayName = lockstep.ReadString();
-            if (!isImport)
-                ((Internal.GMProxiesManager)gmProxiesManager).RegisterGMProxy(this);
         }
     }
 }

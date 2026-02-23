@@ -1,7 +1,7 @@
 
 # RP Menu
 
-A menu with a focus on role play, with features such as GM requests, voice volumes, teleporting, no clip, spawning items, and permissions.
+A menu with a focus on role play, with features such as GM requests, voice ranges, teleporting, no clip, spawning items, and permissions.
 
 # Installing
 

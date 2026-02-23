@@ -204,5 +204,5 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [ ] ui sounds
 - [ ] maybe have the menu side bar expanded/collapsed state be part of import export
 - [ ] maybe have the expanded/collapsed state of the keyboard on the items page
-- [ ] when hiding and showing the import tab the widgets must match what gets created in OnImportSerializedTextValueChangedDelayed
+- [x] when hiding and showing the import tab the widgets must match what gets created in OnImportSerializedTextValueChangedDelayed
 - [ ] mention sylan's gm menu in the readme. While I took no code nor assets from there, I did take notable amount of inspiration

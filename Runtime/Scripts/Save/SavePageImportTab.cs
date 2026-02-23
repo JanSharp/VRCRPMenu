@@ -58,22 +58,17 @@ namespace JanSharp
 
         public override void OnTabGotShown()
         {
-            // Technically possible that this Clear is required, due to the delay for input field value changed.
-            importOptionsUI.Clear();
-            if (importedGameStates != null)
-                lockstep.ShowImportOptionsEditor(importOptionsUI, importedGameStates);
-            importOptionsUI.Draw();
         }
 
         public override void OnTabGotHidden()
         {
-            if (importedGameStates != null)
-            {
-                lockstep.UpdateAllCurrentImportOptionsFromWidgets();
-                lockstep.HideImportOptionsEditor();
-            }
-            importOptionsUI.Clear();
-            importOptionsUI.Draw(); // Return widgets to the pool.
+            // Do not call HideImportOptionsEditor or anything else in here, as that would mean rebuilding the
+            // editor in OnTabGotShown. Unlike the export and autosave tabs we can expect the user not to
+            // paste something into the input field, close the menu and keep it closed forever. The user is
+            // likely to actually go through with the import, or cancel by going to a different page, rather
+            // quickly. Therefore there is no need to worry about any systems keeping the import options
+            // editor up to date while the menu is actually not shown, which would be a waste of performance.
+            // It would still be a waste here, however it is likely to only be for a very short time.
         }
 
         public override void OnPageBecameInactive()

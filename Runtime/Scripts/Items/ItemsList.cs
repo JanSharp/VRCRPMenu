@@ -56,7 +56,8 @@ namespace JanSharp
             someRowsAreOutOfSortOrder = false;
         }
 
-        private void FetchLocalPlayer()
+        [PlayerDataEvent(PlayerDataEventType.OnLocalPlayerDataAvailable)]
+        public void OnLocalPlayerDataAvailable()
         {
             localPlayer = playersBackendManager.GetRPPlayerData(playerDataManager.LocalPlayerData);
         }
@@ -111,8 +112,6 @@ namespace JanSharp
             row.entityPrototype = prototype;
             FindWords(row);
 
-            if (localPlayer == null)
-                FetchLocalPlayer();
             bool isFavorite = localPlayer.favoriteItemIdsLut.ContainsKey(prototype.Id);
             string itemName = prototype.DisplayName;
             string category = "Category"; // TODO

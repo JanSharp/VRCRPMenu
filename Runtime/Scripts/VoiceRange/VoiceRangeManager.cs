@@ -72,9 +72,6 @@ namespace JanSharp.Internal
 
         #region Initialization
 
-        private bool isInitialized = false;
-        public override bool IsInitialized => isInitialized;
-
         private void Start()
         {
             localPlayerId = (uint)Networking.LocalPlayer.playerId;
@@ -141,21 +138,21 @@ namespace JanSharp.Internal
             voiceRangePlayerDataIndex = playerDataManager.GetPlayerDataClassNameIndex<VoiceRangePlayerData>(nameof(VoiceRangePlayerData));
         }
 
-        [PlayerDataEvent(PlayerDataEventType.OnPostPlayerDataManagerInit)]
-        public void OnPostPlayerDataManagerInit()
-        {
-            Setup();
-        }
-
-        private void Setup()
-        {
-            FetchLocalPlayerData();
-            isInitialized = true;
-        }
-
-        private void FetchLocalPlayerData()
+        [PlayerDataEvent(PlayerDataEventType.OnLocalPlayerDataAvailable)]
+        public void OnLocalPlayerDataAvailable()
         {
             localPlayer = (VoiceRangePlayerData)playerDataManager.GetCorePlayerDataForPlayerId(localPlayerId).customPlayerData[voiceRangePlayerDataIndex];
+        }
+
+        [LockstepEvent(LockstepEventType.OnPostClientBeginCatchUp)]
+        public void OnPostClientBeginCatchUp()
+        {
+            // When a player leaves the world their voice range mode gets set to default, thus the only time
+            // this logic here would be required is if some system changed a players mode while they were
+            // offline and the permission group they are in also does not have the permission for that voice
+            // range mode.
+            for (int i = 0; i < rangeDefsCount; i++)
+                rangeDefs[i].Resolve();
         }
 
         #endregion
@@ -346,10 +343,7 @@ namespace JanSharp.Internal
         public override string DeserializeGameState(bool isImport, uint importedDataVersion, LockstepGameStateOptionsData importOptions)
         {
             if (!isImport)
-            {
-                Setup();
                 return null;
-            }
             suspensionSw.Restart();
             if (!lockstep.IsContinuationFromPrevFrame && !BuildImportRemapAndMasks())
                 return null;

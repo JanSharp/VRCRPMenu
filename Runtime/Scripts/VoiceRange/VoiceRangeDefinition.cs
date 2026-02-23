@@ -6,6 +6,7 @@ namespace JanSharp
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class VoiceRangeDefinition : PermissionResolver
     {
+        [HideInInspector][SerializeField][SingletonReference] private LockstepAPI lockstep;
         [HideInInspector][SerializeField][SingletonReference] private PermissionManagerAPI permissionManager;
         [HideInInspector][SerializeField][SingletonReference] private VoiceRangeManagerAPI voiceRangeManager;
 
@@ -52,7 +53,7 @@ namespace JanSharp
 
         public override void Resolve()
         {
-            if (permissionDef == null || permissionDef.valueForLocalPlayer || !voiceRangeManager.IsInitialized)
+            if (permissionDef == null || permissionDef.valueForLocalPlayer || !lockstep.IsInitialized)
                 return;
             VoiceRangePlayerData localPlayer = voiceRangeManager.LocalPlayer;
             if (localPlayer.latencyVoiceRangeIndex == index)

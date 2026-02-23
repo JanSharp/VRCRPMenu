@@ -57,7 +57,6 @@ namespace JanSharp.Internal
         public override int ActiveRequestsCount => activeRequestsCount;
 
         #region GameState
-        private int rpPlayerDataIndex;
         private GMRequest[] requests = new GMRequest[ArrList.MinCapacity];
         private int requestsCount = 0;
         /// <summary>
@@ -129,29 +128,12 @@ namespace JanSharp.Internal
 
         #endregion
 
-        private uint localPlayerId;
         private RPPlayerData localPlayer;
 
-        private void Start()
+        [PlayerDataEvent(PlayerDataEventType.OnLocalPlayerDataAvailable)]
+        public void OnLocalPlayerDataAvailable()
         {
-            localPlayerId = (uint)Networking.LocalPlayer.playerId;
-        }
-
-        [PlayerDataEvent(PlayerDataEventType.OnAllCustomPlayerDataRegistered)]
-        public void OnAllCustomPlayerDataRegistered()
-        {
-            rpPlayerDataIndex = playerDataManager.GetPlayerDataClassNameIndex<RPPlayerData>(nameof(RPPlayerData));
-        }
-
-        [LockstepEvent(LockstepEventType.OnInit)]
-        public void OnInit()
-        {
-            FetchLocalPlayerData();
-        }
-
-        private void FetchLocalPlayerData()
-        {
-            localPlayer = (RPPlayerData)playerDataManager.GetCorePlayerDataForPlayerId(localPlayerId).customPlayerData[rpPlayerDataIndex];
+            localPlayer = playersBackendManager.GetRPPlayerData(playerDataManager.LocalPlayerData);
         }
 
         private GMRequest CreateNewGMRequestInst()
@@ -637,7 +619,6 @@ namespace JanSharp.Internal
         {
             if (!lockstep.IsContinuationFromPrevFrame)
             {
-                FetchLocalPlayerData();
                 requestsCount = (int)lockstep.ReadSmallUInt();
                 ArrList.EnsureCapacity(ref requests, requestsCount);
             }

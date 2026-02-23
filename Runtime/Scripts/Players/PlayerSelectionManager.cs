@@ -60,22 +60,13 @@ namespace JanSharp
 
         public PlayerSelectionGroup SelectionGroupForSerialization => (PlayerSelectionGroup)dataForSerialization;
 
-        private uint localPlayerId;
         private PerPlayerSelectionData localPlayer;
-        public PerPlayerSelectionData LocalPlayer
-        {
-            get
-            {
-                if (localPlayer == null)
-                    localPlayer = (PerPlayerSelectionData)playerDataManager.GetCorePlayerDataForPlayerId(localPlayerId).customPlayerData[playerDataIndex];
-                return localPlayer;
-            }
-        }
+        public PerPlayerSelectionData LocalPlayer => localPlayer;
 
-        protected override void Start()
+        [PlayerDataEvent(PlayerDataEventType.OnLocalPlayerDataAvailable)]
+        public void OnLocalPlayerDataAvailable()
         {
-            base.Start();
-            localPlayerId = (uint)Networking.LocalPlayer.playerId;
+            localPlayer = (PerPlayerSelectionData)playerDataManager.LocalPlayerData.customPlayerData[playerDataIndex];
         }
 
         public void SetPlayerSelectionState(CorePlayerData player, bool isSelected)

@@ -36,6 +36,12 @@ namespace JanSharp
         private VRCPlayerApi localPlayerApi;
         private RPPlayerData localPlayer;
 
+        [MenuManagerEvent(MenuManagerEventType.OnMenuManagerStart)]
+        public void OnMenuManagerStart()
+        {
+            localPlayerApi = Networking.LocalPlayer;
+        }
+
         public override void Initialize()
         {
             base.Initialize();
@@ -46,9 +52,9 @@ namespace JanSharp
             someRowsAreOutOfSortOrder = false;
         }
 
-        private void FetchLocalPlayer()
+        [PlayerDataEvent(PlayerDataEventType.OnLocalPlayerDataAvailable)]
+        public void OnLocalPlayerDataAvailable()
         {
-            localPlayerApi = Networking.LocalPlayer;
             localPlayer = playersBackendManager.GetRPPlayerData(playerDataManager.LocalPlayerData);
         }
 
@@ -108,8 +114,6 @@ namespace JanSharp
             RPPlayerData rpPlayerData = (RPPlayerData)core.customPlayerData[rpPlayerDataIndex];
             row.rpPlayerData = rpPlayerData;
 
-            if (localPlayer == null)
-                FetchLocalPlayer();
             bool isFavorite = localPlayer.favoritePlayersOutgoingLut.ContainsKey(rpPlayerData);
             string playerName = rpPlayerData.PlayerDisplayName;
             string characterName = rpPlayerData.characterName;
@@ -138,8 +142,6 @@ namespace JanSharp
 
         private void EvaluateAllProximity()
         {
-            if (localPlayer == null)
-                FetchLocalPlayer();
             Vector3 localPosition = localPlayerApi.GetPosition();
             PlayersRow[] rows = Rows;
             for (int i = 0; i < rowsCount; i++)

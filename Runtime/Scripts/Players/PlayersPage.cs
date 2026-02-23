@@ -38,19 +38,7 @@ namespace JanSharp
 
         // private bool isInitialized = false;
 
-        /// <summary>
-        /// <para>Check <see langword="null"/> and call <see cref="FetchLocalPlayer"/> before using.</para>
-        /// </summary>
         private RPPlayerData localPlayer;
-
-        /// <summary>
-        /// <para>To avoid having to do this using OnInit would be required, which makes putting a rebuild
-        /// rows call into OnInit and checking isInitialized in every event handler.</para>
-        /// </summary>
-        private void FetchLocalPlayer()
-        {
-            localPlayer = playersBackendManager.GetRPPlayerData(playerDataManager.LocalPlayerData);
-        }
 
         [MenuManagerEvent(MenuManagerEventType.OnMenuManagerStart)]
         public void OnMenuManagerStart()
@@ -64,6 +52,12 @@ namespace JanSharp
         {
             rowsList.Initialize();
             // isInitialized = true;
+        }
+
+        [PlayerDataEvent(PlayerDataEventType.OnLocalPlayerDataAvailable)]
+        public void OnLocalPlayerDataAvailable()
+        {
+            localPlayer = playersBackendManager.GetRPPlayerData(playerDataManager.LocalPlayerData);
         }
 
         [LockstepEvent(LockstepEventType.OnClientBeginCatchUp)]
@@ -186,8 +180,6 @@ namespace JanSharp
 
         public void OnFavoriteValueChanged(PlayersRow row)
         {
-            if (localPlayer == null)
-                FetchLocalPlayer();
             bool isFavorite = row.favoriteToggle.isOn;
             if (isFavorite)
                 playersFavoritesManager.SendAddFavoritePlayerIA(localPlayer, row.rpPlayerData);

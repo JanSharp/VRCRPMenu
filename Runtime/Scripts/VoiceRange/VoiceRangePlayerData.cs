@@ -89,6 +89,8 @@ namespace JanSharp
             latencyWorldVisualType = worldVisualType;
             latencyShowInHUDMask = showInHUDMask;
             latencyHUDVisualType = hudVisualType;
+            if (isImport)
+                ((Internal.VoiceRangeManager)voiceRangeManager).RemapImportedPlayerData(this);
         }
     }
 }

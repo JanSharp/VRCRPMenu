@@ -6,7 +6,7 @@ using VRC.SDKBase;
 namespace JanSharp.Internal
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-    [LockstepGameStateDependency(typeof(PlayerDataManagerAPI))]
+    [LockstepGameStateDependency(typeof(PlayerDataManagerAPI), SelfLoadsBeforeDependency = true)]
     [CustomRaisedEventsDispatcher(typeof(VoiceRangeEventAttribute), typeof(VoiceRangeEventType))]
     public class VoiceRangeManager : VoiceRangeManagerAPI
     {
@@ -55,20 +55,7 @@ namespace JanSharp.Internal
         private uint importKeepMask;
         private uint importAddWorldMask;
         private uint importAddHUDMask;
-
-        private int suspendedIndexInArray = 0;
-        private System.Diagnostics.Stopwatch suspensionSw = new System.Diagnostics.Stopwatch();
-        private const long MaxWorkMSPerFrame = 10L;
-
-        private bool LogicIsRunningLong()
-        {
-            if (suspensionSw.ElapsedMilliseconds >= MaxWorkMSPerFrame)
-            {
-                lockstep.FlagToContinueNextFrame();
-                return true;
-            }
-            return false;
-        }
+        private bool importMustDoRemapping;
 
         #region Initialization
 
@@ -344,37 +331,35 @@ namespace JanSharp.Internal
         {
             if (!isImport)
                 return null;
-            suspensionSw.Restart();
-            if (!lockstep.IsContinuationFromPrevFrame && !BuildImportRemapAndMasks())
-                return null;
-            int count = playerDataManager.AllCorePlayerDataCount;
-            CorePlayerData[] players = playerDataManager.AllCorePlayerDataRaw;
-            while (suspendedIndexInArray < count)
-            {
-                if (LogicIsRunningLong())
-                    return null;
-                VoiceRangePlayerData player = (VoiceRangePlayerData)players[suspendedIndexInArray].customPlayerData[voiceRangePlayerDataIndex];
-                uint worldMask = player.showInWorldMask;
-                uint hudMask = player.showInHUDMask;
-                uint newWorldMask = (worldMask & importKeepMask) | importAddWorldMask;
-                uint newHUDMask = (hudMask & importKeepMask) | importAddHUDMask;
-                for (int i = 0; i < importToRemapCount; i++)
-                {
-                    uint fromFlag = fromImportedFlag[i];
-                    uint toFlag = toLiveFlag[i];
-                    if ((worldMask & fromFlag) != 0u)
-                        newWorldMask |= toFlag;
-                    if ((hudMask & fromFlag) != 0u)
-                        newHUDMask |= toFlag;
-                }
-                player.showInWorldMask = newWorldMask;
-                player.showInHUDMask = newHUDMask;
-                player.latencyShowInWorldMask = newWorldMask;
-                player.latencyShowInHUDMask = newHUDMask;
-                suspendedIndexInArray++;
-            }
-            suspendedIndexInArray = 0;
+            importMustDoRemapping = BuildImportRemapAndMasks();
             return null;
+        }
+
+        /// <summary>
+        /// <para>Internal API.</para>
+        /// </summary>
+        /// <param name="player"></param>
+        public void RemapImportedPlayerData(VoiceRangePlayerData player)
+        {
+            if (!importMustDoRemapping)
+                return;
+            uint worldMask = player.showInWorldMask;
+            uint hudMask = player.showInHUDMask;
+            uint newWorldMask = (worldMask & importKeepMask) | importAddWorldMask;
+            uint newHUDMask = (hudMask & importKeepMask) | importAddHUDMask;
+            for (int i = 0; i < importToRemapCount; i++)
+            {
+                uint fromFlag = fromImportedFlag[i];
+                uint toFlag = toLiveFlag[i];
+                if ((worldMask & fromFlag) != 0u)
+                    newWorldMask |= toFlag;
+                if ((hudMask & fromFlag) != 0u)
+                    newHUDMask |= toFlag;
+            }
+            player.showInWorldMask = newWorldMask;
+            player.showInHUDMask = newHUDMask;
+            player.latencyShowInWorldMask = newWorldMask;
+            player.latencyShowInHUDMask = newHUDMask;
         }
 
         #endregion

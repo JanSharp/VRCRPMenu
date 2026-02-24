@@ -22,7 +22,7 @@ namespace JanSharp
         {
             if (!toggle.toggle.isOn)
             {
-                MakeTogglesMatchLatencyState();
+                toggle.toggle.SetIsOnWithoutNotify(true);
                 return;
             }
             int voiceRangeIndex = voiceRangeManager.GetVoiceRangeDefinition(toggle.voiceRangeInternalName).index;

@@ -102,7 +102,10 @@ namespace JanSharp
 
         public void OnTabToggleValueChanged(SavePageTab tab)
         {
-            SetActiveTab(tab.tabType);
+            if (tab.tabToggle.isOn)
+                SetActiveTab(tab.tabType);
+            else
+                tab.tabToggle.SetIsOnWithoutNotify(true);
         }
 
         private void SetActiveTab(SavePageTabType activeTabType)

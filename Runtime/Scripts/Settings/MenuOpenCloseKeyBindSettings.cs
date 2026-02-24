@@ -22,7 +22,7 @@ namespace JanSharp
             if (toggle.toggle.isOn)
                 menuSettingsManager.SendSetOpenCloseKeyBindIA(menuSettingsManager.LocalPlayerSettings, toggle.keyBind);
             else
-                MakeTogglesMatchLatencyState();
+                toggle.toggle.SetIsOnWithoutNotify(true);
         }
 
         [LockstepEvent(LockstepEventType.OnInit)]

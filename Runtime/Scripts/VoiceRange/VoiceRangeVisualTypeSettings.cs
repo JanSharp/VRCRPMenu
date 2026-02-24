@@ -25,7 +25,7 @@ namespace JanSharp
         {
             if (!toggle.toggle.isOn)
             {
-                MakeTogglesMatchLatencyState();
+                toggle.toggle.SetIsOnWithoutNotify(true);
                 return;
             }
             VoiceRangePlayerData localPlayer = voiceRangeManager.LocalPlayer;

@@ -22,7 +22,7 @@ namespace JanSharp
             if (toggle.toggle.isOn)
                 menuSettingsManager.SendSetMenuPositionIA(menuSettingsManager.LocalPlayerSettings, toggle.menuPosition);
             else
-                MakeTogglesMatchLatencyState();
+                toggle.toggle.SetIsOnWithoutNotify(true);
         }
 
         [LockstepEvent(LockstepEventType.OnInit)]

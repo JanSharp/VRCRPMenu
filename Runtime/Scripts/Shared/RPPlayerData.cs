@@ -7,7 +7,7 @@ namespace JanSharp
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class RPPlayerData : PlayerData
     {
-        public override string PlayerDataInternalName => "jansharp.rp-backend";
+        public override string PlayerDataInternalName => "jansharp.rp-menu-backend";
         public override string PlayerDataDisplayName => "RP Player Backend";
         public override bool SupportsImportExport => true;
         public override uint DataVersion => 0u;

@@ -6,8 +6,8 @@ namespace JanSharp
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class PerPlayerSelectionData : PerPlayerDynamicData
     {
-        public override string PlayerDataInternalName => "jansharp.player-selection-data";
-        public override string PlayerDataDisplayName => "Player Selection Data";
+        public override string PlayerDataInternalName => "jansharp.rp-menu-player-selection";
+        public override string PlayerDataDisplayName => "Player Selection";
         public override uint DataVersion => 0u;
         public override uint LowestSupportedDataVersion => 0u;
 

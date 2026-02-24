@@ -7,8 +7,8 @@ namespace JanSharp
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class VoiceRangePlayerData : PlayerData
     {
-        public override string PlayerDataInternalName => "jansharp.voice-range";
-        public override string PlayerDataDisplayName => "Voice Range Data";
+        public override string PlayerDataInternalName => "jansharp.rp-menu-voice-range";
+        public override string PlayerDataDisplayName => "Voice Range And Settings";
         public override bool SupportsImportExport => true;
         public override uint DataVersion => 0u;
         public override uint LowestSupportedDataVersion => 0u;

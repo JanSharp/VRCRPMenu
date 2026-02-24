@@ -30,6 +30,8 @@ namespace JanSharp
         private bool anySupportImportExport;
         private bool isInitialized = false;
 
+        [SerializeField] private SavePageAutosaveTab autosaveTab;
+
         private bool waitingForExportToFinish = false;
 
         private LockstepGameStateOptionsData[] exportOptions;
@@ -67,9 +69,7 @@ namespace JanSharp
         {
             lockstep.UpdateAllCurrentExportOptionsFromWidgets();
             lockstep.HideExportOptionsEditor();
-            // TODO
-            // if (!AutosaveUsesExportOptions && autosavesEnabledToggle.isOn)
-            //     lockstep.ExportOptionsForAutosave = exportOptions; // exportOptions == autosaveOptions
+            autosaveTab.OnExportSettingsChanged();
             exportOptionsUI.Clear();
             exportOptionsUI.Draw(); // Return widgets to the pool.
         }

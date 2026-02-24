@@ -64,6 +64,12 @@ namespace JanSharp
 
         // These four events get raised in this order.
 
+        public void OnExportSettingsChanged()
+        {
+            if (AutosaveUsesExportOptions && autosavesEnabledToggle.isOn)
+                lockstep.ExportOptionsForAutosave = autosaveOptions; // exportOptions == autosaveOptions
+        }
+
         public override void OnPageBecameActive()
         {
         }

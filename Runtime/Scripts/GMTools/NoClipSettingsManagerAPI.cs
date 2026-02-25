@@ -37,7 +37,7 @@ namespace JanSharp
     }
 
     [SingletonScript("21117a51120db00258006c8192882928")] // Runtime/Prefabs/Managers/NoClipManager.prefab
-    public abstract class NoClipSettingsManagerAPI : UdonSharpBehaviour
+    public abstract class NoClipSettingsManagerAPI : LockstepGameState
     {
         public abstract bool InitialNoClipEnabled { get; }
         /// <summary>
@@ -53,6 +53,19 @@ namespace JanSharp
 
         public abstract void SendSetNoClipEnabledIA(NoClipSettingsPlayerData data, bool noClipEnabled);
         public abstract void SendSetNoClipSpeedIA(NoClipSettingsPlayerData data, float noClipSpeed);
+
+        /// <summary>
+        /// <para>Used in exports.</para>
+        /// </summary>
+        public abstract NoClipImportExportOptions ExportOptions { get; }
+        /// <summary>
+        /// <para>Used in imports.</para>
+        /// </summary>
+        public abstract NoClipImportExportOptions ImportOptions { get; }
+        /// <summary>
+        /// <para>Used in imports.</para>
+        /// </summary>
+        public abstract NoClipImportExportOptions OptionsFromExport { get; }
 
         public abstract NoClipSettingsPlayerData LocalNoClipSettingsPlayerData { get; }
         public abstract NoClipSettingsPlayerData SendingNoClipSettingsPlayerData { get; }

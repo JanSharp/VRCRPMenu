@@ -8,9 +8,6 @@ namespace JanSharp.Internal
     [CustomRaisedEventsDispatcher(typeof(PlayersBackendEventAttribute), typeof(PlayersBackendEventType))]
     public class PlayersBackendManager : PlayersBackendManagerAPI
     {
-        [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
-        [HideInInspector][SerializeField][SingletonReference] private PermissionManagerAPI permissionManager;
-
         public override string GameStateInternalName => "jansharp.rp-menu-players-backend";
         public override string GameStateDisplayName => "RP Menu Players Backend";
         public override bool GameStateSupportsImportExport => true;
@@ -20,6 +17,9 @@ namespace JanSharp.Internal
         [SerializeField] private PlayersBackendImportExportOptionsUI importUI;
         public override LockstepGameStateOptionsUI ExportUI => exportUI;
         public override LockstepGameStateOptionsUI ImportUI => importUI;
+
+        [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
+        [HideInInspector][SerializeField][SingletonReference] private PermissionManagerAPI permissionManager;
 
         public override PlayersBackendImportExportOptions ExportOptions => (PlayersBackendImportExportOptions)OptionsForCurrentExport;
         public override PlayersBackendImportExportOptions ImportOptions => (PlayersBackendImportExportOptions)OptionsForCurrentImport;
@@ -187,6 +187,8 @@ namespace JanSharp.Internal
             return core == null ? null : (RPPlayerData)core.customPlayerData[rpPlayerDataIndex];
         }
 
+        #region Serialization
+
         public override void SerializeGameState(bool isExport, LockstepGameStateOptionsData exportOptions)
         {
             if (!isExport)
@@ -207,6 +209,8 @@ namespace JanSharp.Internal
         {
             optionsFromExport = null;
         }
+
+        #endregion
 
         #region EventDispatcher
 

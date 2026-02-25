@@ -5,11 +5,26 @@ using VRC.SDK3.Data;
 namespace JanSharp.Internal
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [LockstepGameStateDependency(typeof(PlayerDataManagerAPI), SelfLoadsBeforeDependency = true)]
     [CustomRaisedEventsDispatcher(typeof(NoClipSettingsEventAttribute), typeof(NoClipSettingsEventType))]
     public class NoClipSettingsManager : NoClipSettingsManagerAPI
     {
-        [HideInInspector][SerializeField][SingletonReference] private LockstepAPI lockstep;
+        public override string GameStateInternalName => "jansharp.rp-menu-no-clip-settings";
+        public override string GameStateDisplayName => "No Clip Settings";
+        public override bool GameStateSupportsImportExport => true;
+        public override uint GameStateDataVersion => 0u;
+        public override uint GameStateLowestSupportedDataVersion => 0u;
+        [SerializeField] private NoClipImportExportOptionsUI exportUI;
+        [SerializeField] private NoClipImportExportOptionsUI importUI;
+        public override LockstepGameStateOptionsUI ExportUI => exportUI;
+        public override LockstepGameStateOptionsUI ImportUI => importUI;
+
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
+
+        public override NoClipImportExportOptions ExportOptions => (NoClipImportExportOptions)OptionsForCurrentExport;
+        public override NoClipImportExportOptions ImportOptions => (NoClipImportExportOptions)OptionsForCurrentImport;
+        private NoClipImportExportOptions optionsFromExport;
+        public override NoClipImportExportOptions OptionsFromExport => optionsFromExport;
 
         private int noClipPlayerDataIndex;
 
@@ -162,6 +177,31 @@ namespace JanSharp.Internal
         {
             CorePlayerData core = playerDataManager.ReadCorePlayerDataRef();
             return core == null ? null : (NoClipSettingsPlayerData)core.customPlayerData[noClipPlayerDataIndex];
+        }
+
+        #endregion
+
+        #region Serialization
+
+        public override void SerializeGameState(bool isExport, LockstepGameStateOptionsData exportOptions)
+        {
+            if (!isExport)
+                return;
+            lockstep.WriteCustomClass(exportOptions);
+        }
+
+        public override string DeserializeGameState(bool isImport, uint importedDataVersion, LockstepGameStateOptionsData importOptions)
+        {
+            if (!isImport)
+                return null;
+            optionsFromExport = (NoClipImportExportOptions)lockstep.ReadCustomClass(nameof(NoClipImportExportOptions));
+            return null;
+        }
+
+        [LockstepEvent(LockstepEventType.OnImportFinished, Order = 1000)]
+        public void OnImportFinished()
+        {
+            optionsFromExport = null;
         }
 
         #endregion

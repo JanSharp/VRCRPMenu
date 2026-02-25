@@ -36,18 +36,38 @@ namespace JanSharp
                 || noClipSpeed != noClipSettingsManager.InitialNoClipSpeed;
         }
 
-        public override void Serialize(bool isExport)
+        private void WriteSettings()
         {
             lockstep.WriteFlags(noClipEnabled);
             lockstep.WriteFloat(noClipSpeed);
         }
 
-        public override void Deserialize(bool isImport, uint importedDataVersion)
+        private void ReadSettings(bool isImport, bool discard)
         {
+            if (discard)
+            {
+                lockstep.ReadFlags(out bool discard1); // Cannot use 'out _'.
+                lockstep.ReadFloat();
+                return;
+            }
             lockstep.ReadFlags(out noClipEnabled);
             noClipSpeed = lockstep.ReadFloat();
             if (core.isLocal)
                 ((Internal.NoClipSettingsManager)noClipSettingsManager).ResetLatencyStateToGameState(this, suppressEvents: !isImport);
+        }
+
+        public override void Serialize(bool isExport)
+        {
+            if (!isExport || noClipSettingsManager.ExportOptions.includeNoClipSettings)
+                WriteSettings();
+        }
+
+        public override void Deserialize(bool isImport, uint importedDataVersion)
+        {
+            if (!isImport)
+                ReadSettings(isImport, discard: false);
+            else if (noClipSettingsManager.OptionsFromExport.includeNoClipSettings)
+                ReadSettings(isImport, discard: !noClipSettingsManager.ImportOptions.includeNoClipSettings);
         }
     }
 }

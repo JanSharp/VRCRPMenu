@@ -126,6 +126,19 @@ namespace JanSharp
         public abstract void WriteVoiceRangePlayerDataRef(VoiceRangePlayerData voiceRangePlayerData);
         public abstract VoiceRangePlayerData ReadVoiceRangePlayerDataRef();
 
+        /// <summary>
+        /// <para>Used in exports.</para>
+        /// </summary>
+        public abstract VoiceRangeImportExportOptions ExportOptions { get; }
+        /// <summary>
+        /// <para>Used in imports.</para>
+        /// </summary>
+        public abstract VoiceRangeImportExportOptions ImportOptions { get; }
+        /// <summary>
+        /// <para>Used in imports.</para>
+        /// </summary>
+        public abstract VoiceRangeImportExportOptions OptionsFromExport { get; }
+
         public abstract VoiceRangePlayerData PlayerDataForEvent { get; }
     }
 }

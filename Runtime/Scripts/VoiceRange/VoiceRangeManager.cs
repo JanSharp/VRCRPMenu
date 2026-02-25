@@ -15,10 +15,17 @@ namespace JanSharp.Internal
         public override bool GameStateSupportsImportExport => true;
         public override uint GameStateDataVersion => 0u;
         public override uint GameStateLowestSupportedDataVersion => 0u;
-        public override LockstepGameStateOptionsUI ExportUI => null;
-        public override LockstepGameStateOptionsUI ImportUI => null;
+        [SerializeField] private VoiceRangeImportExportOptionsUI exportUI;
+        [SerializeField] private VoiceRangeImportExportOptionsUI importUI;
+        public override LockstepGameStateOptionsUI ExportUI => exportUI;
+        public override LockstepGameStateOptionsUI ImportUI => importUI;
 
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
+
+        public override VoiceRangeImportExportOptions ExportOptions => (VoiceRangeImportExportOptions)OptionsForCurrentExport;
+        public override VoiceRangeImportExportOptions ImportOptions => (VoiceRangeImportExportOptions)OptionsForCurrentImport;
+        private VoiceRangeImportExportOptions optionsFromExport;
+        public override VoiceRangeImportExportOptions OptionsFromExport => optionsFromExport;
 
         #region GameState
 
@@ -280,6 +287,9 @@ namespace JanSharp.Internal
         {
             if (!isExport)
                 return;
+            lockstep.WriteCustomClass(exportOptions);
+            if (!((VoiceRangeImportExportOptions)exportOptions).includeVoiceRangeSettings)
+                return;
             lockstep.WriteSmallUInt((uint)rangeDefsCount);
             for (int i = 0; i < rangeDefsCount; i++)
                 lockstep.WriteString(rangeDefs[i].internalName);
@@ -331,8 +341,17 @@ namespace JanSharp.Internal
         {
             if (!isImport)
                 return null;
+            optionsFromExport = (VoiceRangeImportExportOptions)lockstep.ReadCustomClass(nameof(VoiceRangeImportExportOptions));
+            if (!optionsFromExport.includeVoiceRangeSettings || !((VoiceRangeImportExportOptions)importOptions).includeVoiceRangeSettings)
+                return null;
             importMustDoRemapping = BuildImportRemapAndMasks();
             return null;
+        }
+
+        [LockstepEvent(LockstepEventType.OnImportFinished, Order = 1000)]
+        public void OnImportFinished()
+        {
+            optionsFromExport = null;
         }
 
         /// <summary>

@@ -62,14 +62,43 @@ namespace JanSharp
                 || hudVisualType != voiceRangeManager.DefaultHUDVisualType;
         }
 
-        public override void Serialize(bool isExport)
+        private void WriteSettings()
         {
-            if (!isExport)
-                lockstep.WriteSmallUInt((uint)voiceRangeIndex);
             lockstep.WriteSmallUInt(showInWorldMask);
             lockstep.WriteByte((byte)worldVisualType);
             lockstep.WriteSmallUInt(showInHUDMask);
             lockstep.WriteByte((byte)hudVisualType);
+        }
+
+        private void ReadSettings(bool isImport, bool discard)
+        {
+            if (discard)
+            {
+                lockstep.ReadSmallUInt();
+                lockstep.ReadByte();
+                lockstep.ReadSmallUInt();
+                lockstep.ReadByte();
+                return;
+            }
+            showInWorldMask = lockstep.ReadSmallUInt();
+            worldVisualType = (VoiceRangeVisualizationType)lockstep.ReadByte();
+            showInHUDMask = lockstep.ReadSmallUInt();
+            hudVisualType = (VoiceRangeVisualizationType)lockstep.ReadByte();
+            latencyShowInWorldMask = showInWorldMask;
+            latencyWorldVisualType = worldVisualType;
+            latencyShowInHUDMask = showInHUDMask;
+            latencyHUDVisualType = hudVisualType;
+            if (isImport)
+                ((Internal.VoiceRangeManager)voiceRangeManager).RemapImportedPlayerData(this);
+        }
+
+        public override void Serialize(bool isExport)
+        {
+            if (!isExport)
+                lockstep.WriteSmallUInt((uint)voiceRangeIndex);
+
+            if (!isExport || voiceRangeManager.ExportOptions.includeVoiceRangeSettings)
+                WriteSettings();
         }
 
         public override void Deserialize(bool isImport, uint importedDataVersion)
@@ -81,16 +110,11 @@ namespace JanSharp
             }
             else
                 latencyHiddenUniqueIds.Clear(); // Empty when not importing anyway, no need to clear there.
-            showInWorldMask = lockstep.ReadSmallUInt();
-            worldVisualType = (VoiceRangeVisualizationType)lockstep.ReadByte();
-            showInHUDMask = lockstep.ReadSmallUInt();
-            hudVisualType = (VoiceRangeVisualizationType)lockstep.ReadByte();
-            latencyShowInWorldMask = showInWorldMask;
-            latencyWorldVisualType = worldVisualType;
-            latencyShowInHUDMask = showInHUDMask;
-            latencyHUDVisualType = hudVisualType;
-            if (isImport)
-                ((Internal.VoiceRangeManager)voiceRangeManager).RemapImportedPlayerData(this);
+
+            if (!isImport)
+                ReadSettings(isImport, discard: false);
+            else if (voiceRangeManager.OptionsFromExport.includeVoiceRangeSettings)
+                ReadSettings(isImport, discard: !voiceRangeManager.ImportOptions.includeVoiceRangeSettings);
         }
     }
 }

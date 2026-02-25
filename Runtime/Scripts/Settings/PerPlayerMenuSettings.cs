@@ -44,7 +44,7 @@ namespace JanSharp
                 || menuPosition != menuSettingsManager.InitialMenuPosition;
         }
 
-        public override void Serialize(bool isExport)
+        private void WriteSettings()
         {
             lockstep.WriteFlags(uiSoundsEnabled);
             lockstep.WriteFloat(uiSoundsVolume);
@@ -53,8 +53,15 @@ namespace JanSharp
             lockstep.WriteByte((byte)menuPosition);
         }
 
-        public override void Deserialize(bool isImport, uint importedDataVersion)
+        private void ReadSettings(bool isImport, bool discard)
         {
+            if (discard)
+            {
+                lockstep.ReadFlags(out bool discard1); // Cannot use 'out _'.
+                lockstep.ReadFloat();
+                lockstep.ReadBytes(3, skip: true);
+                return;
+            }
             lockstep.ReadFlags(out uiSoundsEnabled);
             uiSoundsVolume = lockstep.ReadFloat();
             defaultPage = (RPMenuDefaultPageType)lockstep.ReadByte();
@@ -62,6 +69,20 @@ namespace JanSharp
             menuPosition = (MenuPositionType)lockstep.ReadByte();
             if (core.isLocal)
                 ((Internal.MenuSettingsManager)menuSettingsManager).ResetLatencyStateToGameState(this, suppressEvents: !isImport);
+        }
+
+        public override void Serialize(bool isExport)
+        {
+            if (!isExport || menuSettingsManager.ExportOptions.includeMenuSettings)
+                WriteSettings();
+        }
+
+        public override void Deserialize(bool isImport, uint importedDataVersion)
+        {
+            if (!isImport)
+                ReadSettings(isImport, discard: false);
+            else if (menuSettingsManager.OptionsFromExport.includeMenuSettings)
+                ReadSettings(isImport, discard: !menuSettingsManager.ImportOptions.includeMenuSettings);
         }
     }
 }

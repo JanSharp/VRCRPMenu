@@ -59,7 +59,7 @@ namespace JanSharp
     }
 
     [SingletonScript("3218dea9483cea14a8af077049ea7e6c")] // Runtime/Prefabs/Managers/MenuSettingsManager.prefab
-    public abstract class MenuSettingsManagerAPI : UdonSharpBehaviour
+    public abstract class MenuSettingsManagerAPI : LockstepGameState
     {
         public abstract bool InitialUISoundsEnabled { get; }
         public abstract float InitialUISoundsVolume { get; }
@@ -83,6 +83,19 @@ namespace JanSharp
         public abstract void SendSetDefaultPageIA(PerPlayerMenuSettings settings, RPMenuDefaultPageType defaultPage);
         public abstract void SendSetOpenCloseKeyBindIA(PerPlayerMenuSettings settings, MenuOpenCloseKeyBind keyBind);
         public abstract void SendSetMenuPositionIA(PerPlayerMenuSettings settings, MenuPositionType menuPosition);
+
+        /// <summary>
+        /// <para>Used in exports.</para>
+        /// </summary>
+        public abstract MenuSettingsImportExportOptions ExportOptions { get; }
+        /// <summary>
+        /// <para>Used in imports.</para>
+        /// </summary>
+        public abstract MenuSettingsImportExportOptions ImportOptions { get; }
+        /// <summary>
+        /// <para>Used in imports.</para>
+        /// </summary>
+        public abstract MenuSettingsImportExportOptions OptionsFromExport { get; }
 
         public abstract PerPlayerMenuSettings LocalPlayerSettings { get; }
         public abstract PerPlayerMenuSettings SendingPerPlayerMenuSettings { get; }

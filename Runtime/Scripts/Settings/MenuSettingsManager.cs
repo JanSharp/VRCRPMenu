@@ -5,12 +5,27 @@ using VRC.SDK3.Data;
 namespace JanSharp.Internal
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [LockstepGameStateDependency(typeof(PlayerDataManagerAPI), SelfLoadsBeforeDependency = true)]
     [CustomRaisedEventsDispatcher(typeof(MenuSettingsEventAttribute), typeof(MenuSettingsEventType))]
     public class MenuSettingsManager : MenuSettingsManagerAPI
     {
-        [HideInInspector][SerializeField][SingletonReference] private LockstepAPI lockstep;
+        public override string GameStateInternalName => "jansharp.rp-menu-menu-settings";
+        public override string GameStateDisplayName => "Menu Settings";
+        public override bool GameStateSupportsImportExport => true;
+        public override uint GameStateDataVersion => 0u;
+        public override uint GameStateLowestSupportedDataVersion => 0u;
+        [SerializeField] private MenuSettingsImportExportOptionsUI exportUI;
+        [SerializeField] private MenuSettingsImportExportOptionsUI importUI;
+        public override LockstepGameStateOptionsUI ExportUI => exportUI;
+        public override LockstepGameStateOptionsUI ImportUI => importUI;
+
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
         [HideInInspector][SerializeField][SingletonReference] private MenuInputHandler menuInputHandler;
+
+        public override MenuSettingsImportExportOptions ExportOptions => (MenuSettingsImportExportOptions)OptionsForCurrentExport;
+        public override MenuSettingsImportExportOptions ImportOptions => (MenuSettingsImportExportOptions)OptionsForCurrentImport;
+        private MenuSettingsImportExportOptions optionsFromExport;
+        public override MenuSettingsImportExportOptions OptionsFromExport => optionsFromExport;
 
         private int perPlayerMenuSettingsIndex;
 
@@ -304,6 +319,31 @@ namespace JanSharp.Internal
         {
             CorePlayerData core = playerDataManager.ReadCorePlayerDataRef();
             return core == null ? null : (PerPlayerMenuSettings)core.customPlayerData[perPlayerMenuSettingsIndex];
+        }
+
+        #endregion
+
+        #region Serialization
+
+        public override void SerializeGameState(bool isExport, LockstepGameStateOptionsData exportOptions)
+        {
+            if (!isExport)
+                return;
+            lockstep.WriteCustomClass(exportOptions);
+        }
+
+        public override string DeserializeGameState(bool isImport, uint importedDataVersion, LockstepGameStateOptionsData importOptions)
+        {
+            if (!isImport)
+                return null;
+            optionsFromExport = (MenuSettingsImportExportOptions)lockstep.ReadCustomClass(nameof(MenuSettingsImportExportOptions));
+            return null;
+        }
+
+        [LockstepEvent(LockstepEventType.OnImportFinished, Order = 1000)]
+        public void OnImportFinished()
+        {
+            optionsFromExport = null;
         }
 
         #endregion

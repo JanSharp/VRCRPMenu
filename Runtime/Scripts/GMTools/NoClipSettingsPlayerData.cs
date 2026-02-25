@@ -24,6 +24,12 @@ namespace JanSharp
 
         public override void OnPlayerDataInit(bool isAboutToBeImported)
         {
+            if (isAboutToBeImported
+                && noClipSettingsManager.OptionsFromExport.includeNoClipSettings
+                && noClipSettingsManager.ImportOptions.includeNoClipSettings)
+            {
+                return;
+            }
             noClipEnabled = noClipSettingsManager.InitialNoClipEnabled;
             noClipSpeed = noClipSettingsManager.InitialNoClipSpeed;
             if (core.isLocal) // Only the case for the very first client, during player data OnInit.

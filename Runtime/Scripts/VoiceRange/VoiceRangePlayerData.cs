@@ -36,8 +36,12 @@ namespace JanSharp
         {
             voiceRangeIndex = voiceRangeManager.DefaultVoiceRangeIndex;
             latencyVoiceRangeIndex = voiceRangeIndex;
-            if (isAboutToBeImported)
+            if (isAboutToBeImported
+                && voiceRangeManager.OptionsFromExport.includeVoiceRangeSettings
+                && voiceRangeManager.ImportOptions.includeVoiceRangeSettings)
+            {
                 return;
+            }
             showInWorldMask = voiceRangeManager.DefaultShowInWorldMask;
             worldVisualType = voiceRangeManager.DefaultWorldVisualType;
             showInHUDMask = voiceRangeManager.DefaultShowInHUDMask;

@@ -24,8 +24,12 @@ namespace JanSharp
 
         public override void OnPlayerDataInit(bool isAboutToBeImported)
         {
-            if (isAboutToBeImported)
+            if (isAboutToBeImported
+                && menuSettingsManager.OptionsFromExport.includeMenuSettings
+                && menuSettingsManager.ImportOptions.includeMenuSettings)
+            {
                 return;
+            }
             uiSoundsEnabled = menuSettingsManager.InitialUISoundsEnabled;
             uiSoundsVolume = menuSettingsManager.InitialUISoundsVolume;
             defaultPage = menuSettingsManager.InitialDefaultPage;

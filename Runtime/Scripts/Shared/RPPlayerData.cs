@@ -55,9 +55,12 @@ namespace JanSharp
 
         public override void OnPlayerDataInit(bool isAboutToBeImported)
         {
-            if (isAboutToBeImported)
-                return;
-            characterName = "";
+            if (!isAboutToBeImported
+                || !playersBackendManager.OptionsFromExport.includeCharacterName
+                || !playersBackendManager.ImportOptions.includeCharacterName)
+            {
+                characterName = "";
+            }
         }
 
         public override void OnPlayerDataUninit(bool force)

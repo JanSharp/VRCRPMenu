@@ -256,17 +256,19 @@ namespace JanSharp
                 return; // lockstep does not provide a way to do "server" side checks for this.
             lockstep.UpdateAllCurrentImportOptionsFromWidgets();
             lockstep.StartImport(importedGameStates, exportDate, exportWorldName, exportName);
-            ResetImport();
+            ResetImport(leaveInputFieldUntouched: false, alreadyUpdatedOptions: true);
             importOptionsUI.Draw(); // Return widgets to the pool.
         }
 
-        private void ResetImport(bool leaveInputFieldUntouched = false)
+        private void ResetImport(bool leaveInputFieldUntouched = false, bool alreadyUpdatedOptions = false)
         {
             if (!leaveInputFieldUntouched)
                 serializedInputField.SetTextWithoutNotify("");
 
             if (importedGameStates != null)
             {
+                if (!alreadyUpdatedOptions)
+                    lockstep.UpdateAllCurrentImportOptionsFromWidgets(); // Remember options even when not confirming an import.
                 lockstep.HideImportOptionsEditor();
                 lockstep.CleanupImportedGameStatesData(importedGameStates);
             }

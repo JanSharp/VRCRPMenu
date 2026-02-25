@@ -63,10 +63,12 @@ namespace JanSharp
             AddGameStatesToExportToInfoWidget(exportOptionsUI);
             lockstep.ShowExportOptionsEditor(exportOptionsUI, exportOptions);
             exportOptionsUI.Draw();
+            base.OnTabGotShown(); // Must enable last, prevent nonsensical generic value editor UI animations.
         }
 
         public override void OnTabGotHidden()
         {
+            base.OnTabGotHidden();
             lockstep.UpdateAllCurrentExportOptionsFromWidgets();
             lockstep.HideExportOptionsEditor();
             autosaveTab.OnExportSettingsChanged();

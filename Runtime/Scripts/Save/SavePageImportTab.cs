@@ -20,6 +20,8 @@ namespace JanSharp
         [SerializeField] private Selectable confirmImportButtonTextSelectable;
         [SerializeField] private TextMeshProUGUI confirmImportButtonText;
 
+        private bool tabIsShown = false;
+
         private bool anySupportImportExport;
         private bool isInitialized = false;
 
@@ -58,10 +60,14 @@ namespace JanSharp
 
         public override void OnTabGotShown()
         {
+            tabIsShown = true;
+            base.OnTabGotShown();
         }
 
         public override void OnTabGotHidden()
         {
+            tabIsShown = false;
+            base.OnTabGotHidden();
             // Do not call HideImportOptionsEditor or anything else in here, as that would mean rebuilding the
             // editor in OnTabGotShown. Unlike the export and autosave tabs we can expect the user not to
             // paste something into the input field, close the menu and keep it closed forever. The user is
@@ -97,12 +103,19 @@ namespace JanSharp
             onImportSerializedTextValueChangedDelayedQueued = false;
             if (!isInitialized)
                 return;
+
+            if (tabIsShown)
+                tabRoot.SetActive(false); // Reduce UI layout overhead and prevent nonsensical generic value editor UI animations.
             // Reset regardless, because 2 consecutive valid yet different imports could be pasted in.
             ResetImport(leaveInputFieldUntouched: true);
 
             string importString = serializedInputField.text;
             if (importString == "")
+            {
+                if (tabIsShown)
+                    tabRoot.SetActive(true);
                 return;
+            }
             importedGameStates = lockstep.ImportPreProcess(
                 importString,
                 out exportDate,
@@ -112,6 +125,8 @@ namespace JanSharp
             {
                 importOptionsUI.Info.AddChild(importOptionsUI.WidgetManager.NewLabel("Malformed or invalid data.").StdMoveWidget());
                 importOptionsUI.Draw();
+                if (tabIsShown)
+                    tabRoot.SetActive(true);
                 return;
             }
 
@@ -140,6 +155,9 @@ namespace JanSharp
             importOptionsUI.Draw();
 
             UpdateImportButton();
+
+            if (tabIsShown)
+                tabRoot.SetActive(true);
         }
 
         private string BuildImportedGameStatesMsg(out int canImportCount, out bool anyWarnings)

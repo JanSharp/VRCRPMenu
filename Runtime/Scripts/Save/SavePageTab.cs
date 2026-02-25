@@ -23,24 +23,16 @@ namespace JanSharp
         // These get raised in this order.
         // They are guaranteed to be run only once lockstep IsInitialized is true, and after each tab has
         // initialized.
-        public virtual void OnTabBecameActive()
-        {
-            tabToggle.SetIsOnWithoutNotify(true);
-            tabRoot.SetActive(true);
-        }
+        public virtual void OnTabBecameActive() => tabToggle.SetIsOnWithoutNotify(true);
         /// <summary>
         /// <para>Only the active tab will know about whether the page is active, inactive tabs will always
         /// think the page is inactive.</para>
         /// </summary>
         public abstract void OnPageBecameActive();
-        public abstract void OnTabGotShown();
-        public abstract void OnTabGotHidden();
+        public virtual void OnTabGotShown() => tabRoot.SetActive(true);
+        public virtual void OnTabGotHidden() => tabRoot.SetActive(false);
         /// <inheritdoc cref="OnPageBecameActive"/>
         public abstract void OnPageBecameInactive();
-        public virtual void OnTabBecameInactive()
-        {
-            tabToggle.SetIsOnWithoutNotify(false);
-            tabRoot.SetActive(false);
-        }
+        public virtual void OnTabBecameInactive() => tabToggle.SetIsOnWithoutNotify(false);
     }
 }

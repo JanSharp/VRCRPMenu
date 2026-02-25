@@ -79,11 +79,13 @@ namespace JanSharp
             tabIsShown = true;
             ShowAutosaveOptionsEditor();
             StartStopAutosaveTimerUpdateLoop();
+            base.OnTabGotShown(); // Must enable last, prevent nonsensical generic value editor UI animations.
         }
 
         public override void OnTabGotHidden()
         {
             tabIsShown = false;
+            base.OnTabGotHidden();
             HideAutosaveOptionsEditor();
             autosaveOptionsUI.Clear();
             autosaveOptionsUI.Draw(); // Return widgets to the pool.
@@ -111,8 +113,12 @@ namespace JanSharp
                         options.DecrementRefsCount();
                 autosaveOptions = exportTab.ExportOptions;
             }
+            if (tabIsShown)
+                tabRoot.SetActive(false); // Reduce UI layout overhead and prevent nonsensical generic value editor UI animations.
             HideAutosaveOptionsEditor();
             ShowAutosaveOptionsEditor();
+            if (tabIsShown)
+                tabRoot.SetActive(true);
         }
 
         private void ShowAutosaveOptionsEditor()

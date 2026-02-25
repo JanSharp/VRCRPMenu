@@ -6,6 +6,9 @@ namespace JanSharp
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class MenuSettingsImportExportOptionsUI : LockstepGameStateOptionsUI
     {
+        [HideInInspector][SerializeField][SingletonReference] private PlayerDataExportUIAPI playerDataExportUI;
+        [HideInInspector][SerializeField][SingletonReference] private PlayerDataImportUIAPI playerDataImportUI;
+
         public override string OptionsClassName => nameof(MenuSettingsImportExportOptions);
 
         [SerializeField] private bool isImportUI;
@@ -51,7 +54,15 @@ namespace JanSharp
                 optionsFromExport.Delete();
             }
             includeMenuSettingsToggle.SetValueWithoutNotify(includeMenuSettingsToggle.Interactable && currentOptions.includeMenuSettings);
-            ui.General.AddChildDynamic(includeMenuSettingsToggle);
+            AddToggle(includeMenuSettingsToggle);
+        }
+
+        private void AddToggle(ToggleFieldWidgetData toggle)
+        {
+            if (isImportUI)
+                playerDataImportUI.AddPlayerDataOptionToggle(toggle);
+            else
+                playerDataExportUI.AddPlayerDataOptionToggle(toggle);
         }
 
         protected override void OnOptionsEditorHide(LockstepOptionsEditorUI ui)

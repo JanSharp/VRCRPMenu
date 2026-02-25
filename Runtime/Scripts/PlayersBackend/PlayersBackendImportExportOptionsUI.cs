@@ -6,6 +6,9 @@ namespace JanSharp
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class PlayersBackendImportExportOptionsUI : LockstepGameStateOptionsUI
     {
+        [HideInInspector][SerializeField][SingletonReference] private PlayerDataExportUIAPI playerDataExportUI;
+        [HideInInspector][SerializeField][SingletonReference] private PlayerDataImportUIAPI playerDataImportUI;
+
         public override string OptionsClassName => nameof(PlayersBackendImportExportOptions);
 
         [SerializeField] private bool isImportUI;
@@ -63,9 +66,17 @@ namespace JanSharp
             includeOverriddenDisplayNameToggle.SetValueWithoutNotify(includeOverriddenDisplayNameToggle.Interactable && currentOptions.includeOverriddenDisplayName);
             includeCharacterNameToggle.SetValueWithoutNotify(includeCharacterNameToggle.Interactable && currentOptions.includeCharacterName);
             includeFavoriteItemsToggle.SetValueWithoutNotify(includeFavoriteItemsToggle.Interactable && currentOptions.includeFavoriteItems);
-            ui.General.AddChildDynamic(includeOverriddenDisplayNameToggle);
-            ui.General.AddChildDynamic(includeCharacterNameToggle);
-            ui.General.AddChildDynamic(includeFavoriteItemsToggle);
+            AddToggle(includeOverriddenDisplayNameToggle);
+            AddToggle(includeCharacterNameToggle);
+            AddToggle(includeFavoriteItemsToggle);
+        }
+
+        private void AddToggle(ToggleFieldWidgetData toggle)
+        {
+            if (isImportUI)
+                playerDataImportUI.AddPlayerDataOptionToggle(toggle);
+            else
+                playerDataExportUI.AddPlayerDataOptionToggle(toggle);
         }
 
         protected override void OnOptionsEditorHide(LockstepOptionsEditorUI ui)

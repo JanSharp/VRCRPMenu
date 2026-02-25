@@ -6,6 +6,9 @@ namespace JanSharp
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class VoiceRangeImportExportOptionsUI : LockstepGameStateOptionsUI
     {
+        [HideInInspector][SerializeField][SingletonReference] private PlayerDataExportUIAPI playerDataExportUI;
+        [HideInInspector][SerializeField][SingletonReference] private PlayerDataImportUIAPI playerDataImportUI;
+
         public override string OptionsClassName => nameof(VoiceRangeImportExportOptions);
 
         [SerializeField] private bool isImportUI;
@@ -51,7 +54,15 @@ namespace JanSharp
                 optionsFromExport.Delete();
             }
             includeVoiceRangeSettingsToggle.SetValueWithoutNotify(includeVoiceRangeSettingsToggle.Interactable && currentOptions.includeVoiceRangeSettings);
-            ui.General.AddChildDynamic(includeVoiceRangeSettingsToggle);
+            AddToggle(includeVoiceRangeSettingsToggle);
+        }
+
+        private void AddToggle(ToggleFieldWidgetData toggle)
+        {
+            if (isImportUI)
+                playerDataImportUI.AddPlayerDataOptionToggle(toggle);
+            else
+                playerDataExportUI.AddPlayerDataOptionToggle(toggle);
         }
 
         protected override void OnOptionsEditorHide(LockstepOptionsEditorUI ui)

@@ -91,23 +91,26 @@ namespace JanSharp
                 lockstep.ReadString();
         }
 
-        private void WriteFavoriteItems(bool isExport, PlayersBackendExportOptions options)
+        private void WriteFavoriteItems(bool isExport, PlayersBackendImportExportOptions exportOptions)
         {
-            if (isExport && !options.includeFavoriteItems)
+            if (isExport && !exportOptions.includeFavoriteItems)
                 return;
             lockstep.WriteSmallUInt((uint)favoriteItemsCount);
             for (int i = 0; i < favoriteItemsCount; i++)
                 lockstep.WriteSmallUInt(favoriteItems[i].Id);
         }
 
-        private void ReadFavoriteItems(bool isImport, PlayersBackendExportOptions optionsFromExport, PlayersBackendImportOptions options)
+        private void ReadFavoriteItems(
+            bool isImport,
+            PlayersBackendImportExportOptions optionsFromExport,
+            PlayersBackendImportExportOptions importOptions)
         {
             if (isImport)
             {
                 if (!optionsFromExport.includeFavoriteItems)
                     return;
                 int count = (int)lockstep.ReadSmallUInt();
-                if (!options.includeFavoriteItems)
+                if (!importOptions.includeFavoriteItems)
                 {
                     for (int i = 0; i < count; i++)
                         lockstep.ReadSmallUInt();
@@ -133,11 +136,11 @@ namespace JanSharp
 
         public override void Serialize(bool isExport)
         {
-            PlayersBackendExportOptions options = playersBackendManager.ExportOptions;
-            WriteString(isExport, isExport && options.includeOverriddenDisplayName, overriddenDisplayName);
-            WriteString(isExport, isExport && options.includeCharacterName, characterName);
+            PlayersBackendImportExportOptions exportOptions = playersBackendManager.ExportOptions;
+            WriteString(isExport, isExport && exportOptions.includeOverriddenDisplayName, overriddenDisplayName);
+            WriteString(isExport, isExport && exportOptions.includeCharacterName, characterName);
 
-            WriteFavoriteItems(isExport, options);
+            WriteFavoriteItems(isExport, exportOptions);
 
             if (isExport)
                 return;
@@ -154,21 +157,21 @@ namespace JanSharp
 
         public override void Deserialize(bool isImport, uint importedDataVersion)
         {
-            PlayersBackendExportOptions optionsFromExport = playersBackendManager.OptionsFromExport;
-            PlayersBackendImportOptions options = playersBackendManager.ImportOptions;
+            PlayersBackendImportExportOptions optionsFromExport = playersBackendManager.OptionsFromExport;
+            PlayersBackendImportExportOptions importOptions = playersBackendManager.ImportOptions;
 
             ReadString(
                 isImport,
                 isImport && optionsFromExport.includeOverriddenDisplayName,
-                isImport && options.includeOverriddenDisplayName,
+                isImport && importOptions.includeOverriddenDisplayName,
                 ref overriddenDisplayName);
             ReadString(
                 isImport,
                 isImport && optionsFromExport.includeCharacterName,
-                isImport && options.includeCharacterName,
+                isImport && importOptions.includeCharacterName,
                 ref characterName);
 
-            ReadFavoriteItems(isImport, optionsFromExport, options);
+            ReadFavoriteItems(isImport, optionsFromExport, importOptions);
 
             if (isImport)
                 return;

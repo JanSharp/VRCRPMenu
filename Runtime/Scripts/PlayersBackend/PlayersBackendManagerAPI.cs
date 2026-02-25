@@ -90,9 +90,18 @@ namespace JanSharp
         public abstract void WriteRPPlayerDataRef(RPPlayerData rpPlayerData);
         public abstract RPPlayerData ReadRPPlayerDataRef();
 
-        public abstract PlayersBackendExportOptions ExportOptions { get; }
-        public abstract PlayersBackendImportOptions ImportOptions { get; }
-        public abstract PlayersBackendExportOptions OptionsFromExport { get; }
+        /// <summary>
+        /// <para>Used in exports.</para>
+        /// </summary>
+        public abstract PlayersBackendImportExportOptions ExportOptions { get; }
+        /// <summary>
+        /// <para>Used in imports.</para>
+        /// </summary>
+        public abstract PlayersBackendImportExportOptions ImportOptions { get; }
+        /// <summary>
+        /// <para>Used in imports.</para>
+        /// </summary>
+        public abstract PlayersBackendImportExportOptions OptionsFromExport { get; }
 
         /// <summary>
         /// <para>Usable inside of

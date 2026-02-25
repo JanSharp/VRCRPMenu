@@ -1,14 +1,17 @@
-﻿using UdonSharp;
+using UdonSharp;
+using UnityEngine;
 
 namespace JanSharp
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-    public class PlayersBackendImportUI : LockstepGameStateOptionsUI
+    public class PlayersBackendImportExportOptionsUI : LockstepGameStateOptionsUI
     {
-        public override string OptionsClassName => nameof(PlayersBackendImportOptions);
+        public override string OptionsClassName => nameof(PlayersBackendImportExportOptions);
 
-        private PlayersBackendImportOptions currentOptions;
-        private PlayersBackendImportOptions optionsToValidate;
+        [SerializeField] private bool isImportUI;
+
+        private PlayersBackendImportExportOptions currentOptions;
+        private PlayersBackendImportExportOptions optionsToValidate;
 
         private ToggleFieldWidgetData includeOverriddenDisplayNameToggle;
         private ToggleFieldWidgetData includeCharacterNameToggle;
@@ -16,8 +19,7 @@ namespace JanSharp
 
         protected override LockstepGameStateOptionsData NewOptionsImpl()
         {
-            PlayersBackendImportOptions options = wannaBeClasses.New<PlayersBackendImportOptions>(nameof(PlayersBackendImportOptions));
-            return options;
+            return wannaBeClasses.New<PlayersBackendImportExportOptions>(nameof(PlayersBackendImportExportOptions));
         }
 
         protected override void ValidateOptionsImpl()
@@ -50,14 +52,17 @@ namespace JanSharp
         protected override void OnOptionsEditorShow(LockstepOptionsEditorUI ui, uint importedDataVersion)
         {
             LazyInitWidgetData();
-            var optionsFromExport = (PlayersBackendExportOptions)lockstep.ReadCustomClass(nameof(PlayersBackendExportOptions), isImport: true);
-            includeOverriddenDisplayNameToggle.Interactable = optionsFromExport.includeOverriddenDisplayName;
-            includeCharacterNameToggle.Interactable = optionsFromExport.includeCharacterName;
-            includeFavoriteItemsToggle.Interactable = optionsFromExport.includeFavoriteItems;
-            optionsFromExport.Delete();
-            includeOverriddenDisplayNameToggle.SetValueWithoutNotify(optionsFromExport.includeOverriddenDisplayName && currentOptions.includeOverriddenDisplayName);
-            includeCharacterNameToggle.SetValueWithoutNotify(optionsFromExport.includeCharacterName && currentOptions.includeCharacterName);
-            includeFavoriteItemsToggle.SetValueWithoutNotify(optionsFromExport.includeFavoriteItems && currentOptions.includeFavoriteItems);
+            if (isImportUI)
+            {
+                var optionsFromExport = (PlayersBackendImportExportOptions)lockstep.ReadCustomClass(nameof(PlayersBackendImportExportOptions), isImport: true);
+                includeOverriddenDisplayNameToggle.Interactable = optionsFromExport.includeOverriddenDisplayName;
+                includeCharacterNameToggle.Interactable = optionsFromExport.includeCharacterName;
+                includeFavoriteItemsToggle.Interactable = optionsFromExport.includeFavoriteItems;
+                optionsFromExport.Delete();
+            }
+            includeOverriddenDisplayNameToggle.SetValueWithoutNotify(includeOverriddenDisplayNameToggle.Interactable && currentOptions.includeOverriddenDisplayName);
+            includeCharacterNameToggle.SetValueWithoutNotify(includeCharacterNameToggle.Interactable && currentOptions.includeCharacterName);
+            includeFavoriteItemsToggle.SetValueWithoutNotify(includeFavoriteItemsToggle.Interactable && currentOptions.includeFavoriteItems);
             ui.General.AddChildDynamic(includeOverriddenDisplayNameToggle);
             ui.General.AddChildDynamic(includeCharacterNameToggle);
             ui.General.AddChildDynamic(includeFavoriteItemsToggle);

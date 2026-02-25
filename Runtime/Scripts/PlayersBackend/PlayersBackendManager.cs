@@ -16,15 +16,15 @@ namespace JanSharp.Internal
         public override bool GameStateSupportsImportExport => true;
         public override uint GameStateDataVersion => 0u;
         public override uint GameStateLowestSupportedDataVersion => 0u;
-        [SerializeField] private PlayersBackendExportUI exportUI;
-        [SerializeField] private PlayersBackendImportUI importUI;
+        [SerializeField] private PlayersBackendImportExportOptionsUI exportUI;
+        [SerializeField] private PlayersBackendImportExportOptionsUI importUI;
         public override LockstepGameStateOptionsUI ExportUI => exportUI;
         public override LockstepGameStateOptionsUI ImportUI => importUI;
 
-        public override PlayersBackendExportOptions ExportOptions => (PlayersBackendExportOptions)OptionsForCurrentExport;
-        public override PlayersBackendImportOptions ImportOptions => (PlayersBackendImportOptions)OptionsForCurrentImport;
-        private PlayersBackendExportOptions optionsFromExport;
-        public override PlayersBackendExportOptions OptionsFromExport => optionsFromExport;
+        public override PlayersBackendImportExportOptions ExportOptions => (PlayersBackendImportExportOptions)OptionsForCurrentExport;
+        public override PlayersBackendImportExportOptions ImportOptions => (PlayersBackendImportExportOptions)OptionsForCurrentImport;
+        private PlayersBackendImportExportOptions optionsFromExport;
+        public override PlayersBackendImportExportOptions OptionsFromExport => optionsFromExport;
 
         private int rpPlayerDataIndex;
 
@@ -198,7 +198,7 @@ namespace JanSharp.Internal
         {
             if (!isImport)
                 return null;
-            optionsFromExport = (PlayersBackendExportOptions)lockstep.ReadCustomClass(nameof(PlayersBackendExportOptions));
+            optionsFromExport = (PlayersBackendImportExportOptions)lockstep.ReadCustomClass(nameof(PlayersBackendImportExportOptions));
             return null;
         }
 

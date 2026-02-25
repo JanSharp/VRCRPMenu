@@ -4,13 +4,27 @@ using UnityEngine;
 namespace JanSharp.Internal
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [LockstepGameStateDependency(typeof(PlayerDataManagerAPI), SelfLoadsBeforeDependency = true)]
     [CustomRaisedEventsDispatcher(typeof(PlayersBackendEventAttribute), typeof(PlayersBackendEventType))]
     public class PlayersBackendManager : PlayersBackendManagerAPI
     {
-        [HideInInspector][SerializeField][SingletonReference] private LockstepAPI lockstep;
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
         [HideInInspector][SerializeField][SingletonReference] private PermissionManagerAPI permissionManager;
-        [HideInInspector][SerializeField][SingletonReference] private MenuInputHandler menuInputHandler;
+
+        public override string GameStateInternalName => "jansharp.rp-menu-players-backend";
+        public override string GameStateDisplayName => "RP Menu Players Backend";
+        public override bool GameStateSupportsImportExport => true;
+        public override uint GameStateDataVersion => 0u;
+        public override uint GameStateLowestSupportedDataVersion => 0u;
+        [SerializeField] private PlayersBackendExportUI exportUI;
+        [SerializeField] private PlayersBackendImportUI importUI;
+        public override LockstepGameStateOptionsUI ExportUI => exportUI;
+        public override LockstepGameStateOptionsUI ImportUI => importUI;
+
+        public override PlayersBackendExportOptions ExportOptions => (PlayersBackendExportOptions)OptionsForCurrentExport;
+        public override PlayersBackendImportOptions ImportOptions => (PlayersBackendImportOptions)OptionsForCurrentImport;
+        private PlayersBackendExportOptions optionsFromExport;
+        public override PlayersBackendExportOptions OptionsFromExport => optionsFromExport;
 
         private int rpPlayerDataIndex;
 
@@ -171,6 +185,27 @@ namespace JanSharp.Internal
         {
             CorePlayerData core = playerDataManager.ReadCorePlayerDataRef();
             return core == null ? null : (RPPlayerData)core.customPlayerData[rpPlayerDataIndex];
+        }
+
+        public override void SerializeGameState(bool isExport, LockstepGameStateOptionsData exportOptions)
+        {
+            if (!isExport)
+                return;
+            lockstep.WriteCustomClass(exportOptions);
+        }
+
+        public override string DeserializeGameState(bool isImport, uint importedDataVersion, LockstepGameStateOptionsData importOptions)
+        {
+            if (!isImport)
+                return null;
+            optionsFromExport = (PlayersBackendExportOptions)lockstep.ReadCustomClass(nameof(PlayersBackendExportOptions));
+            return null;
+        }
+
+        [LockstepEvent(LockstepEventType.OnImportFinished, Order = 1000)]
+        public void OnImportFinished()
+        {
+            optionsFromExport = null;
         }
 
         #region EventDispatcher

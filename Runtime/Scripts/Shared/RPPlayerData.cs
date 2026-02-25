@@ -70,18 +70,49 @@ namespace JanSharp
             return overriddenDisplayName != null || characterName != "";
         }
 
-        private void WriteFavoriteItems()
+        private void WriteString(bool isExport, bool includedInExport, string value)
         {
+            if (!isExport || includedInExport)
+                lockstep.WriteString(value);
+        }
+
+        private void ReadString(bool isImport, bool includedInExport, bool includedInImport, ref string value)
+        {
+            if (!isImport)
+            {
+                value = lockstep.ReadString();
+                return;
+            }
+            if (!includedInExport)
+                return;
+            if (includedInImport)
+                value = lockstep.ReadString();
+            else
+                lockstep.ReadString();
+        }
+
+        private void WriteFavoriteItems(bool isExport, PlayersBackendExportOptions options)
+        {
+            if (isExport && !options.includeFavoriteItems)
+                return;
             lockstep.WriteSmallUInt((uint)favoriteItemsCount);
             for (int i = 0; i < favoriteItemsCount; i++)
                 lockstep.WriteSmallUInt(favoriteItems[i].Id);
         }
 
-        private void ReadFavoriteItems(bool isImport)
+        private void ReadFavoriteItems(bool isImport, PlayersBackendExportOptions optionsFromExport, PlayersBackendImportOptions options)
         {
             if (isImport)
             {
+                if (!optionsFromExport.includeFavoriteItems)
+                    return;
                 int count = (int)lockstep.ReadSmallUInt();
+                if (!options.includeFavoriteItems)
+                {
+                    for (int i = 0; i < count; i++)
+                        lockstep.ReadSmallUInt();
+                    return;
+                }
                 importedFavoriteItemIds = new uint[count];
                 for (int i = 0; i < count; i++)
                     importedFavoriteItemIds[i] = lockstep.ReadSmallUInt();
@@ -102,10 +133,11 @@ namespace JanSharp
 
         public override void Serialize(bool isExport)
         {
-            lockstep.WriteString(overriddenDisplayName);
-            lockstep.WriteString(characterName);
+            PlayersBackendExportOptions options = playersBackendManager.ExportOptions;
+            WriteString(isExport, isExport && options.includeOverriddenDisplayName, overriddenDisplayName);
+            WriteString(isExport, isExport && options.includeCharacterName, characterName);
 
-            WriteFavoriteItems();
+            WriteFavoriteItems(isExport, options);
 
             if (isExport)
                 return;
@@ -122,10 +154,21 @@ namespace JanSharp
 
         public override void Deserialize(bool isImport, uint importedDataVersion)
         {
-            overriddenDisplayName = lockstep.ReadString();
-            characterName = lockstep.ReadString();
+            PlayersBackendExportOptions optionsFromExport = playersBackendManager.OptionsFromExport;
+            PlayersBackendImportOptions options = playersBackendManager.ImportOptions;
 
-            ReadFavoriteItems(isImport);
+            ReadString(
+                isImport,
+                isImport && optionsFromExport.includeOverriddenDisplayName,
+                isImport && options.includeOverriddenDisplayName,
+                ref overriddenDisplayName);
+            ReadString(
+                isImport,
+                isImport && optionsFromExport.includeCharacterName,
+                isImport && options.includeCharacterName,
+                ref characterName);
+
+            ReadFavoriteItems(isImport, optionsFromExport, options);
 
             if (isImport)
                 return;

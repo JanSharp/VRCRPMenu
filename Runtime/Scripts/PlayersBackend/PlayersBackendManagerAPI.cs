@@ -68,7 +68,7 @@ namespace JanSharp
     }
 
     [SingletonScript("000377df80d8968ff9358be09d3fa9e3")] // Runtime/Prefabs/PlayersBackendManager.prefab
-    public abstract class PlayersBackendManagerAPI : UdonSharpBehaviour
+    public abstract class PlayersBackendManagerAPI : LockstepGameState
     {
         public abstract void SendSetOverriddenDisplayNameIA(RPPlayerData rpPlayerData, string overriddenDisplayName);
         public abstract void SetOverriddenDisplayNameInGS(RPPlayerData rpPlayerData, string overriddenDisplayName);
@@ -89,6 +89,10 @@ namespace JanSharp
 
         public abstract void WriteRPPlayerDataRef(RPPlayerData rpPlayerData);
         public abstract RPPlayerData ReadRPPlayerDataRef();
+
+        public abstract PlayersBackendExportOptions ExportOptions { get; }
+        public abstract PlayersBackendImportOptions ImportOptions { get; }
+        public abstract PlayersBackendExportOptions OptionsFromExport { get; }
 
         /// <summary>
         /// <para>Usable inside of

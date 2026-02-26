@@ -25,13 +25,14 @@ namespace JanSharp.Internal
         {
             RPPlayerData source = playersBackendManager.ReadRPPlayerDataRef();
             RPPlayerData target = playersBackendManager.ReadRPPlayerDataRef();
+            CorePlayerData targetCore = target.core;
             if (source == null || target == null)
                 return;
-            if (source.favoritePlayersOutgoingLut.ContainsKey(target))
+            if (source.favoritePlayersOutgoingLut.ContainsKey(targetCore))
                 return;
-            source.favoritePlayersOutgoingLut.Add(target, true);
-            ArrList.Add(ref source.favoritePlayersOutgoing, ref source.favoritePlayersOutgoingCount, target);
-            ArrList.Add(ref target.favoritePlayersIncoming, ref target.favoritePlayersIncomingCount, source);
+            source.favoritePlayersOutgoingLut.Add(targetCore, true);
+            ArrList.Add(ref source.favoritePlayersOutgoing, ref source.favoritePlayersOutgoingCount, targetCore);
+            ArrList.Add(ref target.favoritePlayersIncoming, ref target.favoritePlayersIncomingCount, source.core);
             RaiseOnPlayerFavoriteAdded(source, target);
         }
 
@@ -50,12 +51,13 @@ namespace JanSharp.Internal
         {
             RPPlayerData source = playersBackendManager.ReadRPPlayerDataRef();
             RPPlayerData target = playersBackendManager.ReadRPPlayerDataRef();
+            CorePlayerData targetCore = target.core;
             if (source == null || target == null)
                 return;
-            if (!source.favoritePlayersOutgoingLut.Remove(target))
+            if (!source.favoritePlayersOutgoingLut.Remove(targetCore))
                 return;
-            ArrList.Remove(ref source.favoritePlayersOutgoing, ref source.favoritePlayersOutgoingCount, target);
-            ArrList.Remove(ref target.favoritePlayersIncoming, ref target.favoritePlayersIncomingCount, source);
+            ArrList.Remove(ref source.favoritePlayersOutgoing, ref source.favoritePlayersOutgoingCount, targetCore);
+            ArrList.Remove(ref target.favoritePlayersIncoming, ref target.favoritePlayersIncomingCount, source.core);
             RaiseOnPlayerFavoriteRemoved(source, target);
         }
 
@@ -65,18 +67,19 @@ namespace JanSharp.Internal
         /// <param name="player"></param>
         public void OnPlayerDataUnInit(RPPlayerData player)
         {
+            CorePlayerData playerCore = player.core;
             // At the time of writing this the Player Data system does not delete any existing player data
             // during imports, however if it did then this here should actually handle it cleanly anyway,
             // nothing needs to happen in OnImportFinishingUp. The only unfortunate part would be that this
             // would raise events during the import process, which I have kind of started to avoid, but it
             // would be fine anyway as systems should expect to receive events involving unknown players.
-            RPPlayerData[] players = player.favoritePlayersIncoming;
+            CorePlayerData[] players = player.favoritePlayersIncoming;
             int count = player.favoritePlayersIncomingCount;
             for (int i = count - 1; i >= 0; i--)
             {
-                RPPlayerData source = players[i];
-                source.favoritePlayersOutgoingLut.Remove(player);
-                ArrList.Remove(ref source.favoritePlayersOutgoing, ref source.favoritePlayersOutgoingCount, player);
+                RPPlayerData source = playersBackendManager.GetRPPlayerData(players[i]);
+                source.favoritePlayersOutgoingLut.Remove(playerCore);
+                ArrList.Remove(ref source.favoritePlayersOutgoing, ref source.favoritePlayersOutgoingCount, playerCore);
                 player.favoritePlayersIncomingCount = i;
                 RaiseOnPlayerFavoriteRemoved(source, player);
             }

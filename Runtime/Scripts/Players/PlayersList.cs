@@ -114,7 +114,7 @@ namespace JanSharp
             RPPlayerData rpPlayerData = (RPPlayerData)core.customPlayerData[rpPlayerDataIndex];
             row.rpPlayerData = rpPlayerData;
 
-            bool isFavorite = localPlayer.favoritePlayersOutgoingLut.ContainsKey(rpPlayerData);
+            bool isFavorite = localPlayer.favoritePlayersOutgoingLut.ContainsKey(core);
             string playerName = rpPlayerData.PlayerDisplayName;
             string characterName = rpPlayerData.characterName;
             bool isSelected = selectionManager.selectedPlayersLut.ContainsKey(core);

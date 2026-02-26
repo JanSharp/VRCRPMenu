@@ -14,6 +14,7 @@ namespace JanSharp
         public override uint LowestSupportedDataVersion => 0u;
 
         [HideInInspector][SerializeField][SingletonReference] private PlayersBackendManagerAPI playersBackendManager;
+        [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
         [HideInInspector][SerializeField][SingletonReference] private PlayersFavoritesManagerAPI playersFavoritesManager;
         [HideInInspector][SerializeField][SingletonReference] private ItemsFavoritesManagerAPI itemsFavoritesManager;
         [HideInInspector][SerializeField][SingletonReference] private EntitySystem entitySystem;
@@ -30,12 +31,12 @@ namespace JanSharp
         [System.NonSerialized] public string characterName;
 
         /// <summary>
-        /// <para><see cref="RPPlayerData"/> player => <see langword="true"/></para>
+        /// <para><see cref="CorePlayerData"/> player => <see langword="true"/></para>
         /// </summary>
         [System.NonSerialized] public DataDictionary favoritePlayersOutgoingLut = new DataDictionary();
-        [System.NonSerialized] public RPPlayerData[] favoritePlayersOutgoing = new RPPlayerData[ArrList.MinCapacity];
+        [System.NonSerialized] public CorePlayerData[] favoritePlayersOutgoing = new CorePlayerData[ArrList.MinCapacity];
         [System.NonSerialized] public int favoritePlayersOutgoingCount = 0;
-        [System.NonSerialized] public RPPlayerData[] favoritePlayersIncoming = new RPPlayerData[ArrList.MinCapacity];
+        [System.NonSerialized] public CorePlayerData[] favoritePlayersIncoming = new CorePlayerData[ArrList.MinCapacity];
         [System.NonSerialized] public int favoritePlayersIncomingCount = 0;
 
         /// <summary>
@@ -136,12 +137,12 @@ namespace JanSharp
         {
             lockstep.WriteSmallUInt((uint)favoritePlayersOutgoingCount);
             for (int i = 0; i < favoritePlayersOutgoingCount; i++)
-                playersBackendManager.WriteRPPlayerDataRef(favoritePlayersOutgoing[i]);
+                playerDataManager.WriteCorePlayerDataRef(favoritePlayersOutgoing[i]);
 
             // Must also serialize this list, it is not redundant, since the order must be identical on all clients.
             lockstep.WriteSmallUInt((uint)favoritePlayersIncomingCount);
             for (int i = 0; i < favoritePlayersIncomingCount; i++)
-                playersBackendManager.WriteRPPlayerDataRef(favoritePlayersIncoming[i]);
+                playerDataManager.WriteCorePlayerDataRef(favoritePlayersIncoming[i]);
         }
 
         private void ReadFavoritePlayers(bool isImport, bool discard)
@@ -152,17 +153,21 @@ namespace JanSharp
                 {
                     int count = (int)lockstep.ReadSmallUInt();
                     for (int j = 0; j < count; j++)
-                        playersBackendManager.ReadRPPlayerDataRef(isImport);
+                        playerDataManager.ReadCorePlayerDataRef(isImport);
                 }
                 return;
             }
+
+            // Can use ReadCorePlayerDataRef reliably here, however could not reliably resolve refs to custom
+            // player data. Those would have to be resolved in OnImportFinishingUp. But it is not necessary,
+            // core player data is more than sufficient.
 
             favoritePlayersOutgoingLut.Clear();
             favoritePlayersOutgoingCount = (int)lockstep.ReadSmallUInt();
             ArrList.EnsureCapacity(ref favoritePlayersOutgoing, favoritePlayersOutgoingCount);
             for (int i = 0; i < favoritePlayersOutgoingCount; i++)
             {
-                RPPlayerData player = playersBackendManager.ReadRPPlayerDataRef(isImport);
+                CorePlayerData player = playerDataManager.ReadCorePlayerDataRef(isImport);
                 favoritePlayersOutgoing[i] = player;
                 favoritePlayersOutgoingLut.Add(player, true);
             }
@@ -170,7 +175,7 @@ namespace JanSharp
             favoritePlayersIncomingCount = (int)lockstep.ReadSmallUInt();
             ArrList.EnsureCapacity(ref favoritePlayersIncoming, favoritePlayersIncomingCount);
             for (int i = 0; i < favoritePlayersIncomingCount; i++)
-                favoritePlayersIncoming[i] = playersBackendManager.ReadRPPlayerDataRef(isImport);
+                favoritePlayersIncoming[i] = playerDataManager.ReadCorePlayerDataRef(isImport);
         }
 
         public override void Serialize(bool isExport)

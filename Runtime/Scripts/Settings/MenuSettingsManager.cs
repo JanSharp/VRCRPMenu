@@ -340,9 +340,12 @@ namespace JanSharp.Internal
             return null;
         }
 
-        [LockstepEvent(LockstepEventType.OnImportFinished, Order = 1000)]
+        [LockstepEvent(LockstepEventType.OnImportFinished, Order = 10000)]
         public void OnImportFinished()
         {
+            if (!IsPartOfCurrentImport)
+                return;
+            optionsFromExport.DecrementRefsCount();
             optionsFromExport = null;
         }
 

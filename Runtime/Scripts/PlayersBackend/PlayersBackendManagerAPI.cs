@@ -89,6 +89,7 @@ namespace JanSharp
 
         public abstract void WriteRPPlayerDataRef(RPPlayerData rpPlayerData);
         public abstract RPPlayerData ReadRPPlayerDataRef();
+        public abstract RPPlayerData ReadRPPlayerDataRef(bool isImport);
 
         /// <summary>
         /// <para>Used in exports.</para>

@@ -12,6 +12,7 @@ namespace JanSharp
         [System.NonSerialized] public bool includeOverriddenDisplayName = true;
         [System.NonSerialized] public bool includeCharacterName = true;
         [System.NonSerialized] public bool includeFavoriteItems = true;
+        [System.NonSerialized] public bool includeFavoritePlayers = true;
 
         public override LockstepGameStateOptionsData Clone()
         {
@@ -19,6 +20,7 @@ namespace JanSharp
             clone.includeOverriddenDisplayName = includeOverriddenDisplayName;
             clone.includeCharacterName = includeCharacterName;
             clone.includeFavoriteItems = includeFavoriteItems;
+            clone.includeFavoritePlayers = includeFavoritePlayers;
             return clone;
         }
 
@@ -27,7 +29,8 @@ namespace JanSharp
             lockstep.WriteFlags(
                 includeOverriddenDisplayName,
                 includeCharacterName,
-                includeFavoriteItems);
+                includeFavoriteItems,
+                includeFavoritePlayers);
         }
 
         public override void Deserialize(bool isImport, uint importedDataVersion)
@@ -35,7 +38,8 @@ namespace JanSharp
             lockstep.ReadFlags(
                 out includeOverriddenDisplayName,
                 out includeCharacterName,
-                out includeFavoriteItems);
+                out includeFavoriteItems,
+                out includeFavoritePlayers);
         }
     }
 }

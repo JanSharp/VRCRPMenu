@@ -183,7 +183,12 @@ namespace JanSharp.Internal
 
         public override RPPlayerData ReadRPPlayerDataRef()
         {
-            CorePlayerData core = playerDataManager.ReadCorePlayerDataRef();
+            return ReadRPPlayerDataRef(lockstep.IsDeserializingForImport);
+        }
+
+        public override RPPlayerData ReadRPPlayerDataRef(bool isImport)
+        {
+            CorePlayerData core = playerDataManager.ReadCorePlayerDataRef(isImport);
             return core == null ? null : (RPPlayerData)core.customPlayerData[rpPlayerDataIndex];
         }
 

@@ -207,3 +207,6 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [x] when hiding and showing the import tab the widgets must match what gets created in OnImportSerializedTextValueChangedDelayed
 - [ ] mention sylan's gm menu in the readme. While I took no code nor assets from there, I did take notable amount of inspiration
 - [x] do something about the order of operations for switching tabs and tabs active state changing on the save page, such that the animations of generic value editor ui values changing don't end up playing
+- [ ] add import export support to favorite players
+- [ ] add import export support to player selection groups
+- [ ] add import export support to custom locations

@@ -1,7 +1,6 @@
 ﻿using UdonSharp;
 using UnityEngine;
 using VRC.SDK3.Data;
-using VRC.SDKBase;
 
 namespace JanSharp
 {
@@ -35,14 +34,14 @@ namespace JanSharp
     }
 
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [LockstepGameStateDependency(typeof(PlayerSelectionOptionsGS))]
+    [LockstepGameStateDependency(typeof(PlayerDataManagerAPI))]
     [SingletonScript("95263ec555dec07b5914eaca0c50884a")] // Runtime/Prefabs/Managers/PlayerSelectionManager.prefab
     [CustomRaisedEventsDispatcher(typeof(PlayerSelectionEventAttribute), typeof(PlayerSelectionEventType))]
     public class PlayerSelectionManager : DynamicDataManager
     {
         public override string GameStateInternalName => "jansharp.rp-menu-player-selection";
         public override string GameStateDisplayName => "Player Selection";
-        public override uint GameStateDataVersion => 0u;
-        public override uint GameStateLowestSupportedDataVersion => 0u;
 
         public override string DynamicDataClassName => nameof(PlayerSelectionGroup);
         public override string PerPlayerDataClassName => nameof(PerPlayerSelectionData);

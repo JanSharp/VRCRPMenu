@@ -5,9 +5,6 @@ namespace JanSharp
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class PlayerSelectionGroup : DynamicData
     {
-        public override uint DataVersion => 0u;
-        public override uint LowestSupportedDataVersion => 0u;
-
         #region GameState
         [System.NonSerialized] public CorePlayerData[] selectedPlayers;
         #endregion

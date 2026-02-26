@@ -8,8 +8,6 @@ namespace JanSharp
     {
         public override string PlayerDataInternalName => "jansharp.rp-menu-player-selection";
         public override string PlayerDataDisplayName => "Player Selection";
-        public override uint DataVersion => 0u;
-        public override uint LowestSupportedDataVersion => 0u;
 
         [HideInInspector][SerializeField][SingletonReference] protected PlayerSelectionManager selectionManager;
         public override DynamicDataManager DataManager => selectionManager;

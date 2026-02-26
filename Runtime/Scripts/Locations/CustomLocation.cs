@@ -6,9 +6,6 @@ namespace JanSharp
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class CustomLocation : DynamicData
     {
-        public override uint DataVersion => 0u;
-        public override uint LowestSupportedDataVersion => 0u;
-
         #region GameState
         [System.NonSerialized] public Vector3 position;
         [System.NonSerialized] public Quaternion rotation;

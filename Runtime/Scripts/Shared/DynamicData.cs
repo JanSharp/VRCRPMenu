@@ -4,7 +4,9 @@ namespace JanSharp
 {
     public abstract class DynamicData : SerializableWannaBeClass
     {
-        public override bool SupportsImportExport => false;
+        public override bool SupportsImportExport => true;
+        public override uint DataVersion => 0u;
+        public override uint LowestSupportedDataVersion => 0u;
 
         [HideInInspector][SerializeField][SingletonReference] protected PlayerDataManagerAPI playerDataManager;
 
@@ -13,30 +15,24 @@ namespace JanSharp
         [System.NonSerialized] public string dataName;
         [System.NonSerialized] public bool isGlobal;
         [System.NonSerialized] public CorePlayerData owningPlayer;
-        // [System.NonSerialized] public bool livesInUndoStack;
-        // [System.NonSerialized] public uint overwrittenAtTick;
         #endregion
 
         public override void Serialize(bool isExport)
         {
-            lockstep.WriteSmallUInt(id);
+            if (!isExport)
+                lockstep.WriteSmallUInt(id);
             lockstep.WriteString(dataName);
             lockstep.WriteFlags(isGlobal);
-            // lockstep.WriteFlags(isGlobal, livesInUndoStack);
             playerDataManager.WriteCorePlayerDataRef(owningPlayer);
-            // if (livesInUndoStack)
-            //     lockstep.WriteSmallUInt(overwrittenAtTick);
         }
 
         public override void Deserialize(bool isImport, uint importedDataVersion)
         {
-            id = lockstep.ReadSmallUInt();
+            if (!isImport)
+                id = lockstep.ReadSmallUInt();
             dataName = lockstep.ReadString();
             lockstep.ReadFlags(out isGlobal);
-            // lockstep.ReadFlags(out isGlobal, out livesInUndoStack);
             owningPlayer = playerDataManager.ReadCorePlayerDataRef();
-            // if (livesInUndoStack)
-            //     overwrittenAtTick = lockstep.ReadSmallUInt();
         }
     }
 }

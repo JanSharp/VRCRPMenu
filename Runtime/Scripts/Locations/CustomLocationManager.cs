@@ -30,14 +30,13 @@ namespace JanSharp
     }
 
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [LockstepGameStateDependency(typeof(CustomLocationOptionsGS))]
     [SingletonScript("e2bd3d3e653c7ff52ad3c01bae45db7a")] // Runtime/Prefabs/Managers/CustomLocationManager.prefab
     [CustomRaisedEventsDispatcher(typeof(CustomLocationEventAttribute), typeof(CustomLocationEventType))]
     public class CustomLocationManager : DynamicDataManager
     {
         public override string GameStateInternalName => "jansharp.rp-menu-custom-locations";
         public override string GameStateDisplayName => "Custom Locations";
-        public override uint GameStateDataVersion => 0u;
-        public override uint GameStateLowestSupportedDataVersion => 0u;
 
         public override string DynamicDataClassName => nameof(CustomLocation);
         public override string PerPlayerDataClassName => nameof(PerPlayerCustomLocationData);

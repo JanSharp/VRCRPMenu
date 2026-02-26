@@ -64,12 +64,20 @@ namespace JanSharp
             isInitialized = true;
         }
 
+        [LockstepEvent(LockstepEventType.OnImportFinishingUp)]
+        public void OnImportFinishingUp()
+        {
+            RebuildDynamicDataButtons();
+        }
+
         public override void InitializeInstantiated() { }
 
         public override void Resolve()
         {
             if (!isInitialized)
                 return;
+            // This could check if permissions actually changed,
+            // which would prevent running the rebuild twice for imports.
             RebuildDynamicDataButtons();
         }
 

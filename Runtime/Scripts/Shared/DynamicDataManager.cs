@@ -5,7 +5,9 @@ namespace JanSharp
 {
     public abstract class DynamicDataManager : LockstepGameState
     {
-        public override bool GameStateSupportsImportExport => false;
+        public override bool GameStateSupportsImportExport => true;
+        public override uint GameStateDataVersion => 0u;
+        public override uint GameStateLowestSupportedDataVersion => 0u;
         public override LockstepGameStateOptionsUI ExportUI => null;
         public override LockstepGameStateOptionsUI ImportUI => null;
 
@@ -15,6 +17,8 @@ namespace JanSharp
         [HideInInspector][SerializeField][SingletonReference] protected WannaBeClassesManager wannaBeClasses;
         [HideInInspector][SerializeField][SingletonReference] protected PlayerDataManagerAPI playerDataManager;
         [HideInInspector][SerializeField][SingletonReference] protected PermissionManagerAPI permissionManager;
+
+        public DynamicDataOptionsGS optionsGS;
 
         protected int playerDataIndex;
 
@@ -55,6 +59,7 @@ namespace JanSharp
         /// <para><c>0u</c> is invalid.</para>
         /// </summary>
         private uint nextId = 1u;
+        public uint GetNextDynamicDataId() => nextId++;
         /// <summary>
         /// <para><see cref="uint"/> id => <see cref="DynamicData"/> data</para>
         /// <para>Has global and all local data. Literally all data part of the game state.</para>
@@ -298,20 +303,44 @@ namespace JanSharp
 
         public override void SerializeGameState(bool isExport, LockstepGameStateOptionsData exportOptions)
         {
-            lockstep.WriteSmallUInt(nextId);
+            if (!isExport)
+                lockstep.WriteSmallUInt(nextId);
+
+            if (isExport && !optionsGS.ExportOptions.includeGlobal)
+                return;
+
             lockstep.WriteSmallUInt((uint)globalDynamicDataCount);
             for (int i = 0; i < globalDynamicDataCount; i++)
-                lockstep.WriteCustomClass(globalDynamicData[i]);
+                lockstep.WriteCustomClass(globalDynamicData[i], isExport);
         }
 
         public override string DeserializeGameState(bool isImport, uint importedDataVersion, LockstepGameStateOptionsData importOptions)
         {
-            nextId = lockstep.ReadSmallUInt();
+            if (!isImport)
+                nextId = lockstep.ReadSmallUInt();
+
+            if (isImport && (!optionsGS.OptionsFromExport.includeGlobal || !optionsGS.ImportOptions.includeGlobal))
+                return null;
+
+            if (isImport)
+            {
+                globalDynamicDataByName.Clear();
+                for (int i = 0; i < globalDynamicDataCount; i++)
+                {
+                    DynamicData data = globalDynamicData[i];
+                    allDynamicDataById.Remove(data.id);
+                    data.DecrementRefsCount();
+                }
+            }
+
             globalDynamicDataCount = (int)lockstep.ReadSmallUInt();
             ArrList.EnsureCapacity(ref globalDynamicData, globalDynamicDataCount);
+            string dynamicDataClassName = DynamicDataClassName;
             for (int i = 0; i < globalDynamicDataCount; i++)
             {
-                DynamicData data = (DynamicData)lockstep.ReadCustomClass(DynamicDataClassName);
+                DynamicData data = (DynamicData)lockstep.ReadCustomClass(dynamicDataClassName, isImport);
+                if (isImport)
+                    data.id = nextId++;
                 allDynamicDataById.Add(data.id, data);
                 globalDynamicDataByName.Add(data.dataName, data);
                 globalDynamicData[i] = data;

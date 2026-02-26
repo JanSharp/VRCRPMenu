@@ -208,5 +208,5 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [ ] mention sylan's gm menu in the readme. While I took no code nor assets from there, I did take notable amount of inspiration
 - [x] do something about the order of operations for switching tabs and tabs active state changing on the save page, such that the animations of generic value editor ui values changing don't end up playing
 - [x] add import export support to favorite players
-- [ ] add import export support to player selection groups
-- [ ] add import export support to custom locations
+- [x] add import export support to player selection groups
+- [x] add import export support to custom locations

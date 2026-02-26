@@ -4,7 +4,9 @@ namespace JanSharp
 {
     public abstract class PerPlayerDynamicData : PlayerData
     {
-        public override bool SupportsImportExport => false;
+        public override bool SupportsImportExport => true;
+        public override uint DataVersion => 0u;
+        public override uint LowestSupportedDataVersion => 0u;
 
         public abstract string DynamicDataClassName { get; }
         public abstract DynamicDataManager DataManager { get; }
@@ -31,24 +33,66 @@ namespace JanSharp
             return localDynamicDataCount != 0;
         }
 
-        public override void Serialize(bool isExport)
+        private void WriteLocalDynamicData(bool isExport)
         {
             lockstep.WriteSmallUInt((uint)localDynamicDataCount);
             for (int i = 0; i < localDynamicDataCount; i++)
-                lockstep.WriteCustomClass(localDynamicData[i]);
+                lockstep.WriteCustomClass(localDynamicData[i], isExport);
         }
 
-        public override void Deserialize(bool isImport, uint importedDataVersion)
+        private void ReadLocalDynamicData(bool isImport, bool discard)
         {
+            string dynamicDataClassName = DynamicDataClassName;
+            DynamicDataManager dataManager = DataManager;
+
+            if (discard)
+            {
+                int count = (int)lockstep.ReadSmallUInt();
+                if (count == 0)
+                    return;
+                DynamicData dummy = (DynamicData)WannaBeClasses.NewDynamic(dynamicDataClassName);
+                for (int i = 0; i < count; i++)
+                    lockstep.ReadCustomClass(dummy, isImport);
+                dummy.Delete();
+                return;
+            }
+
+            if (isImport)
+            {
+                localDynamicDataByName.Clear();
+                for (int i = 0; i < localDynamicDataCount; i++)
+                {
+                    DynamicData data = localDynamicData[i];
+                    dataManager.allDynamicDataById.Remove(data.id);
+                    data.DecrementRefsCount();
+                }
+            }
+
             localDynamicDataCount = (int)lockstep.ReadSmallUInt();
             WannaBeArrList.EnsureCapacity(ref localDynamicData, localDynamicDataCount);
             for (int i = 0; i < localDynamicDataCount; i++)
             {
-                DynamicData data = (DynamicData)lockstep.ReadCustomClass(DynamicDataClassName);
-                DataManager.allDynamicDataById.Add(data.id, data);
+                DynamicData data = (DynamicData)lockstep.ReadCustomClass(dynamicDataClassName, isImport);
+                if (isImport)
+                    data.id = dataManager.GetNextDynamicDataId();
+                dataManager.allDynamicDataById.Add(data.id, data);
                 localDynamicDataByName.Add(data.dataName, data);
                 localDynamicData[i] = data;
             }
+        }
+
+        public override void Serialize(bool isExport)
+        {
+            if (!isExport || DataManager.optionsGS.ExportOptions.includePerPlayer)
+                WriteLocalDynamicData(isExport);
+        }
+
+        public override void Deserialize(bool isImport, uint importedDataVersion)
+        {
+            if (!isImport)
+                ReadLocalDynamicData(isImport, discard: false);
+            else if (DataManager.optionsGS.OptionsFromExport.includePerPlayer)
+                ReadLocalDynamicData(isImport, discard: !DataManager.optionsGS.ImportOptions.includePerPlayer);
         }
     }
 }

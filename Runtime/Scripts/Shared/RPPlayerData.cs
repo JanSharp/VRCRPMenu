@@ -71,7 +71,11 @@ namespace JanSharp
 
         public override bool PersistPlayerDataWhileOffline()
         {
-            return overriddenDisplayName != null || characterName != "";
+            return overriddenDisplayName != null
+                || characterName != ""
+                || favoritePlayersOutgoingCount != 0
+                || favoritePlayersIncomingCount != 0
+                || favoriteItemsCount != 0;
         }
 
         private void WriteString(bool isExport, bool includedInExport, string value)

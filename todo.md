@@ -210,3 +210,7 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [x] add import export support to favorite players
 - [x] add import export support to player selection groups
 - [x] add import export support to custom locations
+- [ ] reset the small medium large toggles for gm proxies as well as items to their default when leaving the page
+  - [ ] maybe also when closing and opening the menu... only maybe. that'd be inconsistent with the one other thing that resets currently, that being the save page
+  - [ ] bigger maybe also reset when spawning an item/gm proxy
+- [ ] maybe reset the GM proxy name when spawning

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 8952147531675513764}
   - component: {fileID: 3174030092127625706}
   m_Layer: 0
-  m_Name: PlayersBackendImportUI
+  m_Name: PlayersBackendImportOptionsUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -58,6 +58,8 @@ MonoBehaviour:
   lockstep: {fileID: 0}
   wannaBeClasses: {fileID: 0}
   widgetManager: {fileID: 0}
+  playerDataExportUI: {fileID: 0}
+  playerDataImportUI: {fileID: 0}
   isImportUI: 1
 --- !u!114 &3174030092127625706
 MonoBehaviour:
@@ -96,7 +98,7 @@ GameObject:
   - component: {fileID: 7693813480984288384}
   - component: {fileID: 4314094996092929568}
   m_Layer: 0
-  m_Name: PlayersBackendExportUI
+  m_Name: "PlayersBackendExportOptions\x7FUI"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -142,6 +144,8 @@ MonoBehaviour:
   lockstep: {fileID: 0}
   wannaBeClasses: {fileID: 0}
   widgetManager: {fileID: 0}
+  playerDataExportUI: {fileID: 0}
+  playerDataImportUI: {fileID: 0}
   isImportUI: 0
 --- !u!114 &4314094996092929568
 MonoBehaviour:
@@ -226,10 +230,10 @@ MonoBehaviour:
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 7127205063460077921}
   lockstep: {fileID: 0}
-  playerDataManager: {fileID: 0}
-  permissionManager: {fileID: 0}
   exportUI: {fileID: 7693813480984288384}
   importUI: {fileID: 8952147531675513764}
+  playerDataManager: {fileID: 0}
+  permissionManager: {fileID: 0}
   editDisplayNamePermissionAsset: 90af794bc490466609d6f9a484ec70c1
   editDisplayNamePDef: {fileID: 0}
   editCharacterNamePermissionAsset: 2e415fb8570687e1e849f16e2e3a9874

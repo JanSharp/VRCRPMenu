@@ -66,6 +66,11 @@ namespace JanSharp
                 || hudVisualType != voiceRangeManager.DefaultHUDVisualType;
         }
 
+        public override bool PersistPlayerDataInExport()
+        {
+            return voiceRangeManager.ExportOptions.includeVoiceRangeSettings && PersistPlayerDataWhileOffline();
+        }
+
         private void WriteSettings()
         {
             lockstep.WriteSmallUInt(showInWorldMask);

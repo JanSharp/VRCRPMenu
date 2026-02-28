@@ -42,6 +42,11 @@ namespace JanSharp
                 || noClipSpeed != noClipSettingsManager.InitialNoClipSpeed;
         }
 
+        public override bool PersistPlayerDataInExport()
+        {
+            return noClipSettingsManager.ExportOptions.includeNoClipSettings && PersistPlayerDataWhileOffline();
+        }
+
         private void WriteSettings()
         {
             lockstep.WriteFlags(noClipEnabled);

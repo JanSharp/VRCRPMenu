@@ -48,6 +48,11 @@ namespace JanSharp
                 || menuPosition != menuSettingsManager.InitialMenuPosition;
         }
 
+        public override bool PersistPlayerDataInExport()
+        {
+            return menuSettingsManager.ExportOptions.includeMenuSettings && PersistPlayerDataWhileOffline();
+        }
+
         private void WriteSettings()
         {
             lockstep.WriteFlags(uiSoundsEnabled);

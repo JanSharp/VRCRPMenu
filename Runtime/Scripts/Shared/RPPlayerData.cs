@@ -78,6 +78,17 @@ namespace JanSharp
                 || favoriteItemsCount != 0;
         }
 
+        public override bool PersistPlayerDataInExport()
+        {
+            PlayersBackendImportExportOptions exportOptions = playersBackendManager.ExportOptions;
+            // Flipping these conditions would be more performant, however this is more readable and this runs
+            // in a block in the player data system checking if it should spread work out across frames so it's fine.
+            return exportOptions.includeOverriddenDisplayName && overriddenDisplayName != null
+                || exportOptions.includeCharacterName && characterName != ""
+                || exportOptions.includeCharacterName && (favoritePlayersOutgoingCount != 0 || favoritePlayersIncomingCount != 0)
+                || exportOptions.includeFavoriteItems && favoriteItemsCount != 0;
+        }
+
         private void WriteString(bool isExport, bool includedInExport, string value)
         {
             if (!isExport || includedInExport)

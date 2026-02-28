@@ -33,6 +33,11 @@ namespace JanSharp
             return localDynamicDataCount != 0;
         }
 
+        public override bool PersistPlayerDataInExport()
+        {
+            return DataManager.optionsGS.ExportOptions.includePerPlayer && PersistPlayerDataWhileOffline();
+        }
+
         private void WriteLocalDynamicData(bool isExport)
         {
             lockstep.WriteSmallUInt((uint)localDynamicDataCount);

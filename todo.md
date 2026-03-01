@@ -214,3 +214,4 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
   - [ ] maybe also when closing and opening the menu... only maybe. that'd be inconsistent with the one other thing that resets currently, that being the save page
   - [ ] bigger maybe also reset when spawning an item/gm proxy
 - [ ] maybe reset the GM proxy name when spawning
+- [ ] switch away from abusing Selectable for animations and do cross fading on the graphic through script. Selectable does eat performance when changing parents, which is what happens when switching pages, contributing to that lag spike (~180ms total lag spike with 1089 players, switching to and from the players backend page, ~21ms of which is Selectable. Granted that includes the Button, Toggle and TMPInputField as they derive from Selectable, but still)

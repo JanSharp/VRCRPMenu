@@ -19,6 +19,7 @@ namespace JanSharp.Internal
         public override LockstepGameStateOptionsUI ExportUI => exportUI;
         public override LockstepGameStateOptionsUI ImportUI => importUI;
 
+        [HideInInspector][SerializeField][SingletonReference] private UISoundsManagerAPI uiSoundsManager;
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
         [HideInInspector][SerializeField][SingletonReference] private MenuInputHandler menuInputHandler;
 
@@ -29,9 +30,8 @@ namespace JanSharp.Internal
 
         private int perPlayerMenuSettingsIndex;
 
-        [SerializeField] private bool initialUISoundsEnabled = true;
-        [Range(0f, 1f)]
-        [SerializeField] private float initialUISoundsVolume = 0.5f;
+        private bool initialUISoundsEnabled;
+        private float initialUISoundsVolume;
         [SerializeField] private RPMenuDefaultPageType initialDefaultPage = RPMenuDefaultPageType.Home;
         private MenuOpenCloseKeyBind initialMenuOpenCloseKeyBind;
         private MenuPositionType initialMenuPosition;
@@ -55,6 +55,8 @@ namespace JanSharp.Internal
 
         private void Start()
         {
+            initialUISoundsEnabled = !uiSoundsManager.Muted;
+            initialUISoundsVolume = uiSoundsManager.Volume;
             initialMenuOpenCloseKeyBind = menuInputHandler.keyBind;
             initialMenuPosition = menuInputHandler.MenuPosition;
         }
@@ -84,8 +86,10 @@ namespace JanSharp.Internal
             latencyHiddenUniqueIds.Clear();
             if (suppressEvents)
             {
-                latencyUISoundsEnabled = localSettings.uiSoundsEnabled;
-                latencyUISoundsVolume = localSettings.uiSoundsVolume;
+                latencyUISoundsEnabled = localSettings.uiSoundsEnabled; // Must set before, otherwise it sends an IA.
+                uiSoundsManager.Muted = !localSettings.uiSoundsEnabled;
+                latencyUISoundsVolume = localSettings.uiSoundsVolume; // Must set before, otherwise it sends an IA.
+                uiSoundsManager.Volume = localSettings.uiSoundsVolume;
                 latencyDefaultPage = localSettings.defaultPage;
                 menuInputHandler.keyBind = localSettings.menuOpenCloseKeyBind;
                 menuInputHandler.MenuPosition = localSettings.menuPosition;
@@ -144,7 +148,8 @@ namespace JanSharp.Internal
         {
             if (latencyUISoundsEnabled == enabled)
                 return;
-            latencyUISoundsEnabled = enabled;
+            latencyUISoundsEnabled = enabled; // Must set before, otherwise it sends an IA.
+            uiSoundsManager.Muted = !enabled;
             RaiseOnLocalLatencyUISoundsEnabledSettingChanged();
         }
 
@@ -197,7 +202,8 @@ namespace JanSharp.Internal
         {
             if (latencyUISoundsVolume == volume)
                 return;
-            latencyUISoundsVolume = volume;
+            latencyUISoundsVolume = volume; // Must set before, otherwise it sends an IA.
+            uiSoundsManager.Volume = volume;
             RaiseOnLocalLatencyUISoundsVolumeSettingChanged();
         }
 
@@ -298,6 +304,44 @@ namespace JanSharp.Internal
                 return;
             menuInputHandler.MenuPosition = menuPosition;
             RaiseOnLocalLatencyMenuPositionSettingChanged();
+        }
+
+        [LockstepEvent(LockstepEventType.OnInitFinished)]
+        public void OnInitFinished() => MatchUISoundsManager();
+
+        [LockstepEvent(LockstepEventType.OnPostClientBeginCatchUp)]
+        public void OnPostClientBeginCatchUp() => MatchUISoundsManager();
+
+        [UISoundsEvent(UISoundsEventType.OnUISoundsMutedChanged)]
+        public void OnUISoundsMutedChanged()
+        {
+            if (lockstep.IsInitialized)
+                MatchUISoundsManagerMuted();
+        }
+
+        [UISoundsEvent(UISoundsEventType.OnUISoundsVolumeChanged)]
+        public void OnUISoundsVolumeChanged()
+        {
+            if (lockstep.IsInitialized)
+                MatchUISoundsManagerVolume();
+        }
+
+        private void MatchUISoundsManager()
+        {
+            MatchUISoundsManagerMuted();
+            MatchUISoundsManagerVolume();
+        }
+
+        private void MatchUISoundsManagerMuted()
+        {
+            if (latencyUISoundsEnabled == uiSoundsManager.Muted) // == because their meaning is inverted.
+                SendSetUISoundsEnabledIA(LocalPlayerSettings, !uiSoundsManager.Muted);
+        }
+
+        private void MatchUISoundsManagerVolume()
+        {
+            if (latencyUISoundsVolume != uiSoundsManager.Volume)
+                SendSetUISoundsVolumeIARateLimited(uiSoundsManager.Volume); // Rate limited in case something is using a slider.
         }
 
         #endregion

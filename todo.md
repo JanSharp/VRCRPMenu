@@ -201,7 +201,7 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
   - [x] favorites
   - [x] when importing favorites, ignore entities which are no longer items
 - [ ] help page
-- [ ] ui sounds
+- [x] ui sounds
 - [ ] maybe have the menu side bar expanded/collapsed state be part of import export
 - [ ] maybe have the expanded/collapsed state of the keyboard on the items page
 - [x] when hiding and showing the import tab the widgets must match what gets created in OnImportSerializedTextValueChangedDelayed
@@ -215,3 +215,4 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
   - [ ] bigger maybe also reset when spawning an item/gm proxy
 - [ ] maybe reset the GM proxy name when spawning
 - [ ] switch away from abusing Selectable for animations and do cross fading on the graphic through script. Selectable does eat performance when changing parents, which is what happens when switching pages, contributing to that lag spike (~180ms total lag spike with 1089 players, switching to and from the players backend page, ~21ms of which is Selectable. Granted that includes the Button, Toggle and TMPInputField as they derive from Selectable, but still)
+- [ ] close item spawn confirmation popup when switching pages

@@ -90,9 +90,9 @@ namespace JanSharp.Internal
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onPlayerFavoriteAddedListeners;
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onPlayerFavoriteRemovedListeners;
 
-        public RPPlayerData sourcePlayerForEvent;
+        private RPPlayerData sourcePlayerForEvent;
         public override RPPlayerData SourcePlayerForEvent => sourcePlayerForEvent;
-        public RPPlayerData targetPlayerForEvent;
+        private RPPlayerData targetPlayerForEvent;
         public override RPPlayerData TargetPlayerForEvent => targetPlayerForEvent;
 
         private void RaiseOnPlayerFavoriteAdded(RPPlayerData sourcePlayerForEvent, RPPlayerData targetPlayerForEvent)

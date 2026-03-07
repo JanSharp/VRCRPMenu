@@ -41,7 +41,7 @@ namespace JanSharp
         {
             if (includeNoClipSettingsToggle != null)
                 return;
-            includeNoClipSettingsToggle = widgetManager.NewToggleField("No Clip Settings", false);
+            includeNoClipSettingsToggle = widgetManager.NewLeftToggleField("No Clip Settings", false);
         }
 
         protected override void OnOptionsEditorShow(LockstepOptionsEditorUI ui, uint importedDataVersion)

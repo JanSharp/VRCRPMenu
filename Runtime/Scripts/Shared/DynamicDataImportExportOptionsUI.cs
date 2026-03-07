@@ -44,8 +44,8 @@ namespace JanSharp
         {
             if (includeGlobalToggle != null)
                 return;
-            includeGlobalToggle = widgetManager.NewToggleField($"Global {ToggleLabel}", false);
-            includePerPlayerToggle = widgetManager.NewToggleField($"Local {ToggleLabel}", false);
+            includeGlobalToggle = widgetManager.NewLeftToggleField($"Global {ToggleLabel}", false);
+            includePerPlayerToggle = widgetManager.NewLeftToggleField($"Local {ToggleLabel}", false);
         }
 
         protected override void OnOptionsEditorShow(LockstepOptionsEditorUI ui, uint importedDataVersion)

@@ -41,7 +41,7 @@ namespace JanSharp
         {
             if (includeMenuSettingsToggle != null)
                 return;
-            includeMenuSettingsToggle = widgetManager.NewToggleField("Menu Settings", false);
+            includeMenuSettingsToggle = widgetManager.NewLeftToggleField("Menu Settings", false);
         }
 
         protected override void OnOptionsEditorShow(LockstepOptionsEditorUI ui, uint importedDataVersion)

@@ -41,7 +41,7 @@ namespace JanSharp
         {
             if (includeVoiceRangeSettingsToggle != null)
                 return;
-            includeVoiceRangeSettingsToggle = widgetManager.NewToggleField("Voice Range Settings", false);
+            includeVoiceRangeSettingsToggle = widgetManager.NewLeftToggleField("Voice Range Settings", false);
         }
 
         protected override void OnOptionsEditorShow(LockstepOptionsEditorUI ui, uint importedDataVersion)

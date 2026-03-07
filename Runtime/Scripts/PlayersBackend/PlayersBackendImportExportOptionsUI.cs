@@ -50,10 +50,10 @@ namespace JanSharp
         {
             if (includeOverriddenDisplayNameToggle != null)
                 return;
-            includeOverriddenDisplayNameToggle = widgetManager.NewToggleField("Overridden Display Name", false);
-            includeCharacterNameToggle = widgetManager.NewToggleField("Character Name", false);
-            includeFavoriteItemsToggle = widgetManager.NewToggleField("Favorite Items", false);
-            includeFavoritePlayersToggle = widgetManager.NewToggleField("Favorite Players", false);
+            includeOverriddenDisplayNameToggle = widgetManager.NewLeftToggleField("Overridden Display Name", false);
+            includeCharacterNameToggle = widgetManager.NewLeftToggleField("Character Name", false);
+            includeFavoriteItemsToggle = widgetManager.NewLeftToggleField("Favorite Items", false);
+            includeFavoritePlayersToggle = widgetManager.NewLeftToggleField("Favorite Players", false);
         }
 
         protected override void OnOptionsEditorShow(LockstepOptionsEditorUI ui, uint importedDataVersion)

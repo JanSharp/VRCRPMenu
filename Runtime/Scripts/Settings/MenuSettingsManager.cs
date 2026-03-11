@@ -106,7 +106,7 @@ namespace JanSharp.Internal
 
         private bool ShouldApplyReceivedIAToLatencyState(PerPlayerMenuSettings settings)
         {
-            if (settings.core.isLocal)
+            if (!settings.core.isLocal)
                 return false;
             if (latencyHiddenUniqueIds.Count == 0)
                 return true;

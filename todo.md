@@ -223,8 +223,8 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [x] importing global custom locations fails trying to read player data due to load order. Missing GS dependency
 - [ ] importing without keeping unnecessary player data errors in item favorites manager because importedPlayers contains null
 - [ ] anything having references to core player data can very most likely die on imports now due to player data no longer being guaranteed to be exported or imported
-- [ ] PerPlayerMenuSettings behave as though they were global, one player changes their, everybody is affected
-- [ ] NoClipSettingsPlayerData behaves as though they were global, one player changes their, everybody is affected
+- [x] PerPlayerMenuSettings behave as though they were global, one player changes their, everybody is affected
+- [x] NoClipSettingsPlayerData behaves as though they were global, one player changes their, everybody is affected
 - [ ] newly created rows in the players list appear selected when missing player selection permission
 - [ ] GM request type change breaks the latency state for the player changing request type if that GM request also gets marked as read at around the same time
 - [ ] creating 10+ local custom locations and deleting them all made the list show as empty without the empty info text and it is still openable. There was likely some custom locations related input action from another player that ran during the process of marking these locations for deletion

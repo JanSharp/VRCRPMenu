@@ -268,7 +268,25 @@ namespace JanSharp
             Vector2 sizeDelta = popupRectToResize.sizeDelta;
             sizeDelta.y = Mathf.Min(maxDynamicDataPopupHeight, desiredHeight);
             popupRectToResize.sizeDelta = sizeDelta;
-            dynamicDataScrollRect.vertical = desiredHeight > maxDynamicDataPopupHeight;
+            // Using auto hide and expand doesn't work properly.
+            // Firstly I do not want elasticity when there isn't a scroll bar for this list.
+            // So dynamically changing the movement mode would the the idea, however adding a new entry to the
+            // dynamic data list oddly makes the content squished as though there was a scroll bar when there
+            // isn't.
+            // So doing it all manually with the scrollbar outside of the scroll rect seems like the best
+            // solution, even if it itself is hacky.
+            bool hasScrollbar = desiredHeight > maxDynamicDataPopupHeight;
+            dynamicDataScrollRect.vertical = hasScrollbar;
+            if (!hasScrollbar)
+            {
+                // Must set the position to 0 here otherwise when a lot of entries get deleted at once, the
+                // content would be outside of the viewable area, however scrolling would be disabled thus
+                // it would appear empty/invisible.
+                // Basically it seems the scroll rect does not update positions when scrolling got disabled.
+                Vector2 position = dynamicDataScrollRect.content.anchoredPosition;
+                position.y = 0f;
+                dynamicDataScrollRect.content.anchoredPosition = position;
+            }
         }
     }
 }

@@ -216,3 +216,33 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [ ] maybe reset the GM proxy name when spawning
 - [ ] switch away from abusing Selectable for animations and do cross fading on the graphic through script. Selectable does eat performance when changing parents, which is what happens when switching pages, contributing to that lag spike (~180ms total lag spike with 1089 players, switching to and from the players backend page, ~21ms of which is Selectable. Granted that includes the Button, Toggle and TMPInputField as they derive from Selectable, but still)
 - [ ] close item spawn confirmation popup when switching pages
+- [ ] make last open the default for desktop and hide the option, as otherwise using input fields is a really bad experience or even breaks the process as pages run logic upon no longer being the active page
+- [ ] no clip is too fast for the voice range sphere. Making the box bigger is a band aid, it'd be better to somehow force the positioning of the voice range sphere to run after no clip
+- [ ] when player data gets deleted the labels in gm requests do not update
+  - [ ] might also apply to undo/redo teleport
+- [ ] importing global custom locations fails trying to read player data due to load order. Missing GS dependency
+- [ ] importing without keeping unnecessary player data errors in item favorites manager because importedPlayers contains null
+- [ ] anything having references to core player data can very most likely die on imports now due to player data no longer being guaranteed to be exported or imported
+- [ ] PerPlayerMenuSettings behave as though they were global, one player changes their, everybody is affected
+- [ ] NoClipSettingsPlayerData behaves as though they were global, one player changes their, everybody is affected
+- [ ] newly created rows in the players list appear selected when missing player selection permission
+- [ ] GM request type change breaks the latency state for the player changing request type if that GM request also gets marked as read at around the same time
+- [ ] creating 10+ local custom locations and deleting them all made the list show as empty without the empty info text and it is still openable. There was likely some custom locations related input action from another player that ran during the process of marking these locations for deletion
+- [ ] maybe add a toggle to toggle the active state of no clip in the menu without the need to double jump
+- [ ] maybe add an option to the no clip UI to choose between no clip and flying (using velocity, which does collide). When doing so make flying the default
+- [ ] maybe add a fourth option for the voice range in world indicator to only show briefly on change and then fade out
+  - [ ] also for the HUD?
+- [ ] maybe highlight matching characters for searches on the items page
+- [ ] make GM Proxy colors more muted, de-saturated
+- [ ] maybe revamp GM proxy color selection, either a wheel (buttons arranged in a flower pattern) or a hue bar (simply colorful boxes next to each other), total of around 12 colors
+- [ ] maybe change GM request size selection, segmented slider with bars building up in size
+  - [ ] make the items size selection match
+- [ ] change GM request treat as urgent to show as orange rather than red
+- [ ] change GM request treat as urgent timer to 5 minutes
+- [ ] remove GM request responder HUD showing as orange when 5 requests are unread
+- [ ] should proximity sort ignore/bypass favorites
+- [ ] should selection sort ignore/bypass favorites
+- [ ] change "redo TP" to "last player TP"
+- [ ] change "undo TP" to "revert TP" and make it behave like Sylan's Undo TP. Basically behave like undo, except that undo itself also pushes a new action, if we pretend to treat it like an undo stack. This more closely behaves like git revert
+- [ ] note that text can show as invisible on desktop and the workaround is to enter and exit fullscreen
+- [ ] rename "local" dynamic data to "personal" in the UI

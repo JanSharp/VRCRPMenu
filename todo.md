@@ -226,7 +226,7 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [x] PerPlayerMenuSettings behave as though they were global, one player changes their, everybody is affected
 - [x] NoClipSettingsPlayerData behaves as though they were global, one player changes their, everybody is affected
 - [x] newly created rows in the players list appear selected when missing player selection permission
-- [ ] GM request type change breaks the latency state for the player changing request type if that GM request also gets marked as read at around the same time
+- [x] GM request type change breaks the latency state for the player changing request type if that GM request also gets marked as read at around the same time - it was not related to simultaneous actions like that at all... the ids were simply desynced due to nextRequestId not being sent to late joiners
 - [x] creating 10+ local custom locations and deleting them all made the list show as empty without the empty info text and it is still openable. There was likely some custom locations related input action from another player that ran during the process of marking these locations for deletion
 - [ ] maybe add a toggle to toggle the active state of no clip in the menu without the need to double jump
 - [ ] maybe add an option to the no clip UI to choose between no clip and flying (using velocity, which does collide). When doing so make flying the default

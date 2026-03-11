@@ -1,7 +1,6 @@
 ﻿using UdonSharp;
 using UnityEngine;
 using VRC.SDK3.Data;
-using VRC.SDKBase;
 
 namespace JanSharp.Internal
 {
@@ -596,6 +595,7 @@ namespace JanSharp.Internal
 
         public override void SerializeGameState(bool isExport, LockstepGameStateOptionsData exportOptions)
         {
+            lockstep.WriteSmallUInt(nextRequestId);
             lockstep.WriteSmallUInt((uint)requestsCount);
             for (int i = 0; i < requestsCount; i++)
                 WriteGMRequest(requests[i]);
@@ -619,6 +619,7 @@ namespace JanSharp.Internal
         {
             if (!lockstep.IsContinuationFromPrevFrame)
             {
+                nextRequestId = lockstep.ReadSmallUInt();
                 requestsCount = (int)lockstep.ReadSmallUInt();
                 ArrList.EnsureCapacity(ref requests, requestsCount);
             }

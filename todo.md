@@ -220,7 +220,7 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [ ] no clip is too fast for the voice range sphere. Making the box bigger is a band aid, it'd be better to somehow force the positioning of the voice range sphere to run after no clip
 - [ ] when player data gets deleted the labels in gm requests do not update
   - [ ] might also apply to undo/redo teleport
-- [ ] importing global custom locations fails trying to read player data due to load order. Missing GS dependency
+- [x] importing global custom locations fails trying to read player data due to load order. Missing GS dependency
 - [ ] importing without keeping unnecessary player data errors in item favorites manager because importedPlayers contains null
 - [ ] anything having references to core player data can very most likely die on imports now due to player data no longer being guaranteed to be exported or imported
 - [ ] PerPlayerMenuSettings behave as though they were global, one player changes their, everybody is affected

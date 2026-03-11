@@ -3,6 +3,7 @@ using VRC.SDK3.Data;
 
 namespace JanSharp
 {
+    [LockstepGameStateDependency(typeof(PlayerDataManagerAPI))]
     public abstract class DynamicDataManager : LockstepGameState
     {
         public override bool GameStateSupportsImportExport => true;

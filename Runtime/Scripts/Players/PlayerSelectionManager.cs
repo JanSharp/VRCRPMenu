@@ -35,7 +35,6 @@ namespace JanSharp
 
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     [LockstepGameStateDependency(typeof(PlayerSelectionOptionsGS))]
-    [LockstepGameStateDependency(typeof(PlayerDataManagerAPI))]
     [SingletonScript("95263ec555dec07b5914eaca0c50884a")] // Runtime/Prefabs/Managers/PlayerSelectionManager.prefab
     [CustomRaisedEventsDispatcher(typeof(PlayerSelectionEventAttribute), typeof(PlayerSelectionEventType))]
     public class PlayerSelectionManager : DynamicDataManager

@@ -245,4 +245,5 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [ ] change "redo TP" to "last player TP"
 - [ ] change "undo TP" to "revert TP" and make it behave like Sylan's Undo TP. Basically behave like undo, except that undo itself also pushes a new action, if we pretend to treat it like an undo stack. This more closely behaves like git revert
 - [ ] note that text can show as invisible on desktop and the workaround is to enter and exit fullscreen
-- [ ] rename "local" dynamic data to "personal" in the UI
+- [x] rename "local" dynamic data to "personal" in the UI
+- [ ] load dynamic data buttons don't have sound

@@ -25,6 +25,11 @@ namespace JanSharp
         public GameObject characterNameRoot;
         public GameObject teleportToRoot;
         public GameObject proximityRoot;
+        /// <summary>
+        /// <para>Since the graphic of the toggle is outside of its hierarchy, it's active state must also be
+        /// set separately.</para>
+        /// </summary>
+        public GameObject selectionHighlightRoot;
         public GameObject selectRoot;
 
         public void OnFavoriteValueChanged() => page.OnFavoriteValueChanged(this);

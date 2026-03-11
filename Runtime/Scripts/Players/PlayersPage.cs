@@ -102,6 +102,7 @@ namespace JanSharp
             rowPrefabScript.characterNameRoot.SetActive(characterNameValue);
             rowPrefabScript.teleportToRoot.SetActive(teleportToValue);
             rowPrefabScript.proximityRoot.SetActive(proximityValue);
+            rowPrefabScript.selectionHighlightRoot.SetActive(selectionValue);
             rowPrefabScript.selectRoot.SetActive(selectionValue);
 
             for (int i = 0; i < 2; i++)
@@ -120,7 +121,10 @@ namespace JanSharp
                     if (proximityChanged)
                         row.proximityRoot.SetActive(proximityValue);
                     if (selectionChanged)
+                    {
+                        row.selectionHighlightRoot.SetActive(selectionValue);
                         row.selectRoot.SetActive(selectionValue);
+                    }
                 }
             }
         }

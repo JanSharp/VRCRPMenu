@@ -18,7 +18,6 @@ namespace JanSharp
         public bool singleLine;
         protected string baseLabelText;
 
-        private bool interactable;
         private bool isHovered;
         private CorePlayerData lastPlayerTP;
 
@@ -98,12 +97,11 @@ namespace JanSharp
             }
 
             lastPlayerTP = teleportManager.LastPlayerTP;
-            SetInteractable(lastPlayerTP != null);
+            SetInteractable(lastPlayerTP != null && !lastPlayerTP.isOffline);
         }
 
         private void SetInteractable(bool interactable)
         {
-            this.interactable = interactable;
             button.interactable = interactable;
             labelSelectable.interactable = interactable;
             UpdateTooltipShownState();
@@ -111,7 +109,7 @@ namespace JanSharp
 
         private void UpdateTooltipShownState()
         {
-            if (!interactable || !isHovered)
+            if (lastPlayerTP == null || !isHovered)
             {
                 if (!tooltipIsShown)
                     return;

@@ -250,4 +250,5 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [x] load dynamic data buttons don't have sound
 - [x] prevent player data from getting deleted if that player is in any selection groups
 - [ ] it would also be preferable if any player data referenced by GM requests is prevented from getting deleted, both requester and responder
-- [ ] make last player TP button not interactable but still show the tooltip when hovered when that last player is currently offline
+- [x] make last player TP button not interactable but still show the tooltip when hovered when that last player is currently offline
+- [ ] summon indicators are broken. summon some players, instantly try to summon some again, once the first one finishes, indicators for the new one disappear. Cancelling and trying to summon again does not show the correct amount of indicators anymore

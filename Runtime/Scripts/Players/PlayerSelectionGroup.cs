@@ -23,18 +23,11 @@ namespace JanSharp
             base.Deserialize(isImport, importedDataVersion);
             int count = (int)lockstep.ReadSmallUInt();
             selectedPlayers = new CorePlayerData[count];
-            int actualCount = 0;
             for (int i = 0; i < count; i++)
             {
-                CorePlayerData corePlayerData = playerDataManager.ReadCorePlayerDataRef(isImport);
-                if (corePlayerData != null)
-                    selectedPlayers[actualCount++] = corePlayerData;
+                // Guaranteed to not be null thanks to the selected in groups counters on the player data, even in imports.
+                selectedPlayers[i] = playerDataManager.ReadCorePlayerDataRef(isImport);
             }
-            if (actualCount == count)
-                return;
-            CorePlayerData[] resized = new CorePlayerData[actualCount];
-            System.Array.Copy(selectedPlayers, resized, actualCount);
-            selectedPlayers = resized;
         }
     }
 }

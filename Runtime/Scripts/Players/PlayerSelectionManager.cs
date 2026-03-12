@@ -239,6 +239,38 @@ namespace JanSharp
         }
 #endif
 
+        [PlayerSelectionEvent(PlayerSelectionEventType.OnSelectionGroupAdded)]
+        public void OnSelectionGroupAdded()
+        {
+            ShiftSelectedInGroupsCounters(SelectionGroupForEvent, delta: 1);
+        }
+
+        [PlayerSelectionEvent(PlayerSelectionEventType.OnSelectionGroupOverwritten)]
+        public void OnSelectionGroupOverwritten()
+        {
+            ShiftSelectedInGroupsCounters(OverwrittenSelectionGroupForEvent, delta: -1);
+            ShiftSelectedInGroupsCounters(SelectionGroupForEvent, delta: 1);
+        }
+
+        [PlayerSelectionEvent(PlayerSelectionEventType.OnSelectionGroupDeleted)]
+        public void OnSelectionGroupDeleted()
+        {
+            ShiftSelectedInGroupsCounters(SelectionGroupForEvent, delta: -1);
+        }
+
+        private void ShiftSelectedInGroupsCounters(PlayerSelectionGroup group, int delta)
+        {
+            bool isGlobal = group.isGlobal;
+            foreach (CorePlayerData core in group.selectedPlayers)
+            {
+                PerPlayerSelectionData player = (PerPlayerSelectionData)GetPlayerData(core);
+                if (isGlobal)
+                    player.selectedInGlobalGroupsCount += delta;
+                else
+                    player.selectedInPerPlayerGroupsCount += delta;
+            }
+        }
+
         #region EventDispatcher
 
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onOnePlayerSelectionChangedListeners;

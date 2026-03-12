@@ -28,14 +28,16 @@ namespace JanSharp
             }
         }
 
-        public override bool PersistPlayerDataWhileOffline()
+        private bool PersistPlayerDataWhileOfflineNotOverridable()
         {
             return localDynamicDataCount != 0;
         }
 
+        public override bool PersistPlayerDataWhileOffline() => PersistPlayerDataWhileOfflineNotOverridable();
+
         public override bool PersistPlayerDataInExport()
         {
-            return DataManager.optionsGS.ExportOptions.includePerPlayer && PersistPlayerDataWhileOffline();
+            return DataManager.optionsGS.ExportOptions.includePerPlayer && PersistPlayerDataWhileOfflineNotOverridable();
         }
 
         private void WriteLocalDynamicData(bool isExport)

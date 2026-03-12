@@ -14,6 +14,9 @@ namespace JanSharp
         [System.NonSerialized] public uint id;
         [System.NonSerialized] public string dataName;
         [System.NonSerialized] public bool isGlobal;
+        /// <summary>
+        /// <para>Can be <see langword="null"/> when <see cref="isGlobal"/> is <see langword="true"/>.</para>
+        /// </summary>
         [System.NonSerialized] public CorePlayerData owningPlayer;
         #endregion
 
@@ -32,7 +35,9 @@ namespace JanSharp
                 id = lockstep.ReadSmallUInt();
             dataName = lockstep.ReadString();
             lockstep.ReadFlags(out isGlobal);
-            owningPlayer = playerDataManager.ReadCorePlayerDataRef();
+            // Guaranteed to not be null when not global since it is simply the player which this dynamic data
+            // is also part of in the serialized per player dynamic data player data.
+            owningPlayer = playerDataManager.ReadCorePlayerDataRef(isImport);
         }
     }
 }

@@ -110,7 +110,7 @@ namespace JanSharp
 
         public PerPlayerDynamicData SendingPlayerData => (PerPlayerDynamicData)playerDataManager.SendingPlayerData.customPlayerData[playerDataIndex];
 
-        public PerPlayerDynamicData GetPlayerData(CorePlayerData core) => (PerPlayerDynamicData)core.customPlayerData[playerDataIndex];
+        public PerPlayerDynamicData GetPlayerData(CorePlayerData core) => core == null ? null : (PerPlayerDynamicData)core.customPlayerData[playerDataIndex];
 
         public string GetFirstUnusedDataName(DataDictionary dataByName, string desiredName, bool alwaysUsePostfix)
         {

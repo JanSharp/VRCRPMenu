@@ -221,8 +221,8 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [ ] when player data gets deleted the labels in gm requests do not update
   - [ ] might also apply to undo/redo teleport
 - [x] importing global custom locations fails trying to read player data due to load order. Missing GS dependency
-- [ ] importing without keeping unnecessary player data errors in item favorites manager because importedPlayers contains null
-- [ ] anything having references to core player data can very most likely die on imports now due to player data no longer being guaranteed to be exported or imported
+- [x] importing without keeping unnecessary player data errors in item favorites manager because importedPlayers contains null
+- [x] anything having references to core player data can very most likely die on imports now due to player data no longer being guaranteed to be exported or imported
 - [x] PerPlayerMenuSettings behave as though they were global, one player changes their, everybody is affected
 - [x] NoClipSettingsPlayerData behaves as though they were global, one player changes their, everybody is affected
 - [x] newly created rows in the players list appear selected when missing player selection permission

@@ -114,6 +114,23 @@ namespace JanSharp.Internal
                 UpdateAllProxiesCreatedByPlayer(entitySystem.GetPlayerData(playersBackendManager.RPPlayerDataForEvent.core));
         }
 
+        [PlayerDataEvent(PlayerDataEventType.OnPlayerDataDeleted)]
+        public void OnPlayerDataDeleted()
+        {
+            if (viewGMProxySpawnedByValue) // No need to waste performance otherwise.
+                UpdateAllProxiesCreatedByPlayer(entitySystem.GetPlayerData(playerDataManager.PlayerDataForEvent));
+        }
+
+        [LockstepEvent(LockstepEventType.OnImportFinishingUp)]
+        public void OnImportFinishingUp()
+        {
+            // Could optimize this by only running this when Resolve didn't.
+            // Could probably even check if it is specifically just the display names and character names that
+            // changed and the entity system did not change, however adding all those conditions here would
+            // just make this fragile to future changes for basically no gain.
+            UpdateAllProxies();
+        }
+
         private void UpdateAllProxies()
         {
             for (int i = 0; i < allGMProxiesCount; i++)

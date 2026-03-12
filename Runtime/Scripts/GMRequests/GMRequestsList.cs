@@ -102,7 +102,7 @@ namespace JanSharp
         public void UpdateRowRequester(GMRequestRow row)
         {
             RPPlayerData requester = row.request.requestingPlayer;
-            row.requesterText.text = requester == null
+            row.requesterText.text = (requester == null || requester.core.isDeleted)
                 ? "<Unknown>"
                 : requester.PlayerDisplayNameWithCharacterName;
         }
@@ -124,7 +124,9 @@ namespace JanSharp
         public void UpdateRowResponder(GMRequestRow row)
         {
             RPPlayerData responder = row.request.latencyRespondingPlayer;
-            row.responderText.text = responder == null ? "" : $"Responder:  {responder.PlayerDisplayName}"; // Intentional double space.
+            row.responderText.text = (responder == null || responder.core.isDeleted)
+                ? ""
+                : $"Responder:  {responder.PlayerDisplayName}"; // Intentional double space.
         }
 
         public void UpdateRowTimeInfo(GMRequestRow row)

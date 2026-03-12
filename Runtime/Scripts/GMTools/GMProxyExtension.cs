@@ -37,7 +37,9 @@ namespace JanSharp
 
         public override void ApplyExtensionData()
         {
-            if (!viewGMProxySpawnedByPDef.valueForLocalPlayer || entityData.createdByPlayerData == null)
+            if (!viewGMProxySpawnedByPDef.valueForLocalPlayer
+                || entityData.createdByPlayerData == null
+                || entityData.createdByPlayerData.core.isDeleted)
             {
                 pickup.interactText = data.gmProxyDisplayName;
                 return;

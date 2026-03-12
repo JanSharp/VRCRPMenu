@@ -9,6 +9,7 @@ namespace JanSharp
         [HideInInspector][SerializeField][SingletonReference] private LockstepAPI lockstep;
         [HideInInspector][SerializeField][SingletonReference] private GMRequestsManagerAPI requestsManager;
         [HideInInspector][SerializeField][SingletonReference] private PlayersBackendManagerAPI playersBackendManager;
+        [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
         [HideInInspector][SerializeField][SingletonReference] private RPMenuTeleportManagerAPI teleportManager;
 
         public GMRequestsList requestsList;
@@ -19,7 +20,7 @@ namespace JanSharp
         public void OnInit()
         {
 #if RP_MENU_DEBUG
-            Debug.Log("[RPMenuDebug] GMRequestsPage  OnInit");
+            Debug.Log($"[RPMenuDebug] GMRequestsPage  OnInit");
 #endif
             Initialize();
         }
@@ -28,7 +29,7 @@ namespace JanSharp
         public void OnClientBeginCatchUp()
         {
 #if RP_MENU_DEBUG
-            Debug.Log("[RPMenuDebug] GMRequestsPage  OnClientBeginCatchUp");
+            Debug.Log($"[RPMenuDebug] GMRequestsPage  OnClientBeginCatchUp");
 #endif
             Initialize();
         }
@@ -36,7 +37,7 @@ namespace JanSharp
         private void Initialize()
         {
 #if RP_MENU_DEBUG
-            Debug.Log("[RPMenuDebug] GMRequestsPage  Initialize");
+            Debug.Log($"[RPMenuDebug] GMRequestsPage  Initialize");
 #endif
             if (!lockstep.IsContinuationFromPrevFrame)
                 requestsList.Initialize();
@@ -49,7 +50,7 @@ namespace JanSharp
         public void OnRespondClick(GMRequestRow row)
         {
 #if RP_MENU_DEBUG
-            Debug.Log("[RPMenuDebug] GMRequestsPage  OnRespondClick");
+            Debug.Log($"[RPMenuDebug] GMRequestsPage  OnRespondClick");
 #endif
             GMRequest request = row.request;
             if (!request.latencyIsRead)
@@ -60,7 +61,7 @@ namespace JanSharp
         public void OnJoinClick(GMRequestRow row)
         {
 #if RP_MENU_DEBUG
-            Debug.Log("[RPMenuDebug] GMRequestsPage  OnJoinClick");
+            Debug.Log($"[RPMenuDebug] GMRequestsPage  OnJoinClick");
 #endif
             TeleportToRequester(row.request);
         }
@@ -68,7 +69,7 @@ namespace JanSharp
         private void TeleportToRequester(GMRequest request)
         {
 #if RP_MENU_DEBUG
-            Debug.Log("[RPMenuDebug] GMRequestsPage  TeleportToRequester");
+            Debug.Log($"[RPMenuDebug] GMRequestsPage  TeleportToRequester");
 #endif
             if (request.requestingPlayer == null || request.requestingPlayer.core.isLocal)
                 return;
@@ -78,7 +79,7 @@ namespace JanSharp
         public void OnReadToggleValueChanged(GMRequestRow row)
         {
 #if RP_MENU_DEBUG
-            Debug.Log("[RPMenuDebug] GMRequestsPage  OnReadToggleValueChanged");
+            Debug.Log($"[RPMenuDebug] GMRequestsPage  OnReadToggleValueChanged");
 #endif
             bool isOn = row.readToggle.isOn;
             if (row.request.latencyIsRead == isOn)
@@ -93,7 +94,7 @@ namespace JanSharp
         public void OnGMRequestCreatedInLatency()
         {
 #if RP_MENU_DEBUG
-            Debug.Log("[RPMenuDebug] GMRequestsPage  OnGMRequestCreatedInLatency");
+            Debug.Log($"[RPMenuDebug] GMRequestsPage  OnGMRequestCreatedInLatency");
 #endif
             if (!isInitialized)
                 return;
@@ -104,7 +105,7 @@ namespace JanSharp
         public void OnGMRequestCreated()
         {
 #if RP_MENU_DEBUG
-            Debug.Log("[RPMenuDebug] GMRequestsPage  OnGMRequestCreated");
+            Debug.Log($"[RPMenuDebug] GMRequestsPage  OnGMRequestCreated");
 #endif
             if (!isInitialized)
                 return;
@@ -119,7 +120,7 @@ namespace JanSharp
         public void OnGMRequestChangedInLatency()
         {
 #if RP_MENU_DEBUG
-            Debug.Log("[RPMenuDebug] GMRequestsPage  OnGMRequestChangedInLatency");
+            Debug.Log($"[RPMenuDebug] GMRequestsPage  OnGMRequestChangedInLatency");
 #endif
             if (!isInitialized)
                 return;
@@ -133,7 +134,7 @@ namespace JanSharp
         public void OnGMRequestDeletedInLatency()
         {
 #if RP_MENU_DEBUG
-            Debug.Log("[RPMenuDebug] GMRequestsPage  OnGMRequestDeletedInLatency");
+            Debug.Log($"[RPMenuDebug] GMRequestsPage  OnGMRequestDeletedInLatency");
 #endif
             if (!isInitialized)
                 return;
@@ -146,7 +147,7 @@ namespace JanSharp
         public void OnGMRequestUnDeletedInLatency()
         {
 #if RP_MENU_DEBUG
-            Debug.Log("[RPMenuDebug] GMRequestsPage  OnGMRequestUnDeletedInLatency");
+            Debug.Log($"[RPMenuDebug] GMRequestsPage  OnGMRequestUnDeletedInLatency");
 #endif
             if (!isInitialized)
                 return;
@@ -157,36 +158,43 @@ namespace JanSharp
         public void OnRPPlayerDataOverriddenDisplayNameChanged()
         {
 #if RP_MENU_DEBUG
-            Debug.Log("[RPMenuDebug] GMRequestsPage  OnRPPlayerDataOverriddenDisplayNameChanged");
+            Debug.Log($"[RPMenuDebug] GMRequestsPage  OnRPPlayerDataOverriddenDisplayNameChanged");
 #endif
-            RPPlayerData rpPlayerData = playersBackendManager.RPPlayerDataForEvent;
-            GMRequestRow[] rows = requestsList.Rows;
-            int count = requestsList.RowsCount;
-            for (int i = 0; i < count; i++)
-            {
-                GMRequestRow row = rows[i];
-                GMRequest request = row.request;
-                if (request.latencyRespondingPlayer == rpPlayerData)
-                    requestsList.UpdateRowResponder(row);
-                if (request.requestingPlayer == rpPlayerData)
-                    requestsList.UpdateRowRequester(row);
-            }
+            UpdateRowsDueToPlayerChange(playersBackendManager.RPPlayerDataForEvent, doUpdateResponding: true);
         }
 
         [PlayersBackendEvent(PlayersBackendEventType.OnRPPlayerDataCharacterNameChanged)]
         public void OnRPPlayerDataCharacterNameChanged()
         {
 #if RP_MENU_DEBUG
-            Debug.Log("[RPMenuDebug] GMRequestsPage  OnRPPlayerDataCharacterNameChanged");
+            Debug.Log($"[RPMenuDebug] GMRequestsPage  OnRPPlayerDataCharacterNameChanged");
 #endif
-            RPPlayerData rpPlayerData = playersBackendManager.RPPlayerDataForEvent;
+            UpdateRowsDueToPlayerChange(playersBackendManager.RPPlayerDataForEvent, doUpdateResponding: false);
+        }
+
+        [PlayerDataEvent(PlayerDataEventType.OnPlayerDataDeleted)]
+        public void OnPlayerDataDeleted()
+        {
+#if RP_MENU_DEBUG
+            Debug.Log($"[RPMenuDebug] GMRequestsPage  OnPlayerDataDeleted");
+#endif
+            UpdateRowsDueToPlayerChange(playersBackendManager.GetRPPlayerData(playerDataManager.PlayerDataForEvent), doUpdateResponding: true);
+        }
+
+        private void UpdateRowsDueToPlayerChange(RPPlayerData changedPlayer, bool doUpdateResponding)
+        {
+#if RP_MENU_DEBUG
+            Debug.Log($"[RPMenuDebug] GMRequestsPage  UpdateRowsDueToPlayerChange - changedPlayer.PlayerDisplayNameWithCharacterName: {changedPlayer.PlayerDisplayNameWithCharacterName}, doUpdateResponding: {doUpdateResponding}");
+#endif
             GMRequestRow[] rows = requestsList.Rows;
             int count = requestsList.RowsCount;
             for (int i = 0; i < count; i++)
             {
                 GMRequestRow row = rows[i];
                 GMRequest request = row.request;
-                if (request.requestingPlayer == rpPlayerData)
+                if (doUpdateResponding && request.latencyRespondingPlayer == changedPlayer)
+                    requestsList.UpdateRowResponder(row);
+                if (request.requestingPlayer == changedPlayer)
                     requestsList.UpdateRowRequester(row);
             }
         }
@@ -194,6 +202,9 @@ namespace JanSharp
         [LockstepEvent(LockstepEventType.OnImportFinishingUp)]
         public void OnImportFinishingUp()
         {
+#if RP_MENU_DEBUG
+            Debug.Log($"[RPMenuDebug] GMRequestsPage  OnImportFinishingUp");
+#endif
             GMRequestRow[] rows = requestsList.Rows;
             int count = requestsList.RowsCount;
             for (int i = 0; i < count; i++)

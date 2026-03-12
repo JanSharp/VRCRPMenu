@@ -1,5 +1,3 @@
-using UdonSharp;
-
 namespace JanSharp
 {
     public enum NoClipSettingsEventType

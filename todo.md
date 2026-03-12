@@ -247,3 +247,4 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [ ] note that text can show as invisible on desktop and the workaround is to enter and exit fullscreen
 - [x] rename "local" dynamic data to "personal" in the UI
 - [x] load dynamic data buttons don't have sound
+- [ ] prevent player data from getting deleted if that player is in any selection groups

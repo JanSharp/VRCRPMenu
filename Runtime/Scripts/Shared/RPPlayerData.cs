@@ -52,6 +52,9 @@ namespace JanSharp
         public string PlayerDisplayName => overriddenDisplayName ?? core.displayName;
         public string PlayerDisplayNameWithCharacterName => characterName == ""
             ? $"[{PlayerDisplayName}]"
+            : $"[{PlayerDisplayName}] {characterName}";
+        public string PlayerDisplayNameWithCharacterNameWithDoubleSpace => characterName == ""
+            ? $"[{PlayerDisplayName}]"
             : $"[{PlayerDisplayName}]  {characterName}"; // Intentional double space.
 
         public override void OnPlayerDataInit(bool isAboutToBeImported)

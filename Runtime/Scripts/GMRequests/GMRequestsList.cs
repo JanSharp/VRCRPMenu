@@ -104,7 +104,7 @@ namespace JanSharp
             RPPlayerData requester = row.request.requestingPlayer;
             row.requesterText.text = (requester == null || requester.core.isDeleted)
                 ? "<Unknown>"
-                : requester.PlayerDisplayNameWithCharacterName;
+                : requester.PlayerDisplayNameWithCharacterNameWithDoubleSpace;
         }
 
         public void UpdateRowExceptRequester(GMRequestRow row)

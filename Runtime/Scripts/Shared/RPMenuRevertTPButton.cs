@@ -1,4 +1,5 @@
-﻿using UdonSharp;
+﻿using TMPro;
+using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
 using VRC.SDKBase;
@@ -6,7 +7,7 @@ using VRC.SDKBase;
 namespace JanSharp
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-    public class RPMenuUndoTPButton : RPMenuUndoRedoTPButton
+    public class RPMenuRevertTPButton : UdonSharpBehaviour
     {
         [HideInInspector][SerializeField][SingletonReference] private RPMenuTeleportManagerAPI teleportManager;
         [HideInInspector][SerializeField][SingletonReference] private UpdateManager updateManager;
@@ -16,7 +17,17 @@ namespace JanSharp
         private int customUpdateInternalIndex;
 
         public Button button;
+        public TextMeshProUGUI label;
         public Selectable labelSelectable;
+        public bool singleLine;
+        protected string baseLabelText;
+
+        protected VRCPlayerApi localPlayer;
+
+        protected Vector3 positionForTooltip;
+        protected float timeAtPositionBeforeLastTP;
+        protected uint elapsedSeconds;
+        protected string formattedElapsedSeconds;
 
         private bool interactable;
         private bool isHovered;
@@ -25,7 +36,7 @@ namespace JanSharp
 
         public void OnClick()
         {
-            teleportManager.UndoTeleport();
+            teleportManager.RevertTeleport();
         }
 
         private void OnDisable()
@@ -45,13 +56,13 @@ namespace JanSharp
             UpdateTooltipShownState();
         }
 
-        [RPMenuTeleportEvent(RPMenuTeleportEventType.OnRPMenuTeleportUndoRedoStateChanged)]
-        public void OnRPMenuTeleportUndoRedoStateChanged()
+        [RPMenuTeleportEvent(RPMenuTeleportEventType.OnRPMenuRevertTPStateChanged)]
+        public void OnRPMenuRevertTPStateChanged()
         {
-            positionForTooltip = teleportManager.UndoAblePosition;
-            undoAbleActionTakenAtTime = teleportManager.UndoAbleActionTakenAtTime;
+            positionForTooltip = teleportManager.PositionBeforeLastTP;
+            timeAtPositionBeforeLastTP = teleportManager.TimeAtPositionBeforeLastTP;
             elapsedSeconds = uint.MaxValue;
-            interactable = teleportManager.HasUndoData && teleportManager.IsAtUndoAbleLocation;
+            interactable = teleportManager.HasPositionBeforeLastTP;
             button.interactable = interactable;
             labelSelectable.interactable = interactable;
             UpdateTooltipShownState();
@@ -83,6 +94,29 @@ namespace JanSharp
         public void CustomUpdate()
         {
             UpdateTimeAndDistanceTooltip();
+        }
+
+        protected void UpdateTimeAndDistanceTooltip()
+        {
+            uint seconds = (uint)(Time.time - timeAtPositionBeforeLastTP);
+            if (seconds != elapsedSeconds)
+            {
+                elapsedSeconds = seconds;
+                formattedElapsedSeconds = FormatTime(seconds);
+            }
+            float distance = Vector3.Distance(localPlayer.GetPosition(), positionForTooltip);
+            label.text = $"{baseLabelText}{(singleLine ? " - " : "\n")}{formattedElapsedSeconds} ago, {distance:0.0} m";
+        }
+
+        protected string FormatTime(uint seconds)
+        {
+            uint minutes = seconds / 60u;
+            seconds -= minutes * 60u;
+            if (minutes < 60u)
+                return $"{minutes}:{seconds:d2}";
+            uint hours = minutes / 60u;
+            minutes -= hours * 60u;
+            return $"{hours}:{minutes:d2}:{seconds:d2}";
         }
     }
 }

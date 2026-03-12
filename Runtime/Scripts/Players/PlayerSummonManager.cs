@@ -244,7 +244,7 @@ namespace JanSharp.Internal
         {
             if (--localPlayerSummonDelayedEventCount != 0)
                 return;
-            teleportManager.TeleportTo(summonTargetPosition, summonTargetRotation);
+            teleportManager.TeleportTo(summonTargetPosition, summonTargetRotation, recordRevert: false);
             RaiseOnLocalPlayerSummoned();
         }
 

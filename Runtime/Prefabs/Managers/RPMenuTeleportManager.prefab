@@ -164,12 +164,15 @@ MonoBehaviour:
     PrefabModifications: []
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 6008220760298797166}
+  playerDataManager: {fileID: 0}
   localPlayerCollidingLayers:
     serializedVersion: 2
     m_Bits: 7604695
   debugOtherPlayer: {fileID: 6919462605774107254}
   debugLocalPlayer: {fileID: 2731731168133453566}
-  onRPMenuTeleportUndoRedoStateChangedListeners: []
+  onLocalPlayerTeleportedListeners: []
+  onRPMenuLastPlayerTPStateChangedListeners: []
+  onRPMenuRevertTPStateChangedListeners: []
 --- !u!114 &6008220760298797166
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -157,7 +157,7 @@ GameObject:
   - component: {fileID: 2324636482792983802}
   - component: {fileID: 786261284483569074}
   m_Layer: 17
-  m_Name: UndoTPButton
+  m_Name: RevertTPButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -414,12 +414,12 @@ MonoBehaviour:
     PrefabModifications: []
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 911166317476346983}
-  label: {fileID: 2084682039566001759}
-  singleLine: 0
   teleportManager: {fileID: 0}
   updateManager: {fileID: 0}
   button: {fileID: 8929947570651505361}
+  label: {fileID: 2084682039566001759}
   labelSelectable: {fileID: 1599903348590520152}
+  singleLine: 0
 --- !u!114 &2324636482792983802
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -573,7 +573,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Undo TP
+  m_text: Revert TP
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -600,7 +600,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 26
+  m_fontSize: 10
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1

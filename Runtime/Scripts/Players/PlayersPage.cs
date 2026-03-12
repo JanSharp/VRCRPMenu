@@ -255,7 +255,7 @@ namespace JanSharp
             CorePlayerData core = row.rpPlayerData.core;
             if (core.isLocal)
                 return;
-            teleportManager.TeleportToPlayer(core, Vector3.back, recordUndo: true);
+            teleportManager.TeleportToPlayer(core, Vector3.back, recordLastPlayerTPAndRevert: true);
         }
 
         #endregion

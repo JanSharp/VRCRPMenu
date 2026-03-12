@@ -1,36 +1,33 @@
-﻿using UdonSharp;
+﻿using TMPro;
+using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
-using VRC.SDKBase;
 
 namespace JanSharp
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-    public class RPMenuRedoTPButton : RPMenuUndoRedoTPButton
+    public class RPMenuLastPlayerTPButton : UdonSharpBehaviour
     {
         [HideInInspector][SerializeField][SingletonReference] private RPMenuTeleportManagerAPI teleportManager;
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
         [HideInInspector][SerializeField][SingletonReference] private PlayersBackendManagerAPI playersBackendManager;
-        [HideInInspector][SerializeField][SingletonReference] private UpdateManager updateManager;
-        /// <summary>
-        /// <para>Used by <see cref="UpdateManager"/>.</para>
-        /// </summary>
-        private int customUpdateInternalIndex;
 
         public Button button;
+        public TextMeshProUGUI label;
         public Selectable labelSelectable;
+        public bool singleLine;
+        protected string baseLabelText;
 
         private bool interactable;
         private bool isHovered;
-        private CorePlayerData redoAblePlayer;
+        private CorePlayerData lastPlayerTP;
 
         private bool tooltipIsShown;
-        private bool redoAbleLocationIsPlayer;
         private RPPlayerData playerInTooltip;
 
         public void OnClick()
         {
-            teleportManager.RedoTeleport();
+            teleportManager.TeleportToLastPlayerTP();
         }
 
         private void OnDisable()
@@ -71,59 +68,37 @@ namespace JanSharp
                 UpdateTooltip();
         }
 
-        [PlayerDataEvent(PlayerDataEventType.OnPlayerDataDeleted)]
-        public void OnPlayerDataDeleted()
-        {
-            if (playerDataManager.PlayerDataForEvent == redoAblePlayer)
-                UpdateInteractableState();
-        }
-
         [PlayerDataEvent(PlayerDataEventType.OnPlayerDataWentOffline)]
         public void OnPlayerDataWentOffline()
         {
-            if (playerDataManager.PlayerDataForEvent == redoAblePlayer)
+            if (playerDataManager.PlayerDataForEvent == lastPlayerTP)
                 UpdateInteractableState();
         }
 
         [PlayerDataEvent(PlayerDataEventType.OnPlayerDataWentOnline)]
         public void OnPlayerDataWentOnline()
         {
-            if (playerDataManager.PlayerDataForEvent == redoAblePlayer)
+            if (playerDataManager.PlayerDataForEvent == lastPlayerTP)
                 UpdateInteractableState();
         }
 
-        [RPMenuTeleportEvent(RPMenuTeleportEventType.OnRPMenuTeleportUndoRedoStateChanged)]
-        public void OnRPMenuTeleportUndoRedoStateChanged()
+        [RPMenuTeleportEvent(RPMenuTeleportEventType.OnRPMenuLastPlayerTPStateChanged)]
+        public void OnRPMenuLastPlayerTPStateChanged()
         {
-            positionForTooltip = teleportManager.RedoAblePosition;
-            undoAbleActionTakenAtTime = teleportManager.UndoAbleActionTakenAtTime;
-            elapsedSeconds = uint.MaxValue;
-            redoAbleLocationIsPlayer = teleportManager.RedoAbleLocationIsPlayer;
             UpdateInteractableState();
         }
 
         private void UpdateInteractableState()
         {
-            if (!teleportManager.HasUndoData || teleportManager.IsAtUndoAbleLocation)
+            if (!teleportManager.HasLastPlayerTP)
             {
-                redoAblePlayer = null;
+                lastPlayerTP = null;
                 SetInteractable(false);
                 return;
             }
-            // Has undo data and is at redo able location.
 
-            if (redoAbleLocationIsPlayer)
-            {
-                redoAblePlayer = teleportManager.RedoAblePlayer;
-                if (redoAblePlayer != null && redoAblePlayer.isDeleted)
-                    redoAblePlayer = null;
-                SetInteractable(redoAblePlayer != null);
-            }
-            else
-            {
-                redoAblePlayer = null;
-                SetInteractable(true);
-            }
+            lastPlayerTP = teleportManager.LastPlayerTP;
+            SetInteractable(lastPlayerTP != null);
         }
 
         private void SetInteractable(bool interactable)
@@ -143,45 +118,23 @@ namespace JanSharp
                 tooltipIsShown = false;
                 playerInTooltip = null;
                 label.text = baseLabelText;
-                updateManager.Deregister(this);
                 return;
             }
-            playerInTooltip = redoAblePlayer == null ? null : playersBackendManager.GetRPPlayerData(redoAblePlayer);
+            playerInTooltip = lastPlayerTP == null ? null : playersBackendManager.GetRPPlayerData(lastPlayerTP);
             if (tooltipIsShown)
             {
                 UpdateTooltip();
-                PotentiallyRegisterForCustomUpdate();
                 return;
             }
             if (baseLabelText == null)
-            {
                 baseLabelText = label.text;
-                localPlayer = Networking.LocalPlayer;
-            }
             tooltipIsShown = true;
             UpdateTooltip();
-            PotentiallyRegisterForCustomUpdate();
-        }
-
-        private void PotentiallyRegisterForCustomUpdate()
-        {
-            if (redoAbleLocationIsPlayer)
-                updateManager.Deregister(this);
-            else
-                updateManager.Register(this);
-        }
-
-        public void CustomUpdate()
-        {
-            UpdateTimeAndDistanceTooltip();
         }
 
         private void UpdateTooltip()
         {
-            if (redoAbleLocationIsPlayer)
-                label.text = $"{baseLabelText}{(singleLine ? " - " : "\n")}{playerInTooltip.PlayerDisplayNameWithCharacterName}";
-            else
-                UpdateTimeAndDistanceTooltip();
+            label.text = $"{baseLabelText}{(singleLine ? " - " : "\n")}{playerInTooltip.PlayerDisplayNameWithCharacterName}";
         }
     }
 }

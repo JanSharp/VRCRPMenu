@@ -13,7 +13,7 @@ namespace JanSharp
         protected override void LoadDynamicData(DynamicData data)
         {
             CustomLocation location = (CustomLocation)data;
-            teleportManager.TeleportTo(location.position, location.rotation, recordUndo: false);
+            teleportManager.TeleportTo(location.position, location.rotation, recordRevert: false);
         }
 
         [CustomLocationEvent(CustomLocationEventType.OnCustomLocationAdded)]

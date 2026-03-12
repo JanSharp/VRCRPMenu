@@ -73,7 +73,7 @@ namespace JanSharp
             if (row.location == null)
                 return;
             Transform location = row.location.transform;
-            teleportManager.TeleportTo(location.position, location.rotation, recordUndo: false);
+            teleportManager.TeleportTo(location.position, location.rotation, recordRevert: false);
         }
     }
 }

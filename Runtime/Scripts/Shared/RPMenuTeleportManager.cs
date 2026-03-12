@@ -8,6 +8,8 @@ namespace JanSharp.Internal
     [CustomRaisedEventsDispatcher(typeof(RPMenuTeleportEventAttribute), typeof(RPMenuTeleportEventType))]
     public class RPMenuTeleportManager : RPMenuTeleportManagerAPI
     {
+        [SerializeField][HideInInspector][SingletonReference] private PlayerDataManagerAPI playerDataManager;
+
         [SerializeField] public LayerMask localPlayerCollidingLayers;
         public override LayerMask LocalPlayerCollidingLayers => localPlayerCollidingLayers;
 
@@ -26,32 +28,22 @@ namespace JanSharp.Internal
         };
         private int directionsToTryCount;
 
-        private bool hasUndoData;
-        /// <summary>
-        /// <para>When <see langword="false"/> it means "is at redo able location".</para>
-        /// </summary>
-        private bool isAtUndoAbleLocation;
-        private float undoAbleActionTakenAtTime;
+        private CorePlayerData lastPlayerTP;
+        private Vector3 lastPlayerTPDesiredRelativeDirection;
 
-        private bool redoAbleLocationIsPlayer;
-        private CorePlayerData redoAblePlayer;
-        private Vector3 redoAbleDesiredRelativeDirection;
-        private Vector3 redoAblePosition;
-        private Quaternion redoAbleRotation;
+        private bool hasPositionBeforeLastTP;
+        private float timeAtPositionBeforeLastTP;
+        private Vector3 positionBeforeLastTP;
+        private Quaternion rotationBeforeLastTP;
 
-        private Vector3 undoAblePosition;
-        private Quaternion undoAbleRotation;
+        public override bool HasLastPlayerTP => lastPlayerTP != null && !lastPlayerTP.isDeleted;
+        public override CorePlayerData LastPlayerTP => lastPlayerTP;
+        public override Vector3 LastPlayerTPDesiredRelativeDirection => lastPlayerTPDesiredRelativeDirection;
 
-        public override bool HasUndoData => hasUndoData;
-        public override bool IsAtUndoAbleLocation => isAtUndoAbleLocation;
-        public override float UndoAbleActionTakenAtTime => undoAbleActionTakenAtTime;
-        public override bool RedoAbleLocationIsPlayer => redoAbleLocationIsPlayer;
-        public override CorePlayerData RedoAblePlayer => redoAblePlayer;
-        public override Vector3 RedoAbleDesiredRelativeDirection => redoAbleDesiredRelativeDirection;
-        public override Vector3 RedoAblePosition => redoAblePosition;
-        public override Quaternion RedoAbleRotation => redoAbleRotation;
-        public override Vector3 UndoAblePosition => undoAblePosition;
-        public override Quaternion UndoAbleRotation => undoAbleRotation;
+        public override bool HasPositionBeforeLastTP => hasPositionBeforeLastTP;
+        public override float TimeAtPositionBeforeLastTP => timeAtPositionBeforeLastTP;
+        public override Vector3 PositionBeforeLastTP => positionBeforeLastTP;
+        public override Quaternion RotationBeforeLastTP => rotationBeforeLastTP;
 
         private VRCPlayerApi localPlayer;
 
@@ -70,33 +62,33 @@ namespace JanSharp.Internal
         }
 #endif
 
-        private void RecordTeleportToPlayerUndo(Vector3 currentPosition, Quaternion currentRotation, CorePlayerData otherPlayer, Vector3 desiredRelativeDirection)
+        [PlayerDataEvent(PlayerDataEventType.OnPlayerDataDeleted)]
+        public void OnPlayerDataDeleted()
         {
-            hasUndoData = true;
-            isAtUndoAbleLocation = true;
-            undoAbleActionTakenAtTime = Time.time;
-            redoAbleLocationIsPlayer = true;
-            redoAblePlayer = otherPlayer;
-            redoAbleDesiredRelativeDirection = desiredRelativeDirection;
-            undoAblePosition = currentPosition;
-            undoAbleRotation = currentRotation;
-            RaiseOnRPMenuTeleportUndoRedoStateChanged();
+            if (lastPlayerTP != playerDataManager.PlayerDataForEvent)
+                return;
+            lastPlayerTP = null;
+            RaiseOnRPMenuLastPlayerTPStateChanged();
         }
 
-        private void RecordTeleportToLocation(Vector3 currentPosition, Quaternion currentRotation, Vector3 otherPosition, Quaternion otherRotation)
+        private void RecordTeleportToPlayer(Vector3 currentPosition, Quaternion currentRotation, CorePlayerData otherPlayer, Vector3 desiredRelativeDirection)
         {
-            hasUndoData = true;
-            isAtUndoAbleLocation = true;
-            undoAbleActionTakenAtTime = Time.time;
-            redoAbleLocationIsPlayer = false;
-            redoAblePosition = otherPosition;
-            redoAbleRotation = otherRotation;
-            undoAblePosition = currentPosition;
-            undoAbleRotation = currentRotation;
-            RaiseOnRPMenuTeleportUndoRedoStateChanged();
+            lastPlayerTP = otherPlayer;
+            lastPlayerTPDesiredRelativeDirection = desiredRelativeDirection;
+            RaiseOnRPMenuLastPlayerTPStateChanged();
+            RecordTeleportToLocation(currentPosition, currentRotation);
         }
 
-        public override void TeleportToPlayer(CorePlayerData otherPlayer, Vector3 desiredRelativeDirection, bool recordUndo = false)
+        private void RecordTeleportToLocation(Vector3 currentPosition, Quaternion currentRotation)
+        {
+            hasPositionBeforeLastTP = true;
+            timeAtPositionBeforeLastTP = Time.time;
+            positionBeforeLastTP = currentPosition;
+            rotationBeforeLastTP = currentRotation;
+            RaiseOnRPMenuRevertTPStateChanged();
+        }
+
+        public override void TeleportToPlayer(CorePlayerData otherPlayer, Vector3 desiredRelativeDirection, bool recordLastPlayerTPAndRevert = false)
         {
             VRCPlayerApi playerApi = otherPlayer.playerApi;
             if (!Utilities.IsValid(playerApi))
@@ -106,8 +98,8 @@ namespace JanSharp.Internal
             Vector3 currentPosition = localPlayer.GetPosition();
             Quaternion currentRotation = localPlayer.GetRotation();
             TeleportWithoutLerp(position, rotation);
-            if (recordUndo)
-                RecordTeleportToPlayerUndo(currentPosition, currentRotation, otherPlayer, desiredRelativeDirection);
+            if (recordLastPlayerTPAndRevert)
+                RecordTeleportToPlayer(currentPosition, currentRotation, otherPlayer, desiredRelativeDirection);
         }
 
         public void FindTarget(
@@ -176,45 +168,38 @@ namespace JanSharp.Internal
             rotation = Quaternion.LookRotation(otherPosition - positionOnYPlane);
         }
 
-        public override void TeleportTo(Vector3 position, Quaternion rotation, bool recordUndo = false)
+        public override void TeleportTo(Vector3 position, Quaternion rotation, bool recordRevert = false)
+        {
+            if (recordRevert)
+                TeleportWithoutLerpAndRecordRevert(position, rotation);
+            else
+                TeleportWithoutLerp(position, rotation);
+        }
+
+        public override void RevertTeleport()
+        {
+            if (!hasPositionBeforeLastTP)
+                return;
+            TeleportWithoutLerpAndRecordRevert(positionBeforeLastTP, rotationBeforeLastTP);
+        }
+
+        public override void TeleportToLastPlayerTP()
+        {
+            if (!HasLastPlayerTP)
+                return;
+            VRCPlayerApi playerApi = lastPlayerTP.playerApi;
+            if (!Utilities.IsValid(playerApi))
+                return;
+            FindTarget(playerApi.GetPosition(), playerApi.GetRotation(), lastPlayerTPDesiredRelativeDirection, out Vector3 position, out Quaternion rotation);
+            TeleportWithoutLerpAndRecordRevert(position, rotation);
+        }
+
+        private void TeleportWithoutLerpAndRecordRevert(Vector3 position, Quaternion rotation)
         {
             Vector3 currentPosition = localPlayer.GetPosition();
             Quaternion currentRotation = localPlayer.GetRotation();
             TeleportWithoutLerp(position, rotation);
-            if (recordUndo)
-                RecordTeleportToLocation(currentPosition, currentRotation, position, rotation);
-        }
-
-        public override void UndoTeleport()
-        {
-            if (!hasUndoData || !isAtUndoAbleLocation)
-                return;
-            isAtUndoAbleLocation = false;
-            TeleportWithoutLerp(undoAblePosition, undoAbleRotation);
-            RaiseOnRPMenuTeleportUndoRedoStateChanged();
-        }
-
-        public override void RedoTeleport()
-        {
-            if (!hasUndoData || isAtUndoAbleLocation)
-                return;
-            isAtUndoAbleLocation = true;
-
-            if (!redoAbleLocationIsPlayer)
-            {
-                TeleportWithoutLerp(redoAblePosition, redoAbleRotation);
-                RaiseOnRPMenuTeleportUndoRedoStateChanged();
-                return;
-            }
-
-            if (redoAblePlayer == null || redoAblePlayer.isDeleted)
-                return;
-            VRCPlayerApi playerApi = redoAblePlayer.playerApi;
-            if (!Utilities.IsValid(playerApi))
-                return;
-            FindTarget(playerApi.GetPosition(), playerApi.GetRotation(), redoAbleDesiredRelativeDirection, out Vector3 position, out Quaternion rotation);
-            TeleportWithoutLerp(position, rotation);
-            RaiseOnRPMenuTeleportUndoRedoStateChanged();
+            RecordTeleportToLocation(currentPosition, currentRotation);
         }
 
         private void TeleportWithoutLerp(Vector3 position, Quaternion rotation)
@@ -294,7 +279,8 @@ namespace JanSharp.Internal
         #region EventDispatcher
 
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onLocalPlayerTeleportedListeners;
-        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onRPMenuTeleportUndoRedoStateChangedListeners;
+        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onRPMenuLastPlayerTPStateChangedListeners;
+        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onRPMenuRevertTPStateChangedListeners;
 
         private void RaiseOnLocalPlayerTeleported()
         {
@@ -302,10 +288,16 @@ namespace JanSharp.Internal
             JanSharp.CustomRaisedEvents.Raise(ref onLocalPlayerTeleportedListeners, nameof(RPMenuTeleportEventType.OnLocalPlayerTeleported));
         }
 
-        private void RaiseOnRPMenuTeleportUndoRedoStateChanged()
+        private void RaiseOnRPMenuLastPlayerTPStateChanged()
         {
             // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
-            JanSharp.CustomRaisedEvents.Raise(ref onRPMenuTeleportUndoRedoStateChangedListeners, nameof(RPMenuTeleportEventType.OnRPMenuTeleportUndoRedoStateChanged));
+            JanSharp.CustomRaisedEvents.Raise(ref onRPMenuLastPlayerTPStateChangedListeners, nameof(RPMenuTeleportEventType.OnRPMenuLastPlayerTPStateChanged));
+        }
+
+        private void RaiseOnRPMenuRevertTPStateChanged()
+        {
+            // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
+            JanSharp.CustomRaisedEvents.Raise(ref onRPMenuRevertTPStateChangedListeners, nameof(RPMenuTeleportEventType.OnRPMenuRevertTPStateChanged));
         }
 
         #endregion

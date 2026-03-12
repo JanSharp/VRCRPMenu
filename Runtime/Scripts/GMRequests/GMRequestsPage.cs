@@ -73,7 +73,7 @@ namespace JanSharp
 #endif
             if (request.requestingPlayer == null || request.requestingPlayer.core.isLocal)
                 return;
-            teleportManager.TeleportToPlayer(request.requestingPlayer.core, Vector3.forward, recordUndo: true);
+            teleportManager.TeleportToPlayer(request.requestingPlayer.core, Vector3.forward, recordLastPlayerTPAndRevert: true);
         }
 
         public void OnReadToggleValueChanged(GMRequestRow row)

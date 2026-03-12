@@ -13,7 +13,11 @@ namespace JanSharp
         /// <summary>
         /// <para>Not game state safe.</para>
         /// </summary>
-        OnRPMenuTeleportUndoRedoStateChanged,
+        OnRPMenuLastPlayerTPStateChanged,
+        /// <summary>
+        /// <para>Not game state safe.</para>
+        /// </summary>
+        OnRPMenuRevertTPStateChanged,
     }
 
     [System.AttributeUsage(System.AttributeTargets.Method, Inherited = true, AllowMultiple = false)]
@@ -43,27 +47,20 @@ namespace JanSharp
         public const float SafetyDistanceFromGround = 0.015f;
         public const float SafetyDistanceFromWalls = 0.1f;
 
-        public abstract bool HasUndoData { get; }
-        /// <summary>
-        /// <para>When <see langword="false"/> it means "is at redo able location".</para>
-        /// </summary>
-        public abstract bool IsAtUndoAbleLocation { get; }
-        public abstract float UndoAbleActionTakenAtTime { get; }
+        public abstract bool HasLastPlayerTP { get; }
+        public abstract CorePlayerData LastPlayerTP { get; }
+        public abstract Vector3 LastPlayerTPDesiredRelativeDirection { get; }
 
-        public abstract bool RedoAbleLocationIsPlayer { get; }
-        public abstract CorePlayerData RedoAblePlayer { get; }
-        public abstract Vector3 RedoAbleDesiredRelativeDirection { get; }
-        public abstract Vector3 RedoAblePosition { get; }
-        public abstract Quaternion RedoAbleRotation { get; }
-
-        public abstract Vector3 UndoAblePosition { get; }
-        public abstract Quaternion UndoAbleRotation { get; }
+        public abstract bool HasPositionBeforeLastTP { get; }
+        public abstract float TimeAtPositionBeforeLastTP { get; }
+        public abstract Vector3 PositionBeforeLastTP { get; }
+        public abstract Quaternion RotationBeforeLastTP { get; }
 
         public abstract LayerMask LocalPlayerCollidingLayers { get; }
-        public abstract void TeleportToPlayer(CorePlayerData otherPlayer, Vector3 desiredRelativeDirection, bool recordUndo = false);
-        public abstract void TeleportTo(Vector3 position, Quaternion rotation, bool recordUndo = false);
-        public abstract void UndoTeleport();
-        public abstract void RedoTeleport();
+        public abstract void TeleportToPlayer(CorePlayerData otherPlayer, Vector3 desiredRelativeDirection, bool recordLastPlayerTPAndRevert = false);
+        public abstract void TeleportTo(Vector3 position, Quaternion rotation, bool recordRevert = false);
+        public abstract void RevertTeleport();
+        public abstract void TeleportToLastPlayerTP();
 
         /// <summary>
         /// <para>Handles quaternions where their forward vector is pointing straight up or down.</para>

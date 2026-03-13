@@ -32,7 +32,14 @@ namespace JanSharp
         public string turningOffColorName;
         public Color turningOffColor;
 
+        [Space]
+
+        [Tooltip("When true each segment must have a Resizable Container set.")]
+        [SerializeField] private bool changeEachSegmentSize = false;
+        // Could add an option here for whether it should be ascending, descending, horizontal, vertical, bottom aligned, top aligned.
+
         private uint segmentsCount;
+        public uint SegmentsCount => segmentsCount;
         [SerializeField] private SegmentedSliderSegment[] segments;
         [SerializeField] private float transitionTime = 0.1f;
 
@@ -80,11 +87,29 @@ namespace JanSharp
         public void OnMenuManagerStart()
         {
             segmentsCount = (uint)segments.Length;
+            if (segmentsCount == 0)
+            {
+                Debug.LogError("[RPMenu] A Segmented Slider must have at least one segment.", this);
+                return;
+            }
+
+            RectTransform resizableContainer = segments[0].resizableContainer;
+            Vector2 anchorMin = changeEachSegmentSize ? resizableContainer.anchorMin : Vector2.zero;
+            Vector2 anchorMax = changeEachSegmentSize ? resizableContainer.anchorMax : Vector2.zero;
+            anchorMin.y = 0f;
+            float segmentsCountFloat = segmentsCount;
+
             for (uint i = 0; i < segmentsCount; i++)
             {
                 SegmentedSliderSegment segment = segments[i];
                 segment.index = i;
                 segment.fillImage.CrossFadeColor(i <= value ? onColor : offColor, 0f, ignoreTimeScale: true, useAlpha: true);
+                if (!changeEachSegmentSize)
+                    continue;
+                resizableContainer = segment.resizableContainer;
+                resizableContainer.anchorMin = anchorMin;
+                anchorMax.y = (i + 1f) / segmentsCountFloat;
+                resizableContainer.anchorMax = anchorMax;
             }
         }
 

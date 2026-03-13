@@ -1,4 +1,5 @@
 ﻿using UdonSharp;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace JanSharp
@@ -9,6 +10,8 @@ namespace JanSharp
         [System.NonSerialized] public uint index;
         public SegmentedSlider slider;
         public Image fillImage;
+        [Tooltip("Only used when Change Each Segment Size is true.")]
+        public RectTransform resizableContainer;
 
         public void OnClick() => slider.OnClick(this);
 

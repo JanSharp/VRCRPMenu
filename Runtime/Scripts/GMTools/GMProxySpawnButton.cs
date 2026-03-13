@@ -12,7 +12,7 @@ namespace JanSharp
         [HideInInspector][SerializeField][SingletonReference] private ItemSpawnLocationHelperAPI itemSpawnLocationHelper;
 
         public TMP_InputField displayNameField;
-        public ToggleGroupWithFloatValues scaleToggles;
+        public SegmentedSliderForSizing sizeSlider;
         public Image accentColorImage;
         public string gmProxyDefInternalName;
         private GMProxyDefinition gmProxyDefinition;
@@ -27,7 +27,7 @@ namespace JanSharp
         {
             itemSpawnLocationHelper.DetermineItemSpawnLocation(this, nameof(OnLocationDetermined), new object[]
             {
-                scaleToggles.GetValue(),
+                sizeSlider.GetSize(),
                 displayNameField.text,
             });
         }

@@ -118,7 +118,7 @@ namespace JanSharp.Internal
         public void OnPlayerDataDeleted()
         {
             if (viewGMProxySpawnedByValue) // No need to waste performance otherwise.
-                UpdateAllProxiesCreatedByPlayer(entitySystem.GetPlayerData(playerDataManager.PlayerDataForEvent));
+                UpdateAllProxiesWithoutCreatedByPlayer();
         }
 
         [LockstepEvent(LockstepEventType.OnImportFinishingUp)]
@@ -147,6 +147,20 @@ namespace JanSharp.Internal
             {
                 GMProxyExtensionData data = allGMProxies[i];
                 if (data.entityData.createdByPlayerData != player)
+                    continue;
+                GMProxyExtension ext = data.ext;
+                if (ext != null)
+                    ext.ApplyExtensionData();
+            }
+        }
+
+        private void UpdateAllProxiesWithoutCreatedByPlayer()
+        {
+            for (int i = 0; i < allGMProxiesCount; i++)
+            {
+                GMProxyExtensionData data = allGMProxies[i];
+                EntitySystemPlayerData player = data.entityData.createdByPlayerData;
+                if (player != null && !player.core.isDeleted)
                     continue;
                 GMProxyExtension ext = data.ext;
                 if (ext != null)

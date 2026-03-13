@@ -178,7 +178,21 @@ namespace JanSharp
 #if RP_MENU_DEBUG
             Debug.Log($"[RPMenuDebug] GMRequestsPage  OnPlayerDataDeleted");
 #endif
-            UpdateRowsDueToPlayerChange(playersBackendManager.GetRPPlayerData(playerDataManager.PlayerDataForEvent), doUpdateResponding: true);
+            GMRequestRow[] rows = requestsList.Rows;
+            int count = requestsList.RowsCount;
+            for (int i = 0; i < count; i++)
+            {
+                GMRequestRow row = rows[i];
+                GMRequest request = row.request;
+
+                RPPlayerData player = request.latencyRespondingPlayer;
+                if (player == null || player.core.isDeleted)
+                    requestsList.UpdateRowResponder(row);
+
+                player = request.requestingPlayer;
+                if (player == null || player.core.isDeleted)
+                    requestsList.UpdateRowRequester(row);
+            }
         }
 
         private void UpdateRowsDueToPlayerChange(RPPlayerData changedPlayer, bool doUpdateResponding)

@@ -240,7 +240,7 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
   - [ ] make the items size selection match
 - [ ] change GM request treat as urgent to show as orange rather than red
 - [x] change GM request treat as urgent timer to 5 minutes
-- [ ] remove GM request responder HUD showing as orange when 5 requests are unread
+- [x] remove GM request responder HUD showing as orange when 5 requests are unread
 - [ ] should proximity sort ignore/bypass favorites
 - [ ] should selection sort ignore/bypass favorites
 - [x] change "redo TP" to "last player TP"

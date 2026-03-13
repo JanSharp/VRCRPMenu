@@ -51,13 +51,9 @@ namespace JanSharp
         [UIStyleColor(nameof(responderRegularColor))]
         public string responderRegularColorName;
         public Color responderRegularColor;
-        [UIStyleColor(nameof(responderManyRegularColor))]
-        public string responderManyRegularColorName;
-        public Color responderManyRegularColor;
         [UIStyleColor(nameof(responderUrgentColor))]
         public string responderUrgentColorName;
         public Color responderUrgentColor;
-        private const int ResponderManyRegularThreshold = 5;
         private const float ResponderRegularImageCrossFadeDuration = 0.2f;
         private bool responderHUDIsShown = false;
         private bool responderIsInNewRequestAnimation = false;
@@ -303,11 +299,6 @@ namespace JanSharp
             }
         }
 
-        private bool HasManyActiveRequests()
-        {
-            return requestsManager.ActiveRequestsCount >= ResponderManyRegularThreshold;
-        }
-
         private void UpdateResponderHUD(bool hasNewRequest)
         {
             if (cannotViewAndEdit)
@@ -353,9 +344,7 @@ namespace JanSharp
         private void UpdateResponderImageColor(bool presentAsUrgent)
         {
             responderRegularImage.CrossFadeColor(
-                presentAsUrgent ? responderUrgentColor
-                    : HasManyActiveRequests() ? responderManyRegularColor
-                    : responderRegularColor,
+                presentAsUrgent ? responderUrgentColor : responderRegularColor,
                 ResponderRegularImageCrossFadeDuration, // CrossFadeColor is instant when the object is inactive.
                 ignoreTimeScale: true,
                 useAlpha: true);

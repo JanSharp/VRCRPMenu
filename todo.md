@@ -234,8 +234,8 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [ ] maybe add a fourth option for the voice range in world indicator to only show briefly on change and then fade out
   - [ ] also for the HUD?
 - [ ] maybe highlight matching characters for searches on the items page
-- [ ] make GM Proxy colors more muted, de-saturated
-- [ ] maybe revamp GM proxy color selection, either a wheel (buttons arranged in a flower pattern) or a hue bar (simply colorful boxes next to each other), total of around 12 colors
+- [x] make GM Proxy colors more muted, de-saturated
+- [x] maybe revamp GM proxy color selection, either a wheel (buttons arranged in a flower pattern) or a hue bar (simply colorful boxes next to each other), total of around 12 colors
 - [x] maybe change GM request size selection, segmented slider with bars building up in size
   - [x] make the items size selection match
 - [x] change GM request treat as urgent to show as orange rather than red

@@ -417,23 +417,11 @@ namespace JanSharp
         }
 
         public void CompareRowSelectionAscending()
-        {
-            PlayersRow left = (PlayersRow)compareLeft;
-            PlayersRow right = (PlayersRow)compareRight;
-            if (left.isFavorite != right.isFavorite)
-                leftSortsFirst = left.isFavorite;
-            else
-                leftSortsFirst = left.sortableSelection <= right.sortableSelection;
-        }
+            => leftSortsFirst = ((PlayersRow)compareLeft).sortableSelection
+                <= ((PlayersRow)compareRight).sortableSelection;
         public void CompareRowSelectionDescending()
-        {
-            PlayersRow left = (PlayersRow)compareLeft;
-            PlayersRow right = (PlayersRow)compareRight;
-            if (left.isFavorite != right.isFavorite)
-                leftSortsFirst = left.isFavorite;
-            else
-                leftSortsFirst = left.sortableSelection >= right.sortableSelection;
-        }
+            => leftSortsFirst = ((PlayersRow)compareLeft).sortableSelection
+                >= ((PlayersRow)compareRight).sortableSelection;
 
         #endregion
     }

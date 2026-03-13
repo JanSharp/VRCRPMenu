@@ -242,7 +242,7 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [x] change GM request treat as urgent timer to 5 minutes
 - [x] remove GM request responder HUD showing as orange when 5 requests are unread
 - [x] should proximity sort ignore/bypass favorites
-- [ ] should selection sort ignore/bypass favorites
+- [x] should selection sort ignore/bypass favorites
 - [x] change "redo TP" to "last player TP"
 - [x] change "undo TP" to "revert TP" and make it behave like Sylan's Undo TP. Basically behave like undo, except that undo itself also pushes a new action, if we pretend to treat it like an undo stack. This more closely behaves like git revert
 - [ ] note that text can show as invisible on desktop and the workaround is to enter and exit fullscreen

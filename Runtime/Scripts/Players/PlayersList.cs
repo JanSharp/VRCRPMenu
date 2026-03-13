@@ -395,11 +395,6 @@ namespace JanSharp
         {
             PlayersRow left = (PlayersRow)compareLeft;
             PlayersRow right = (PlayersRow)compareRight;
-            if (left.isFavorite != right.isFavorite)
-            {
-                leftSortsFirst = left.isFavorite;
-                return;
-            }
             // -1 always sorts last.
             float leftProximity = left.sortableProximity;
             float rightProximity = right.sortableProximity;
@@ -412,11 +407,6 @@ namespace JanSharp
         {
             PlayersRow left = (PlayersRow)compareLeft;
             PlayersRow right = (PlayersRow)compareRight;
-            if (left.isFavorite != right.isFavorite)
-            {
-                leftSortsFirst = left.isFavorite;
-                return;
-            }
             // -1 always sorts last.
             float leftProximity = left.sortableProximity;
             float rightProximity = right.sortableProximity;

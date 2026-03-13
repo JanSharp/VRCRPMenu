@@ -229,7 +229,7 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [x] newly created rows in the players list appear selected when missing player selection permission
 - [x] GM request type change breaks the latency state for the player changing request type if that GM request also gets marked as read at around the same time - it was not related to simultaneous actions like that at all... the ids were simply desynced due to nextRequestId not being sent to late joiners
 - [x] creating 10+ local custom locations and deleting them all made the list show as empty without the empty info text and it is still openable. There was likely some custom locations related input action from another player that ran during the process of marking these locations for deletion
-- [ ] maybe add a toggle to toggle the active state of no clip in the menu without the need to double jump
+- [x] maybe add a toggle to toggle the active state of no clip in the menu without the need to double jump
 - [ ] maybe add an option to the no clip UI to choose between no clip and flying (using velocity, which does collide). When doing so make flying the default
 - [ ] maybe add a fourth option for the voice range in world indicator to only show briefly on change and then fade out
   - [ ] also for the HUD?
@@ -253,3 +253,4 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [x] make last player TP button not interactable but still show the tooltip when hovered when that last player is currently offline
 - [ ] summon indicators are broken. summon some players, instantly try to summon some again, once the first one finishes, indicators for the new one disappear. Cancelling and trying to summon again does not show the correct amount of indicators anymore
 - [x] in GMRequestsPage OnPlayerDataDeleted RPPlayerData does not exist anymore at this point, also check in gm proxies manager
+- [ ] missing an in menu method to delete items

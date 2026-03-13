@@ -55,8 +55,15 @@ namespace JanSharp
                 if (interactable == value)
                     return;
                 interactable = value;
+                UpdateAllButtonInteractable();
                 UpdateSegments();
             }
+        }
+
+        private void UpdateAllButtonInteractable()
+        {
+            foreach (SegmentedSliderSegment segment in segments)
+                segment.button.interactable = interactable; // Prevent UI sounds, or any other listeners.
         }
 
         [Tooltip("Zero based")]
@@ -92,6 +99,8 @@ namespace JanSharp
                 Debug.LogError("[RPMenu] A Segmented Slider must have at least one segment.", this);
                 return;
             }
+
+            UpdateAllButtonInteractable();
 
             RectTransform resizableContainer = segments[0].resizableContainer;
             Vector2 anchorMin = changeEachSegmentSize ? resizableContainer.anchorMin : Vector2.zero;

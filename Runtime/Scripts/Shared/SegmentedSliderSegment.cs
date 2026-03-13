@@ -9,6 +9,7 @@ namespace JanSharp
     {
         [System.NonSerialized] public uint index;
         public SegmentedSlider slider;
+        public Button button;
         public Image fillImage;
         [Tooltip("Only used when Change Each Segment Size is true.")]
         public RectTransform resizableContainer;

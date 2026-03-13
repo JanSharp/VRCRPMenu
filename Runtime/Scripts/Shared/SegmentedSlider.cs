@@ -91,8 +91,7 @@ namespace JanSharp
         private void OnDisable()
         {
             isHovering = false;
-            if (interactable)
-                UpdateSegments();
+            UpdateSegments(); // Must update regardless to ensure nothing got stuck mid fade.
         }
 
         public void OnClick(SegmentedSliderSegment segment)

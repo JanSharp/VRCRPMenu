@@ -24,7 +24,7 @@ namespace JanSharp.Internal
 
         [Tooltip("-1 makes regular requests never be presented as urgent.")]
         [Min(-1)]
-        [SerializeField] private int presentAsUrgentAfterSeconds = 180;
+        [SerializeField] private int presentAsUrgentAfterSeconds = 300;
         public override int PresentAsUrgentAfterSeconds => presentAsUrgentAfterSeconds;
 
         public override bool ShouldPresetAsUrgent(GMRequest request)

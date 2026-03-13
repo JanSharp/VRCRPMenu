@@ -58,7 +58,7 @@ MonoBehaviour:
   requestsManager: {fileID: 0}
   requestType: 0
   associatedRequestPermissionAsset: f9df002d567bb56cc96b6ad25a3b76c7
-  associatedRequestPermissionDef: {fileID: 0}
+  associatedRequestPDef: {fileID: 0}
 --- !u!114 &5676955278396849707
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -142,7 +142,7 @@ MonoBehaviour:
   requestsManager: {fileID: 0}
   requestType: 1
   associatedRequestPermissionAsset: 9b085d77842c6cf35b7acbfd89b33dc2
-  associatedRequestPermissionDef: {fileID: 0}
+  associatedRequestPDef: {fileID: 0}
 --- !u!114 &6416009732249885528
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -230,14 +230,15 @@ MonoBehaviour:
   playerDataManager: {fileID: 0}
   playersBackendManager: {fileID: 0}
   permissionManager: {fileID: 0}
-  presentAsUrgentAfterSeconds: 180
+  presentAsUrgentAfterSeconds: 300
   requestGMPermissionAsset: f9df002d567bb56cc96b6ad25a3b76c7
-  requestGMPermissionDef: {fileID: 0}
+  requestGMPDef: {fileID: 0}
   requestGMUrgentlyPermissionAsset: 9b085d77842c6cf35b7acbfd89b33dc2
-  requestGMUrgentlyPermissionDef: {fileID: 0}
+  requestGMUrgentlyPDef: {fileID: 0}
   viewAndEditGMRequestsPermissionAsset: 1325dbb82dc177674a4bb66b5747bfe8
-  viewAndEditGMRequestsPermissionDef: {fileID: 0}
+  viewAndEditGMRequestsPDef: {fileID: 0}
   createIAId: 0
+  gmRequestShouldPresetAsUrgentChangedIAId: 0
   setRequestTypeIAId: 0
   markReadIAId: 0
   markUnreadIAId: 0
@@ -245,6 +246,7 @@ MonoBehaviour:
   checkAutoDeletionIAId: 0
   onGMRequestCreatedInLatencyListeners: []
   onGMRequestCreatedListeners: []
+  onGMRequestShouldPresetAsUrgentChangedListeners: []
   onGMRequestChangedInLatencyListeners: []
   onGMRequestChangedListeners: []
   onGMRequestDeletedInLatencyListeners: []

@@ -356,7 +356,7 @@ namespace JanSharp
                 presentAsUrgent ? responderUrgentColor
                     : HasManyActiveRequests() ? responderManyRegularColor
                     : responderRegularColor,
-                responderHUDIsShown ? ResponderRegularImageCrossFadeDuration : 0f,
+                ResponderRegularImageCrossFadeDuration, // CrossFadeColor is instant when the object is inactive.
                 ignoreTimeScale: true,
                 useAlpha: true);
         }

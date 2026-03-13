@@ -15,7 +15,7 @@ namespace JanSharp
 
         public ItemsList rowsList;
         public ItemsRow rowPrefabScript;
-        public ToggleGroupWithFloatValues itemSizeToggles;
+        public SegmentedSliderForSizing sizeSlider;
 
         private ItemsRow activeRow;
 
@@ -192,7 +192,7 @@ namespace JanSharp
             itemSpawnLocationHelper.DetermineItemSpawnLocation(this, nameof(OnSpawnLocationDetermined), new object[]
             {
                 activeRow.entityPrototype,
-                itemSizeToggles.GetValue(),
+                sizeSlider.GetSize(),
             });
             ClearActiveRow();
         }

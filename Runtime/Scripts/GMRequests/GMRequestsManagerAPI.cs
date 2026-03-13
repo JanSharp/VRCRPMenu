@@ -14,14 +14,14 @@ namespace JanSharp
         OnGMRequestCreated,
         /// <summary>
         /// <para>Use <see cref="GMRequestsManagerAPI.RequestForEvent"/>.</para>
-        /// <para>Only raised if <see cref="GMRequestsManagerAPI.PresentAsUrgentAfterSeconds"/> is not equal
+        /// <para>Only raised if <see cref="GMRequestsManagerAPI.PresentAsImportantAfterSeconds"/> is not equal
         /// to <c>-1</c>.</para>
         /// <para>Raised only when <see cref="GMRequest.requestType"/> equals
         /// <see cref="GMRequestType.Regular"/>.</para>
         /// <para>Raised regardless of the read state of the request.</para>
         /// <para>Game state safe.</para>
         /// </summary>
-        OnGMRequestShouldPresetAsUrgentChanged,
+        OnGMRequestShouldPresetAsImportantChanged,
         /// <summary>
         /// <para>Use <see cref="GMRequestsManagerAPI.RequestForEvent"/>.</para>
         /// <para>Not game state safe.</para>
@@ -72,8 +72,8 @@ namespace JanSharp
     [SingletonScript("244fcac5ffbfe1f3b8c588e7f8d9ee5b")] // Runtime/Prefabs/Managers/GMRequestsManager.prefab
     public abstract class GMRequestsManagerAPI : LockstepGameState
     {
-        public abstract int PresentAsUrgentAfterSeconds { get; }
-        public abstract bool ShouldPresetAsUrgent(GMRequest request);
+        public abstract int PresentAsImportantAfterSeconds { get; }
+        public abstract bool ShouldPresetAsImportant(GMRequest request);
 
         /// <summary>
         /// <para>Not only does this contain latency hidden requests and do not contain latency deleted

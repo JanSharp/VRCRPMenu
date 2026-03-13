@@ -51,6 +51,9 @@ namespace JanSharp
         [UIStyleColor(nameof(responderRegularColor))]
         public string responderRegularColorName;
         public Color responderRegularColor;
+        [UIStyleColor(nameof(responderImportantRegularColor))]
+        public string responderImportantRegularColorName;
+        public Color responderImportantRegularColor;
         [UIStyleColor(nameof(responderUrgentColor))]
         public string responderUrgentColorName;
         public Color responderUrgentColor;
@@ -315,7 +318,7 @@ namespace JanSharp
             }
 
             bool anyUrgent = false;
-            bool anyPresentAsUrgent = false;
+            bool anyPresentAsImportant = false;
             GMRequest[] requests = requestsManager.ActiveRequestsRaw;
             for (int i = 0; i < count; i++)
             {
@@ -325,8 +328,8 @@ namespace JanSharp
                     anyUrgent = true;
                     break;
                 }
-                if (!anyPresentAsUrgent && requestsManager.ShouldPresetAsUrgent(request))
-                    anyPresentAsUrgent = true;
+                if (!anyPresentAsImportant && requestsManager.ShouldPresetAsImportant(request))
+                    anyPresentAsImportant = true;
             }
 
             responderCountText.text = count.ToString();
@@ -334,17 +337,17 @@ namespace JanSharp
             responderUrgentRoot.SetActive(anyUrgent);
             // Important to be called after SetActive to prevent instantly cancelling a cross fade.
             // And important to be called before ShowHideResponderHUD to use the correct fade duration.
-            UpdateResponderImageColor(anyPresentAsUrgent);
+            UpdateResponderImageColor(anyPresentAsImportant);
 
             if (hasNewRequest)
                 StartResponderNewRequestAnimation();
             ShowHideResponderHUD(true);
         }
 
-        private void UpdateResponderImageColor(bool presentAsUrgent)
+        private void UpdateResponderImageColor(bool presentAsImportant)
         {
             responderRegularImage.CrossFadeColor(
-                presentAsUrgent ? responderUrgentColor : responderRegularColor,
+                presentAsImportant ? responderImportantRegularColor : responderRegularColor,
                 ResponderRegularImageCrossFadeDuration, // CrossFadeColor is instant when the object is inactive.
                 ignoreTimeScale: true,
                 useAlpha: true);
@@ -425,12 +428,12 @@ namespace JanSharp
         [GMRequestsEvent(GMRequestsEventType.OnGMRequestCreatedInLatency)]
         public void OnGMRequestCreatedInLatency() => UpdateHUD(hasNewRequest: true);
 
-        [GMRequestsEvent(GMRequestsEventType.OnGMRequestShouldPresetAsUrgentChanged)]
-        public void OnGMRequestShouldPresetAsUrgentChanged()
+        [GMRequestsEvent(GMRequestsEventType.OnGMRequestShouldPresetAsImportantChanged)]
+        public void OnGMRequestShouldPresetAsImportantChanged()
         {
             GMRequest request = requestsManager.RequestForEvent;
             if (!request.latencyIsRead && request.latencyRequestType == GMRequestType.Regular)
-                UpdateResponderImageColor(presentAsUrgent: true);
+                UpdateResponderImageColor(presentAsImportant: true);
         }
 
         [GMRequestsEvent(GMRequestsEventType.OnGMRequestChangedInLatency)]

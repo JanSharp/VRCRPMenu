@@ -113,12 +113,13 @@ namespace JanSharp
 
             bool latencyIsRead = request.latencyIsRead;
             row.regularHighlight.SetActive(!latencyIsRead && request.latencyRequestType == GMRequestType.Regular);
+            row.regularImportantHighlight.SetActive(false);
             row.urgentHighlight.SetActive(!latencyIsRead && request.latencyRequestType == GMRequestType.Urgent);
             row.readToggle.SetIsOnWithoutNotify(latencyIsRead);
 
             UpdateRowResponder(row);
 
-            UpdateRowTimeInfo(row); // Must do this after updating regular/urgent highlights, as this might toggle those.
+            UpdateRowTimeInfo(row); // Must do this after updating regular/important highlights, as this might toggle those.
         }
 
         public void UpdateRowResponder(GMRequestRow row)
@@ -140,23 +141,23 @@ namespace JanSharp
             }
             uint liveTicks = lockstep.CurrentTick - request.requestedAtTick;
             uint seconds = liveTicks / LockstepAPI.TickRateUInt;
-            UpdateRowPresentedAsUrgent(row, seconds);
+            UpdateRowPresentedAsImportant(row, seconds);
             uint minutes = seconds / 60u;
             seconds -= minutes * 60u;
             row.timeAndInfoText.text = $"{minutes}:{seconds:d2}{postfix}";
         }
 
-        private void UpdateRowPresentedAsUrgent(GMRequestRow row, uint seconds)
+        private void UpdateRowPresentedAsImportant(GMRequestRow row, uint seconds)
         {
             GMRequest request = row.request;
             if (request.latencyIsRead || request.latencyRequestType != GMRequestType.Regular)
                 return;
-            int presentAsUrgentAfterSeconds = requestsManager.PresentAsUrgentAfterSeconds;
-            if (presentAsUrgentAfterSeconds == -1)
+            int presentAsImportantAfterSeconds = requestsManager.PresentAsImportantAfterSeconds;
+            if (presentAsImportantAfterSeconds == -1)
                 return;
-            bool becameUrgent = seconds >= presentAsUrgentAfterSeconds;
-            row.regularHighlight.SetActive(!becameUrgent);
-            row.urgentHighlight.SetActive(becameUrgent);
+            bool becameImportant = seconds >= presentAsImportantAfterSeconds;
+            row.regularHighlight.SetActive(!becameImportant);
+            row.regularImportantHighlight.SetActive(becameImportant);
         }
 
         #endregion

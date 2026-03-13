@@ -5790,10 +5790,12 @@ MonoBehaviour:
     color: {r: 0.5019608, g: 0.83137256, b: 1, a: 0}
   - name: regular-gm-request-highlight
     color: {r: 0.5019608, g: 0.83137256, b: 1, a: 0.2509804}
-  - name: urgent-highlight
-    color: {r: 1, g: 0, b: 0, a: 0.4}
+  - name: regular-important-gm-request-highlight
+    color: {r: 1, g: 0.73333335, b: 0.34901962, a: 0.2509804}
   - name: urgent-gm-request-highlight
     color: {r: 1, g: 0, b: 0, a: 0.2509804}
+  - name: urgent-highlight
+    color: {r: 1, g: 0, b: 0, a: 0.4}
   - name: main
     color: {r: 1, g: 1, b: 1, a: 1}
   - name: main-disabled
@@ -7685,6 +7687,69 @@ MonoBehaviour:
   flexibleWidth: 0
   flexibleHeight: 1
   layoutPriority: 2
+--- !u!1 &4669423737504583197
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2502326740946543744}
+  - component: {fileID: 1401094424784553889}
+  m_Layer: 17
+  m_Name: image-regular-important-gm-request-highlight
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2502326740946543744
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4669423737504583197}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7521404726449737656}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1401094424784553889
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4669423737504583197}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d93d7530f4c07f2c9076f8387e524b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  profileName: image-regular-important-gm-request-highlight
+  sourceImage: none
+  color: regular-important-gm-request-highlight
+  material: {fileID: 2100000, guid: 35630e38b4e5ffb40b44ec5348b4333f, type: 2}
+  raycastTarget: 0
+  raycastPaddingLeft: 0
+  raycastPaddingBottom: 0
+  raycastPaddingRight: 0
+  raycastPaddingTop: 0
+  maskable: 1
+  imageType: 1
+  useSpriteMesh: 0
+  preserveAspect: 0
+  fillCenter: 1
+  pixelsPerUnitMultiplier: 1
+  fillMethod: 4
+  fillOrigin: 12
+  fillAmount: 1
+  clockwise: 1
 --- !u!1 &4701169346688766607
 GameObject:
   m_ObjectHideFlags: 0
@@ -16424,6 +16489,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 147376872127741729}
+    - targetCorrespondingSourceObject: {fileID: 6496738037252997729, guid: b30c0489bc1cef59baba23f87dd71436,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2502326740946543744}
     - targetCorrespondingSourceObject: {fileID: 6496738037252997729, guid: b30c0489bc1cef59baba23f87dd71436,
         type: 3}
       insertIndex: -1

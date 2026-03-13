@@ -11,6 +11,7 @@ namespace JanSharp
         [System.NonSerialized] public GMRequest request;
         public GMRequestsPage page;
         public GameObject regularHighlight;
+        public GameObject regularImportantHighlight;
         public GameObject urgentHighlight;
         public Toggle readToggle;
         public TextMeshProUGUI timeAndInfoText;

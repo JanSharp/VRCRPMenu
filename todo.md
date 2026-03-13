@@ -238,7 +238,7 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [ ] maybe revamp GM proxy color selection, either a wheel (buttons arranged in a flower pattern) or a hue bar (simply colorful boxes next to each other), total of around 12 colors
 - [ ] maybe change GM request size selection, segmented slider with bars building up in size
   - [ ] make the items size selection match
-- [ ] change GM request treat as urgent to show as orange rather than red
+- [x] change GM request treat as urgent to show as orange rather than red
 - [x] change GM request treat as urgent timer to 5 minutes
 - [x] remove GM request responder HUD showing as orange when 5 requests are unread
 - [ ] should proximity sort ignore/bypass favorites

@@ -22,16 +22,16 @@ namespace JanSharp.Internal
         [HideInInspector][SerializeField][SingletonReference] private PlayersBackendManagerAPI playersBackendManager;
         [HideInInspector][SerializeField][SingletonReference] private PermissionManagerAPI permissionManager;
 
-        [Tooltip("-1 makes regular requests never be presented as urgent.")]
+        [Tooltip("-1 makes regular requests never be presented as important.")]
         [Min(-1)]
-        [SerializeField] private int presentAsUrgentAfterSeconds = 300;
-        public override int PresentAsUrgentAfterSeconds => presentAsUrgentAfterSeconds;
+        [SerializeField] private int presentAsImportantAfterSeconds = 300;
+        public override int PresentAsImportantAfterSeconds => presentAsImportantAfterSeconds;
 
-        public override bool ShouldPresetAsUrgent(GMRequest request)
+        public override bool ShouldPresetAsImportant(GMRequest request)
         {
-            return presentAsUrgentAfterSeconds != -1
+            return presentAsImportantAfterSeconds != -1
                 && !request.isLatency
-                && lockstep.CurrentTick >= request.requestedAtTick + (uint)presentAsUrgentAfterSeconds * LockstepAPI.TickRateUInt;
+                && lockstep.CurrentTick >= request.requestedAtTick + (uint)presentAsImportantAfterSeconds * LockstepAPI.TickRateUInt;
         }
 
         private const uint MinLiveTicksWhenMarkedRead = 60u * LockstepAPI.TickRateUInt;
@@ -210,31 +210,31 @@ namespace JanSharp.Internal
             if (mustRegisterInLS)
                 RegisterRequestInLS(request, doRaise: true);
             RaiseOnGMRequestCreated(request);
-            ManagePresentAsUrgentForNewRequest(request);
+            ManagePresentAsImportantForNewRequest(request);
         }
 
-        private void ManagePresentAsUrgentForNewRequest(GMRequest request)
+        private void ManagePresentAsImportantForNewRequest(GMRequest request)
         {
-            if (presentAsUrgentAfterSeconds == -1)
+            if (presentAsImportantAfterSeconds == -1)
                 return;
-            if (presentAsUrgentAfterSeconds == 0)
+            if (presentAsImportantAfterSeconds == 0)
             {
                 if (request.requestType == GMRequestType.Regular)
-                    RaiseOnGMRequestShouldPresetAsUrgentChanged(request);
+                    RaiseOnGMRequestShouldPresetAsImportantChanged(request);
                 return;
             }
             WriteGMRequestRef(request);
-            lockstep.SendEventDelayedTicks(gmRequestShouldPresetAsUrgentChangedIAId, (uint)presentAsUrgentAfterSeconds * LockstepAPI.TickRateUInt);
+            lockstep.SendEventDelayedTicks(gmRequestShouldPresetAsImportantChangedIAId, (uint)presentAsImportantAfterSeconds * LockstepAPI.TickRateUInt);
         }
 
-        [HideInInspector][SerializeField] private uint gmRequestShouldPresetAsUrgentChangedIAId;
-        [LockstepInputAction(nameof(gmRequestShouldPresetAsUrgentChangedIAId))]
-        public void OnGMRequestShouldPresetAsUrgentChangedIA()
+        [HideInInspector][SerializeField] private uint gmRequestShouldPresetAsImportantChangedIAId;
+        [LockstepInputAction(nameof(gmRequestShouldPresetAsImportantChangedIAId))]
+        public void OnGMRequestShouldPresetAsImportantChangedIA()
         {
             GMRequest request = ReadGMRequestRef();
             if (request == null || request.requestType != GMRequestType.Regular)
                 return;
-            RaiseOnGMRequestShouldPresetAsUrgentChanged(request);
+            RaiseOnGMRequestShouldPresetAsImportantChanged(request);
         }
 
         public override void SendSetRequestTypeIA(GMRequest request, GMRequestType requestType)
@@ -643,7 +643,7 @@ namespace JanSharp.Internal
 
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onGMRequestCreatedInLatencyListeners;
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onGMRequestCreatedListeners;
-        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onGMRequestShouldPresetAsUrgentChangedListeners;
+        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onGMRequestShouldPresetAsImportantChangedListeners;
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onGMRequestChangedInLatencyListeners;
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onGMRequestChangedListeners;
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onGMRequestDeletedInLatencyListeners;
@@ -669,11 +669,11 @@ namespace JanSharp.Internal
             this.requestForEvent = null; // To prevent misuse of the API.
         }
 
-        private void RaiseOnGMRequestShouldPresetAsUrgentChanged(GMRequest requestForEvent)
+        private void RaiseOnGMRequestShouldPresetAsImportantChanged(GMRequest requestForEvent)
         {
             this.requestForEvent = requestForEvent;
             // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
-            JanSharp.CustomRaisedEvents.Raise(ref onGMRequestShouldPresetAsUrgentChangedListeners, nameof(GMRequestsEventType.OnGMRequestShouldPresetAsUrgentChanged));
+            JanSharp.CustomRaisedEvents.Raise(ref onGMRequestShouldPresetAsImportantChangedListeners, nameof(GMRequestsEventType.OnGMRequestShouldPresetAsImportantChanged));
             this.requestForEvent = null; // To prevent misuse of the API.
         }
 

@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Text;
+using System.Text.RegularExpressions;
 using TMPro;
 using UdonSharp;
 using UnityEngine;
@@ -22,6 +23,10 @@ namespace JanSharp
         private string sortOrderFunctionPreSearch;
         private Image sortOrderImagePreSearch;
 
+        [UIStyleColor(nameof(searchMatchHighlightColor))]
+        public string searchMatchHighlightColorName;
+        public Color searchMatchHighlightColor;
+
         /// <summary>
         /// <para><see cref="uint"/> entityPrototypeId => <see cref="ItemsRow"/> row</para>
         /// </summary>
@@ -37,6 +42,8 @@ namespace JanSharp
 
         private Regex sanitationRegex;
         private Regex wordsRegex;
+        private StringBuilder stringBuilder = new StringBuilder();
+        private string highlightMarkOpenTag;
 
         [MenuManagerEvent(MenuManagerEventType.OnMenuManagerStart)]
         public void OnMenuManagerStart()
@@ -54,6 +61,7 @@ namespace JanSharp
             currentSortOrderImage = sortItemNameAscendingImage;
             currentSortOrderImage.enabled = true;
             someRowsAreOutOfSortOrder = false;
+            highlightMarkOpenTag = $"<mark=#{StringUtil.GetHexFromColor(searchMatchHighlightColor, includeAlpha: true)}>";
         }
 
         [PlayerDataEvent(PlayerDataEventType.OnLocalPlayerDataAvailable)]
@@ -114,6 +122,8 @@ namespace JanSharp
 
             bool isFavorite = localPlayer.favoriteItemIdsLut.ContainsKey(prototype.Id);
             string itemName = prototype.DisplayName;
+            string sanitizedItemName = SanitizeRichText(itemName);
+            row.sanitizedItemName = sanitizedItemName;
             string category = "Category"; // TODO
 
             row.isFavorite = isFavorite;
@@ -121,7 +131,7 @@ namespace JanSharp
             row.sortableCategory = category.ToLower();
 
             row.favoriteToggle.SetIsOnWithoutNotify(isFavorite);
-            row.itemNameLabel.text = itemName;
+            row.itemNameLabel.text = sanitizedItemName;
             row.categoryLabel.text = category;
             row.spawnToggle.SetIsOnWithoutNotify(false);
             row.itemNameLabelSelectable.interactable = true;
@@ -146,9 +156,24 @@ namespace JanSharp
 
         #region Search
 
+        private string SanitizeRichText(string text, bool doNotWrapInNoParse = false)
+        {
+            ///cSpell:ignore noparse
+            while (text.Contains("<noparse>"))
+                text = text.Replace("<noparse>", "");
+            while (text.Contains("</noparse>"))
+                text = text.Replace("</noparse>", "");
+            if (!doNotWrapInNoParse && text.Contains('<'))
+                text = $"<noparse>{text}</noparse>";
+            return text;
+        }
+
         private void FindWords(ItemsRow row)
         {
-            string name = sanitationRegex.Replace(row.entityPrototype.DisplayName, " ");
+            // Sanitizing here too just so that if there are any noparse tags in the name,
+            // they don't show up while searching.
+            string displayName = SanitizeRichText(row.entityPrototype.DisplayName, doNotWrapInNoParse: true);
+            string name = sanitationRegex.Replace(displayName, " ");
             Match match = wordsRegex.Match(name);
             if (!match.Success)
             {
@@ -159,13 +184,25 @@ namespace JanSharp
             CaptureCollection captures = match.Groups["word"].Captures;
             int count = captures.Count;
             int totalCharCount = 0;
+            string[] intermediates = new string[count + 1];
+            string[] mixedCasingWords = new string[count];
             string[] words = new string[count];
+            int lastCharIndex = 0;
             for (int i = 0; i < count; i++)
             {
-                string word = captures[i].Value.ToLower();
-                words[i] = word;
-                totalCharCount += word.Length;
+                Capture capture = captures[i];
+                int index = capture.Index;
+                int length = capture.Length;
+                string word = capture.Value;
+                intermediates[i] = SanitizeRichText(displayName.Substring(lastCharIndex, index - lastCharIndex));
+                mixedCasingWords[i] = word;
+                words[i] = word.ToLower();
+                totalCharCount += length;
+                lastCharIndex = index + length;
             }
+            intermediates[count] = SanitizeRichText(displayName.Substring(lastCharIndex));
+            row.intermediates = intermediates;
+            row.mixedCasingWords = mixedCasingWords;
             row.words = words;
             row.totalWordsLetterCount = totalCharCount;
         }
@@ -202,15 +239,29 @@ namespace JanSharp
 
         protected override bool EvaluateHiddenCallback(SortableScrollableRow row)
         {
-            if (searchQueryLength == 0)
-                return false;
-
             ItemsRow itemsRow = (ItemsRow)row;
-            string[] words = itemsRow.words;
-            int wordCount = words.Length;
-            int totalWordsCharCount = itemsRow.totalWordsLetterCount;
-            if (wordCount == 0 || searchQueryLength > totalWordsCharCount)
+            if (searchQueryLength == 0)
+            {
+                itemsRow.itemNameLabel.text = itemsRow.sanitizedItemName;
+                return false;
+            }
+            bool matches = SearchForQuery(itemsRow);
+            itemsRow.itemNameLabel.text = matches
+                ? BuildItemNameWithHighlights(itemsRow)
+                : itemsRow.sanitizedItemName;
+            return !matches; // Return value means "hidden".
+        }
+
+        private bool SearchForQuery(ItemsRow row)
+        {
+            if (searchQueryLength == 0)
                 return true;
+
+            string[] words = row.words;
+            int wordCount = words.Length;
+            int totalWordsCharCount = row.totalWordsLetterCount;
+            if (wordCount == 0 || searchQueryLength > totalWordsCharCount)
+                return false;
 
             string word = null;
             int wordIndex = -1;
@@ -278,12 +329,72 @@ namespace JanSharp
             }
 
             if (!matches)
-                return true;
-            itemsRow.firstMatchingLetterIndex = firstMatchingLetterIndex;
-            itemsRow.longestConsecutiveMatch = longestConsecutiveMatch;
-            itemsRow.anyMatchesAreBeginningsOfWords = anyMatchesAreBeginningsOfWords;
-            itemsRow.allMatchesAreBeginningsOfWords = allMatchesAreBeginningsOfWords;
-            return false;
+                return false;
+            row.firstMatchingLetterIndex = firstMatchingLetterIndex;
+            row.longestConsecutiveMatch = longestConsecutiveMatch;
+            row.anyMatchesAreBeginningsOfWords = anyMatchesAreBeginningsOfWords;
+            row.allMatchesAreBeginningsOfWords = allMatchesAreBeginningsOfWords;
+            return true;
+        }
+
+        /// <summary>
+        /// <para>Expects the given <paramref name="row"/> to fully match the current
+        /// <see cref="searchQuery"/>.</para>
+        /// </summary>
+        /// <param name="row"></param>
+        /// <returns></returns>
+        private string BuildItemNameWithHighlights(ItemsRow row)
+        {
+            string[] intermediates = row.intermediates;
+            string[] mixedCasingWords = row.mixedCasingWords;
+            string[] words = row.words;
+            int wordCount = words.Length;
+
+            string mixedCasingWord = null;
+            string word = null;
+            int wordIndex = -1;
+            int wordLength = 0;
+            int letterIndex = -1;
+
+            for (int i = 0; i < searchQueryLength; i++)
+            {
+                char query = searchQuery[i];
+                while (true)
+                {
+                    if ((++letterIndex) == wordLength)
+                    {
+                        wordIndex++;
+                        stringBuilder.Append(intermediates[wordIndex]);
+                        mixedCasingWord = mixedCasingWords[wordIndex];
+                        word = words[wordIndex];
+                        wordLength = word.Length;
+                        letterIndex = 0;
+                    }
+
+                    if (word[letterIndex] != query)
+                        stringBuilder.Append(mixedCasingWord[letterIndex]);
+                    else
+                    {
+                        stringBuilder.Append(highlightMarkOpenTag);
+                        stringBuilder.Append(mixedCasingWord[letterIndex]);
+                        stringBuilder.Append("</mark>");
+                        break;
+                    }
+                }
+            }
+
+            if ((++letterIndex) < wordLength)
+                stringBuilder.Append(mixedCasingWord, letterIndex, wordLength - letterIndex);
+            while ((++wordIndex) < wordCount)
+            {
+                stringBuilder.Append(intermediates[wordIndex]);
+                stringBuilder.Append(mixedCasingWords[wordIndex]);
+            }
+            stringBuilder.Append(intermediates[wordCount]);
+
+            string result = stringBuilder.ToString();
+            stringBuilder.Clear();
+            return result;
         }
 
         #endregion

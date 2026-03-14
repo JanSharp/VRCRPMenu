@@ -234,7 +234,7 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [x] maybe add an option to the no clip UI to choose between no clip and flying (using velocity, which does collide). When doing so make flying the default
 - [ ] maybe add a fourth option for the voice range in world indicator to only show briefly on change and then fade out
   - [ ] also for the HUD?
-- [ ] maybe highlight matching characters for searches on the items page
+- [x] maybe highlight matching characters for searches on the items page
 - [x] make GM Proxy colors more muted, de-saturated
 - [x] maybe revamp GM proxy color selection, either a wheel (buttons arranged in a flower pattern) or a hue bar (simply colorful boxes next to each other), total of around 12 colors
 - [x] maybe change GM request size selection, segmented slider with bars building up in size

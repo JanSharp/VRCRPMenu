@@ -22,6 +22,10 @@ namespace JanSharp
         public GameObject categoryRoot;
         public GameObject overlayRoot;
 
+        [System.NonSerialized] public string sanitizedItemName;
+
+        [System.NonSerialized] public string[] intermediates;
+        [System.NonSerialized] public string[] mixedCasingWords;
         [System.NonSerialized] public string[] words;
         [System.NonSerialized] public int totalWordsLetterCount;
         [System.NonSerialized] public int firstMatchingLetterIndex;

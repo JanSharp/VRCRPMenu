@@ -29,16 +29,21 @@ namespace JanSharp.Internal
         private int noClipPlayerDataIndex;
 
         [SerializeField] private bool initialNoClipEnabled = false;
+        [Tooltip("Takes precedence over what is set in the No Clip Movement inspector.")]
+        [SerializeField] private NoClipFlyingType initialNoClipFlyingType = NoClipFlyingType.Flying;
         [Min(0f)]
         [SerializeField] private float initialNoClipSpeed = 32f;
         public override bool InitialNoClipEnabled => initialNoClipEnabled;
+        public override NoClipFlyingType InitialNoClipFlyingType => initialNoClipFlyingType;
         public override float InitialNoClipSpeed => initialNoClipSpeed;
 
         #region LatencyState
         private DataDictionary latencyHiddenUniqueIds = new DataDictionary();
         private bool latencyNoClipEnabled;
+        private NoClipFlyingType latencyNoClipFlyingType;
         private float latencyNoClipSpeed;
         public override bool LatencyNoClipEnabled => latencyNoClipEnabled;
+        public override NoClipFlyingType LatencyNoClipFlyingType => latencyNoClipFlyingType;
         public override float LatencyNoClipSpeed => latencyNoClipSpeed;
         #endregion
 
@@ -68,11 +73,13 @@ namespace JanSharp.Internal
             if (suppressEvents)
             {
                 latencyNoClipEnabled = localData.noClipEnabled;
+                latencyNoClipFlyingType = localData.noClipFlyingType;
                 latencyNoClipSpeed = localData.noClipSpeed;
             }
             else
             {
                 SetNoClipEnabledInLS(localData.noClipEnabled);
+                SetNoClipFlyingTypeInLS(localData.noClipFlyingType);
                 SetNoClipSpeedInLS(localData.noClipSpeed);
             }
         }
@@ -123,6 +130,39 @@ namespace JanSharp.Internal
                 return;
             latencyNoClipEnabled = noClipEnabled;
             RaiseOnLocalLatencyNoClipEnabledChanged();
+        }
+
+        public override void SendSetNoClipFlyingTypeIA(NoClipSettingsPlayerData data, NoClipFlyingType noClipFlyingType)
+        {
+            WriteNoClipSettingsPlayerDataRef(data);
+            lockstep.WriteByte((byte)noClipFlyingType);
+            ulong uniqueId = lockstep.SendInputAction(setNoClipFlyingTypeIAId);
+            if (!data.core.isLocal)
+                return;
+            latencyHiddenUniqueIds.Add(uniqueId, true);
+            SetNoClipFlyingTypeInLS(noClipFlyingType);
+        }
+
+        [HideInInspector][SerializeField] private uint setNoClipFlyingTypeIAId;
+        [LockstepInputAction(nameof(setNoClipFlyingTypeIAId))]
+        public void OnSetNoClipFlyingTypeIA()
+        {
+            NoClipSettingsPlayerData data = ReadNoClipSettingsPlayerDataRef();
+            NoClipFlyingType noClipFlyingType = (NoClipFlyingType)lockstep.ReadByte();
+            if (data == null)
+                return; // Can skip checking latencyHiddenUniqueIds, local settings are not going to be null.
+
+            data.noClipFlyingType = noClipFlyingType;
+            if (ShouldApplyReceivedIAToLatencyState(data))
+                SetNoClipFlyingTypeInLS(noClipFlyingType);
+        }
+
+        private void SetNoClipFlyingTypeInLS(NoClipFlyingType noClipFlyingType)
+        {
+            if (latencyNoClipFlyingType == noClipFlyingType)
+                return;
+            latencyNoClipFlyingType = noClipFlyingType;
+            RaiseOnLocalLatencyNoClipFlyingTypeChanged();
         }
 
         public override void SendSetNoClipSpeedIA(NoClipSettingsPlayerData data, float noClipSpeed)
@@ -212,12 +252,19 @@ namespace JanSharp.Internal
         #region EventDispatcher
 
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onLocalLatencyNoClipEnabledChangedListeners;
+        [HideInInspector][SerializeField] private UdonSharpBehaviour[] onLocalLatencyNoClipFlyingTypeChangedListeners;
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onLocalLatencyNoClipSpeedChangedListeners;
 
         private void RaiseOnLocalLatencyNoClipEnabledChanged()
         {
             // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
             JanSharp.CustomRaisedEvents.Raise(ref onLocalLatencyNoClipEnabledChangedListeners, nameof(NoClipSettingsEventType.OnLocalLatencyNoClipEnabledChanged));
+        }
+
+        private void RaiseOnLocalLatencyNoClipFlyingTypeChanged()
+        {
+            // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
+            JanSharp.CustomRaisedEvents.Raise(ref onLocalLatencyNoClipFlyingTypeChangedListeners, nameof(NoClipSettingsEventType.OnLocalLatencyNoClipFlyingTypeChanged));
         }
 
         private void RaiseOnLocalLatencyNoClipSpeedChanged()

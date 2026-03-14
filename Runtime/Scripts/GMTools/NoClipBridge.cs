@@ -13,17 +13,34 @@ namespace JanSharp
         private bool isMenuOpen;
 
         [LockstepEvent(LockstepEventType.OnInit)]
-        public void OnInit() => UpdateSpeed();
+        public void OnInit() => UpdateSettings();
 
         [LockstepEvent(LockstepEventType.OnClientBeginCatchUp)]
-        public void OnClientBeginCatchUp() => UpdateSpeed();
+        public void OnClientBeginCatchUp() => UpdateSettings();
 
         [NoClipSettingsEvent(NoClipSettingsEventType.OnLocalLatencyNoClipSpeedChanged)]
         public void OnLocalLatencyNoClipSpeedChanged() => UpdateSpeed();
 
+        [NoClipSettingsEvent(NoClipSettingsEventType.OnLocalLatencyNoClipFlyingTypeChanged)]
+        public void OnLocalLatencyNoClipFlyingTypeChanged() => UpdateFlyingType();
+
+        private void UpdateSettings()
+        {
+            UpdateSpeed();
+            UpdateFlyingType();
+        }
+
         private void UpdateSpeed()
         {
             noClipMovement.Speed = noClipSettingsManager.LatencyNoClipSpeed;
+        }
+
+        private void UpdateFlyingType()
+        {
+            NoClipFlyingType flyingType = noClipSettingsManager.LatencyNoClipFlyingType;
+            noClipMovement.ModeWhileMoving = flyingType == NoClipFlyingType.Flying ? NoClipModeWhileMoving.Velocity
+                : flyingType == NoClipFlyingType.NoClip ? NoClipModeWhileMoving.Teleport
+                : NoClipModeWhileMoving.Velocity; // Fallback for any new NoClipFlyingType.
         }
 
         [MenuManagerEvent(MenuManagerEventType.OnMenuOpenStateChanged)]

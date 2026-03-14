@@ -48,7 +48,7 @@ namespace JanSharp
     }
 
     /// <summary>
-    /// <para>Values are guaranteed to never change with updates, making them save for serialization.</para>
+    /// <para>Values are guaranteed to never change with updates, making them safe for serialization.</para>
     /// </summary>
     public enum RPMenuDefaultPageType : byte
     {

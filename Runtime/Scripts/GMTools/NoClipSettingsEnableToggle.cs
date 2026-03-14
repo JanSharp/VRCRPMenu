@@ -11,8 +11,8 @@ namespace JanSharp
 
         public Toggle toggle;
         public Toggle linkedToggle;
-        public Selectable[] labelsToDisable;
-        public Toggle[] togglesToDisable;
+        public Selectable[] selectablesToDisable;
+        public NoClipSettingsFlyingTypeToggle[] flyingTypeTogglesToDisable;
         public SegmentedSlider[] slidersToDisable;
 
         public void OnValueChanged()
@@ -27,10 +27,10 @@ namespace JanSharp
             bool enabled = noClipSettingsManager.LatencyNoClipEnabled;
             toggle.SetIsOnWithoutNotify(enabled);
             linkedToggle.SetIsOnWithoutNotify(enabled);
-            foreach (Selectable label in labelsToDisable)
-                label.interactable = enabled;
-            foreach (Toggle toggle in togglesToDisable)
-                toggle.interactable = enabled;
+            foreach (Selectable selectable in selectablesToDisable)
+                selectable.interactable = enabled;
+            foreach (NoClipSettingsFlyingTypeToggle toggle in flyingTypeTogglesToDisable)
+                toggle.Interactable = enabled;
             foreach (SegmentedSlider slider in slidersToDisable)
                 slider.Interactable = enabled;
         }

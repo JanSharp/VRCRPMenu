@@ -230,7 +230,8 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [x] GM request type change breaks the latency state for the player changing request type if that GM request also gets marked as read at around the same time - it was not related to simultaneous actions like that at all... the ids were simply desynced due to nextRequestId not being sent to late joiners
 - [x] creating 10+ local custom locations and deleting them all made the list show as empty without the empty info text and it is still openable. There was likely some custom locations related input action from another player that ran during the process of marking these locations for deletion
 - [x] maybe add a toggle to toggle the active state of no clip in the menu without the need to double jump
-- [ ] maybe add an option to the no clip UI to choose between no clip and flying (using velocity, which does collide). When doing so make flying the default
+  - [ ] maybe make the whole "double jump" info label area also clickable to toggle that toggle, it feels natural
+- [x] maybe add an option to the no clip UI to choose between no clip and flying (using velocity, which does collide). When doing so make flying the default
 - [ ] maybe add a fourth option for the voice range in world indicator to only show briefly on change and then fade out
   - [ ] also for the HUD?
 - [ ] maybe highlight matching characters for searches on the items page

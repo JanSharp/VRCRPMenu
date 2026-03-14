@@ -16,6 +16,7 @@ namespace JanSharp
 
         #region GameState
         [System.NonSerialized] public bool noClipEnabled;
+        [System.NonSerialized] public NoClipFlyingType noClipFlyingType;
         /// <summary>
         /// <para>Meters per second.</para>
         /// </summary>
@@ -31,6 +32,7 @@ namespace JanSharp
                 return;
             }
             noClipEnabled = noClipSettingsManager.InitialNoClipEnabled;
+            noClipFlyingType = noClipSettingsManager.InitialNoClipFlyingType;
             noClipSpeed = noClipSettingsManager.InitialNoClipSpeed;
             if (core.isLocal) // Only the case for the very first client, during player data OnInit.
                 ((Internal.NoClipSettingsManager)noClipSettingsManager).ResetLatencyStateToGameState(this, suppressEvents: true);
@@ -39,6 +41,7 @@ namespace JanSharp
         public override bool PersistPlayerDataWhileOffline()
         {
             return noClipEnabled != noClipSettingsManager.InitialNoClipEnabled
+                || noClipFlyingType != noClipSettingsManager.InitialNoClipFlyingType
                 || noClipSpeed != noClipSettingsManager.InitialNoClipSpeed;
         }
 
@@ -50,6 +53,7 @@ namespace JanSharp
         private void WriteSettings()
         {
             lockstep.WriteFlags(noClipEnabled);
+            lockstep.WriteByte((byte)noClipFlyingType);
             lockstep.WriteFloat(noClipSpeed);
         }
 
@@ -62,6 +66,7 @@ namespace JanSharp
                 return;
             }
             lockstep.ReadFlags(out noClipEnabled);
+            noClipFlyingType = (NoClipFlyingType)lockstep.ReadByte();
             noClipSpeed = lockstep.ReadFloat();
             if (core.isLocal)
                 ((Internal.NoClipSettingsManager)noClipSettingsManager).ResetLatencyStateToGameState(this, suppressEvents: !isImport);

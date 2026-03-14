@@ -13,6 +13,12 @@ namespace JanSharp
         /// <para>Only raised if the value is actually different.</para>
         /// <para>Not game state safe.</para>
         /// </summary>
+        OnLocalLatencyNoClipFlyingTypeChanged,
+        /// <summary>
+        /// <para>Unlike several other systems, this does get raised for imports.</para>
+        /// <para>Only raised if the value is actually different.</para>
+        /// <para>Not game state safe.</para>
+        /// </summary>
         OnLocalLatencyNoClipSpeedChanged,
     }
 
@@ -34,22 +40,34 @@ namespace JanSharp
         { }
     }
 
+    /// <summary>
+    /// <para>Values are guaranteed to never change with updates, making them safe for serialization.</para>
+    /// </summary>
+    public enum NoClipFlyingType : byte
+    {
+        Flying = 0,
+        NoClip = 1,
+    }
+
     [SingletonScript("21117a51120db00258006c8192882928")] // Runtime/Prefabs/Managers/NoClipManager.prefab
     public abstract class NoClipSettingsManagerAPI : LockstepGameState
     {
         public abstract bool InitialNoClipEnabled { get; }
+        public abstract NoClipFlyingType InitialNoClipFlyingType { get; }
         /// <summary>
         /// <para>Meters per second.</para>
         /// </summary>
         public abstract float InitialNoClipSpeed { get; }
 
         public abstract bool LatencyNoClipEnabled { get; }
+        public abstract NoClipFlyingType LatencyNoClipFlyingType { get; }
         /// <summary>
         /// <para>Meters per second.</para>
         /// </summary>
         public abstract float LatencyNoClipSpeed { get; }
 
         public abstract void SendSetNoClipEnabledIA(NoClipSettingsPlayerData data, bool noClipEnabled);
+        public abstract void SendSetNoClipFlyingTypeIA(NoClipSettingsPlayerData data, NoClipFlyingType noClipFlyingType);
         public abstract void SendSetNoClipSpeedIA(NoClipSettingsPlayerData data, float noClipSpeed);
 
         /// <summary>

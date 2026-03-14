@@ -209,6 +209,7 @@ namespace JanSharp.Internal
             }
             else
             {
+                localPlayer.SetGravityStrength(1f);
                 fakeGroundGo.SetActive(false);
                 localPlayer.SetVelocity(currentVelocity);
                 updateManager.Deregister(this);

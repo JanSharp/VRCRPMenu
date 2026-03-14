@@ -38,9 +38,16 @@ namespace JanSharp
         private void UpdateFlyingType()
         {
             NoClipFlyingType flyingType = noClipSettingsManager.LatencyNoClipFlyingType;
-            noClipMovement.ModeWhileMoving = flyingType == NoClipFlyingType.Flying ? NoClipModeWhileMoving.Velocity
-                : flyingType == NoClipFlyingType.NoClip ? NoClipModeWhileMoving.Teleport
-                : NoClipModeWhileMoving.Velocity; // Fallback for any new NoClipFlyingType.
+            if (flyingType == NoClipFlyingType.NoClip)
+            {
+                noClipMovement.ModeWhileMoving = NoClipModeWhileMoving.Teleport;
+                noClipMovement.ModeWhileStill = NoClipModeWhileStill.FakeGround;
+            }
+            else // flyingType == NoClipFlyingType.Flying and also the fallback for any new NoClipFlyingType.
+            {
+                noClipMovement.ModeWhileMoving = NoClipModeWhileMoving.Velocity;
+                noClipMovement.ModeWhileStill = NoClipModeWhileStill.Velocity;
+            }
         }
 
         [MenuManagerEvent(MenuManagerEventType.OnMenuOpenStateChanged)]

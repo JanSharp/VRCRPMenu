@@ -165,7 +165,7 @@ Shader "RP Menu/Voice Range Sphere"
                     opacity = dist - _InnerRadius;
                     opacity = opacity / (_MiddleRadius - _InnerRadius) / 2;
                     opacity = sin(opacity * UNITY_PI);
-                    opacity = opacity * opacity;
+                    opacity = pow(opacity, 3); // Should compile into just 2 multiplications.
                 }
                 else
                 {

@@ -145,7 +145,7 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [x] or maybe treat holding jump in no clip like shift on desktop
 - [ ] maybe make the RPMenu prefab invisible in the scene by default
 - [x] must increase the radius of the local player capsule, it appears bigger than what I have tested previously when it comes to what it collides with, which is likely different than ray casts hitting it. It's a very weird kind of collider, these capsule controllers
-- [ ] make voice range sphere even less obtrusive, maybe change the opacity based on the viewing angle... we don't have the normal vector, never mind. Still make it less obtrusive
+- [x] make voice range sphere even less obtrusive, maybe change the opacity based on the viewing angle... we don't have the normal vector, never mind. Still make it less obtrusive
 - [x] apparently putting the fake ground onto the local player collider actually does not make the player stand on it... even though in the project settings it shows that it should. Probably a discrepancy in the sdk and actual VRC. Will have to keep the collider always active and near the player to be able to check for collisions reliably
   - first of all, it says in the project settings that local player does not collide with itself, so that's just wrong
   - however it is true that adding the local player layer to the included layers on the collider does not make the local player actually be able to stand on it - apparently this is wrong

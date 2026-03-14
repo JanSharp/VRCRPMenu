@@ -258,5 +258,5 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
   - [ ] maybe have a toggle in the gm tools page which puts a sphere on your hand which while holding the trigger deletes items it collides with
   - [ ] maybe have a delete held item button
 - [ ] add a flying permission separate from the no clip permission
-- [ ] maybe combine no clip enabled and flying type options into one row in the UI - none, flying, no clip
+- [x] maybe combine no clip enabled and flying type options into one row in the UI - none, flying, no clip
 - [ ] maybe change no clip label in UI to one word

@@ -255,3 +255,5 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [ ] summon indicators are broken. summon some players, instantly try to summon some again, once the first one finishes, indicators for the new one disappear. Cancelling and trying to summon again does not show the correct amount of indicators anymore
 - [x] in GMRequestsPage OnPlayerDataDeleted RPPlayerData does not exist anymore at this point, also check in gm proxies manager
 - [ ] missing an in menu method to delete items
+- [ ] add a flying permission separate from the no clip permission
+- [ ] maybe combine no clip enabled and flying type options into one row in the UI - none, flying, no clip

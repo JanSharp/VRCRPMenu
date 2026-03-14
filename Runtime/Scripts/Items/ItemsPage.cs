@@ -33,6 +33,12 @@ namespace JanSharp
             localPlayer = playersBackendManager.GetRPPlayerData(playerDataManager.LocalPlayerData);
         }
 
+        [MenuManagerEvent(MenuManagerEventType.OnMenuActivePageChanged)]
+        public void OnMenuActivePageChanged()
+        {
+            ClearActiveRow();
+        }
+
         [LockstepEvent(LockstepEventType.OnInit)]
         public void OnInit()
         {

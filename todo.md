@@ -215,7 +215,7 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
   - [ ] bigger maybe also reset when spawning an item/gm proxy
 - [ ] maybe reset the GM proxy name when spawning
 - [ ] switch away from abusing Selectable for animations and do cross fading on the graphic through script. Selectable does eat performance when changing parents, which is what happens when switching pages, contributing to that lag spike (~180ms total lag spike with 1089 players, switching to and from the players backend page, ~21ms of which is Selectable. Granted that includes the Button, Toggle and TMPInputField as they derive from Selectable, but still)
-- [ ] close item spawn confirmation popup when switching pages
+- [x] close item spawn confirmation popup when switching pages
 - [ ] make last open the default for desktop and hide the option, as otherwise using input fields is a really bad experience or even breaks the process as pages run logic upon no longer being the active page
 - [ ] no clip is too fast for the voice range sphere. Making the box bigger is a band aid, it'd be better to somehow force the positioning of the voice range sphere to run after no clip
 - [x] when player data gets deleted the labels in gm requests do not update

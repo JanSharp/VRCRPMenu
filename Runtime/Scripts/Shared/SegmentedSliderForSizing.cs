@@ -9,16 +9,17 @@ namespace JanSharp
         public SegmentedSlider slider;
         [Min(0f)]
         public float percentagePerSegment = 0.2f;
+        private float middlePointIndex = 0u;
+
+        [MenuManagerEvent(MenuManagerEventType.OnMenuManagerStart)]
+        public void OnMenuManagerStart()
+        {
+            middlePointIndex = slider.Value;
+        }
 
         public float GetSize()
         {
-            float count = slider.SegmentsCount;
-            if ((count % 2f) == 0f)
-            {
-                Debug.LogError("[RPMenu] SegmentedSliderForSizing must use an odd number of segments", this);
-                return 1f;
-            }
-            return Mathf.Pow(1f + percentagePerSegment, slider.Value - ((count - 1f) / 2f));
+            return Mathf.Pow(1f + percentagePerSegment, slider.Value - middlePointIndex);
         }
     }
 }

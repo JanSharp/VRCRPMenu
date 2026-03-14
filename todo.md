@@ -259,4 +259,4 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
   - [ ] maybe have a delete held item button
 - [ ] add a flying permission separate from the no clip permission
 - [x] maybe combine no clip enabled and flying type options into one row in the UI - none, flying, no clip
-- [ ] maybe change no clip label in UI to one word
+- [x] maybe change no clip label in UI to one word

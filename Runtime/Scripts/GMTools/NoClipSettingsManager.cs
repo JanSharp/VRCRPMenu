@@ -10,7 +10,8 @@ namespace JanSharp.Internal
     public class NoClipSettingsManager : NoClipSettingsManagerAPI
     {
         public override string GameStateInternalName => "jansharp.rp-menu-no-clip-settings";
-        public override string GameStateDisplayName => "No Clip Settings";
+        ///cSpell:ignore noclip
+        public override string GameStateDisplayName => "Noclip Settings";
         public override bool GameStateSupportsImportExport => true;
         public override uint GameStateDataVersion => 0u;
         public override uint GameStateLowestSupportedDataVersion => 0u;

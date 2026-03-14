@@ -7,7 +7,8 @@ namespace JanSharp
     public class NoClipSettingsPlayerData : PlayerData
     {
         public override string PlayerDataInternalName => "jansharp.rp-menu-no-clip-settings";
-        public override string PlayerDataDisplayName => "No Clip Settings";
+        ///cSpell:ignore noclip
+        public override string PlayerDataDisplayName => "Noclip Settings";
         public override bool SupportsImportExport => true;
         public override uint DataVersion => 0u;
         public override uint LowestSupportedDataVersion => 0u;

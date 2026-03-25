@@ -47,10 +47,10 @@ namespace JanSharp
             ClosePopup(doSendDeleteIAs: false);
         }
 
-        public override void Resolve()
+        public override void ResolveAll()
         {
             UpdateDynamicDataPopupWidth();
-            base.Resolve();
+            base.ResolveAll();
             if (popupIsShown
                 && !localLoadPDef.valueForLocalPlayer
                 && !localDeletePDef.valueForLocalPlayer

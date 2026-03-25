@@ -146,7 +146,7 @@ namespace JanSharp.Internal
             // offline and the permission group they are in also does not have the permission for that voice
             // range mode.
             for (int i = 0; i < rangeDefsCount; i++)
-                rangeDefs[i].Resolve();
+                rangeDefs[i].ResolveAll();
         }
 
         #endregion

@@ -86,7 +86,7 @@ namespace JanSharp
 
         public override void InitializeInstantiated() { }
 
-        public override void Resolve()
+        public override void ResolveAll()
         {
             bool characterNameValue = viewCharacterNamePDef.valueForLocalPlayer;
             bool teleportToValue = teleportToPlayerPDef.valueForLocalPlayer;

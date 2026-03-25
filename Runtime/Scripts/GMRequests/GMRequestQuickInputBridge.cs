@@ -40,7 +40,7 @@ namespace JanSharp
 
         public override void InitializeInstantiated() { }
 
-        public override void Resolve() => UpdateShouldIgnoreInput();
+        public override void ResolveAll() => UpdateShouldIgnoreInput();
 
         [LockstepEvent(LockstepEventType.OnClientBeginCatchUp)]
         public void OnClientBeginCatchUp() => UpdateShouldIgnoreInput();

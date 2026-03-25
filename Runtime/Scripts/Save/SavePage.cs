@@ -81,7 +81,7 @@ namespace JanSharp
 
         public override void InitializeInstantiated() { }
 
-        public override void Resolve()
+        public override void ResolveAll()
         {
             if (!isInitialized)
                 return;
@@ -140,7 +140,7 @@ namespace JanSharp
         private void OnInitialized()
         {
             isInitialized = true;
-            Resolve();
+            ResolveAll();
         }
 
         [LockstepEvent(LockstepEventType.OnInitFinished, Order = 10)] // Run after each tab's initialization.

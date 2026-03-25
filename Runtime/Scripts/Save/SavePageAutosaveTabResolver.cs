@@ -16,7 +16,7 @@ namespace JanSharp
 
         public override void InitializeInstantiated() { }
 
-        public override void Resolve()
+        public override void ResolveAll()
         {
             bool shouldPause = !exportGameStatesPDef.valueForLocalPlayer;
             if (isPaused == shouldPause)

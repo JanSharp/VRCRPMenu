@@ -45,7 +45,7 @@ namespace JanSharp
 
         public override void InitializeInstantiated() { }
 
-        public override void Resolve()
+        public override void ResolveAll()
         {
             bool conditionsMatching = PermissionsUtil.ResolveConditionsList(logicalAnds, inverts, permissionDefs);
             LocationShouldBeShown = (whenConditionsAreMet == WhenConditionsAreMetType.Show) == conditionsMatching;

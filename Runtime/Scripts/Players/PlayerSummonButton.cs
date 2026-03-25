@@ -73,7 +73,7 @@ namespace JanSharp
 
         public override void InitializeInstantiated() { }
 
-        public override void Resolve()
+        public override void ResolveAll()
         {
             if (isShowingPreview && !summonPlayersPDef.valueForLocalPlayer)
                 menuManager.ClosePopup(confirmationPopup, doCallback: true);

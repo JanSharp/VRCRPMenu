@@ -16,7 +16,7 @@ namespace JanSharp
 
         public override void InitializeInstantiated() { }
 
-        public override void Resolve()
+        public override void ResolveAll()
         {
             if (!viewPDef.valueForLocalPlayer && thisToggle.isOn)
             {

@@ -288,7 +288,7 @@ namespace JanSharp
 
         public override void InitializeInstantiated() { }
 
-        public override void Resolve() => UpdateToMatchLatencyState();
+        public override void ResolveAll() => UpdateToMatchLatencyState();
 
         [LockstepEvent(LockstepEventType.OnInit)]
         public void OnInit() => Initialize();

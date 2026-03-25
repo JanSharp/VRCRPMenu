@@ -149,7 +149,7 @@ namespace JanSharp
 
         public override void InitializeInstantiated() { }
 
-        public override void Resolve()
+        public override void ResolveAll()
         {
             bool displayNameValue = editDisplayNamePDef.valueForLocalPlayer;
             bool characterNameValue = editCharacterNamePDef.valueForLocalPlayer;

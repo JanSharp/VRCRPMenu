@@ -91,7 +91,7 @@ namespace JanSharp.Internal
 
         public override void InitializeInstantiated() { }
 
-        public override void Resolve()
+        public override void ResolveAll()
         {
             if (!isFirstPermissionResolve && viewGMProxySpawnedByValue == viewGMProxySpawnedByPDef.valueForLocalPlayer)
                 return;

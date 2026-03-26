@@ -79,6 +79,10 @@ namespace JanSharp
         public abstract float Speed { get; set; }
         public abstract NoClipModeWhileStill ModeWhileStill { get; set; }
         public abstract NoClipModeWhileMoving ModeWhileMoving { get; set; }
+        /// <summary>
+        /// <para>Only affects desktop. There is no vertical movement in VR. Using the right stick forward
+        /// back/up down for that in VR was found to be more of an annoyance than a feature.</para>
+        /// </summary>
         public abstract NoClipVerticalMovementType VerticalMovement { get; set; }
         /// <summary>
         /// <para>How many seconds it take to go from 0% speed to 100% speed.</para>

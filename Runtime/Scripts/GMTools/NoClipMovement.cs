@@ -71,6 +71,9 @@ namespace JanSharp.Internal
         private string currentModeWhileStillEventName;
         private string currentModeWhileMovingEventName;
 
+        // Not exposed in the inspector. While this is exposed in the API, this is basically not meant to be
+        // modified. It's just been kept since it existed for testing purposes and there's very little cost
+        // for keeping it around.
         private NoClipVerticalMovementType verticalMovement = NoClipVerticalMovementType.HeadLocalSpace;
         public override NoClipVerticalMovementType VerticalMovement
         {
@@ -234,12 +237,6 @@ namespace JanSharp.Internal
             inputZ = value;
         }
 
-        // Right joystick up down. Mouse movement up down in desktop.
-        public override void InputLookVertical(float value, UdonInputEventArgs args)
-        {
-            inputY = value;
-        }
-
         public override void InputJump(bool value, UdonInputEventArgs args)
         {
             isHoldingJump = value;
@@ -290,7 +287,7 @@ namespace JanSharp.Internal
 
             // Moving diagonally can exceed targetSpeed, especially on desktop, but eh not a big deal.
             Vector3 targetVelocity;
-            if (verticalMovement == NoClipVerticalMovementType.None)
+            if (isInVR || verticalMovement == NoClipVerticalMovementType.None)
                 targetVelocity = (currentHead.rotation * new Vector3(inputX, 0f, inputZ)) * targetSpeed;
             else if (verticalMovement == NoClipVerticalMovementType.HeadLocalSpace)
                 targetVelocity = (currentHead.rotation * new Vector3(inputX, inputY, inputZ)) * targetSpeed;

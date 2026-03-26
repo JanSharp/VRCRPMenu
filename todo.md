@@ -273,5 +273,5 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [ ] look for fonts, maybe there's something good, look at the one Ames shared
 - [x] remove right stick up down movement
 - [x] add info about holding jump (or shift) to speed up in no clip
-- [ ] fix some UI sounds being delayed. The sound files themselves start with (near) silence
+- [x] fix some UI sounds being delayed. The sound files themselves start with (near) silence
 - [ ] change summon indicators to expand radius before forming a full circle already, very most likely feels nicer that way

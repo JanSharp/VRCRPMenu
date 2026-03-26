@@ -139,7 +139,7 @@ namespace JanSharp.Internal
             else
             {
                 reusedCount = Mathf.Min(count, inactiveIndicatorsCount);
-                System.Array.Copy(inactiveIndicators, indicators, reusedCount);
+                System.Array.Copy(inactiveIndicators, inactiveIndicatorsCount - reusedCount, indicators, 0, reusedCount);
                 inactiveIndicatorsCount -= reusedCount;
                 for (int i = 0; i < reusedCount; i++)
                     indicators[i].SetActive(true);

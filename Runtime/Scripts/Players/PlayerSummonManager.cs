@@ -15,6 +15,7 @@ namespace JanSharp.Internal
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
 
         private const float MinSummonRadius = 2f;
+        private const float ExtraMinSummonRadiusPerPlayer = 0.1f;
         private const float MaxSummonRadius = 7f;
         private const float MaxRelativeDownwardsDistancePerSummonRadius = 0.5f;
         private const float DesiredDistanceBetweenSummonPositions = 0.4f;
@@ -57,14 +58,16 @@ namespace JanSharp.Internal
         private void FindSummonPositions(Vector3 center, Quaternion rotation, GameObject[] targetPositions)
         {
             int count = targetPositions.Length;
+            float minSummonRadius = Mathf.Min(MinSummonRadius + count * ExtraMinSummonRadiusPerPlayer, MaxSummonRadius);
             float radius = count * DesiredDistanceBetweenSummonPositions / Mathf.PI;
             Quaternion rotationPerPlayer;
-            if (radius < MinSummonRadius)
+            if (radius < minSummonRadius)
             {
-                radius = MinSummonRadius;
-                rotationPerPlayer = Quaternion.AngleAxis(AnglePerPlayerWithMinSummonRadius, Vector3.up);
+                radius = minSummonRadius;
+                float angle = 360f * (DesiredDistanceBetweenSummonPositions / (minSummonRadius * Mathf.PI));
+                rotationPerPlayer = Quaternion.AngleAxis(angle, Vector3.up);
                 // count - 1 because we want the amount of gaps between players, excluding the one larger gap.
-                rotation *= Quaternion.AngleAxis(AnglePerPlayerWithMinSummonRadius * (count - 1) / -2f, Vector3.up);
+                rotation *= Quaternion.AngleAxis(angle * (count - 1) / -2f, Vector3.up);
             }
             else
             {

@@ -274,4 +274,4 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [x] remove right stick up down movement
 - [x] add info about holding jump (or shift) to speed up in no clip
 - [x] fix some UI sounds being delayed. The sound files themselves start with (near) silence
-- [ ] change summon indicators to expand radius before forming a full circle already, very most likely feels nicer that way
+- [x] change summon indicators to expand radius before forming a full circle already, very most likely feels nicer that way

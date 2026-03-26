@@ -63,6 +63,7 @@ namespace JanSharp
             if (discard)
             {
                 lockstep.ReadFlags(out bool discard1); // Cannot use 'out _'.
+                lockstep.ReadByte();
                 lockstep.ReadFloat();
                 return;
             }

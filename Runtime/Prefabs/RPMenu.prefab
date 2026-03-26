@@ -10701,6 +10701,8 @@ MonoBehaviour:
     sprite: {fileID: 21300000, guid: 1813be4a0964a4e098254606c4272229, type: 3}
   - name: cancel
     sprite: {fileID: 21300000, guid: fe53a31e6981a8602813b332ac123785, type: 3}
+  - name: keyboard
+    sprite: {fileID: 21300000, guid: 0d5056cba250da9bba08023492abb8cc, type: 3}
 --- !u!1 &6143293070397769522
 GameObject:
   m_ObjectHideFlags: 0
@@ -12050,6 +12052,69 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   profileName: rect-clickable-row
+--- !u!1 &7010136683738347079
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1270869324144157026}
+  - component: {fileID: 1476209385898154715}
+  m_Layer: 17
+  m_Name: image-keyboard
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1270869324144157026
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7010136683738347079}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7521404726449737656}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1476209385898154715
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7010136683738347079}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d93d7530f4c07f2c9076f8387e524b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  profileName: image-keyboard
+  sourceImage: keyboard
+  color: main
+  material: {fileID: 2100000, guid: 35630e38b4e5ffb40b44ec5348b4333f, type: 2}
+  raycastTarget: 0
+  raycastPaddingLeft: 0
+  raycastPaddingBottom: 0
+  raycastPaddingRight: 0
+  raycastPaddingTop: 0
+  maskable: 1
+  imageType: 0
+  useSpriteMesh: 0
+  preserveAspect: 0
+  fillCenter: 1
+  pixelsPerUnitMultiplier: 1
+  fillMethod: 4
+  fillOrigin: 12
+  fillAmount: 1
+  clockwise: 1
 --- !u!1 &7025620967690946988
 GameObject:
   m_ObjectHideFlags: 0
@@ -16843,6 +16908,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 1894991455890637767}
+    - targetCorrespondingSourceObject: {fileID: 6496738037252997729, guid: b30c0489bc1cef59baba23f87dd71436,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1270869324144157026}
     - targetCorrespondingSourceObject: {fileID: 9031575174301748137, guid: b30c0489bc1cef59baba23f87dd71436,
         type: 3}
       insertIndex: -1

@@ -269,7 +269,7 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [ ] do have the hand attachment style option
 - [ ] voice range sphere maybe a little brighter, or use something other than normal alpha blending to make it more visible on bright surfaces
 - [ ] think about attaching and theft
-- [ ] make a keyboard icon for items page search expand collapse button
+- [x] make a keyboard icon for items page search expand collapse button
 - [ ] look for fonts, maybe there's something good, look at the one Ames shared
 - [x] remove right stick up down movement
 - [x] add info about holding jump (or shift) to speed up in no clip

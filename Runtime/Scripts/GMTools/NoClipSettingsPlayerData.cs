@@ -42,7 +42,7 @@ namespace JanSharp
         public override bool PersistPlayerDataWhileOffline()
         {
             return noClipEnabled != noClipSettingsManager.InitialNoClipEnabled
-                || noClipFlyingType != noClipSettingsManager.InitialNoClipFlyingType
+                || noClipSettingsManager.FlyingTypeShouldPersist(core, noClipFlyingType)
                 || noClipSpeed != noClipSettingsManager.InitialNoClipSpeed;
         }
 

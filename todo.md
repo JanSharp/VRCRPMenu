@@ -257,6 +257,19 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [ ] missing an in menu method to delete items
   - [ ] maybe have a toggle in the gm tools page which puts a sphere on your hand which while holding the trigger deletes items it collides with
   - [ ] maybe have a delete held item button
-- [ ] add a flying permission separate from the no clip permission
+- [x] add a flying permission separate from the no clip permission
 - [x] maybe combine no clip enabled and flying type options into one row in the UI - none, flying, no clip
 - [x] maybe change no clip label in UI to one word
+- [x] fix losing no clip permissions not deactivating no clip
+- [ ] see if there is anything to be done about the menu jittering while moving around in no clip
+- [ ] use material property blocks for gm proxies
+  - [ ] check if filamented supports property block instancing on its color property
+  - [ ] check the same for unity default shaders for the fun of it
+- [ ] size options for the UI
+- [ ] do have the hand attachment style option
+- [ ] voice range sphere maybe a little brighter, or use something other than normal alpha blending to make it more visible on bright surfaces
+- [ ] think about attaching and theft
+- [ ] make a keyboard icon for items page search expand collapse button
+- [ ] look for fonts, maybe there's something good, look at the one Ames shared
+- [ ] remove right stick up down movement
+- [ ] add info about holding jump (or shift) to speed up in no clip

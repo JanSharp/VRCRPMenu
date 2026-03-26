@@ -66,8 +66,17 @@ namespace JanSharp
         /// </summary>
         public abstract float LatencyNoClipSpeed { get; }
 
+        /// <summary>
+        /// <para>Game state safe.</para>
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="noClipFlyingType"></param>
+        /// <returns></returns>
+        public abstract bool FlyingTypeShouldPersist(CorePlayerData player, NoClipFlyingType noClipFlyingType);
+
         public abstract void SendSetNoClipEnabledIA(NoClipSettingsPlayerData data, bool noClipEnabled);
         public abstract void SendSetNoClipFlyingTypeIA(NoClipSettingsPlayerData data, NoClipFlyingType noClipFlyingType);
+        public abstract void SetNoClipFlyingTypeInGS(NoClipSettingsPlayerData data, NoClipFlyingType noClipFlyingType);
         public abstract void SendSetNoClipSpeedIA(NoClipSettingsPlayerData data, float noClipSpeed);
 
         /// <summary>

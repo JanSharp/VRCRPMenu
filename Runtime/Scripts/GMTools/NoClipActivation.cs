@@ -5,7 +5,7 @@ using VRC.Udon.Common;
 namespace JanSharp
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-    public class NoClipActivation : UdonSharpBehaviour
+    public class NoClipActivation : PermissionResolver
     {
         [HideInInspector][SerializeField][SingletonReference] private NoClipSettingsManagerAPI noClipSettingsManager;
         [HideInInspector][SerializeField][SingletonReference] private NoClipMovementAPI noClipMovement;
@@ -20,11 +20,31 @@ namespace JanSharp
         /// events are the events for that, technically.</para>
         /// </summary>
         private bool noClipEnabled = false;
+        private bool hasAnyPermission = false;
         private float lastJumpInputTime = -1f;
+
+        [PermissionDefinitionReference(nameof(useFlyingPDef))]
+        public string useFlyingPermissionAsset; // A guid.
+        [HideInInspector][SerializeField] private PermissionDefinition useFlyingPDef;
+
+        [PermissionDefinitionReference(nameof(useNoClipPDef))]
+        public string useNoClipPermissionAsset; // A guid.
+        [HideInInspector][SerializeField] private PermissionDefinition useNoClipPDef;
+
+        public override void InitializeInstantiated() { }
+
+        public override void ResolveAll()
+        {
+            // When losing only one permission, the flying type will
+            // get changed to the other one and it should stay active.
+            hasAnyPermission = useFlyingPDef.valueForLocalPlayer || useNoClipPDef.valueForLocalPlayer;
+            if (!hasAnyPermission)
+                ForceDeactivate();
+        }
 
         public override void InputJump(bool value, UdonInputEventArgs args)
         {
-            if (!value || !noClipEnabled)
+            if (!value || !noClipEnabled || !hasAnyPermission)
                 return;
             float time = Time.time;
             if (time > lastJumpInputTime + DoubleClickInterval)
@@ -45,10 +65,13 @@ namespace JanSharp
         {
             noClipEnabled = noClipSettingsManager.LatencyNoClipEnabled;
             if (!noClipEnabled)
-            {
-                noClipMovement.IsNoClipActive = false;
-                lastJumpInputTime = -1f; // For extra cleanliness.
-            }
+                ForceDeactivate();
+        }
+
+        private void ForceDeactivate()
+        {
+            noClipMovement.IsNoClipActive = false;
+            lastJumpInputTime = -1f; // For extra cleanliness.
         }
 
         [LockstepEvent(LockstepEventType.OnInit)]

@@ -20,6 +20,7 @@ namespace JanSharp.Internal
         public override LockstepGameStateOptionsUI ExportUI => exportUI;
         public override LockstepGameStateOptionsUI ImportUI => importUI;
 
+        [HideInInspector][SerializeField][SingletonReference] private PermissionManagerAPI permissionManager;
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
 
         public override NoClipImportExportOptions ExportOptions => (NoClipImportExportOptions)OptionsForCurrentExport;
@@ -47,6 +48,23 @@ namespace JanSharp.Internal
         public override NoClipFlyingType LatencyNoClipFlyingType => latencyNoClipFlyingType;
         public override float LatencyNoClipSpeed => latencyNoClipSpeed;
         #endregion
+
+        [PermissionDefinitionReference(nameof(useFlyingPDef))]
+        public string useFlyingPermissionAsset; // A guid.
+        [HideInInspector][SerializeField] private PermissionDefinition useFlyingPDef;
+
+        [PermissionDefinitionReference(nameof(useNoClipPDef))]
+        public string useNoClipPermissionAsset; // A guid.
+        [HideInInspector][SerializeField] private PermissionDefinition useNoClipPDef;
+
+        public override bool FlyingTypeShouldPersist(CorePlayerData player, NoClipFlyingType noClipFlyingType)
+        {
+            bool hasFlying = permissionManager.PlayerHasPermission(player, useFlyingPDef);
+            bool hasNoClip = permissionManager.PlayerHasPermission(player, useNoClipPDef);
+            if (!hasFlying || !hasNoClip) // The player only has a choice between the types when having both permissions.
+                return false; // Therefore in any other case there is no need to persist the given flying type.
+            return noClipFlyingType != initialNoClipFlyingType;
+        }
 
         [PlayerDataEvent(PlayerDataEventType.OnRegisterCustomPlayerData)]
         public void OnRegisterCustomPlayerData()
@@ -153,9 +171,29 @@ namespace JanSharp.Internal
             if (data == null)
                 return; // Can skip checking latencyHiddenUniqueIds, local settings are not going to be null.
 
+            if (!permissionManager.PlayerHasPermission(data.core, noClipFlyingType == NoClipFlyingType.Flying ? useFlyingPDef : useNoClipPDef))
+            {
+                ResetNoClipFlyingTypeLSToGS(data);
+                return;
+            }
+
             data.noClipFlyingType = noClipFlyingType;
             if (ShouldApplyReceivedIAToLatencyState(data))
                 SetNoClipFlyingTypeInLS(noClipFlyingType);
+        }
+
+        public override void SetNoClipFlyingTypeInGS(NoClipSettingsPlayerData data, NoClipFlyingType noClipFlyingType)
+        {
+            data.noClipFlyingType = noClipFlyingType;
+            ResetNoClipFlyingTypeLSToGS(data);
+        }
+
+        private void ResetNoClipFlyingTypeLSToGS(NoClipSettingsPlayerData data)
+        {
+            if (latencyHiddenUniqueIds.Count != 0)
+                ResetLatencyStateToGameState(data, suppressEvents: false);
+            else
+                SetNoClipFlyingTypeInLS(data.noClipFlyingType);
         }
 
         private void SetNoClipFlyingTypeInLS(NoClipFlyingType noClipFlyingType)

@@ -272,4 +272,4 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [ ] make a keyboard icon for items page search expand collapse button
 - [ ] look for fonts, maybe there's something good, look at the one Ames shared
 - [x] remove right stick up down movement
-- [ ] add info about holding jump (or shift) to speed up in no clip
+- [x] add info about holding jump (or shift) to speed up in no clip

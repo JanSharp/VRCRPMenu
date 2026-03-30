@@ -182,7 +182,7 @@ namespace JanSharp
             toggle.toggle.SetIsOnWithoutNotify(true);
 
             PermissionGroup group = toggle.permissionGroup;
-            groupNameField.text = group.groupName;
+            groupNameField.SetTextWithoutNotify(group.groupName);
             bool isNotDefault = !group.isDefault;
             groupNameField.interactable = isNotDefault;
             groupNameFieldText.interactable = isNotDefault;

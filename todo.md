@@ -275,3 +275,17 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [x] add info about holding jump (or shift) to speed up in no clip
 - [x] fix some UI sounds being delayed. The sound files themselves start with (near) silence
 - [x] change summon indicators to expand radius before forming a full circle already, very most likely feels nicer that way
+- [ ] maybe add sliders as settings to move the hud, one for vertical one for horizontal
+- [ ] when creating the world, `SortableScrollableList`s do not initialize properly and never end up showing any entries, though the size is set correctly. Worked around by rejoining
+- [ ] sometimes list end up not showing any entries until you start scrolling after switching to a page. This is separate to the issue above, as in said case they do not populate even when scrolling
+- [ ] maybe make strafe slower, like half to quarter speed
+- [ ] maybe make strafe always move you on the y plane, rather than relative to the head
+- [ ] through some mysterious means the timer on a gm request just stopped updating. Switching pages did not cause it to start again
+- [ ] make dynamic data add and overwrite headers clear headers
+- [ ] hud positioning is also affected by order of operations while no clipping, just like how the menu jitters
+- [ ] custom location add input field should say Custom Location Name, not Selection Group Name
+- [ ] fix permissions for item sizes, small and large item permissions are outdated
+- [ ] add more space between gm proxies and no clip modules to make it a clearer separation
+- [ ] add "minutes" to autosave interval label
+- [ ] maybe add location zones, another column alternative to proximity
+- [ ] add tooltip when hovering save as global stating how setting the name is required in order to save as global dynamic data

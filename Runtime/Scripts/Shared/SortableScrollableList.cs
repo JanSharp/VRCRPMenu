@@ -56,11 +56,11 @@ namespace JanSharp
 
         private int suspendedIndexInArray = 0;
         private System.Diagnostics.Stopwatch suspensionSw = new System.Diagnostics.Stopwatch();
-        private const long MaxWorkMSPerFrame = 10L;
+        private double maxWorkMSPerFrame;
 
         private bool LogicIsRunningLong()
         {
-            if (suspensionSw.ElapsedMilliseconds >= MaxWorkMSPerFrame)
+            if (suspensionSw.Elapsed.TotalMilliseconds > maxWorkMSPerFrame)
             {
                 lockstep.FlagToContinueNextFrame();
                 return true;
@@ -76,9 +76,16 @@ namespace JanSharp
 
         public virtual void Initialize()
         {
+            maxWorkMSPerFrame = lockstep.MaxWorkMSPerFrame;
             rowHeight = rowPrefabScript.rowRect.sizeDelta.y;
             negativeRowHeight = -rowHeight;
             StartStopUpdateLoop();
+        }
+
+        [LockstepEvent(LockstepEventType.OnMaxWorkMSPerFrameChanged)]
+        public void OnMaxWorkMSPerFrameChanged()
+        {
+            maxWorkMSPerFrame = lockstep.MaxWorkMSPerFrame;
         }
 
         [MenuManagerEvent(MenuManagerEventType.OnMenuActivePageChanged)]

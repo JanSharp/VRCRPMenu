@@ -129,6 +129,17 @@ namespace JanSharp.Internal
 
         private RPPlayerData localPlayer;
 
+        private void Start()
+        {
+            maxWorkMSPerFrame = lockstep.MaxWorkMSPerFrame;
+        }
+
+        [LockstepEvent(LockstepEventType.OnMaxWorkMSPerFrameChanged)]
+        public void OnMaxWorkMSPerFrameChanged()
+        {
+            maxWorkMSPerFrame = lockstep.MaxWorkMSPerFrame;
+        }
+
         [PlayerDataEvent(PlayerDataEventType.OnLocalPlayerDataAvailable)]
         public void OnLocalPlayerDataAvailable()
         {
@@ -603,11 +614,11 @@ namespace JanSharp.Internal
 
         private int suspendedIndexInArray = 0;
         private System.Diagnostics.Stopwatch suspensionSw = new System.Diagnostics.Stopwatch();
-        private const long MaxWorkMSPerFrame = 10L;
+        private double maxWorkMSPerFrame;
 
         private bool LogicIsRunningLong()
         {
-            if (suspensionSw.ElapsedMilliseconds >= MaxWorkMSPerFrame)
+            if (suspensionSw.Elapsed.TotalMilliseconds > maxWorkMSPerFrame)
             {
                 lockstep.FlagToContinueNextFrame();
                 return true;

@@ -289,3 +289,4 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [ ] add "minutes" to autosave interval label
 - [ ] maybe add location zones, another column alternative to proximity
 - [ ] add tooltip when hovering save as global stating how setting the name is required in order to save as global dynamic data
+- [x] use max work ms per frame from lockstep API

@@ -280,7 +280,7 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [x] sometimes list end up not showing any entries until you start scrolling after switching to a page. This is separate to the issue above, as in said case they do not populate even when scrolling - same issue as above
 - [ ] maybe make strafe slower, like half to quarter speed
 - [ ] maybe make strafe always move you on the y plane, rather than relative to the head
-- [ ] through some mysterious means the timer on a gm request just stopped updating. Switching pages did not cause it to start again
+- [x] through some mysterious means the timer on a gm request just stopped updating. Switching pages did not cause it to start again - same issue as that one `SortableScrollableList` above, the menu system was at fault
 - [ ] make dynamic data add and overwrite headers clear headers
 - [ ] hud positioning is also affected by order of operations while no clipping, just like how the menu jitters
 - [x] custom location add input field should say Custom Location Name, not Selection Group Name

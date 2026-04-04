@@ -285,7 +285,7 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [ ] hud positioning is also affected by order of operations while no clipping, just like how the menu jitters
 - [x] custom location add input field should say Custom Location Name, not Selection Group Name
 - [ ] fix permissions for item sizes, small and large item permissions are outdated
-- [ ] add more space between gm proxies and no clip modules to make it a clearer separation
+- [x] add more space between gm proxies and no clip modules to make it a clearer separation
 - [ ] add "minutes" to autosave interval label
 - [ ] maybe add location zones, another column alternative to proximity
 - [ ] add tooltip when hovering save as global stating how setting the name is required in order to save as global dynamic data

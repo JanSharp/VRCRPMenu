@@ -276,8 +276,8 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [x] fix some UI sounds being delayed. The sound files themselves start with (near) silence
 - [x] change summon indicators to expand radius before forming a full circle already, very most likely feels nicer that way
 - [ ] maybe add sliders as settings to move the hud, one for vertical one for horizontal
-- [ ] when creating the world, `SortableScrollableList`s do not initialize properly and never end up showing any entries, though the size is set correctly. Worked around by rejoining
-- [ ] sometimes list end up not showing any entries until you start scrolling after switching to a page. This is separate to the issue above, as in said case they do not populate even when scrolling
+- [x] when creating the world, `SortableScrollableList`s do not initialize properly and never end up showing any entries, though the size is set correctly. Worked around by rejoining - the menu's is open state was false due to requesting a GM, however the menu open close input handler ignored that event and kept the menu open. The lists thought the menu was closed though
+- [x] sometimes list end up not showing any entries until you start scrolling after switching to a page. This is separate to the issue above, as in said case they do not populate even when scrolling - same issue as above
 - [ ] maybe make strafe slower, like half to quarter speed
 - [ ] maybe make strafe always move you on the y plane, rather than relative to the head
 - [ ] through some mysterious means the timer on a gm request just stopped updating. Switching pages did not cause it to start again

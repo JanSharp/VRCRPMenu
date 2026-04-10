@@ -27,7 +27,7 @@ namespace JanSharp.Internal
             for (int i = 0; i < importedPlayersCount; i++)
             {
                 RPPlayerData player = importedPlayers[i];
-                if (player == null || !player.CheckLiveliness()) // Since these are weak references must check liveliness too.
+                if (!player.CheckLiveliness()) // Since these are weak references must check liveliness.
                     continue;
                 DataDictionary favoriteItemIdsLut = player.favoriteItemIdsLut;
                 favoriteItemIdsLut.Clear();

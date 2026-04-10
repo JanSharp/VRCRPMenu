@@ -104,7 +104,7 @@ namespace JanSharp
             if (permissionManager.IsPartOfCurrentImport)
             {
                 RebuildPermissionGroupToggles();
-                if (activePermissionGroupToggle.permissionGroup == null || activePermissionGroupToggle.permissionGroup.isDeleted)
+                if (activePermissionGroupToggle.permissionGroup.CheckIsDeleted())
                     SetActivePermissionGroupToggle(GetPermissionGroupToggle(permissionManager.DefaultPermissionGroup.id));
                 else
                 {
@@ -269,7 +269,7 @@ namespace JanSharp
             if (!isInitialized)
                 return;
             PermissionGroup group = permissionManager.CreatedPermissionGroup;
-            if (group.isDeleted)
+            if (group.CheckIsDeleted())
                 return;
             PermissionsPermissionGroupToggle toggle = CreatePermissionGroupToggle(group);
             pgTogglesById.Add(group.id, toggle);
@@ -301,7 +301,7 @@ namespace JanSharp
 
         public void OnConfirmDeleteClick()
         {
-            if (groupAwaitingDeleteConfirmation == null || groupAwaitingDeleteConfirmation.isDeleted)
+            if (groupAwaitingDeleteConfirmation.CheckIsDeleted())
                 return;
             permissionsPagesManager.SendDeletePermissionGroupIA(groupAwaitingDeleteConfirmation, permissionManager.DefaultPermissionGroup);
             menuManager.ClosePopup(deleteConfirmationPopup, doCallback: true); // Clears groupAwaitingDeleteConfirmation.

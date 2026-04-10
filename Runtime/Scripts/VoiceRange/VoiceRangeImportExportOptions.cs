@@ -13,7 +13,7 @@ namespace JanSharp
 
         public override LockstepGameStateOptionsData Clone()
         {
-            var clone = WannaBeClasses.New<VoiceRangeImportExportOptions>(nameof(VoiceRangeImportExportOptions));
+            var clone = wannaBeClasses.New<VoiceRangeImportExportOptions>(nameof(VoiceRangeImportExportOptions));
             clone.includeVoiceRangeSettings = includeVoiceRangeSettings;
             return clone;
         }

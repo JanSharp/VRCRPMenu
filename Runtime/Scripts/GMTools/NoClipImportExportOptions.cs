@@ -13,7 +13,7 @@ namespace JanSharp
 
         public override LockstepGameStateOptionsData Clone()
         {
-            var clone = WannaBeClasses.New<NoClipImportExportOptions>(nameof(NoClipImportExportOptions));
+            var clone = wannaBeClasses.New<NoClipImportExportOptions>(nameof(NoClipImportExportOptions));
             clone.includeNoClipSettings = includeNoClipSettings;
             return clone;
         }

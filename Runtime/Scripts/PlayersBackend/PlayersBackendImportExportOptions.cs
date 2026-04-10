@@ -16,7 +16,7 @@ namespace JanSharp
 
         public override LockstepGameStateOptionsData Clone()
         {
-            var clone = WannaBeClasses.New<PlayersBackendImportExportOptions>(nameof(PlayersBackendImportExportOptions));
+            var clone = wannaBeClasses.New<PlayersBackendImportExportOptions>(nameof(PlayersBackendImportExportOptions));
             clone.includeOverriddenDisplayName = includeOverriddenDisplayName;
             clone.includeCharacterName = includeCharacterName;
             clone.includeFavoriteItems = includeFavoriteItems;

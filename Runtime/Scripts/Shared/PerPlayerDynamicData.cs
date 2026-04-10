@@ -57,7 +57,7 @@ namespace JanSharp
                 int count = (int)lockstep.ReadSmallUInt();
                 if (count == 0)
                     return;
-                DynamicData dummy = (DynamicData)WannaBeClasses.NewDynamic(dynamicDataClassName);
+                DynamicData dummy = (DynamicData)wannaBeClasses.NewDynamic(dynamicDataClassName);
                 for (int i = 0; i < count; i++)
                     lockstep.ReadCustomClass(dummy, isImport);
                 dummy.Delete();

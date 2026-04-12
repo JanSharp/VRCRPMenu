@@ -5,7 +5,7 @@ using VRC.SDK3.Data;
 namespace JanSharp
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-    public class VoiceRangePlayerData : PlayerData
+    public class VoiceRangePlayerData : CustomPlayerData
     {
         public override string PlayerDataInternalName => "jansharp.rp-menu-voice-range";
         public override string PlayerDataDisplayName => "Voice Range And Settings";

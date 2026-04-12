@@ -2,7 +2,7 @@ using VRC.SDK3.Data;
 
 namespace JanSharp
 {
-    public abstract class PerPlayerDynamicData : PlayerData
+    public abstract class PerPlayerDynamicData : CustomPlayerData
     {
         public override bool SupportsImportExport => true;
         public override uint DataVersion => 0u;

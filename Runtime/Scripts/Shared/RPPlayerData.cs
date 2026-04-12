@@ -5,7 +5,7 @@ using VRC.SDK3.Data;
 namespace JanSharp
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-    public class RPPlayerData : PlayerData
+    public class RPPlayerData : CustomPlayerData
     {
         public override string PlayerDataInternalName => "jansharp.rp-menu-backend";
         public override string PlayerDataDisplayName => "RP Player Backend";

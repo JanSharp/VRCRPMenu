@@ -4,7 +4,7 @@ using UnityEngine;
 namespace JanSharp
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-    public class NoClipSettingsPlayerData : PlayerData
+    public class NoClipSettingsPlayerData : CustomPlayerData
     {
         public override string PlayerDataInternalName => "jansharp.rp-menu-no-clip-settings";
         ///cSpell:ignore noclip

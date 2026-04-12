@@ -4,7 +4,7 @@ using UnityEngine;
 namespace JanSharp
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-    public class PerPlayerMenuSettings : PlayerData
+    public class PerPlayerMenuSettings : CustomPlayerData
     {
         public override string PlayerDataInternalName => "jansharp.rp-menu-settings";
         public override string PlayerDataDisplayName => "Menu Settings";

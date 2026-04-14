@@ -24,6 +24,15 @@ namespace JanSharp
         [System.NonSerialized] public float noClipSpeed;
         #endregion
 
+        public override bool WannaBeClassSupportsPooling => true;
+        public override void ResetWannaBeClassToDefault()
+        {
+            base.ResetWannaBeClassToDefault();
+            noClipEnabled = default;
+            noClipFlyingType = default;
+            noClipSpeed = default;
+        }
+
         public override void OnPlayerDataInit(bool isAboutToBeImported)
         {
             if (isAboutToBeImported

@@ -17,6 +17,15 @@ namespace JanSharp
         [System.NonSerialized] public int localDynamicDataCount = 0;
         #endregion
 
+        // public override bool WannaBeClassSupportsPooling => true; // Up to the deriving class.
+        public override void ResetWannaBeClassToDefault()
+        {
+            base.ResetWannaBeClassToDefault();
+            localDynamicDataByName.Clear();
+            localDynamicData = new DynamicData[WannaBeArrList.MinCapacity];
+            localDynamicDataCount = 0;
+        }
+
         public override void OnPlayerDataUninit(bool force)
         {
             DataDictionary allDynamicDataById = DataManager.allDynamicDataById;

@@ -19,6 +19,15 @@ namespace JanSharp
         [System.NonSerialized] public int indexInAllGMProxies;
         [System.NonSerialized] public GMProxyExtension ext;
 
+        public override bool WannaBeClassSupportsPooling => true;
+        public override void ResetWannaBeClassToDefault()
+        {
+            base.ResetWannaBeClassToDefault();
+            gmProxyDisplayName = default;
+            indexInAllGMProxies = default;
+            ext = default;
+        }
+
         public override void InitFromDefault(EntityExtension entityExtension)
         {
             gmProxyDisplayName = ((GMProxyExtension)entityExtension).pickup.interactText;

@@ -11,6 +11,14 @@ namespace JanSharp
         [System.NonSerialized] public Quaternion rotation;
         #endregion
 
+        public override bool WannaBeClassSupportsPooling => true;
+        public override void ResetWannaBeClassToDefault()
+        {
+            base.ResetWannaBeClassToDefault();
+            position = default;
+            rotation = default;
+        }
+
         public override void Serialize(bool isExport)
         {
             base.Serialize(isExport);

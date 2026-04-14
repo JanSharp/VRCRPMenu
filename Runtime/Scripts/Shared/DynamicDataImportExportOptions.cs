@@ -12,6 +12,14 @@ namespace JanSharp
         [System.NonSerialized] public bool includeGlobal = true;
         [System.NonSerialized] public bool includePerPlayer = true;
 
+        public override bool WannaBeClassSupportsPooling => true;
+        public override void ResetWannaBeClassToDefault()
+        {
+            base.ResetWannaBeClassToDefault();
+            includeGlobal = true;
+            includePerPlayer = true;
+        }
+
         public override LockstepGameStateOptionsData Clone()
         {
             var clone = wannaBeClasses.New<DynamicDataImportExportOptions>(nameof(DynamicDataImportExportOptions));

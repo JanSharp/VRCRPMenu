@@ -20,6 +20,16 @@ namespace JanSharp
         [System.NonSerialized] public CorePlayerData owningPlayer;
         #endregion
 
+        // public override bool WannaBeClassSupportsPooling => true; // Up to the deriving class.
+        public override void ResetWannaBeClassToDefault()
+        {
+            base.ResetWannaBeClassToDefault();
+            id = default;
+            dataName = default;
+            isGlobal = default;
+            owningPlayer = default;
+        }
+
         public override void Serialize(bool isExport)
         {
             if (!isExport)

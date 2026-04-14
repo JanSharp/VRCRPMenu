@@ -11,6 +11,13 @@ namespace JanSharp
 
         [System.NonSerialized] public bool includeNoClipSettings = true;
 
+        public override bool WannaBeClassSupportsPooling => true;
+        public override void ResetWannaBeClassToDefault()
+        {
+            base.ResetWannaBeClassToDefault();
+            includeNoClipSettings = true;
+        }
+
         public override LockstepGameStateOptionsData Clone()
         {
             var clone = wannaBeClasses.New<NoClipImportExportOptions>(nameof(NoClipImportExportOptions));

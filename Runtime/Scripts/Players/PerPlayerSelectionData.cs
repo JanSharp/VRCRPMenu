@@ -25,6 +25,14 @@ namespace JanSharp
         [System.NonSerialized] public int selectedInPerPlayerGroupsCount = 0;
         #endregion
 
+        public override bool WannaBeClassSupportsPooling => true;
+        public override void ResetWannaBeClassToDefault()
+        {
+            base.ResetWannaBeClassToDefault();
+            selectedInGlobalGroupsCount = 0;
+            selectedInPerPlayerGroupsCount = 0;
+        }
+
         public override bool PersistPlayerDataWhileOffline()
         {
             return base.PersistPlayerDataWhileOffline()

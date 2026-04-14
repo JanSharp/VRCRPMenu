@@ -13,6 +13,14 @@ namespace JanSharp
         [System.NonSerialized] public GameObject[] indicators;
         public bool IsActive => indicators != null;
 
+        public override bool WannaBeClassSupportsPooling => true;
+        public override void ResetWannaBeClassToDefault()
+        {
+            centerPosition = default;
+            centerRotation = default;
+            indicators = default;
+        }
+
         public void Show(Vector3 centerPosition, Quaternion centerRotation, GameObject[] indicators)
         {
             this.centerPosition = centerPosition;

@@ -22,6 +22,17 @@ namespace JanSharp
         [System.NonSerialized] public MenuPositionType menuPosition;
         #endregion
 
+        public override bool WannaBeClassSupportsPooling => true;
+        public override void ResetWannaBeClassToDefault()
+        {
+            base.ResetWannaBeClassToDefault();
+            uiSoundsEnabled = default;
+            uiSoundsVolume = default;
+            defaultPage = default;
+            menuOpenCloseKeyBind = default;
+            menuPosition = default;
+        }
+
         public override void OnPlayerDataInit(bool isAboutToBeImported)
         {
             if (isAboutToBeImported

@@ -63,5 +63,29 @@ namespace JanSharp
         [System.NonSerialized] public RPPlayerData respondingPlayer;
         [System.NonSerialized] public bool isDeleted;
         #endregion
+
+        public override bool WannaBeClassSupportsPooling => true;
+        public override void ResetWannaBeClassToDefault()
+        {
+            latencyHiddenUniqueIds.Clear();
+
+            isLatency = default;
+            latencyRequestType = default;
+            latencyIsRead = default;
+            latencyRespondingPlayer = default;
+            latencyIsDeleted = default;
+
+            index = default;
+            uniqueId = default;
+            id = default;
+            requestType = default;
+            isRead = default;
+            requestedAtTick = default;
+            autoDeleteAtTick = default;
+            requestingCorePlayer = default;
+            requestingPlayer = default;
+            respondingPlayer = default;
+            isDeleted = default;
+        }
     }
 }

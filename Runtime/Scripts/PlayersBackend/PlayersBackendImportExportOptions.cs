@@ -14,6 +14,16 @@ namespace JanSharp
         [System.NonSerialized] public bool includeFavoriteItems = true;
         [System.NonSerialized] public bool includeFavoritePlayers = true;
 
+        public override bool WannaBeClassSupportsPooling => true;
+        public override void ResetWannaBeClassToDefault()
+        {
+            base.ResetWannaBeClassToDefault();
+            includeOverriddenDisplayName = true;
+            includeCharacterName = true;
+            includeFavoriteItems = true;
+            includeFavoritePlayers = true;
+        }
+
         public override LockstepGameStateOptionsData Clone()
         {
             var clone = wannaBeClasses.New<PlayersBackendImportExportOptions>(nameof(PlayersBackendImportExportOptions));

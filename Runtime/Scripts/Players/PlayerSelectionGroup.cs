@@ -9,6 +9,13 @@ namespace JanSharp
         [System.NonSerialized] public CorePlayerData[] selectedPlayers;
         #endregion
 
+        public override bool WannaBeClassSupportsPooling => true;
+        public override void ResetWannaBeClassToDefault()
+        {
+            base.ResetWannaBeClassToDefault();
+            selectedPlayers = default;
+        }
+
         public override void Serialize(bool isExport)
         {
             base.Serialize(isExport);

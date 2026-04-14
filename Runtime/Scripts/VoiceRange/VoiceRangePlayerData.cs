@@ -32,6 +32,24 @@ namespace JanSharp
         [System.NonSerialized] public VoiceRangeVisualizationType hudVisualType;
         #endregion
 
+        public override bool WannaBeClassSupportsPooling => true;
+        public override void ResetWannaBeClassToDefault()
+        {
+            base.ResetWannaBeClassToDefault();
+            latencyHiddenUniqueIds.Clear();
+            latencyVoiceRangeIndex = default;
+            latencyShowInWorldMask = default;
+            latencyWorldVisualType = default;
+            latencyShowInHUDMask = default;
+            latencyHUDVisualType = default;
+
+            voiceRangeIndex = default;
+            showInWorldMask = default;
+            worldVisualType = default;
+            showInHUDMask = default;
+            hudVisualType = default;
+        }
+
         public override void OnPlayerDataInit(bool isAboutToBeImported)
         {
             voiceRangeIndex = voiceRangeManager.DefaultVoiceRangeIndex;

@@ -13,5 +13,8 @@ namespace JanSharp
         public override DynamicDataManager DataManager => customLocationManager;
 
         public override string DynamicDataClassName => nameof(CustomLocation);
+
+        public override bool WannaBeClassSupportsPooling => true;
+        // public override void ResetWannaBeClassToDefault() => base.ResetWannaBeClassToDefault(); // Redundant.
     }
 }

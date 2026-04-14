@@ -57,6 +57,25 @@ namespace JanSharp
             ? $"[{PlayerDisplayName}]"
             : $"[{PlayerDisplayName}]  {characterName}"; // Intentional double space.
 
+        public override bool WannaBeClassSupportsPooling => true;
+        public override void ResetWannaBeClassToDefault()
+        {
+            base.ResetWannaBeClassToDefault();
+            overriddenDisplayName = default;
+            characterName = default;
+
+            favoritePlayersOutgoingLut.Clear();
+            favoritePlayersOutgoing = new CorePlayerData[ArrList.MinCapacity];
+            favoritePlayersOutgoingCount = 0;
+            favoritePlayersIncoming = new CorePlayerData[ArrList.MinCapacity];
+            favoritePlayersIncomingCount = 0;
+
+            favoriteItemIdsLut.Clear();
+            favoriteItems = new EntityPrototype[ArrList.MinCapacity];
+            favoriteItemsCount = 0;
+            importedFavoriteItemIds = default;
+        }
+
         public override void OnPlayerDataInit(bool isAboutToBeImported)
         {
             if (!isAboutToBeImported

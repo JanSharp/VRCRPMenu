@@ -11,6 +11,13 @@ namespace JanSharp
 
         [System.NonSerialized] public bool includeMenuSettings = true;
 
+        public override bool WannaBeClassSupportsPooling => true;
+        public override void ResetWannaBeClassToDefault()
+        {
+            base.ResetWannaBeClassToDefault();
+            includeMenuSettings = true;
+        }
+
         public override LockstepGameStateOptionsData Clone()
         {
             var clone = wannaBeClasses.New<MenuSettingsImportExportOptions>(nameof(MenuSettingsImportExportOptions));

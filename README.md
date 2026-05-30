@@ -7,9 +7,9 @@ A menu with a focus on role play, with features such as GM requests, voice range
 
 (It's not actually published as a package yet, but once it is the following applies.)
 
-Head to my [VCC Listing](https://jansharp.github.io/vrc/vcclisting.xhtml) and follow the instructions there.
+Make sure to add [Sylan's Listing](https://sylantroh.github.io/SylanVCC/) since this package depends on the Audio Manager.
 
-Also make sure to add [Sylan's Listing](https://sylantroh.github.io/SylanVCC/) since this package depends on the Audio Manager.
+Then head to my [VCC Listing](https://jansharp.github.io/vrc/vcclisting.xhtml) and follow the instructions there.
 
 # Contributing
 

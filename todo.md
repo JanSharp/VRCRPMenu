@@ -290,3 +290,4 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [ ] maybe add location zones, another column alternative to proximity
 - [ ] add tooltip when hovering save as global stating how setting the name is required in order to save as global dynamic data
 - [x] use max work ms per frame from lockstep API
+- [ ] experiment with changing the voice range sphere to actually be a ring on the ground. But not actually a ring, rather a similar approach to right now, but as a cylinder rather than sphere, where said cylinder is only visible on the ground level. Similar to Lucio's aura effect in overwatch

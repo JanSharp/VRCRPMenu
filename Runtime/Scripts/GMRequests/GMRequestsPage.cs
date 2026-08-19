@@ -9,7 +9,6 @@ namespace JanSharp
         [HideInInspector][SerializeField][SingletonReference] private LockstepAPI lockstep;
         [HideInInspector][SerializeField][SingletonReference] private GMRequestsManagerAPI requestsManager;
         [HideInInspector][SerializeField][SingletonReference] private PlayersBackendManagerAPI playersBackendManager;
-        [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
         [HideInInspector][SerializeField][SingletonReference] private RPMenuTeleportManagerAPI teleportManager;
 
         public GMRequestsList requestsList;

@@ -230,7 +230,7 @@ namespace JanSharp.Internal
                 return;
             if (presentAsImportantAfterSeconds == 0)
             {
-                if (request.requestType == GMRequestType.Regular)
+                if (request.requestType != GMRequestType.Urgent)
                     RaiseOnGMRequestShouldPresetAsImportantChanged(request);
                 return;
             }
@@ -243,7 +243,7 @@ namespace JanSharp.Internal
         public void OnGMRequestShouldPresetAsImportantChangedIA()
         {
             GMRequest request = ReadGMRequestRef();
-            if (request == null || request.requestType != GMRequestType.Regular)
+            if (request == null || request.requestType == GMRequestType.Urgent)
                 return;
             RaiseOnGMRequestShouldPresetAsImportantChanged(request);
         }

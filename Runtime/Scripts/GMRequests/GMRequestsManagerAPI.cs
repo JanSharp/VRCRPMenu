@@ -16,8 +16,8 @@ namespace JanSharp
         /// <para>Use <see cref="GMRequestsManagerAPI.RequestForEvent"/>.</para>
         /// <para>Only raised if <see cref="GMRequestsManagerAPI.PresentAsImportantAfterSeconds"/> is not equal
         /// to <c>-1</c>.</para>
-        /// <para>Raised only when <see cref="GMRequest.requestType"/> equals
-        /// <see cref="GMRequestType.Regular"/>.</para>
+        /// <para>Raised only when <see cref="GMRequest.requestType"/> does not equal
+        /// <see cref="GMRequestType.Urgent"/>.</para>
         /// <para>Raised regardless of the read state of the request.</para>
         /// <para>Game state safe.</para>
         /// </summary>

@@ -150,7 +150,7 @@ namespace JanSharp
         private void UpdateRowPresentedAsImportant(GMRequestRow row, uint seconds)
         {
             GMRequest request = row.request;
-            if (request.latencyIsRead || request.latencyRequestType != GMRequestType.Regular)
+            if (request.latencyIsRead || request.latencyRequestType == GMRequestType.Urgent)
                 return;
             int presentAsImportantAfterSeconds = requestsManager.PresentAsImportantAfterSeconds;
             if (presentAsImportantAfterSeconds == -1)

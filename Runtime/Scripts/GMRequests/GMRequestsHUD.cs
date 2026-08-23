@@ -432,7 +432,7 @@ namespace JanSharp
         public void OnGMRequestShouldPresetAsImportantChanged()
         {
             GMRequest request = requestsManager.RequestForEvent;
-            if (!request.latencyIsRead && request.latencyRequestType == GMRequestType.Regular)
+            if (!request.latencyIsRead && request.latencyRequestType != GMRequestType.Urgent)
                 UpdateResponderImageColor(presentAsImportant: true);
         }
 

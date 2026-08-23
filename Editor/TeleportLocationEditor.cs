@@ -7,10 +7,10 @@ using UnityEngine;
 
 namespace JanSharp
 {
-    [InitializeOnLoad]
     public static class TeleportLocationOnBuild
     {
-        static TeleportLocationOnBuild()
+        [OrderedInitializeOnLoad]
+        private static void OnAssemblyLoad()
         {
             OnBuildUtil.RegisterTypeCumulative<TeleportLocation>(OnBuildCumulative);
         }

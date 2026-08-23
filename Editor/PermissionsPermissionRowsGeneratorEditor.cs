@@ -6,12 +6,12 @@ using UnityEngine.UI;
 
 namespace JanSharp
 {
-    [InitializeOnLoad]
     public static class PermissionsPermissionRowsGeneratorOnBuild
     {
         private static PermissionDefinition[] allPermissionDefs;
 
-        static PermissionsPermissionRowsGeneratorOnBuild()
+        [OrderedInitializeOnLoad]
+        private static void OnAssemblyLoad()
         {
             OnBuildUtil.RegisterType<PermissionManagerAPI>(OnPermissionManagerBuild, order: -22);
             OnBuildUtil.RegisterType<PermissionsPermissionRowsGenerator>(OnBuild, order: -21);

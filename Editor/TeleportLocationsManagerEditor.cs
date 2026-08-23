@@ -8,12 +8,12 @@ using UnityEngine;
 
 namespace JanSharp
 {
-    [InitializeOnLoad]
     public static class TeleportLocationsManagerOnBuild
     {
         private static List<TeleportLocation> allLocations;
 
-        static TeleportLocationsManagerOnBuild()
+        [OrderedInitializeOnLoad]
+        private static void OnAssemblyLoad()
         {
             OnBuildUtil.RegisterTypeCumulative<TeleportLocation>(OnLocationsBuild, order: -10, includeEditorOnly: true);
             OnBuildUtil.RegisterType<TeleportLocationsManager>(OnBuild, order: -9);

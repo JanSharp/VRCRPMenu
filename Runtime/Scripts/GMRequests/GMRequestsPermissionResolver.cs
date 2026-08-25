@@ -8,7 +8,7 @@ namespace JanSharp
     {
         [HideInInspector][SerializeField][SingletonReference] private GMRequestsManagerAPI requestsManager;
 
-        public GMRequestType requestType;
+        public GMRequestType[] requestTypes;
         [PermissionDefinitionReference(nameof(associatedRequestPDef))]
         public string associatedRequestPermissionAsset; // A guid.
         [HideInInspector][SerializeField] private PermissionDefinition associatedRequestPDef;
@@ -29,7 +29,7 @@ namespace JanSharp
             for (int i = 0; i < count; i++)
             {
                 GMRequest request = requests[i];
-                if (request.latencyRequestType == requestType)
+                if (System.Array.IndexOf(requestTypes, request.latencyRequestType) != -1)
                     toDelete[toDeleteCount++] = request;
             }
             for (int i = 0; i < toDeleteCount; i++)

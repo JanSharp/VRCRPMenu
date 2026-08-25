@@ -5,8 +5,27 @@ namespace JanSharp
 {
     public enum GMRequestType : byte
     {
+        /// <summary>
+        /// <para>When checking if a request is a regular request, check if it is not equal to
+        /// <see cref="Urgent"/> instead, to support other types of regular requests.</para>
+        /// </summary>
         Regular,
+        /// <summary>
+        /// <para>This is the only type of request which is considered to be pressing.</para>
+        /// </summary>
         Urgent,
+
+        /// <summary>
+        /// <para>Other type of non <see cref="Urgent"/> request for use by other system, not used by the RP
+        /// Menu itself. The RP Menu simply treats these as <see cref="Regular"/> requests.</para>
+        /// </summary>
+        Question,
+        /// <inheritdoc cref="Question"/>
+        NeedARoll,
+        /// <inheritdoc cref="Question"/>
+        JoinSilently,
+        /// <inheritdoc cref="Question"/>
+        RequestGMRadio,
     }
 
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]

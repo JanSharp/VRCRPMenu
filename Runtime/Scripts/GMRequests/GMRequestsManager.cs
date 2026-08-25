@@ -101,12 +101,10 @@ namespace JanSharp.Internal
                 return false;
             switch (requestType)
             {
-                case GMRequestType.Regular:
-                    return permissionManager.PlayerHasPermission(actingPlayer, requestGMPDef);
                 case GMRequestType.Urgent:
                     return permissionManager.PlayerHasPermission(actingPlayer, requestGMUrgentlyPDef);
                 default:
-                    return false;
+                    return permissionManager.PlayerHasPermission(actingPlayer, requestGMPDef);
             }
         }
 

@@ -12,15 +12,19 @@ namespace JanSharp
         [HideInInspector][SerializeField][SingletonReference] private GMRequestsManagerAPI requestsManager;
         [HideInInspector][SerializeField][FindInParent] private MenuManagerAPI menuManager;
 
-        public GMRequestType requestType;
+        [Tooltip("The type of request to create when this button is clicked while turned off")]
+        public GMRequestType primaryRequestType;
+        public GMRequestType[] turnOnForRequestTypes;
         public Toggle toggle;
         public TextMeshProUGUI label;
         public string offText;
         public string onText;
 
-        private bool RequestMatchesButtonType(GMRequest request)
+        private bool ShouldBeOnForRequest(GMRequest request)
         {
-            return request != null && request.latencyRequestType == requestType;
+            return request != null
+                && (request.latencyRequestType == primaryRequestType
+                    || System.Array.IndexOf(turnOnForRequestTypes, request.latencyRequestType) != -1);
         }
 
         [LockstepEvent(LockstepEventType.OnClientBeginCatchUp)]
@@ -39,7 +43,7 @@ namespace JanSharp
 
             GMRequest latestRequest = requestsManager.GetLatestActiveLocalRequest();
 
-            if (isOn == RequestMatchesButtonType(latestRequest))
+            if (isOn == ShouldBeOnForRequest(latestRequest))
                 return;
 
             if (!isOn)
@@ -50,16 +54,16 @@ namespace JanSharp
 
             if (latestRequest == null)
             {
-                requestsManager.SendCreateIA(requestType);
+                requestsManager.SendCreateIA(primaryRequestType);
                 return;
             }
 
-            requestsManager.SendSetRequestTypeIA(latestRequest, requestType);
+            requestsManager.SendSetRequestTypeIA(latestRequest, primaryRequestType);
         }
 
         private void UpdateToggleStateBasedOnLatest()
         {
-            bool isOn = RequestMatchesButtonType(requestsManager.GetLatestActiveLocalRequest());
+            bool isOn = ShouldBeOnForRequest(requestsManager.GetLatestActiveLocalRequest());
             toggle.SetIsOnWithoutNotify(isOn);
             label.text = isOn ? onText : offText;
         }

@@ -112,7 +112,7 @@ namespace JanSharp
             GMRequest request = row.request;
 
             bool latencyIsRead = request.latencyIsRead;
-            row.regularHighlight.SetActive(!latencyIsRead && request.latencyRequestType == GMRequestType.Regular);
+            row.regularHighlight.SetActive(!latencyIsRead && request.latencyRequestType != GMRequestType.Urgent);
             row.regularImportantHighlight.SetActive(false);
             row.urgentHighlight.SetActive(!latencyIsRead && request.latencyRequestType == GMRequestType.Urgent);
             row.readToggle.SetIsOnWithoutNotify(latencyIsRead);

@@ -114,7 +114,7 @@ namespace JanSharp
 
         private bool HideRequesterHUDIfMissingPermissionForRequest(GMRequest request)
         {
-            bool isRegular = request.latencyRequestType == GMRequestType.Regular;
+            bool isRegular = request.latencyRequestType != GMRequestType.Urgent;
             if (isRegular ? cannotRequestRegular : cannotRequestUrgent)
             {
                 ShowHideRequesterHUD(false);
@@ -175,7 +175,7 @@ namespace JanSharp
             StopFadeOutAnimation();
             prevActiveLocalRequest = request;
 
-            bool isRegular = request.latencyRequestType == GMRequestType.Regular;
+            bool isRegular = request.latencyRequestType != GMRequestType.Urgent;
             requesterRegularGo.SetActive(isRegular);
             requesterUrgentGo.SetActive(!isRegular);
 
@@ -229,7 +229,7 @@ namespace JanSharp
 #endif
             SetRequesterIsInFadeOutAnimation(true);
 
-            bool isRegular = prevActiveLocalRequest.latencyRequestType == GMRequestType.Regular;
+            bool isRegular = prevActiveLocalRequest.latencyRequestType != GMRequestType.Urgent;
             requesterCurrentImage = isRegular
                 ? requesterRegularImage
                 : requesterUrgentImage;

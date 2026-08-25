@@ -26,9 +26,9 @@ namespace JanSharp
             if (activeLocalRequest == null)
                 newShouldIgnore = !requestGMPDef.valueForLocalPlayer; // Even if the player has permissions for urgent, do not let them in this manner.
             else
-                newShouldIgnore = activeLocalRequest.latencyRequestType == GMRequestType.Regular
-                    ? !requestGMPDef.valueForLocalPlayer
-                    : !requestGMUrgentlyPDef.valueForLocalPlayer;
+                newShouldIgnore = activeLocalRequest.latencyRequestType == GMRequestType.Urgent
+                    ? !requestGMUrgentlyPDef.valueForLocalPlayer
+                    : !requestGMPDef.valueForLocalPlayer;
             if (shouldIgnoreInput == newShouldIgnore)
                 return;
             shouldIgnoreInput = newShouldIgnore;

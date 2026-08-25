@@ -585,8 +585,9 @@ namespace JanSharp.Internal
             playersBackendManager.WriteRPPlayerDataRef(request.respondingPlayer);
         }
 
-        private GMRequest ReadGMRequest(GMRequest request)
+        private GMRequest ReadGMRequest()
         {
+            GMRequest request = wannaBeClasses.New<GMRequest>(nameof(GMRequest));
             request.uniqueId = lockstep.ReadULong();
             request.id = lockstep.ReadSmallUInt();
             request.requestType = (GMRequestType)lockstep.ReadByte();
@@ -639,12 +640,9 @@ namespace JanSharp.Internal
             {
                 if (LogicIsRunningLong())
                     return null;
-                requests[suspendedIndexInArray] = wannaBeClasses.New<GMRequest>(nameof(GMRequest));
-                suspendedIndexInArray++;
+                requests[suspendedIndexInArray++] = ReadGMRequest();
             }
             suspendedIndexInArray = 0;
-            for (int i = 0; i < requestsCount; i++)
-                ReadGMRequest(requests[i]);
             return null;
         }
 

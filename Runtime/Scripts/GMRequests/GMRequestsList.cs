@@ -180,7 +180,7 @@ namespace JanSharp
                 leftSortsFirst = isRead;
                 return;
             }
-            // isRead means "are read" from this point forward.
+            // isRead is equal to the value of latencyIsRead of both requests from this point forward.
             if (!isRead && requestLeft.latencyRequestType != requestRight.latencyRequestType)
             {
                 leftSortsFirst = requestLeft.latencyRequestType == GMRequestType.Urgent;

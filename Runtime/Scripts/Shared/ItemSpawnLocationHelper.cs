@@ -53,7 +53,7 @@ namespace JanSharp.Internal
                 : VRCPlayerApi.TrackingDataType.RightHand;
             var hand = localPlayer.GetTrackingData(trackingType);
             determinedPosition = hand.position;
-            determinedRotation = hand.rotation * interactables.GetHandRotationNormalization(trackingType);
+            determinedRotation = hand.rotation * interactables.GetRotationNormalization(trackingType);
             this.callbackCustomData = callbackCustomData;
             callbackInst.SendCustomEvent(callbackEventName);
         }
@@ -63,7 +63,7 @@ namespace JanSharp.Internal
             var trackingType = inputManager.DeterminedHand;
             var hand = localPlayer.GetTrackingData(trackingType);
             determinedPosition = hand.position;
-            determinedRotation = hand.rotation * interactables.GetHandRotationNormalization(trackingType);
+            determinedRotation = hand.rotation * interactables.GetRotationNormalization(trackingType);
             object[] callbackData = (object[])inputManager.CallbackCustomData;
             callbackCustomData = callbackData[2];
             ((UdonSharpBehaviour)callbackData[0]).SendCustomEvent((string)callbackData[1]);

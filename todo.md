@@ -187,7 +187,7 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
   - [x] flip the order of import and export game state permissions
   - [x] add the gs info to export and autosave, over in lockstep and then here
   - [x] add comments stating how there's a ton of copy paste from the GameStatesUI
-  - [ ] consider adding the input prevention to the generic value editors since they can be scrollable thus should block UI open close inputs. Though whether that input consuming feature as a whole is a good idea is still up in the air
+  - [x] ~~consider adding the input prevention to the generic value editors since they can be scrollable thus should block UI open close inputs. Though whether that input consuming feature as a whole is a good idea is still up in the air~~ the feature is not a good idea as a whole
   - [ ] make generic value editor styling match
   - [ ] think about import export options profiles
 - [ ] items page
@@ -287,7 +287,8 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [ ] fix permissions for item sizes, small and large item permissions are outdated
 - [x] add more space between gm proxies and no clip modules to make it a clearer separation
 - [x] add "minutes" to autosave interval label
-- [ ] maybe add location zones, another column alternative to proximity
+- [ ] maybe add location zones on the players page, another column alternative to proximity
 - [ ] add tooltip when hovering save as global stating how setting the name is required in order to save as global dynamic data
 - [x] use max work ms per frame from lockstep API
 - [ ] experiment with changing the voice range sphere to actually be a ring on the ground. But not actually a ring, rather a similar approach to right now, but as a cylinder rather than sphere, where said cylinder is only visible on the ground level. Similar to Lucio's aura effect in overwatch
+- [ ] remove "keep menu open while scrolling" entirely

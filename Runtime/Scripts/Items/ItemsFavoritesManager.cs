@@ -27,8 +27,11 @@ namespace JanSharp.Internal
             for (int i = 0; i < importedPlayersCount; i++)
             {
                 RPPlayerData player = importedPlayers[i];
-                if (!player.CheckLiveliness()) // Since these are weak references must check liveliness.
+                if (!player.CheckLiveliness() // Since these are weak references must check liveliness.
+                    || player.importedFavoriteItemIds == null) // The instance got deleted and a new one got created, reusing the pooled one. WannaBeClasses things.
+                {
                     continue;
+                }
                 DataDictionary favoriteItemIdsLut = player.favoriteItemIdsLut;
                 favoriteItemIdsLut.Clear();
                 EntityPrototype[] favoriteItems = player.favoriteItems;

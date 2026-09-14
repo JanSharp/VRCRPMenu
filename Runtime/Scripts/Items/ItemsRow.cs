@@ -6,7 +6,7 @@ using UnityEngine.UI;
 namespace JanSharp
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-    public class ItemsRow : SortableScrollableRow
+    public class ItemsRow : SortableScrollableSearchableRow
     {
         [System.NonSerialized] public bool isFavorite;
         [System.NonSerialized] public string sortableItemName;
@@ -22,16 +22,8 @@ namespace JanSharp
         public GameObject categoryRoot;
         public GameObject overlayRoot;
 
-        [System.NonSerialized] public string sanitizedItemName;
-
-        [System.NonSerialized] public string[] intermediates;
-        [System.NonSerialized] public string[] mixedCasingWords;
-        [System.NonSerialized] public string[] words;
-        [System.NonSerialized] public int totalWordsLetterCount;
-        [System.NonSerialized] public int firstMatchingLetterIndex;
-        [System.NonSerialized] public int longestConsecutiveMatch;
-        [System.NonSerialized] public bool anyMatchesAreBeginningsOfWords;
-        [System.NonSerialized] public bool allMatchesAreBeginningsOfWords;
+        public override TextMeshProUGUI SearchableNameLabel => itemNameLabel;
+        public override string SearchableName => entityPrototype.DisplayName;
 
         public void OnFavoriteValueChanged() => page.OnFavoriteValueChanged(this);
         public void OnSpawnToggleValueChanged() => page.OnSpawnToggleValueChanged(this);

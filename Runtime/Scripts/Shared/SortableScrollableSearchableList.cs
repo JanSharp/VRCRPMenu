@@ -4,21 +4,12 @@ using TMPro;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
-using VRC.SDK3.Data;
 
 namespace JanSharp
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-    public class ItemsList : SortableScrollableList
+    public abstract class SortableScrollableSearchableList : SortableScrollableList
     {
-        [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
-        [HideInInspector][SerializeField][SingletonReference] private PlayersBackendManagerAPI playersBackendManager;
-        [HideInInspector][SerializeField][SingletonReference] private ItemsPageManagerAPI itemsPageManager;
-
-        public Image sortItemNameAscendingImage;
-        public Image sortItemNameDescendingImage;
-        public Image sortCategoryAscendingImage;
-        public Image sortCategoryDescendingImage;
         public TMP_InputField searchInputField;
         private string sortOrderFunctionPreSearch;
         private Image sortOrderImagePreSearch;
@@ -27,136 +18,38 @@ namespace JanSharp
         public string searchMatchHighlightColorName;
         public Color searchMatchHighlightColor;
 
-        /// <summary>
-        /// <para><see cref="uint"/> entityPrototypeId => <see cref="ItemsRow"/> row</para>
-        /// </summary>
-        private DataDictionary rowsByPrototypeId = new DataDictionary();
-        public ItemsRow[] Rows => (ItemsRow[])rows;
-        public int RowsCount => rowsCount;
-        public ItemsRow[] HiddenRows => (ItemsRow[])hiddenRows;
-        public int HiddenRowsCount => hiddenRowsCount;
-        public ItemsRow[] UnusedRows => (ItemsRow[])unusedRows;
-        public int UnusedRowsCount => unusedRowsCount;
-
-        private RPPlayerData localPlayer;
-
         private Regex sanitationRegex;
         private Regex wordsRegex;
         private StringBuilder stringBuilder = new StringBuilder();
         private string highlightMarkOpenTag;
 
         [MenuManagerEvent(MenuManagerEventType.OnMenuManagerStart)]
-        public void OnMenuManagerStart()
+        public virtual void OnMenuManagerStart()
         {
             sanitationRegex = new Regex(@"[^A-Za-z0-9]", RegexOptions.Compiled);
             // There might be a way to shorten this regex, however there should be no backtracking so I think it's good as is.
             wordsRegex = new Regex(@"(?>(?<word>(?>[A-Z](?>(?![A-Z][a-z])[A-Z])+|[A-Z]?[a-z]+|[A-Z]|[0-9]+)) *)+", RegexOptions.Compiled);
-        }
-
-        public override void Initialize()
-        {
-            base.Initialize();
-
-            currentSortOrderFunction = nameof(CompareRowItemNameAscending);
-            currentSortOrderImage = sortItemNameAscendingImage;
-            currentSortOrderImage.enabled = true;
-            someRowsAreOutOfSortOrder = false;
             highlightMarkOpenTag = $"<mark=#{StringUtil.GetHexFromColor(searchMatchHighlightColor, includeAlpha: true)}>";
-        }
-
-        [PlayerDataEvent(PlayerDataEventType.OnLocalPlayerDataAvailable)]
-        public void OnLocalPlayerDataAvailable()
-        {
-            localPlayer = playersBackendManager.GetRPPlayerData(playerDataManager.LocalPlayerData);
         }
 
         #region RowsManagement
 
-        public bool TryGetRow(uint entityPrototypeId, out ItemsRow row)
+        protected void UpdateNewlyCreatedRow(SortableScrollableSearchableRow row)
         {
-            if (rowsByPrototypeId.TryGetValue(entityPrototypeId, out DataToken rowToken))
-            {
-                row = (ItemsRow)rowToken.Reference;
-                return true;
-            }
-            row = null;
-            return false;
-        }
-
-        public ItemsRow CreateRow(EntityPrototype prototype)
-        {
-            ItemsRow row = CreateRowForPrototype(prototype);
-            rowsByPrototypeId.Add(prototype.Id, row);
-            InsertSortNewRow(row);
-            return row;
-        }
-
-        public void RemoveRow(ItemsRow row)
-        {
-            rowsByPrototypeId.Remove(row.entityPrototype.Id);
-            RemoveRow((SortableScrollableRow)row);
-        }
-
-        public void RebuildRows() => RebuildRows(itemsPageManager.ItemPrototypesCount);
-
-        protected override void OnRowCreated(SortableScrollableRow row) { }
-
-        protected override void OnPreRebuildRows()
-        {
-            rowsByPrototypeId.Clear();
-        }
-
-        protected override SortableScrollableRow RebuildRow(int index)
-        {
-            EntityPrototype prototype = itemsPageManager.GetItemPrototype(index);
-            ItemsRow row = CreateRowForPrototype(prototype);
-            rowsByPrototypeId.Add(prototype.Id, row);
-            return row;
-        }
-
-        private ItemsRow CreateRowForPrototype(EntityPrototype prototype)
-        {
-            ItemsRow row = (ItemsRow)CreateRow();
-            row.entityPrototype = prototype;
+            string escapedName = EscapeRichText(row.SearchableName);
+            row.richTextEscapedSearchableName = escapedName;
+            row.SearchableNameLabel.text = escapedName;
             FindWords(row);
-
-            bool isFavorite = localPlayer.favoriteItemIdsLut.ContainsKey(prototype.Id);
-            string itemName = prototype.DisplayName;
-            string sanitizedItemName = SanitizeRichText(itemName);
-            row.sanitizedItemName = sanitizedItemName;
-            string category = "Category"; // TODO
-
-            row.isFavorite = isFavorite;
-            row.sortableItemName = itemName.ToLower();
-            row.sortableCategory = category.ToLower();
-
-            row.favoriteToggle.SetIsOnWithoutNotify(isFavorite);
-            row.itemNameLabel.text = sanitizedItemName;
-            row.categoryLabel.text = category;
-            row.spawnToggle.SetIsOnWithoutNotify(false);
-            row.itemNameLabelSelectable.interactable = true;
-            row.categoryLabelSelectable.interactable = true;
-            row.overlayRoot.SetActive(false);
 
             if (currentSortOrderFunction == nameof(CompareRowSearchResults))
                 row.hidden = EvaluateHiddenCallback(row);
-
-            return row;
-        }
-
-        public void SetRowHidden(ItemsRow row, bool hidden)
-        {
-            if (hidden)
-                HideRow(row);
-            else
-                ShowRow(row);
         }
 
         #endregion
 
         #region Search
 
-        private string SanitizeRichText(string text, bool doNotWrapInNoParse = false)
+        private string EscapeRichText(string text, bool doNotWrapInNoParse = false)
         {
             ///cSpell:ignore noparse
             while (text.Contains("<noparse>"))
@@ -168,11 +61,11 @@ namespace JanSharp
             return text;
         }
 
-        private void FindWords(ItemsRow row)
+        private void FindWords(SortableScrollableSearchableRow row)
         {
             // Sanitizing here too just so that if there are any noparse tags in the name,
             // they don't show up while searching.
-            string displayName = SanitizeRichText(row.entityPrototype.DisplayName, doNotWrapInNoParse: true);
+            string displayName = EscapeRichText(row.SearchableName, doNotWrapInNoParse: true);
             string name = sanitationRegex.Replace(displayName, " ");
             Match match = wordsRegex.Match(name);
             if (!match.Success)
@@ -194,13 +87,13 @@ namespace JanSharp
                 int index = capture.Index;
                 int length = capture.Length;
                 string word = capture.Value;
-                intermediates[i] = SanitizeRichText(displayName.Substring(lastCharIndex, index - lastCharIndex));
+                intermediates[i] = EscapeRichText(displayName.Substring(lastCharIndex, index - lastCharIndex));
                 mixedCasingWords[i] = word;
                 words[i] = word.ToLower();
                 totalCharCount += length;
                 lastCharIndex = index + length;
             }
-            intermediates[count] = SanitizeRichText(displayName.Substring(lastCharIndex));
+            intermediates[count] = EscapeRichText(displayName.Substring(lastCharIndex));
             row.intermediates = intermediates;
             row.mixedCasingWords = mixedCasingWords;
             row.words = words;
@@ -239,20 +132,20 @@ namespace JanSharp
 
         protected override bool EvaluateHiddenCallback(SortableScrollableRow row)
         {
-            ItemsRow itemsRow = (ItemsRow)row;
+            SortableScrollableSearchableRow searchableRow = (SortableScrollableSearchableRow)row;
             if (searchQueryLength == 0)
             {
-                itemsRow.itemNameLabel.text = itemsRow.sanitizedItemName;
+                searchableRow.SearchableNameLabel.text = searchableRow.richTextEscapedSearchableName;
                 return false;
             }
-            bool matches = SearchForQuery(itemsRow);
-            itemsRow.itemNameLabel.text = matches
-                ? BuildItemNameWithHighlights(itemsRow)
-                : itemsRow.sanitizedItemName;
+            bool matches = SearchForQuery(searchableRow);
+            searchableRow.SearchableNameLabel.text = matches
+                ? BuildItemNameWithHighlights(searchableRow)
+                : searchableRow.richTextEscapedSearchableName;
             return !matches; // Return value means "hidden".
         }
 
-        private bool SearchForQuery(ItemsRow row)
+        private bool SearchForQuery(SortableScrollableSearchableRow row)
         {
             if (searchQueryLength == 0)
                 return true;
@@ -343,7 +236,7 @@ namespace JanSharp
         /// </summary>
         /// <param name="row"></param>
         /// <returns></returns>
-        private string BuildItemNameWithHighlights(ItemsRow row)
+        private string BuildItemNameWithHighlights(SortableScrollableSearchableRow row)
         {
             string[] intermediates = row.intermediates;
             string[] mixedCasingWords = row.mixedCasingWords;
@@ -399,128 +292,12 @@ namespace JanSharp
 
         #endregion
 
-        #region SortHeaders
-
-        // NOTE: Cannot just invert the order of the rows when inverting the order of a sorted column.
-        // The categories are the most clear example of this. When inverting the sort order there it makes
-        // more sense for just the categories to flip order, while items in those categories retain relative
-        // order
-
-        public void OnItemNameSortHeaderClick()
-        {
-            if (currentSortOrderImage != null)
-                currentSortOrderImage.enabled = false;
-            if (!someRowsAreOutOfSortOrder && currentSortOrderFunction == nameof(CompareRowItemNameAscending))
-            {
-                currentSortOrderFunction = nameof(CompareRowItemNameDescending);
-                currentSortOrderImage = sortItemNameDescendingImage;
-            }
-            else
-            {
-                currentSortOrderFunction = nameof(CompareRowItemNameAscending);
-                currentSortOrderImage = sortItemNameAscendingImage;
-            }
-            currentSortOrderImage.enabled = true;
-            SortAll();
-        }
-
-        public void OnCategorySortHeaderClick()
-        {
-            if (currentSortOrderImage != null)
-                currentSortOrderImage.enabled = false;
-            if (!someRowsAreOutOfSortOrder && currentSortOrderFunction == nameof(CompareRowCategoryAscending))
-            {
-                currentSortOrderFunction = nameof(CompareRowCategoryDescending);
-                currentSortOrderImage = sortCategoryDescendingImage;
-            }
-            else
-            {
-                currentSortOrderFunction = nameof(CompareRowCategoryAscending);
-                currentSortOrderImage = sortCategoryAscendingImage;
-            }
-            currentSortOrderImage.enabled = true;
-            SortAll();
-        }
-
-        #endregion
-
-        #region SortAPI
-
-        public void SortOnPermissionChange(bool itemCategoryValue)
-        {
-            if (!itemCategoryValue
-                && (currentSortOrderFunction == nameof(CompareRowCategoryAscending)
-                    || currentSortOrderFunction == nameof(CompareRowCategoryDescending)))
-            {
-                currentSortOrderFunction = nameof(CompareRowItemNameAscending);
-                // No need for null check, it's only null while using CompareRowSearchResults.
-                currentSortOrderImage.enabled = false;
-                currentSortOrderImage = sortItemNameAscendingImage;
-                currentSortOrderImage.enabled = true;
-                SortAll();
-            }
-        }
-
-        public void PotentiallySortChangedFavoriteRow(ItemsRow row)
-        {
-            UpdateSortPositionDueToValueChange(row);
-        }
-
-        public void SortAllRows()
-        {
-            SortAll();
-        }
-
-        #endregion
-
         #region MergeSortComparators
-
-        public void CompareRowItemNameAscending()
-        {
-            ItemsRow left = (ItemsRow)compareLeft;
-            ItemsRow right = (ItemsRow)compareRight;
-            if (left.isFavorite != right.isFavorite)
-                leftSortsFirst = left.isFavorite;
-            else
-                leftSortsFirst = left.sortableItemName
-                    .CompareTo(right.sortableItemName) <= 0;
-        }
-        public void CompareRowItemNameDescending()
-        {
-            ItemsRow left = (ItemsRow)compareLeft;
-            ItemsRow right = (ItemsRow)compareRight;
-            if (left.isFavorite != right.isFavorite)
-                leftSortsFirst = left.isFavorite;
-            else
-                leftSortsFirst = left.sortableItemName
-                    .CompareTo(right.sortableItemName) >= 0;
-        }
-
-        public void CompareRowCategoryAscending()
-        {
-            ItemsRow left = (ItemsRow)compareLeft;
-            ItemsRow right = (ItemsRow)compareRight;
-            if (left.isFavorite != right.isFavorite)
-                leftSortsFirst = left.isFavorite;
-            else
-                leftSortsFirst = left.sortableCategory
-                    .CompareTo(right.sortableCategory) <= 0;
-        }
-        public void CompareRowCategoryDescending()
-        {
-            ItemsRow left = (ItemsRow)compareLeft;
-            ItemsRow right = (ItemsRow)compareRight;
-            if (left.isFavorite != right.isFavorite)
-                leftSortsFirst = left.isFavorite;
-            else
-                leftSortsFirst = left.sortableCategory
-                    .CompareTo(right.sortableCategory) >= 0;
-        }
 
         public void CompareRowSearchResults()
         {
-            ItemsRow left = (ItemsRow)compareLeft;
-            ItemsRow right = (ItemsRow)compareRight;
+            SortableScrollableSearchableRow left = (SortableScrollableSearchableRow)compareLeft;
+            SortableScrollableSearchableRow right = (SortableScrollableSearchableRow)compareRight;
             // Ignores favorites. When searching for something it very most likely isn't a favorite.
             if (left.anyMatchesAreBeginningsOfWords != right.anyMatchesAreBeginningsOfWords)
                 leftSortsFirst = left.anyMatchesAreBeginningsOfWords;

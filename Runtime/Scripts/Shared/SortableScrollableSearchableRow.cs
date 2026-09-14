@@ -1,41 +1,29 @@
 ﻿using TMPro;
 using UdonSharp;
-using UnityEngine;
-using UnityEngine.UI;
 
 namespace JanSharp
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-    public class ItemsRow : SortableScrollableRow
+    public abstract class SortableScrollableSearchableRow : SortableScrollableRow
     {
-        [System.NonSerialized] public bool isFavorite;
-        [System.NonSerialized] public string sortableItemName;
-        [System.NonSerialized] public string sortableCategory;
-        [System.NonSerialized] public EntityPrototype entityPrototype;
-        public ItemsPage page;
-        public Toggle favoriteToggle;
-        public TextMeshProUGUI itemNameLabel;
-        public Selectable itemNameLabelSelectable;
-        public TextMeshProUGUI categoryLabel;
-        public Selectable categoryLabelSelectable;
-        public Toggle spawnToggle;
-        public GameObject categoryRoot;
-        public GameObject overlayRoot;
+        public abstract TextMeshProUGUI SearchableNameLabel { get; }
+        public abstract string SearchableName { get; }
 
-        [System.NonSerialized] public string sanitizedItemName;
+        /// <summary><para>Cached upon row creation.</para></summary>
+        [System.NonSerialized] public string richTextEscapedSearchableName;
 
+        /// <summary><para>Cached upon row creation.</para></summary>
         [System.NonSerialized] public string[] intermediates;
+        /// <summary><para>Cached upon row creation.</para></summary>
         [System.NonSerialized] public string[] mixedCasingWords;
+        /// <summary><para>Cached upon row creation.</para></summary>
         [System.NonSerialized] public string[] words;
+        /// <summary><para>Cached upon row creation.</para></summary>
         [System.NonSerialized] public int totalWordsLetterCount;
+
         [System.NonSerialized] public int firstMatchingLetterIndex;
         [System.NonSerialized] public int longestConsecutiveMatch;
         [System.NonSerialized] public bool anyMatchesAreBeginningsOfWords;
         [System.NonSerialized] public bool allMatchesAreBeginningsOfWords;
-
-        public void OnFavoriteValueChanged() => page.OnFavoriteValueChanged(this);
-        public void OnSpawnToggleValueChanged() => page.OnSpawnToggleValueChanged(this);
-        public void OnConfirmSpawnClick() => page.OnConfirmSpawnClick(this);
-        public void OnCancelSpawnClick() => page.OnCancelSpawnClick(this);
     }
 }

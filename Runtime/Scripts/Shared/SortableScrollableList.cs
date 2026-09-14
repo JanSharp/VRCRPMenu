@@ -341,6 +341,14 @@ namespace JanSharp
             SortAll();
         }
 
+        protected void SetRowHidden(SortableScrollableRow row, bool hidden)
+        {
+            if (hidden)
+                HideRow(row);
+            else
+                ShowRow(row);
+        }
+
         protected void HideRow(SortableScrollableRow row)
         {
             if (row.hidden)

@@ -2,136 +2,72 @@
 using UnityEngine;
 using VRC.SDK3.Data;
 
-namespace JanSharp.Internal
+namespace JanSharp
 {
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-    public class ItemsFavoritesManager : ItemsFavoritesManagerAPI
+    public enum ItemsFavoritesEventType
     {
-        [HideInInspector][SerializeField][SingletonReference] private LockstepAPI lockstep;
-        [HideInInspector][SerializeField][SingletonReference] private PlayersBackendManagerAPI playersBackendManager;
+        /// <summary>
+        /// <para>Game state safe.</para>
+        /// </summary>
+        OnItemFavoriteAdded,
+        /// <summary>
+        /// <para>Game state safe.</para>
+        /// </summary>
+        OnItemFavoriteRemoved,
+    }
+
+    [System.AttributeUsage(System.AttributeTargets.Method, Inherited = true, AllowMultiple = false)]
+    public sealed class ItemsFavoritesEventAttribute : CustomRaisedEventBaseAttribute
+    {
+        /// <summary>
+        /// <para>The method this attribute gets applied to must be public.</para>
+        /// <para>The name of the function this attribute is applied to must have the exact same name as the
+        /// name of the <paramref name="eventType"/>.</para>
+        /// <para>Event registration is performed at OnBuild, which is to say that scripts with these kinds of
+        /// event handlers must exist in the scene at build time, any runtime instantiated objects with these
+        /// scripts on them will not receive these events.</para>
+        /// <para>Disabled scripts still receive events.</para>
+        /// </summary>
+        /// <param name="eventType">The event to register this function as a listener to.</param>
+        public ItemsFavoritesEventAttribute(ItemsFavoritesEventType eventType)
+            : base((int)eventType)
+        { }
+    }
+
+    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [CustomRaisedEventsDispatcher(typeof(ItemsFavoritesEventAttribute), typeof(ItemsFavoritesEventType))]
+    [SingletonScript("cc557cc25e37164d491e0d6de003bc23")] // Runtime/Prefabs/Managers/ItemsFavoritesManager.prefab
+    public class ItemsFavoritesManager : EntitiesFavoritesManager
+    {
         [HideInInspector][SerializeField][SingletonReference] private ItemsPageManagerAPI itemsPageManager;
-        [HideInInspector][SerializeField][SingletonReference] private EntitySystem entitySystem;
 
-        private RPPlayerData[] importedPlayers = new RPPlayerData[ArrList.MinCapacity];
-        private int importedPlayersCount = 0;
+        protected override DataDictionary RelevantPrototypeNamesLut => itemsPageManager.ItemPrototypeNamesLut;
 
-        public void OnPlayerDataImported(RPPlayerData player)
-        {
-            ArrList.Add(ref importedPlayers, ref importedPlayersCount, player);
-        }
+        protected override uint[] GetImportedFavoriteEntityIds(RPPlayerData player) => player.importedFavoriteItemIds;
+        protected override void SetImportedFavoriteEntityIds(RPPlayerData player, uint[] importedIds) => player.importedFavoriteItemIds = importedIds;
+        protected override DataDictionary GetFavoriteEntityIdsLut(RPPlayerData player) => player.favoriteItemIdsLut;
+        protected override EntityPrototype[] GetFavoriteEntities(RPPlayerData player) => player.favoriteItems;
+        protected override void SetFavoriteEntities(RPPlayerData player, EntityPrototype[] favorites) => player.favoriteItems = favorites;
+        protected override int GetFavoriteEntitiesCount(RPPlayerData player) => player.favoriteItemsCount;
+        protected override void SetFavoriteEntitiesCount(RPPlayerData player, int favoritesCount) => player.favoriteItemsCount = favoritesCount;
 
-        [LockstepEvent(LockstepEventType.OnImportFinishingUp, Order = -100)]
-        public void OnImportFinishingUp()
-        {
-            DataDictionary itemPrototypeNamesLut = itemsPageManager.ItemPrototypeNamesLut;
-            for (int i = 0; i < importedPlayersCount; i++)
-            {
-                RPPlayerData player = importedPlayers[i];
-                if (!player.CheckLiveliness() // Since these are weak references must check liveliness.
-                    || player.importedFavoriteItemIds == null) // The instance got deleted and a new one got created, reusing the pooled one. WannaBeClasses things.
-                {
-                    continue;
-                }
-                DataDictionary favoriteItemIdsLut = player.favoriteItemIdsLut;
-                favoriteItemIdsLut.Clear();
-                EntityPrototype[] favoriteItems = player.favoriteItems;
-                int favoriteItemsCount = 0;
-
-                uint[] ids = player.importedFavoriteItemIds;
-                int count = ids.Length;
-                for (int j = 0; j < count; j++)
-                {
-                    EntityPrototype entityPrototype = entitySystem.GetImportedPrototypeMetadata(ids[j]).entityPrototype;
-                    if (entityPrototype == null || !itemPrototypeNamesLut.ContainsKey(entityPrototype.PrototypeName))
-                        continue;
-                    ArrList.Add(ref favoriteItems, ref favoriteItemsCount, entityPrototype);
-                    favoriteItemIdsLut.Add(entityPrototype.Id, true);
-                }
-
-                player.favoriteItems = favoriteItems;
-                player.favoriteItemsCount = favoriteItemsCount;
-                player.importedFavoriteItemIds = null;
-            }
-            ArrList.Clear(ref importedPlayers, ref importedPlayersCount);
-        }
-
-        public override void SendAddFavoriteItemIA(RPPlayerData player, EntityPrototype prototype)
-        {
-            if (!lockstep.IsInitialized)
-                return;
-            playersBackendManager.WriteRPPlayerDataRef(player);
-            entitySystem.WriteEntityPrototypeRef(prototype);
-            lockstep.SendInputAction(addFavoritePlayerIAId);
-        }
-
-        [HideInInspector][SerializeField] private uint addFavoritePlayerIAId;
-        [LockstepInputAction(nameof(addFavoritePlayerIAId))]
-        public void OnAddFavoritePlayerIA()
-        {
-            RPPlayerData player = playersBackendManager.ReadRPPlayerDataRef();
-            EntityPrototype prototype = entitySystem.ReadEntityPrototypeRef();
-            if (player == null)
-                return;
-            if (player.favoriteItemIdsLut.ContainsKey(prototype.Id))
-                return;
-            player.favoriteItemIdsLut.Add(prototype.Id, true);
-            ArrList.Add(ref player.favoriteItems, ref player.favoriteItemsCount, prototype);
-            RaiseOnItemFavoriteAdded(player, prototype);
-        }
-
-        public override void SendRemoveFavoriteItemIA(RPPlayerData player, EntityPrototype prototype)
-        {
-            if (!lockstep.IsInitialized)
-                return;
-            playersBackendManager.WriteRPPlayerDataRef(player);
-            entitySystem.WriteEntityPrototypeRef(prototype);
-            lockstep.SendInputAction(removeFavoritePlayerIAId);
-        }
-
-        [HideInInspector][SerializeField] private uint removeFavoritePlayerIAId;
-        [LockstepInputAction(nameof(removeFavoritePlayerIAId))]
-        public void OnRemoveFavoritePlayerIA()
-        {
-            RPPlayerData player = playersBackendManager.ReadRPPlayerDataRef();
-            EntityPrototype prototype = entitySystem.ReadEntityPrototypeRef();
-            if (player == null)
-                return;
-            if (!player.favoriteItemIdsLut.Remove(prototype.Id))
-                return;
-            ArrList.Remove(ref player.favoriteItems, ref player.favoriteItemsCount, prototype);
-            RaiseOnItemFavoriteRemoved(player, prototype);
-        }
-
-        #region EventDispatcher
+        protected override bool GetFavoritesAreIncluded(PlayersBackendImportExportOptions options) => options.includeFavoriteItems;
 
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onItemFavoriteAddedListeners;
         [HideInInspector][SerializeField] private UdonSharpBehaviour[] onItemFavoriteRemovedListeners;
 
-        private RPPlayerData playerForEvent;
-        public override RPPlayerData PlayerForEvent => playerForEvent;
-        private EntityPrototype entityPrototypeForEvent;
-        public override EntityPrototype EntityPrototypeForEvent => entityPrototypeForEvent;
-
-        private void RaiseOnItemFavoriteAdded(RPPlayerData playerForEvent, EntityPrototype entityPrototypeForEvent)
+        protected override UdonSharpBehaviour[] OnFavoriteAddedListeners
         {
-            this.playerForEvent = playerForEvent;
-            this.entityPrototypeForEvent = entityPrototypeForEvent;
-            // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
-            JanSharp.CustomRaisedEvents.Raise(ref onItemFavoriteAddedListeners, nameof(ItemsFavoritesEventType.OnItemFavoriteAdded));
-            this.playerForEvent = null; // To prevent misuse of the API.
-            this.entityPrototypeForEvent = null; // To prevent misuse of the API.
+            get => onItemFavoriteAddedListeners;
+            set => onItemFavoriteAddedListeners = value;
+        }
+        protected override UdonSharpBehaviour[] OnFavoriteRemovedListeners
+        {
+            get => onItemFavoriteRemovedListeners;
+            set => onItemFavoriteRemovedListeners = value;
         }
 
-        private void RaiseOnItemFavoriteRemoved(RPPlayerData playerForEvent, EntityPrototype entityPrototypeForEvent)
-        {
-            this.playerForEvent = playerForEvent;
-            this.entityPrototypeForEvent = entityPrototypeForEvent;
-            // For some reason UdonSharp needs the 'JanSharp.' namespace name here to resolve the Raise function call.
-            JanSharp.CustomRaisedEvents.Raise(ref onItemFavoriteRemovedListeners, nameof(ItemsFavoritesEventType.OnItemFavoriteRemoved));
-            this.playerForEvent = null; // To prevent misuse of the API.
-            this.entityPrototypeForEvent = null; // To prevent misuse of the API.
-        }
-
-        #endregion
+        protected override string OnFavoriteAddedEventName => nameof(ItemsFavoritesEventType.OnItemFavoriteAdded);
+        protected override string OnFavoriteRemovedEventName => nameof(ItemsFavoritesEventType.OnItemFavoriteRemoved);
     }
 }

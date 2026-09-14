@@ -10,7 +10,7 @@ namespace JanSharp
         [HideInInspector][SerializeField][SingletonReference] private PlayersBackendManagerAPI playersBackendManager;
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
         [HideInInspector][SerializeField][SingletonReference] private ItemsPageManagerAPI itemsPageManager;
-        [HideInInspector][SerializeField][SingletonReference] private ItemsFavoritesManagerAPI itemsFavoritesManager;
+        [HideInInspector][SerializeField][SingletonReference] private ItemsFavoritesManager itemsFavoritesManager;
         [HideInInspector][SerializeField][SingletonReference] private ItemSpawnLocationHelperAPI itemSpawnLocationHelper;
 
         public ItemsList rowsList;
@@ -114,9 +114,9 @@ namespace JanSharp
         {
             bool isFavorite = row.favoriteToggle.isOn;
             if (isFavorite)
-                itemsFavoritesManager.SendAddFavoriteItemIA(localPlayer, row.entityPrototype);
+                itemsFavoritesManager.SendAddFavoriteIA(localPlayer, row.entityPrototype);
             else
-                itemsFavoritesManager.SendRemoveFavoriteItemIA(localPlayer, row.entityPrototype);
+                itemsFavoritesManager.SendRemoveFavoriteIA(localPlayer, row.entityPrototype);
             // Latency hiding.
             row.isFavorite = isFavorite;
             rowsList.PotentiallySortChangedFavoriteRow(row);

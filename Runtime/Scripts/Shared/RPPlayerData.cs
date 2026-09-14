@@ -16,8 +16,7 @@ namespace JanSharp
         [HideInInspector][SerializeField][SingletonReference] private PlayersBackendManagerAPI playersBackendManager;
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
         [HideInInspector][SerializeField][SingletonReference] private PlayersFavoritesManagerAPI playersFavoritesManager;
-        [HideInInspector][SerializeField][SingletonReference] private ItemsFavoritesManagerAPI itemsFavoritesManager;
-        [HideInInspector][SerializeField][SingletonReference] private EntitySystem entitySystem;
+        [HideInInspector][SerializeField][SingletonReference] private ItemsFavoritesManager itemsFavoritesManager;
 
         #region GameState
         /// <summary>
@@ -132,44 +131,6 @@ namespace JanSharp
                 lockstep.ReadString();
         }
 
-        private void WriteFavoriteItems()
-        {
-            lockstep.WriteSmallUInt((uint)favoriteItemsCount);
-            for (int i = 0; i < favoriteItemsCount; i++)
-                lockstep.WriteSmallUInt(favoriteItems[i].Id);
-        }
-
-        private void ReadFavoriteItems(bool isImport, bool discard)
-        {
-            if (discard)
-            {
-                int count = (int)lockstep.ReadSmallUInt();
-                for (int i = 0; i < count; i++)
-                    lockstep.ReadSmallUInt();
-                return;
-            }
-
-            if (isImport)
-            {
-                int count = (int)lockstep.ReadSmallUInt();
-                importedFavoriteItemIds = new uint[count];
-                for (int i = 0; i < count; i++)
-                    importedFavoriteItemIds[i] = lockstep.ReadSmallUInt();
-                ((Internal.ItemsFavoritesManager)itemsFavoritesManager).OnPlayerDataImported(this);
-            }
-            else
-            {
-                favoriteItemsCount = (int)lockstep.ReadSmallUInt();
-                ArrList.EnsureCapacity(ref favoriteItems, favoriteItemsCount);
-                for (int i = 0; i < favoriteItemsCount; i++)
-                {
-                    uint id = lockstep.ReadSmallUInt();
-                    favoriteItems[i] = entitySystem.GetEntityPrototype(id);
-                    favoriteItemIdsLut.Add(id, true);
-                }
-            }
-        }
-
         private void WriteFavoritePlayers()
         {
             lockstep.WriteSmallUInt((uint)favoritePlayersOutgoingCount);
@@ -222,8 +183,7 @@ namespace JanSharp
             WriteString(isExport, isExport && exportOptions.includeOverriddenDisplayName, overriddenDisplayName);
             WriteString(isExport, isExport && exportOptions.includeCharacterName, characterName);
 
-            if (!isExport || exportOptions.includeFavoriteItems)
-                WriteFavoriteItems();
+            itemsFavoritesManager.SerializeFavoritesForPlayer(this, isExport);
 
             if (!isExport || exportOptions.includeFavoritePlayers)
                 WriteFavoritePlayers();
@@ -245,10 +205,7 @@ namespace JanSharp
                 isImport && importOptions.includeCharacterName,
                 ref characterName);
 
-            if (!isImport)
-                ReadFavoriteItems(isImport, discard: false);
-            else if (optionsFromExport.includeFavoriteItems)
-                ReadFavoriteItems(isImport, discard: !importOptions.includeFavoriteItems);
+            itemsFavoritesManager.DeserializeFavoritesForPlayer(this, isImport);
 
             if (!isImport)
                 ReadFavoritePlayers(isImport, discard: false);

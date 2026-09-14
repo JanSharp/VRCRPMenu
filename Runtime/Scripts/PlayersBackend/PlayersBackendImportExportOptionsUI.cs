@@ -19,6 +19,7 @@ namespace JanSharp
         private ToggleFieldWidgetData includeOverriddenDisplayNameToggle;
         private ToggleFieldWidgetData includeCharacterNameToggle;
         private ToggleFieldWidgetData includeFavoriteItemsToggle;
+        private ToggleFieldWidgetData includeFavoriteObjectsToggle;
         private ToggleFieldWidgetData includeFavoritePlayersToggle;
 
         protected override LockstepGameStateOptionsData NewOptionsImpl()
@@ -38,6 +39,8 @@ namespace JanSharp
                 currentOptions.includeCharacterName = includeCharacterNameToggle.Value;
             if (includeFavoriteItemsToggle.Interactable)
                 currentOptions.includeFavoriteItems = includeFavoriteItemsToggle.Value;
+            if (includeFavoriteObjectsToggle.Interactable)
+                currentOptions.includeFavoriteObjects = includeFavoriteObjectsToggle.Value;
             if (includeFavoritePlayersToggle.Interactable)
                 currentOptions.includeFavoritePlayers = includeFavoritePlayersToggle.Value;
         }
@@ -53,6 +56,7 @@ namespace JanSharp
             includeOverriddenDisplayNameToggle = widgetManager.NewLeftToggleField("Overridden Display Name", false);
             includeCharacterNameToggle = widgetManager.NewLeftToggleField("Character Name", false);
             includeFavoriteItemsToggle = widgetManager.NewLeftToggleField("Favorite Items", false);
+            includeFavoriteObjectsToggle = widgetManager.NewLeftToggleField("Favorite Objects", false);
             includeFavoritePlayersToggle = widgetManager.NewLeftToggleField("Favorite Players", false);
         }
 
@@ -65,16 +69,19 @@ namespace JanSharp
                 includeOverriddenDisplayNameToggle.Interactable = optionsFromExport.includeOverriddenDisplayName;
                 includeCharacterNameToggle.Interactable = optionsFromExport.includeCharacterName;
                 includeFavoriteItemsToggle.Interactable = optionsFromExport.includeFavoriteItems;
+                includeFavoriteObjectsToggle.Interactable = optionsFromExport.includeFavoriteObjects;
                 includeFavoritePlayersToggle.Interactable = optionsFromExport.includeFavoritePlayers;
                 optionsFromExport.Delete();
             }
             includeOverriddenDisplayNameToggle.SetValueWithoutNotify(includeOverriddenDisplayNameToggle.Interactable && currentOptions.includeOverriddenDisplayName);
             includeCharacterNameToggle.SetValueWithoutNotify(includeCharacterNameToggle.Interactable && currentOptions.includeCharacterName);
             includeFavoriteItemsToggle.SetValueWithoutNotify(includeFavoriteItemsToggle.Interactable && currentOptions.includeFavoriteItems);
+            includeFavoriteObjectsToggle.SetValueWithoutNotify(includeFavoriteObjectsToggle.Interactable && currentOptions.includeFavoriteObjects);
             includeFavoritePlayersToggle.SetValueWithoutNotify(includeFavoritePlayersToggle.Interactable && currentOptions.includeFavoritePlayers);
             AddToggle(includeOverriddenDisplayNameToggle);
             AddToggle(includeCharacterNameToggle);
             AddToggle(includeFavoriteItemsToggle);
+            AddToggle(includeFavoriteObjectsToggle);
             AddToggle(includeFavoritePlayersToggle);
         }
 

@@ -4,24 +4,22 @@ using UnityEngine;
 namespace JanSharp
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-    public class ItemsPage : PermissionResolver
+    public class ObjectsPage : PermissionResolver
     {
         [HideInInspector][SerializeField][SingletonReference] private LockstepAPI lockstep;
         [HideInInspector][SerializeField][SingletonReference] private PlayersBackendManagerAPI playersBackendManager;
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
-        [HideInInspector][SerializeField][SingletonReference] private ItemsPageManagerAPI itemsPageManager;
-        [HideInInspector][SerializeField][SingletonReference] private ItemsFavoritesManager itemsFavoritesManager;
-        [HideInInspector][SerializeField][SingletonReference] private ItemSpawnLocationHelperAPI itemSpawnLocationHelper;
+        [HideInInspector][SerializeField][SingletonReference] private ObjectsPageManagerAPI objectsPageManager;
+        [HideInInspector][SerializeField][SingletonReference] private ObjectsFavoritesManager objectsFavoritesManager;
 
-        public ItemsList rowsList;
-        public ItemsRow rowPrefabScript;
-        public SegmentedSliderForSizing sizeSlider;
+        public ObjectsList rowsList;
+        public ObjectsRow rowPrefabScript;
 
-        private ItemsRow activeRow;
+        private ObjectsRow activeRow;
 
-        [PermissionDefinitionReference(nameof(viewItemCategoryPDef))]
-        public string viewItemCategoryPermissionAsset; // A guid.
-        [HideInInspector][SerializeField] private PermissionDefinition viewItemCategoryPDef;
+        [PermissionDefinitionReference(nameof(viewObjectCategoryPDef))]
+        public string viewObjectCategoryPermissionAsset; // A guid.
+        [HideInInspector][SerializeField] private PermissionDefinition viewObjectCategoryPDef;
 
         // private bool isInitialized = false;
 
@@ -37,6 +35,7 @@ namespace JanSharp
         public void OnMenuActivePageChanged()
         {
             ClearActiveRow();
+            // TODO: Close popups?
         }
 
         [LockstepEvent(LockstepEventType.OnInit)]
@@ -74,22 +73,22 @@ namespace JanSharp
 
         public override void ResolveAll()
         {
-            bool viewItemCategoryValue = viewItemCategoryPDef.valueForLocalPlayer;
+            bool viewObjectCategoryValue = viewObjectCategoryPDef.valueForLocalPlayer;
 
-            rowsList.SortOnPermissionChange(viewItemCategoryValue);
+            rowsList.SortOnPermissionChange(viewObjectCategoryValue);
 
-            bool itemCategoryChanged = rowPrefabScript.categoryRoot.activeSelf != viewItemCategoryValue;
-            rowPrefabScript.categoryRoot.SetActive(viewItemCategoryValue);
+            bool objectCategoryChanged = rowPrefabScript.categoryRoot.activeSelf != viewObjectCategoryValue;
+            rowPrefabScript.categoryRoot.SetActive(viewObjectCategoryValue);
 
-            if (!itemCategoryChanged)
+            if (!objectCategoryChanged)
                 return;
 
             for (int i = 0; i < 2; i++)
             {
-                ItemsRow[] rows = i == 0 ? rowsList.Rows : rowsList.UnusedRows;
+                ObjectsRow[] rows = i == 0 ? rowsList.Rows : rowsList.UnusedRows;
                 int rowsCount = i == 0 ? rowsList.RowsCount : rowsList.UnusedRowsCount;
                 for (int j = 0; j < rowsCount; j++)
-                    rows[j].categoryRoot.SetActive(viewItemCategoryValue);
+                    rows[j].categoryRoot.SetActive(viewObjectCategoryValue);
             }
         }
 
@@ -97,7 +96,7 @@ namespace JanSharp
 
         #region RowsManagement
 
-        private bool TryGetRow(uint entityPrototypeId, out ItemsRow row) => rowsList.TryGetRow(entityPrototypeId, out row);
+        private bool TryGetRow(uint entityPrototypeId, out ObjectsRow row) => rowsList.TryGetRow(entityPrototypeId, out row);
 
         private void RebuildRows()
         {
@@ -110,30 +109,30 @@ namespace JanSharp
 
         #region Favorite
 
-        public void OnFavoriteValueChanged(ItemsRow row)
+        public void OnFavoriteValueChanged(ObjectsRow row)
         {
             bool isFavorite = row.favoriteToggle.isOn;
             if (isFavorite)
-                itemsFavoritesManager.SendAddFavoriteIA(localPlayer, row.entityPrototype);
+                objectsFavoritesManager.SendAddFavoriteIA(localPlayer, row.entityPrototype);
             else
-                itemsFavoritesManager.SendRemoveFavoriteIA(localPlayer, row.entityPrototype);
+                objectsFavoritesManager.SendRemoveFavoriteIA(localPlayer, row.entityPrototype);
             // Latency hiding.
             row.isFavorite = isFavorite;
             rowsList.PotentiallySortChangedFavoriteRow(row);
         }
 
-        [ItemsFavoritesEvent(ItemsFavoritesEventType.OnItemFavoriteAdded)]
-        public void OnItemFavoriteAdded() => OnItemFavoriteChanged(true);
+        [ObjectsFavoritesEvent(ObjectsFavoritesEventType.OnObjectFavoriteAdded)]
+        public void OnObjectFavoriteAdded() => OnObjectFavoriteChanged(true);
 
-        [ItemsFavoritesEvent(ItemsFavoritesEventType.OnItemFavoriteRemoved)]
-        public void OnItemFavoriteRemoved() => OnItemFavoriteChanged(false);
+        [ObjectsFavoritesEvent(ObjectsFavoritesEventType.OnObjectFavoriteRemoved)]
+        public void OnObjectFavoriteRemoved() => OnObjectFavoriteChanged(false);
 
-        private void OnItemFavoriteChanged(bool isFavorite)
+        private void OnObjectFavoriteChanged(bool isFavorite)
         {
             // No need for an isInitialized check, this can only trigger through an input action, not any GS safe context.
-            if (!itemsFavoritesManager.PlayerForEvent.core.isLocal)
+            if (!objectsFavoritesManager.PlayerForEvent.core.isLocal)
                 return;
-            if (!TryGetRow(itemsFavoritesManager.EntityPrototypeForEvent.Id, out ItemsRow row))
+            if (!TryGetRow(objectsFavoritesManager.EntityPrototypeForEvent.Id, out ObjectsRow row))
                 return;
             row.isFavorite = isFavorite;
             row.favoriteToggle.SetIsOnWithoutNotify(isFavorite);
@@ -142,13 +141,13 @@ namespace JanSharp
 
         private void UpdateAllFavorites()
         {
-            ItemsRow[] rows = rowsList.Rows;
+            ObjectsRow[] rows = rowsList.Rows;
             int rowsCount = rowsList.RowsCount;
             bool anyChanged = false;
             for (int i = 0; i < rowsCount; i++)
             {
-                ItemsRow row = rows[i];
-                bool isFavorite = localPlayer.favoriteItemIdsLut.ContainsKey(row.entityPrototype.Id);
+                ObjectsRow row = rows[i];
+                bool isFavorite = localPlayer.favoriteObjectIdsLut.ContainsKey(row.entityPrototype.Id);
                 if (row.isFavorite == isFavorite)
                     continue;
                 row.isFavorite = isFavorite;
@@ -161,61 +160,30 @@ namespace JanSharp
 
         #endregion
 
-        #region Overlay
+        #region Highlight
 
         private void ClearActiveRow()
         {
             if (activeRow == null)
                 return;
-            activeRow.spawnToggle.SetIsOnWithoutNotify(false);
-            activeRow.itemNameLabelSelectable.interactable = true;
-            activeRow.categoryLabelSelectable.interactable = true;
-            activeRow.overlayRoot.SetActive(false);
+            activeRow.highlightToggle.SetIsOnWithoutNotify(false);
             activeRow = null;
         }
 
-        private void SetActiveRow(ItemsRow row)
+        private void SetActiveRow(ObjectsRow row)
         {
             if (activeRow == row)
                 return;
             ClearActiveRow();
             activeRow = row;
-            activeRow.itemNameLabelSelectable.interactable = false;
-            activeRow.categoryLabelSelectable.interactable = false;
-            activeRow.overlayRoot.SetActive(true);
         }
 
-        public void OnSpawnToggleValueChanged(ItemsRow row)
+        public void OnHighlightToggleValueChanged(ObjectsRow row)
         {
-            if (row.spawnToggle.isOn)
+            if (row.highlightToggle.isOn)
                 SetActiveRow(row);
             else if (row == activeRow)
                 ClearActiveRow();
-        }
-
-        public void OnConfirmSpawnClick(ItemsRow row)
-        {
-            itemSpawnLocationHelper.DetermineItemSpawnLocation(this, nameof(OnSpawnLocationDetermined), new object[]
-            {
-                activeRow.entityPrototype,
-                sizeSlider.GetSize(),
-            });
-            ClearActiveRow();
-        }
-
-        public void OnCancelSpawnClick(ItemsRow row)
-        {
-            ClearActiveRow();
-        }
-
-        public void OnSpawnLocationDetermined()
-        {
-            object[] callbackData = (object[])itemSpawnLocationHelper.CallbackCustomData;
-            itemsPageManager.CreateItem(
-                prototype: (EntityPrototype)callbackData[0],
-                itemSpawnLocationHelper.DeterminedPosition,
-                itemSpawnLocationHelper.DeterminedRotation,
-                scale: (float)callbackData[1]);
         }
 
         #endregion

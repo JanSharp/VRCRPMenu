@@ -17,6 +17,7 @@ namespace JanSharp
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
         [HideInInspector][SerializeField][SingletonReference] private PlayersFavoritesManagerAPI playersFavoritesManager;
         [HideInInspector][SerializeField][SingletonReference] private ItemsFavoritesManager itemsFavoritesManager;
+        [HideInInspector][SerializeField][SingletonReference] private ObjectsFavoritesManager objectsFavoritesManager;
 
         #region GameState
         /// <summary>
@@ -44,9 +45,17 @@ namespace JanSharp
         [System.NonSerialized] public DataDictionary favoriteItemIdsLut = new DataDictionary();
         [System.NonSerialized] public EntityPrototype[] favoriteItems = new EntityPrototype[ArrList.MinCapacity];
         [System.NonSerialized] public int favoriteItemsCount = 0;
+
+        /// <summary>
+        /// <para><see cref="uint"/> entityPrototypeId => <see langword="true"/></para>
+        /// </summary>
+        [System.NonSerialized] public DataDictionary favoriteObjectIdsLut = new DataDictionary();
+        [System.NonSerialized] public EntityPrototype[] favoriteObjects = new EntityPrototype[ArrList.MinCapacity];
+        [System.NonSerialized] public int favoriteObjectsCount = 0;
         #endregion
 
         [System.NonSerialized] public uint[] importedFavoriteItemIds;
+        [System.NonSerialized] public uint[] importedFavoriteObjectIds;
 
         public string PlayerDisplayName => overriddenDisplayName ?? core.displayName;
         public string PlayerDisplayNameWithCharacterName => characterName == ""
@@ -72,7 +81,13 @@ namespace JanSharp
             favoriteItemIdsLut.Clear();
             favoriteItems = new EntityPrototype[ArrList.MinCapacity];
             favoriteItemsCount = 0;
+
+            favoriteObjectIdsLut.Clear();
+            favoriteObjects = new EntityPrototype[ArrList.MinCapacity];
+            favoriteObjectsCount = 0;
+
             importedFavoriteItemIds = default;
+            importedFavoriteObjectIds = default;
         }
 
         public override void OnPlayerDataInit(bool isAboutToBeImported)
@@ -96,7 +111,8 @@ namespace JanSharp
                 || characterName != ""
                 || favoritePlayersOutgoingCount != 0
                 || favoritePlayersIncomingCount != 0
-                || favoriteItemsCount != 0;
+                || favoriteItemsCount != 0
+                || favoriteObjectsCount != 0;
         }
 
         public override bool PersistPlayerDataInExport()
@@ -107,7 +123,8 @@ namespace JanSharp
             return exportOptions.includeOverriddenDisplayName && overriddenDisplayName != null
                 || exportOptions.includeCharacterName && characterName != ""
                 || exportOptions.includeCharacterName && (favoritePlayersOutgoingCount != 0 || favoritePlayersIncomingCount != 0)
-                || exportOptions.includeFavoriteItems && favoriteItemsCount != 0;
+                || exportOptions.includeFavoriteItems && favoriteItemsCount != 0
+                || exportOptions.includeFavoriteObjects && favoriteObjectsCount != 0;
         }
 
         private void WriteString(bool isExport, bool includedInExport, string value)
@@ -184,6 +201,7 @@ namespace JanSharp
             WriteString(isExport, isExport && exportOptions.includeCharacterName, characterName);
 
             itemsFavoritesManager.SerializeFavoritesForPlayer(this, isExport);
+            objectsFavoritesManager.SerializeFavoritesForPlayer(this, isExport);
 
             if (!isExport || exportOptions.includeFavoritePlayers)
                 WriteFavoritePlayers();
@@ -206,6 +224,7 @@ namespace JanSharp
                 ref characterName);
 
             itemsFavoritesManager.DeserializeFavoritesForPlayer(this, isImport);
+            objectsFavoritesManager.DeserializeFavoritesForPlayer(this, isImport);
 
             if (!isImport)
                 ReadFavoritePlayers(isImport, discard: false);

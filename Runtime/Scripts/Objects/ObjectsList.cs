@@ -3,29 +3,33 @@ using UnityEngine;
 using UnityEngine.UI;
 using VRC.SDK3.Data;
 
+// NOTE: This file is currently almost 100% copy paste from the ItemsList.
+// With "item" replaced with "object" and "Item" replaced with "Object".
+// And some rows related to the per row overlay in the create function removed.
+
 namespace JanSharp
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-    public class ItemsList : SortableScrollableSearchableList
+    public class ObjectsList : SortableScrollableSearchableList
     {
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
         [HideInInspector][SerializeField][SingletonReference] private PlayersBackendManagerAPI playersBackendManager;
-        [HideInInspector][SerializeField][SingletonReference] private ItemsPageManagerAPI itemsPageManager;
+        [HideInInspector][SerializeField][SingletonReference] private ObjectsPageManagerAPI objectsPageManager;
 
-        public Image sortItemNameAscendingImage;
-        public Image sortItemNameDescendingImage;
+        public Image sortObjectNameAscendingImage;
+        public Image sortObjectNameDescendingImage;
         public Image sortCategoryAscendingImage;
         public Image sortCategoryDescendingImage;
 
         /// <summary>
-        /// <para><see cref="uint"/> entityPrototypeId => <see cref="ItemsRow"/> row</para>
+        /// <para><see cref="uint"/> entityPrototypeId => <see cref="ObjectsRow"/> row</para>
         /// </summary>
         private DataDictionary rowsByPrototypeId = new DataDictionary();
-        public ItemsRow[] Rows => (ItemsRow[])rows;
+        public ObjectsRow[] Rows => (ObjectsRow[])rows;
         public int RowsCount => rowsCount;
-        public ItemsRow[] HiddenRows => (ItemsRow[])hiddenRows;
+        public ObjectsRow[] HiddenRows => (ObjectsRow[])hiddenRows;
         public int HiddenRowsCount => hiddenRowsCount;
-        public ItemsRow[] UnusedRows => (ItemsRow[])unusedRows;
+        public ObjectsRow[] UnusedRows => (ObjectsRow[])unusedRows;
         public int UnusedRowsCount => unusedRowsCount;
 
         private RPPlayerData localPlayer;
@@ -34,8 +38,8 @@ namespace JanSharp
         {
             base.Initialize();
 
-            currentSortOrderFunction = nameof(CompareRowItemNameAscending);
-            currentSortOrderImage = sortItemNameAscendingImage;
+            currentSortOrderFunction = nameof(CompareRowObjectNameAscending);
+            currentSortOrderImage = sortObjectNameAscendingImage;
             currentSortOrderImage.enabled = true;
             someRowsAreOutOfSortOrder = false;
         }
@@ -48,32 +52,32 @@ namespace JanSharp
 
         #region RowsManagement
 
-        public bool TryGetRow(uint entityPrototypeId, out ItemsRow row)
+        public bool TryGetRow(uint entityPrototypeId, out ObjectsRow row)
         {
             if (rowsByPrototypeId.TryGetValue(entityPrototypeId, out DataToken rowToken))
             {
-                row = (ItemsRow)rowToken.Reference;
+                row = (ObjectsRow)rowToken.Reference;
                 return true;
             }
             row = null;
             return false;
         }
 
-        public ItemsRow CreateRow(EntityPrototype prototype)
+        public ObjectsRow CreateRow(EntityPrototype prototype)
         {
-            ItemsRow row = CreateRowForPrototype(prototype);
+            ObjectsRow row = CreateRowForPrototype(prototype);
             rowsByPrototypeId.Add(prototype.Id, row);
             InsertSortNewRow(row);
             return row;
         }
 
-        public void RemoveRow(ItemsRow row)
+        public void RemoveRow(ObjectsRow row)
         {
             rowsByPrototypeId.Remove(row.entityPrototype.Id);
             RemoveRow((SortableScrollableRow)row);
         }
 
-        public void RebuildRows() => RebuildRows(itemsPageManager.ItemPrototypesCount);
+        public void RebuildRows() => RebuildRows(objectsPageManager.ObjectPrototypesCount);
 
         protected override void OnRowCreated(SortableScrollableRow row) { }
 
@@ -84,31 +88,28 @@ namespace JanSharp
 
         protected override SortableScrollableRow RebuildRow(int index)
         {
-            EntityPrototype prototype = itemsPageManager.GetItemPrototype(index);
-            ItemsRow row = CreateRowForPrototype(prototype);
+            EntityPrototype prototype = objectsPageManager.GetObjectPrototype(index);
+            ObjectsRow row = CreateRowForPrototype(prototype);
             rowsByPrototypeId.Add(prototype.Id, row);
             return row;
         }
 
-        private ItemsRow CreateRowForPrototype(EntityPrototype prototype)
+        private ObjectsRow CreateRowForPrototype(EntityPrototype prototype)
         {
-            ItemsRow row = (ItemsRow)CreateRow();
+            ObjectsRow row = (ObjectsRow)CreateRow();
             row.entityPrototype = prototype;
 
-            bool isFavorite = localPlayer.favoriteItemIdsLut.ContainsKey(prototype.Id);
-            string itemName = prototype.DisplayName;
+            bool isFavorite = localPlayer.favoriteObjectIdsLut.ContainsKey(prototype.Id);
+            string objectName = prototype.DisplayName;
             string category = "Category"; // TODO
 
             row.isFavorite = isFavorite;
-            row.sortableItemName = itemName.ToLower();
+            row.sortableObjectName = objectName.ToLower();
             row.sortableCategory = category.ToLower();
 
             row.favoriteToggle.SetIsOnWithoutNotify(isFavorite);
             row.categoryLabel.text = category;
-            row.spawnToggle.SetIsOnWithoutNotify(false);
-            row.itemNameLabelSelectable.interactable = true;
-            row.categoryLabelSelectable.interactable = true;
-            row.overlayRoot.SetActive(false);
+            row.highlightToggle.SetIsOnWithoutNotify(false);
 
             UpdateNewlyCreatedRow(row);
 
@@ -121,22 +122,22 @@ namespace JanSharp
 
         // NOTE: Cannot just invert the order of the rows when inverting the order of a sorted column.
         // The categories are the most clear example of this. When inverting the sort order there it makes
-        // more sense for just the categories to flip order, while items in those categories retain relative
+        // more sense for just the categories to flip order, while objects in those categories retain relative
         // order
 
-        public void OnItemNameSortHeaderClick()
+        public void OnObjectNameSortHeaderClick()
         {
             if (currentSortOrderImage != null)
                 currentSortOrderImage.enabled = false;
-            if (!someRowsAreOutOfSortOrder && currentSortOrderFunction == nameof(CompareRowItemNameAscending))
+            if (!someRowsAreOutOfSortOrder && currentSortOrderFunction == nameof(CompareRowObjectNameAscending))
             {
-                currentSortOrderFunction = nameof(CompareRowItemNameDescending);
-                currentSortOrderImage = sortItemNameDescendingImage;
+                currentSortOrderFunction = nameof(CompareRowObjectNameDescending);
+                currentSortOrderImage = sortObjectNameDescendingImage;
             }
             else
             {
-                currentSortOrderFunction = nameof(CompareRowItemNameAscending);
-                currentSortOrderImage = sortItemNameAscendingImage;
+                currentSortOrderFunction = nameof(CompareRowObjectNameAscending);
+                currentSortOrderImage = sortObjectNameAscendingImage;
             }
             currentSortOrderImage.enabled = true;
             SortAll();
@@ -164,22 +165,22 @@ namespace JanSharp
 
         #region SortAPI
 
-        public void SortOnPermissionChange(bool viewItemCategoryValue)
+        public void SortOnPermissionChange(bool viewObjectCategoryValue)
         {
-            if (!viewItemCategoryValue
+            if (!viewObjectCategoryValue
                 && (currentSortOrderFunction == nameof(CompareRowCategoryAscending)
                     || currentSortOrderFunction == nameof(CompareRowCategoryDescending)))
             {
-                currentSortOrderFunction = nameof(CompareRowItemNameAscending);
+                currentSortOrderFunction = nameof(CompareRowObjectNameAscending);
                 // No need for null check, it's only null while using CompareRowSearchResults.
                 currentSortOrderImage.enabled = false;
-                currentSortOrderImage = sortItemNameAscendingImage;
+                currentSortOrderImage = sortObjectNameAscendingImage;
                 currentSortOrderImage.enabled = true;
                 SortAll();
             }
         }
 
-        public void PotentiallySortChangedFavoriteRow(ItemsRow row)
+        public void PotentiallySortChangedFavoriteRow(ObjectsRow row)
         {
             UpdateSortPositionDueToValueChange(row);
         }
@@ -193,31 +194,31 @@ namespace JanSharp
 
         #region MergeSortComparators
 
-        public void CompareRowItemNameAscending()
+        public void CompareRowObjectNameAscending()
         {
-            ItemsRow left = (ItemsRow)compareLeft;
-            ItemsRow right = (ItemsRow)compareRight;
+            ObjectsRow left = (ObjectsRow)compareLeft;
+            ObjectsRow right = (ObjectsRow)compareRight;
             if (left.isFavorite != right.isFavorite)
                 leftSortsFirst = left.isFavorite;
             else
-                leftSortsFirst = left.sortableItemName
-                    .CompareTo(right.sortableItemName) <= 0;
+                leftSortsFirst = left.sortableObjectName
+                    .CompareTo(right.sortableObjectName) <= 0;
         }
-        public void CompareRowItemNameDescending()
+        public void CompareRowObjectNameDescending()
         {
-            ItemsRow left = (ItemsRow)compareLeft;
-            ItemsRow right = (ItemsRow)compareRight;
+            ObjectsRow left = (ObjectsRow)compareLeft;
+            ObjectsRow right = (ObjectsRow)compareRight;
             if (left.isFavorite != right.isFavorite)
                 leftSortsFirst = left.isFavorite;
             else
-                leftSortsFirst = left.sortableItemName
-                    .CompareTo(right.sortableItemName) >= 0;
+                leftSortsFirst = left.sortableObjectName
+                    .CompareTo(right.sortableObjectName) >= 0;
         }
 
         public void CompareRowCategoryAscending()
         {
-            ItemsRow left = (ItemsRow)compareLeft;
-            ItemsRow right = (ItemsRow)compareRight;
+            ObjectsRow left = (ObjectsRow)compareLeft;
+            ObjectsRow right = (ObjectsRow)compareRight;
             if (left.isFavorite != right.isFavorite)
                 leftSortsFirst = left.isFavorite;
             else
@@ -226,8 +227,8 @@ namespace JanSharp
         }
         public void CompareRowCategoryDescending()
         {
-            ItemsRow left = (ItemsRow)compareLeft;
-            ItemsRow right = (ItemsRow)compareRight;
+            ObjectsRow left = (ObjectsRow)compareLeft;
+            ObjectsRow right = (ObjectsRow)compareRight;
             if (left.isFavorite != right.isFavorite)
                 leftSortsFirst = left.isFavorite;
             else

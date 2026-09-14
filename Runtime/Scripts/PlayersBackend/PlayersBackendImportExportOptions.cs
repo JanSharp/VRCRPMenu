@@ -12,6 +12,7 @@ namespace JanSharp
         [System.NonSerialized] public bool includeOverriddenDisplayName = true;
         [System.NonSerialized] public bool includeCharacterName = true;
         [System.NonSerialized] public bool includeFavoriteItems = true;
+        [System.NonSerialized] public bool includeFavoriteObjects = true;
         [System.NonSerialized] public bool includeFavoritePlayers = true;
 
         public override bool WannaBeClassSupportsPooling => true;
@@ -21,6 +22,7 @@ namespace JanSharp
             includeOverriddenDisplayName = true;
             includeCharacterName = true;
             includeFavoriteItems = true;
+            includeFavoriteObjects = true;
             includeFavoritePlayers = true;
         }
 
@@ -30,6 +32,7 @@ namespace JanSharp
             clone.includeOverriddenDisplayName = includeOverriddenDisplayName;
             clone.includeCharacterName = includeCharacterName;
             clone.includeFavoriteItems = includeFavoriteItems;
+            clone.includeFavoriteObjects = includeFavoriteObjects;
             clone.includeFavoritePlayers = includeFavoritePlayers;
             return clone;
         }
@@ -40,6 +43,7 @@ namespace JanSharp
                 includeOverriddenDisplayName,
                 includeCharacterName,
                 includeFavoriteItems,
+                includeFavoriteObjects,
                 includeFavoritePlayers);
         }
 
@@ -49,6 +53,7 @@ namespace JanSharp
                 out includeOverriddenDisplayName,
                 out includeCharacterName,
                 out includeFavoriteItems,
+                out includeFavoriteObjects,
                 out includeFavoritePlayers);
         }
     }

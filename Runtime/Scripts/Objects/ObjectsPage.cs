@@ -1,8 +1,17 @@
-﻿using UdonSharp;
+﻿using TMPro;
+using UdonSharp;
 using UnityEngine;
 
 namespace JanSharp
 {
+    public enum ObjectsPageMode
+    {
+        Idle,
+        Creating,
+        Editing,
+        Deleting,
+    }
+
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class ObjectsPage : PermissionResolver
     {
@@ -11,11 +20,34 @@ namespace JanSharp
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
         [HideInInspector][SerializeField][SingletonReference] private ObjectsPageManagerAPI objectsPageManager;
         [HideInInspector][SerializeField][SingletonReference] private ObjectsFavoritesManager objectsFavoritesManager;
+        [HideInInspector][SerializeField][FindInParent] private MenuManagerAPI menuManager;
 
         public ObjectsList rowsList;
         public ObjectsRow rowPrefabScript;
 
+        public Transform popupsParent;
+
+        private ObjectsPageMode currentMode;
+        private RectTransform activePopup;
+
+        #region Creating
+        public RectTransform creatingPopup;
+        public TextMeshProUGUI creatingHeaderLabel;
+        private string creatingHeaderLabelFormat;
         private ObjectsRow activeRow;
+        #endregion
+
+        #region Editing
+        public RectTransform editingPopup;
+        #endregion
+
+        #region Deleting
+        public RectTransform deletingPopup;
+        #endregion
+
+        [PermissionDefinitionReference(nameof(useObjectsPDef))]
+        public string useObjectsPermissionAsset; // A guid.
+        [HideInInspector][SerializeField] private PermissionDefinition useObjectsPDef;
 
         [PermissionDefinitionReference(nameof(viewObjectCategoryPDef))]
         public string viewObjectCategoryPermissionAsset; // A guid.
@@ -31,11 +63,16 @@ namespace JanSharp
             localPlayer = playersBackendManager.GetRPPlayerData(playerDataManager.LocalPlayerData);
         }
 
+        [MenuManagerEvent(MenuManagerEventType.OnMenuManagerStart)]
+        public void OnMenuManagerStart()
+        {
+            creatingHeaderLabelFormat = creatingHeaderLabel.text;
+        }
+
         [MenuManagerEvent(MenuManagerEventType.OnMenuActivePageChanged)]
         public void OnMenuActivePageChanged()
         {
-            ClearActiveRow();
-            // TODO: Close popups?
+            EnterIdleMode();
         }
 
         [LockstepEvent(LockstepEventType.OnInit)]
@@ -60,6 +97,12 @@ namespace JanSharp
             // isInitialized = true;
         }
 
+        [LockstepEvent(LockstepEventType.OnImportStart)]
+        public void OnImportStart()
+        {
+            EnterIdleMode();
+        }
+
         [LockstepEvent(LockstepEventType.OnImportFinishingUp)]
         public void OnImportFinishingUp()
         {
@@ -73,6 +116,9 @@ namespace JanSharp
 
         public override void ResolveAll()
         {
+            if (!useObjectsPDef.valueForLocalPlayer)
+                EnterIdleMode();
+
             bool viewObjectCategoryValue = viewObjectCategoryPDef.valueForLocalPlayer;
 
             rowsList.SortOnPermissionChange(viewObjectCategoryValue);
@@ -100,8 +146,8 @@ namespace JanSharp
 
         private void RebuildRows()
         {
-            // if (!lockstep.IsContinuationFromPrevFrame)
-            //     EnsureClosedPopups();
+            if (!lockstep.IsContinuationFromPrevFrame && currentMode == ObjectsPageMode.Creating)
+                ExitCreatingMode(); // Creating relies on an active row.
             rowsList.RebuildRows();
         }
 
@@ -160,7 +206,7 @@ namespace JanSharp
 
         #endregion
 
-        #region Highlight
+        #region Row Highlight
 
         private void ClearActiveRow()
         {
@@ -181,10 +227,115 @@ namespace JanSharp
         public void OnHighlightToggleValueChanged(ObjectsRow row)
         {
             if (row.highlightToggle.isOn)
-                SetActiveRow(row);
+                EnterCreatingMode(row);
             else if (row == activeRow)
-                ClearActiveRow();
+                EnterIdleMode();
         }
+
+        #endregion
+
+        #region Modes
+
+        private void EnterIdleMode()
+        {
+            switch (currentMode)
+            {
+                case ObjectsPageMode.Creating:
+                    ExitCreatingMode();
+                    break;
+                case ObjectsPageMode.Editing:
+                    ExitEditingMode();
+                    break;
+                case ObjectsPageMode.Deleting:
+                    ExitDeletingMode();
+                    break;
+            }
+        }
+
+        #region Popups
+
+        private void ShowPopup(RectTransform popup)
+        {
+            menuManager.ShowPopupAtItsAnchor(popup, this, nameof(OnPopupClosed));
+            activePopup = popup;
+        }
+
+        private void CloseActivePopup()
+        {
+            if (activePopup == null)
+                return;
+            menuManager.ClosePopup(activePopup, doCallback: false);
+            ReturnActivePopup();
+        }
+
+        public void OnPopupClosed()
+        {
+            ReturnActivePopup();
+            EnterIdleMode();
+        }
+
+        private void ReturnActivePopup()
+        {
+            activePopup.SetParent(popupsParent, worldPositionStays: false);
+            activePopup = null;
+        }
+
+        #endregion
+
+        #region Creating
+
+        private void EnterCreatingMode(ObjectsRow row)
+        {
+            currentMode = ObjectsPageMode.Creating;
+            SetActiveRow(row);
+            creatingHeaderLabel.text = string.Format(creatingHeaderLabelFormat, row.entityPrototype.DisplayName);
+            ShowPopup(creatingPopup);
+        }
+
+        private void ExitCreatingMode()
+        {
+            currentMode = ObjectsPageMode.Idle;
+            ClearActiveRow();
+            CloseActivePopup();
+        }
+
+        #endregion
+
+        #region Editing
+
+        public void OnEditExistingClick() => EnterEditingMode();
+
+        private void EnterEditingMode()
+        {
+            currentMode = ObjectsPageMode.Editing;
+            ShowPopup(editingPopup);
+        }
+
+        private void ExitEditingMode()
+        {
+            currentMode = ObjectsPageMode.Idle;
+            CloseActivePopup();
+        }
+
+        #endregion
+
+        #region Deleting
+
+        public void OnDeleteExistingClick() => EnterDeletingMode();
+
+        private void EnterDeletingMode()
+        {
+            currentMode = ObjectsPageMode.Deleting;
+            ShowPopup(deletingPopup);
+        }
+
+        private void ExitDeletingMode()
+        {
+            currentMode = ObjectsPageMode.Idle;
+            CloseActivePopup();
+        }
+
+        #endregion
 
         #endregion
     }

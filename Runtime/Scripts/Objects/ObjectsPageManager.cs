@@ -27,7 +27,7 @@ namespace JanSharp
             foreach (EntityPrototype prototype in prototypes)
             {
                 string[] classNames = prototype.ExtensionDataClassNames;
-                if (System.Array.IndexOf(classNames, nameof(ItemExtensionData)) == -1)
+                if (System.Array.IndexOf(classNames, nameof(ObjectEntityExtensionData)) != -1)
                 {
                     objectPrototypeNamesLut.Add(prototype.PrototypeName, true);
                     ArrList.Add(ref objectPrototypes, ref objectPrototypesCount, prototype);

@@ -148,6 +148,10 @@ namespace JanSharp.Internal
 
         private int currentMoveMode = InvalidMoveModeId;
 
+        private float inputXMultiplier;
+        private const float InputXMultiplierInDesktop = 1f;
+        private const float InputXMultiplierInVR = 0.5f;
+
         private VRCPlayerApi localPlayer;
         private bool isInVR;
 
@@ -156,6 +160,7 @@ namespace JanSharp.Internal
             localPlayer = Networking.LocalPlayer;
             isInVR = localPlayer.IsUserInVR();
             localPlayerCollidingLayers = teleportManager.LocalPlayerCollidingLayers & ~localPlayerLayer;
+            inputXMultiplier = isInVR ? InputXMultiplierInVR : InputXMultiplierInDesktop;
             UpdateCurrentModeWhileStillEventName();
             UpdateCurrentModeWhileMovingEventName();
         }
@@ -228,6 +233,10 @@ namespace JanSharp.Internal
         // Left joystick left right. A and D in desktop.
         public override void InputMoveHorizontal(float value, UdonInputEventArgs args)
         {
+            // It'd be the easiest to just put a multiplication by 0.5 in here while in VR
+            // But this function body shall be kept as tiny as possible.
+            // Because udon is horrendously slow.
+            // so this is the smallest it can get.
             inputX = value;
         }
 
@@ -288,11 +297,11 @@ namespace JanSharp.Internal
             // Moving diagonally can exceed targetSpeed, especially on desktop, but eh not a big deal.
             Vector3 targetVelocity;
             if (isInVR || verticalMovement == NoClipVerticalMovementType.None)
-                targetVelocity = (currentHead.rotation * new Vector3(inputX, 0f, inputZ)) * targetSpeed;
+                targetVelocity = (currentHead.rotation * new Vector3(inputX * inputXMultiplier, 0f, inputZ)) * targetSpeed;
             else if (verticalMovement == NoClipVerticalMovementType.HeadLocalSpace)
-                targetVelocity = (currentHead.rotation * new Vector3(inputX, inputY, inputZ)) * targetSpeed;
+                targetVelocity = (currentHead.rotation * new Vector3(inputX * inputXMultiplier, inputY, inputZ)) * targetSpeed;
             else // if (verticalMovement == NoClipVerticalMovementType.WorldSpace)
-                targetVelocity = (currentHead.rotation * new Vector3(inputX, 0f, inputZ) + Vector3.up * inputY) * targetSpeed;
+                targetVelocity = (currentHead.rotation * new Vector3(inputX * inputXMultiplier, 0f, inputZ) + Vector3.up * inputY) * targetSpeed;
             SmoothCurrentVelocity(targetVelocity);
 
             currentIsNearColliders = CheckForColliders();

@@ -217,7 +217,7 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [ ] switch away from abusing Selectable for animations and do cross fading on the graphic through script. Selectable does eat performance when changing parents, which is what happens when switching pages, contributing to that lag spike (~180ms total lag spike with 1089 players, switching to and from the players backend page, ~21ms of which is Selectable. Granted that includes the Button, Toggle and TMPInputField as they derive from Selectable, but still)
 - [x] close item spawn confirmation popup when switching pages
 - [ ] make last open the default for desktop and hide the option, as otherwise using input fields is a really bad experience or even breaks the process as pages run logic upon no longer being the active page
-- [ ] no clip is too fast for the voice range sphere. Making the box bigger is a band aid, it'd be better to somehow force the positioning of the voice range sphere to run after no clip
+- [x] no clip is too fast for the voice range sphere. Making the box bigger is a band aid, it'd be better to somehow force the positioning of the voice range sphere to run after no clip
 - [x] when player data gets deleted the labels in gm requests do not update
   - [x] might also apply to undo/redo teleport - nope
   - [x] also applies to gm proxies
@@ -261,7 +261,7 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [x] maybe combine no clip enabled and flying type options into one row in the UI - none, flying, no clip
 - [x] maybe change no clip label in UI to one word
 - [x] fix losing no clip permissions not deactivating no clip
-- [ ] see if there is anything to be done about the menu jittering while moving around in no clip
+- [x] see if there is anything to be done about the menu jittering while moving around in no clip
 - [ ] use material property blocks for gm proxies
   - [ ] check if filamented supports property block instancing on its color property
   - [ ] check the same for unity default shaders for the fun of it
@@ -282,7 +282,7 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [ ] maybe make strafe always move you on the y plane, rather than relative to the head
 - [x] through some mysterious means the timer on a gm request just stopped updating. Switching pages did not cause it to start again - same issue as that one `SortableScrollableList` above, the menu system was at fault
 - [x] make dynamic data add and overwrite headers clear headers
-- [ ] hud positioning is also affected by order of operations while no clipping, just like how the menu jitters
+- [x] hud positioning is also affected by order of operations while no clipping, just like how the menu jitters
 - [x] custom location add input field should say Custom Location Name, not Selection Group Name
 - [x] fix permissions for item sizes, small and large item permissions are outdated
 - [x] add more space between gm proxies and no clip modules to make it a clearer separation

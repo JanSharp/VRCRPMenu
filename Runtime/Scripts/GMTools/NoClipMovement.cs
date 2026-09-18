@@ -5,16 +5,12 @@ using VRC.Udon.Common;
 
 namespace JanSharp.Internal
 {
+    [DefaultExecutionOrder(-5000000)] // Must run before the BoneAttachmentManager.
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     [CustomRaisedEventsDispatcher(typeof(NoClipMovementEventAttribute), typeof(NoClipMovementEventType))]
     public class NoClipMovement : NoClipMovementAPI
     {
         [HideInInspector][SerializeField][SingletonReference] private RPMenuTeleportManagerAPI teleportManager;
-        [HideInInspector][SerializeField][SingletonReference] private UpdateManager updateManager;
-        /// <summary>
-        /// <para>Used by <see cref="UpdateManager"/>.</para>
-        /// </summary>
-        private int customUpdateInternalIndex;
 #if RP_MENU_DEBUG
         // DEBUG
         [HideInInspector][SerializeField][SingletonReference] private QuickDebugUI qd;
@@ -163,6 +159,7 @@ namespace JanSharp.Internal
             inputXMultiplier = isInVR ? InputXMultiplierInVR : InputXMultiplierInDesktop;
             UpdateCurrentModeWhileStillEventName();
             UpdateCurrentModeWhileMovingEventName();
+            StopUpdateLoop();
         }
 
         public override void IncrementAvoidTeleporting()
@@ -213,14 +210,14 @@ namespace JanSharp.Internal
                 if (currentVelocity.magnitude > targetSpeed * MaxInitialExtraSpeedMultiplier)
                     currentVelocity = currentVelocity.normalized * targetSpeed * MaxInitialExtraSpeedMultiplier;
                 averageDeltaTime = Time.deltaTime;
-                updateManager.Register(this);
+                StartUpdateLoop();
             }
             else
             {
                 localPlayer.SetGravityStrength(1f);
                 fakeGroundGo.SetActive(false);
                 localPlayer.SetVelocity(currentVelocity);
-                updateManager.Deregister(this);
+                StopUpdateLoop();
             }
         }
 
@@ -260,7 +257,7 @@ namespace JanSharp.Internal
         }
 
         /// <summary>
-        /// <para>Used within <see cref="CustomUpdate"/>.</para>
+        /// <para>Used within <see cref="Update"/>.</para>
         /// </summary>
         private float currentAcknowledgedDeltaTime;
         /// <inheritdoc cref="currentAcknowledgedDeltaTime"/>
@@ -270,8 +267,17 @@ namespace JanSharp.Internal
         /// <inheritdoc cref="currentAcknowledgedDeltaTime"/>
         private bool currentIsNearColliders;
 
-        public void CustomUpdate()
+        private void StartUpdateLoop() => enabled = true;
+
+        private void StopUpdateLoop() => enabled = false;
+
+        private void Update()
         {
+#if RP_MENU_DEBUG
+            qd.ShowForOneFrame(this, "Update", "is running");
+#endif
+            if (!IsNoClipActive)
+                return;
 #if RP_MENU_DEBUG
             // DEBUG
             // Depending on what this shows while moving around using teleport, if it is false even though

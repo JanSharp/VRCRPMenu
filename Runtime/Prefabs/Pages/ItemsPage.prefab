@@ -999,6 +999,8 @@ GameObject:
   - component: {fileID: 1093623571115836143}
   - component: {fileID: 7116495732085546313}
   - component: {fileID: 4135608356696424922}
+  - component: {fileID: 178922752221723254}
+  - component: {fileID: 3376050160103126360}
   m_Layer: 17
   m_Name: SizeSlider
   m_TagString: Untagged
@@ -1262,6 +1264,8 @@ MonoBehaviour:
   _udonSharpBackingUdonBehaviour: {fileID: 1093623571115836143}
   slider: {fileID: 4929616032848286084}
   percentagePerSegment: 0.3894955
+  useSliderPermissionAsset: e374bcce8fc168489a6e0d6bc83d0b0d
+  useSliderPDef: {fileID: 0}
 --- !u!114 &1093623571115836143
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1328,6 +1332,61 @@ MonoBehaviour:
   controlFlexibleWidth: 1
   controlFlexibleHeight: 1
   controlLayoutPriority: 1
+--- !u!114 &178922752221723254
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 982694486810853505}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 910427d32de5308cf85dacab0f4d5f7c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects: []
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes: []
+  _udonSharpBackingUdonBehaviour: {fileID: 3376050160103126360}
+  permissionManager: {fileID: 0}
+  whenConditionsAreMet: 0
+  showWhileLoading: 0
+  logicalAnds: 00
+  inverts: 00
+  assetGuids:
+  - e374bcce8fc168489a6e0d6bc83d0b0d
+  permissionDefs: []
+--- !u!114 &3376050160103126360
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 982694486810853505}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45115577ef41a5b4ca741ed302693907, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  interactTextPlacement: {fileID: 0}
+  interactText: Use
+  interactTextGO: {fileID: 0}
+  proximity: 2
+  SynchronizePosition: 0
+  AllowCollisionOwnershipTransfer: 0
+  Reliable: 0
+  _syncMethod: 2
+  serializedProgramAsset: {fileID: 0}
+  programSource: {fileID: 11400000, guid: a71c4b030bb0d4d00a55b40e068b93aa, type: 2}
+  serializedPublicVariablesBytesString: Ai8AAAAAATIAAABWAFIAQwAuAFUAZABvAG4ALgBDAG8AbQBtAG8AbgAuAFUAZABvAG4AVgBhAHIAaQBhAGIAbABlAFQAYQBiAGwAZQAsACAAVgBSAEMALgBVAGQAbwBuAC4AQwBvAG0AbQBvAG4AAAAAAAYBAAAAAAAAACcBBAAAAHQAeQBwAGUAAWgAAABTAHkAcwB0AGUAbQAuAEMAbwBsAGwAZQBjAHQAaQBvAG4AcwAuAEcAZQBuAGUAcgBpAGMALgBMAGkAcwB0AGAAMQBbAFsAVgBSAEMALgBVAGQAbwBuAC4AQwBvAG0AbQBvAG4ALgBJAG4AdABlAHIAZgBhAGMAZQBzAC4ASQBVAGQAbwBuAFYAYQByAGkAYQBiAGwAZQAsACAAVgBSAEMALgBVAGQAbwBuAC4AQwBvAG0AbQBvAG4AXQBdACwAIABtAHMAYwBvAHIAbABpAGIAAQEJAAAAVgBhAHIAaQBhAGIAbABlAHMALwEAAAABaAAAAFMAeQBzAHQAZQBtAC4AQwBvAGwAbABlAGMAdABpAG8AbgBzAC4ARwBlAG4AZQByAGkAYwAuAEwAaQBzAHQAYAAxAFsAWwBWAFIAQwAuAFUAZABvAG4ALgBDAG8AbQBtAG8AbgAuAEkAbgB0AGUAcgBmAGEAYwBlAHMALgBJAFUAZABvAG4AVgBhAHIAaQBhAGIAbABlACwAIABWAFIAQwAuAFUAZABvAG4ALgBDAG8AbQBtAG8AbgBdAF0ALAAgAG0AcwBjAG8AcgBsAGkAYgABAAAABgEAAAAAAAAAAi8CAAAAAUkAAABWAFIAQwAuAFUAZABvAG4ALgBDAG8AbQBtAG8AbgAuAFUAZABvAG4AVgBhAHIAaQBhAGIAbABlAGAAMQBbAFsAUwB5AHMAdABlAG0ALgBJAG4AdAAzADIALAAgAG0AcwBjAG8AcgBsAGkAYgBdAF0ALAAgAFYAUgBDAC4AVQBkAG8AbgAuAEMAbwBtAG0AbwBuAAIAAAAGAgAAAAAAAAAnAQQAAAB0AHkAcABlAAEXAAAAUwB5AHMAdABlAG0ALgBTAHQAcgBpAG4AZwAsACAAbQBzAGMAbwByAGwAaQBiACcBCgAAAFMAeQBtAGIAbwBsAE4AYQBtAGUAAR8AAABfAF8AXwBVAGQAbwBuAFMAaABhAHIAcABCAGUAaABhAHYAaQBvAHUAcgBWAGUAcgBzAGkAbwBuAF8AXwBfACcBBAAAAHQAeQBwAGUAARYAAABTAHkAcwB0AGUAbQAuAEkAbgB0ADMAMgAsACAAbQBzAGMAbwByAGwAaQBiABcBBQAAAFYAYQBsAHUAZQACAAAABwUHBQcF
+  publicVariablesUnityEngineObjects: []
+  publicVariablesSerializationDataFormat: 0
 --- !u!1 &1173741378571829108
 GameObject:
   m_ObjectHideFlags: 0
@@ -11083,6 +11142,9 @@ MonoBehaviour:
   rowsScrollRect: {fileID: 2590775484848440500}
   minScrollRectVelocity: 20
   emptyListInfo: {fileID: 2853503059163581867}
+  searchInputField: {fileID: 1189287165844911273}
+  searchMatchHighlightColorName: main-highlight-rich-text-mark
+  searchMatchHighlightColor: {r: 0.5019608, g: 0.83137256, b: 1, a: 0.2}
   playerDataManager: {fileID: 0}
   playersBackendManager: {fileID: 0}
   itemsPageManager: {fileID: 0}
@@ -11090,9 +11152,6 @@ MonoBehaviour:
   sortItemNameDescendingImage: {fileID: 2121241103804522498}
   sortCategoryAscendingImage: {fileID: 8242204228428417018}
   sortCategoryDescendingImage: {fileID: 5412575629615751347}
-  searchInputField: {fileID: 1189287165844911273}
-  searchMatchHighlightColorName: main-highlight-rich-text-mark
-  searchMatchHighlightColor: {r: 0.5019608, g: 0.83137256, b: 1, a: 0.2}
 --- !u!114 &1396109078644102461
 MonoBehaviour:
   m_ObjectHideFlags: 0

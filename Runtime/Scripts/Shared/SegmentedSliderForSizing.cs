@@ -14,6 +14,11 @@ namespace JanSharp
         /// </summary>
         private uint middlePointIndex = 0u;
 
+        [Tooltip("Optional")]
+        [PermissionDefinitionReference(nameof(useSliderPDef), Optional = true)]
+        public string useSliderPermissionAsset; // A guid.
+        [HideInInspector][SerializeField] private PermissionDefinition useSliderPDef;
+
         [MenuManagerEvent(MenuManagerEventType.OnMenuManagerStart)]
         public void OnMenuManagerStart()
         {
@@ -29,6 +34,8 @@ namespace JanSharp
 
         public float GetSize()
         {
+            if (useSliderPDef != null && !useSliderPDef.valueForLocalPlayer)
+                return 1f;
             return Mathf.Pow(1f + percentagePerSegment, slider.Value - (float)middlePointIndex);
         }
     }

@@ -284,7 +284,7 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
 - [x] make dynamic data add and overwrite headers clear headers
 - [ ] hud positioning is also affected by order of operations while no clipping, just like how the menu jitters
 - [x] custom location add input field should say Custom Location Name, not Selection Group Name
-- [ ] fix permissions for item sizes, small and large item permissions are outdated
+- [x] fix permissions for item sizes, small and large item permissions are outdated
 - [x] add more space between gm proxies and no clip modules to make it a clearer separation
 - [x] add "minutes" to autosave interval label
 - [ ] maybe add location zones on the players page, another column alternative to proximity

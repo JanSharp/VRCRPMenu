@@ -555,6 +555,8 @@ namespace JanSharp
                 currentCreationPreviewGo.transform.position,
                 currentCreationPreviewGo.transform.rotation);
 
+            facingOptions.OnObjectCreated();
+
             if (uponPlaceClosePopupToggle.isOn)
             {
                 ExitCreatingMode();

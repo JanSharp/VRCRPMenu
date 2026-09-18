@@ -56,6 +56,11 @@ namespace JanSharp
             randomizeToggle.SetIsOnWithoutNotify(true);
             facingSliderHandle.interactable = false;
             facingSlider.wholeNumbers = false;
+            RandomizeRotation();
+        }
+
+        private void RandomizeRotation()
+        {
             yRotation = Random.Range(-180f, 180f);
             facingSlider.SetValueWithoutNotify(Remap(yRotation, -180f, 180f, facingSliderMin, facingSliderMax));
             CalculateOffsetRotation();
@@ -64,6 +69,12 @@ namespace JanSharp
         private void CalculateOffsetRotation()
         {
             offsetRotation = Quaternion.AngleAxis(yRotation, Vector3.up);
+        }
+
+        public void OnObjectCreated()
+        {
+            if (randomizeToggle.isOn)
+                RandomizeRotation();
         }
     }
 }

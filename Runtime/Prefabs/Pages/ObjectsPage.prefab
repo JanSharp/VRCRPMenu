@@ -726,11 +726,23 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 492165436904816948}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 6183502410193979180}
+        m_TargetAssemblyTypeName: 
+        m_MethodName: SendCustomEvent
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: OnDeselectCurrentEditingClick
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &4815289990583919053
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1077,6 +1089,7 @@ GameObject:
   - component: {fileID: 7873856827964419875}
   - component: {fileID: 6674534597459010747}
   - component: {fileID: 3126997867531489990}
+  - component: {fileID: 4083534065418836743}
   m_Layer: 17
   m_Name: OptionContent
   m_TagString: Untagged
@@ -1187,6 +1200,19 @@ MonoBehaviour:
   controlUseChildScaleHeight: 1
   controlChildForceExpandWidth: 1
   controlChildForceExpandHeight: 1
+--- !u!114 &4083534065418836743
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 283124730714518686}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2fafe2cfe61f6974895a912c3755e8f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_AllowSwitchOff: 0
 --- !u!1 &459536255976003853
 GameObject:
   m_ObjectHideFlags: 0
@@ -1770,6 +1796,7 @@ GameObject:
   - component: {fileID: 2616173926069930114}
   - component: {fileID: 7664976836508903719}
   - component: {fileID: 4578353904363128437}
+  - component: {fileID: 6027688812825866870}
   m_Layer: 17
   m_Name: OptionContent
   m_TagString: Untagged
@@ -1879,6 +1906,19 @@ MonoBehaviour:
   controlUseChildScaleHeight: 1
   controlChildForceExpandWidth: 1
   controlChildForceExpandHeight: 1
+--- !u!114 &6027688812825866870
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 749862792388156717}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2fafe2cfe61f6974895a912c3755e8f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_AllowSwitchOff: 0
 --- !u!1 &804134373558335695
 GameObject:
   m_ObjectHideFlags: 0
@@ -2569,13 +2609,31 @@ MonoBehaviour:
   playerDataManager: {fileID: 0}
   objectsPageManager: {fileID: 0}
   objectsFavoritesManager: {fileID: 0}
+  inputManager: {fileID: 0}
+  menuInputHandler: {fileID: 0}
+  interactables: {fileID: 0}
+  entitySystem: {fileID: 0}
+  updateManager: {fileID: 0}
   menuManager: {fileID: 0}
   rowsList: {fileID: 6966109011285424751}
   rowPrefabScript: {fileID: 3029622430203192672}
   popupsParent: {fileID: 4190324151647199972}
   creatingPopup: {fileID: 1001805546320133}
   creatingHeaderLabel: {fileID: 114875804815229716}
+  alignmentTargetSurfaceNormalToggle: {fileID: 7679246287695498835}
+  alignmentWorldUpToggle: {fileID: 3189277218852766128}
+  referenceYourDirectionToggle: {fileID: 7184949717780216130}
+  referenceWorldForwardToggle: {fileID: 4262916099734741380}
+  facingOptions: {fileID: 5546219931023047951}
+  uponPlacePlaceMoreToggle: {fileID: 2137537111226600964}
+  uponPlaceSwitchToEditToggle: {fileID: 56239296639750951}
+  uponPlaceClosePopupToggle: {fileID: 1493560445233778960}
   editingPopup: {fileID: 2016765775663151101}
+  editingHeaderLabel: {fileID: 3332578617537062880}
+  editingInfoWhileDeselected: {fileID: 6947280585877163358}
+  editingInfoWhileSelected: {fileID: 2900577334787862409}
+  editingDeselectCurrentButton: {fileID: 8745683873415098746}
+  editingDeselectCurrentButtonLabel: {fileID: 8172704419992451776}
   deletingPopup: {fileID: 2412217153354202533}
   useObjectsPermissionAsset: 92a0c095b5fef6d65aee4509952527f0
   useObjectsPDef: {fileID: 0}
@@ -3055,7 +3113,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 1229572758412301535}
 --- !u!114 &2611041415893391780
 MonoBehaviour:
@@ -8322,6 +8380,7 @@ GameObject:
   - component: {fileID: 8263595222267857698}
   - component: {fileID: 4111425038874858523}
   - component: {fileID: 2406574702559915237}
+  - component: {fileID: 1710541077909359881}
   m_Layer: 17
   m_Name: OptionContent
   m_TagString: Untagged
@@ -8431,6 +8490,19 @@ MonoBehaviour:
   controlUseChildScaleHeight: 1
   controlChildForceExpandWidth: 1
   controlChildForceExpandHeight: 1
+--- !u!114 &1710541077909359881
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2782809707454845830}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2fafe2cfe61f6974895a912c3755e8f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_AllowSwitchOff: 0
 --- !u!1 &2798097660530496416
 GameObject:
   m_ObjectHideFlags: 0
@@ -9915,7 +9987,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 7145761710326808544}
   toggleTransition: 1
   graphic: {fileID: 2126421335614254211}
-  m_Group: {fileID: 0}
+  m_Group: {fileID: 4083534065418836743}
   onValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -11109,7 +11181,19 @@ MonoBehaviour:
   m_Group: {fileID: 0}
   onValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 2131253933850710679}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SendCustomEvent
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: OnRandomizeValueChanged
+          m_BoolArgument: 0
+        m_CallState: 2
   m_IsOn: 0
 --- !u!114 &7368343897300499808
 MonoBehaviour:
@@ -11926,11 +12010,11 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2680446860982315317}
   toggleTransition: 1
   graphic: {fileID: 3826662086096808051}
-  m_Group: {fileID: 0}
+  m_Group: {fileID: 1710541077909359881}
   onValueChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_IsOn: 0
+  m_IsOn: 1
 --- !u!114 &1550378779626059176
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13038,6 +13122,8 @@ GameObject:
   - component: {fileID: 3036659375394014734}
   - component: {fileID: 3890092740528825880}
   - component: {fileID: 3434658634121768985}
+  - component: {fileID: 5546219931023047951}
+  - component: {fileID: 2131253933850710679}
   m_Layer: 17
   m_Name: FacingOption
   m_TagString: Untagged
@@ -13107,6 +13193,56 @@ MonoBehaviour:
   controlFlexibleWidth: 1
   controlFlexibleHeight: 1
   controlLayoutPriority: 1
+--- !u!114 &5546219931023047951
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3958028912018558589}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 793c9c405baeee56b88f301047a16a93, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects: []
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes: []
+  _udonSharpBackingUdonBehaviour: {fileID: 2131253933850710679}
+  facingSlider: {fileID: 4649244220078801279}
+  facingSliderHandle: {fileID: 487672007218920033}
+  randomizeToggle: {fileID: 4818076762457403027}
+--- !u!114 &2131253933850710679
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3958028912018558589}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45115577ef41a5b4ca741ed302693907, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  interactTextPlacement: {fileID: 0}
+  interactText: Use
+  interactTextGO: {fileID: 0}
+  proximity: 2
+  SynchronizePosition: 0
+  AllowCollisionOwnershipTransfer: 0
+  Reliable: 0
+  _syncMethod: 0
+  serializedProgramAsset: {fileID: 0}
+  programSource: {fileID: 11400000, guid: cc85c7ebcaa0e2cbbbe230638271135c, type: 2}
+  serializedPublicVariablesBytesString: Ai8AAAAAATIAAABWAFIAQwAuAFUAZABvAG4ALgBDAG8AbQBtAG8AbgAuAFUAZABvAG4AVgBhAHIAaQBhAGIAbABlAFQAYQBiAGwAZQAsACAAVgBSAEMALgBVAGQAbwBuAC4AQwBvAG0AbQBvAG4AAAAAAAYBAAAAAAAAACcBBAAAAHQAeQBwAGUAAWgAAABTAHkAcwB0AGUAbQAuAEMAbwBsAGwAZQBjAHQAaQBvAG4AcwAuAEcAZQBuAGUAcgBpAGMALgBMAGkAcwB0AGAAMQBbAFsAVgBSAEMALgBVAGQAbwBuAC4AQwBvAG0AbQBvAG4ALgBJAG4AdABlAHIAZgBhAGMAZQBzAC4ASQBVAGQAbwBuAFYAYQByAGkAYQBiAGwAZQAsACAAVgBSAEMALgBVAGQAbwBuAC4AQwBvAG0AbQBvAG4AXQBdACwAIABtAHMAYwBvAHIAbABpAGIAAQEJAAAAVgBhAHIAaQBhAGIAbABlAHMALwEAAAABaAAAAFMAeQBzAHQAZQBtAC4AQwBvAGwAbABlAGMAdABpAG8AbgBzAC4ARwBlAG4AZQByAGkAYwAuAEwAaQBzAHQAYAAxAFsAWwBWAFIAQwAuAFUAZABvAG4ALgBDAG8AbQBtAG8AbgAuAEkAbgB0AGUAcgBmAGEAYwBlAHMALgBJAFUAZABvAG4AVgBhAHIAaQBhAGIAbABlACwAIABWAFIAQwAuAFUAZABvAG4ALgBDAG8AbQBtAG8AbgBdAF0ALAAgAG0AcwBjAG8AcgBsAGkAYgABAAAABgEAAAAAAAAAAi8CAAAAAUkAAABWAFIAQwAuAFUAZABvAG4ALgBDAG8AbQBtAG8AbgAuAFUAZABvAG4AVgBhAHIAaQBhAGIAbABlAGAAMQBbAFsAUwB5AHMAdABlAG0ALgBJAG4AdAAzADIALAAgAG0AcwBjAG8AcgBsAGkAYgBdAF0ALAAgAFYAUgBDAC4AVQBkAG8AbgAuAEMAbwBtAG0AbwBuAAIAAAAGAgAAAAAAAAAnAQQAAAB0AHkAcABlAAEXAAAAUwB5AHMAdABlAG0ALgBTAHQAcgBpAG4AZwAsACAAbQBzAGMAbwByAGwAaQBiACcBCgAAAFMAeQBtAGIAbwBsAE4AYQBtAGUAAR8AAABfAF8AXwBVAGQAbwBuAFMAaABhAHIAcABCAGUAaABhAHYAaQBvAHUAcgBWAGUAcgBzAGkAbwBuAF8AXwBfACcBBAAAAHQAeQBwAGUAARYAAABTAHkAcwB0AGUAbQAuAEkAbgB0ADMAMgAsACAAbQBzAGMAbwByAGwAaQBiABcBBQAAAFYAYQBsAHUAZQACAAAABwUHBQcF
+  publicVariablesUnityEngineObjects: []
+  publicVariablesSerializationDataFormat: 0
 --- !u!1 &3985008995490997793
 GameObject:
   m_ObjectHideFlags: 0
@@ -19587,7 +19723,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2667368166770343670}
   toggleTransition: 1
   graphic: {fileID: 1704407722325905014}
-  m_Group: {fileID: 0}
+  m_Group: {fileID: 4083534065418836743}
   onValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -24063,7 +24199,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 6038643162130723754}
   toggleTransition: 1
   graphic: {fileID: 1336289776170791740}
-  m_Group: {fileID: 0}
+  m_Group: {fileID: 6027688812825866870}
   onValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -25507,11 +25643,11 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1114570293277766320}
   toggleTransition: 1
   graphic: {fileID: 5795590162918493059}
-  m_Group: {fileID: 0}
+  m_Group: {fileID: 4083534065418836743}
   onValueChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_IsOn: 0
+  m_IsOn: 1
 --- !u!114 &4828442015610897768
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -28293,7 +28429,19 @@ MonoBehaviour:
   m_Value: 0
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 2131253933850710679}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SendCustomEvent
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: OnFacingSliderValueChanged
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &4077731522899158571
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -29828,11 +29976,11 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4714970159948839117}
   toggleTransition: 1
   graphic: {fileID: 473966013700381912}
-  m_Group: {fileID: 0}
+  m_Group: {fileID: 6027688812825866870}
   onValueChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_IsOn: 0
+  m_IsOn: 1
 --- !u!114 &4650836932789178891
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -30127,7 +30275,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 6469419960076837380}
   toggleTransition: 1
   graphic: {fileID: 6632359430001389540}
-  m_Group: {fileID: 0}
+  m_Group: {fileID: 1710541077909359881}
   onValueChanged:
     m_PersistentCalls:
       m_Calls: []

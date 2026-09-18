@@ -97,7 +97,7 @@ namespace JanSharp
 
             bool isFavorite = localPlayer.favoriteItemIdsLut.ContainsKey(prototype.Id);
             string itemName = prototype.DisplayName;
-            string category = "Category"; // TODO
+            string category = prototype.CategoryName;
 
             row.isFavorite = isFavorite;
             row.sortableItemName = itemName.ToLower();

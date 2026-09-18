@@ -190,14 +190,14 @@ UnityEngine.UnitySynchronizationContext:ExecuteTasks ()
   - [x] ~~consider adding the input prevention to the generic value editors since they can be scrollable thus should block UI open close inputs. Though whether that input consuming feature as a whole is a good idea is still up in the air~~ the feature is not a good idea as a whole
   - [ ] make generic value editor styling match
   - [ ] think about import export options profiles
-- [ ] items page
+- [x] items page
   - [x] styling
   - [x] custom keyboard
     - [ ] maybe add holding down keys to repeat their input, especially backspace, if that is doable with the EventTrigger component
     - [x] add num pad
   - [x] filterable list
     - [x] search query logic
-  - [ ] category support for entities, somehow
+  - [x] category support for entities, somehow
   - [x] favorites
   - [x] when importing favorites, ignore entities which are no longer items
 - [ ] help page

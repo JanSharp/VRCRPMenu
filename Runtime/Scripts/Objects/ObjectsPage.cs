@@ -91,6 +91,8 @@ namespace JanSharp
         public GameObject editingInfoWhileSelected;
         public Button editingDeselectCurrentButton;
         public Selectable editingDeselectCurrentButtonLabel;
+        public Button editingPlaceMoreButton;
+        public Selectable editingPlaceMoreButtonLabel;
         public Button editingDuplicateButton;
         public Selectable editingDuplicateButtonLabel;
         #endregion
@@ -643,6 +645,8 @@ namespace JanSharp
 
         public void OnDeselectCurrentEditingClick() => SetEditingEntityData(null);
 
+        public void OnPlaceMoreOfTheSameClick() => SwitchFromEditToCreateMore();
+
         public void OnDuplicateEditingClick() => DuplicateEditingEntity();
 
         private void EnterEditingMode()
@@ -693,6 +697,8 @@ namespace JanSharp
             editingInfoWhileSelected.SetActive(hasEditingEntityData);
             editingDeselectCurrentButton.interactable = hasEditingEntityData;
             editingDeselectCurrentButtonLabel.interactable = hasEditingEntityData;
+            editingPlaceMoreButton.interactable = hasEditingEntityData;
+            editingPlaceMoreButtonLabel.interactable = hasEditingEntityData;
             editingDuplicateButton.interactable = hasEditingEntityData;
             editingDuplicateButtonLabel.interactable = hasEditingEntityData;
         }
@@ -744,6 +750,14 @@ namespace JanSharp
                 return;
             SetEditingEntityData(pointedAtObject.entityData);
             UpdateEditingMode();
+        }
+
+        private void SwitchFromEditToCreateMore()
+        {
+            if (editingEntityData == null)
+                return;
+            TryGetRow(editingEntityData.entityPrototype.Id, out ObjectsRow row);
+            EnterCreatingMode(row);
         }
 
         private void DuplicateEditingEntity()

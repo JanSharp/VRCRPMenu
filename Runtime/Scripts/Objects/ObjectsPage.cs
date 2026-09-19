@@ -699,6 +699,8 @@ namespace JanSharp
 
         private void UpdateEntityTransformGizmo()
         {
+            waitingForEditingEntityToGetCreated = false;
+
             if (editingEntityData == null)
             {
                 entityTransformGizmo.StopTracking();

@@ -91,6 +91,8 @@ namespace JanSharp
         public GameObject editingInfoWhileSelected;
         public Button editingDeselectCurrentButton;
         public Selectable editingDeselectCurrentButtonLabel;
+        public Button editingDuplicateButton;
+        public Selectable editingDuplicateButtonLabel;
         #endregion
 
         #region Deleting
@@ -112,6 +114,7 @@ namespace JanSharp
 
         private RPPlayerData localPlayer;
         private VRCPlayerApi localPlayerApi;
+        private uint localPlayerId;
         private bool isInVR;
 
         #region Event Listeners
@@ -126,6 +129,7 @@ namespace JanSharp
         public void OnMenuManagerStart()
         {
             localPlayerApi = Networking.LocalPlayer;
+            localPlayerId = (uint)localPlayerApi.playerId;
             isInVR = localPlayerApi.IsUserInVR();
 
             objectsCollisionLayers = objectsPageManager.ObjectsCollisionLayers;
@@ -639,6 +643,8 @@ namespace JanSharp
 
         public void OnDeselectCurrentEditingClick() => SetEditingEntityData(null);
 
+        public void OnDuplicateEditingClick() => DuplicateEditingEntity();
+
         private void EnterEditingMode()
         {
             DetermineInteractingHand(nameof(OnEditingActiveHandDetermined), callbackCustomData: null);
@@ -687,6 +693,8 @@ namespace JanSharp
             editingInfoWhileSelected.SetActive(hasEditingEntityData);
             editingDeselectCurrentButton.interactable = hasEditingEntityData;
             editingDeselectCurrentButtonLabel.interactable = hasEditingEntityData;
+            editingDuplicateButton.interactable = hasEditingEntityData;
+            editingDuplicateButtonLabel.interactable = hasEditingEntityData;
         }
 
         private void UpdateEntityTransformGizmo()
@@ -734,6 +742,62 @@ namespace JanSharp
                 return;
             SetEditingEntityData(pointedAtObject.entityData);
             UpdateEditingMode();
+        }
+
+        private void DuplicateEditingEntity()
+        {
+            if (editingEntityData == null)
+                return;
+            Vector3 position;
+            Quaternion rotation;
+            Vector3 scale;
+            if (editingEntityData.entity != null)
+            {
+                Transform entityTransform = editingEntityData.entity.transform;
+                position = entityTransform.position;
+                rotation = entityTransform.rotation;
+                scale = entityTransform.localScale;
+            }
+            else
+            {
+                position = editingEntityData.position;
+                rotation = editingEntityData.rotation;
+                scale = editingEntityData.scale;
+            }
+            EntityData duplicatedEntityData = SendCreateScaledObjectIA(editingEntityData.entityPrototype, position, rotation, scale);
+            SetEditingEntityData(duplicatedEntityData);
+        }
+
+        private EntityData SendCreateScaledObjectIA(EntityPrototype prototype, Vector3 position, Quaternion rotation, Vector3 scale)
+        {
+            if (!lockstep.IsInitialized)
+                return null;
+            lockstep.WriteVector3(scale);
+            EntityData entityData = entitySystem.SendCustomCreateEntityIA(onCreateScaledObjectIAId, prototype.Id, position, rotation);
+
+            InitializeEntity(entityData, scale); // Latency hiding.
+            return entityData;
+        }
+
+        [HideInInspector][SerializeField] private uint onCreateScaledObjectIAId;
+        [LockstepInputAction(nameof(onCreateScaledObjectIAId))]
+        public void OnCreateScaledObjectIA()
+        {
+            Vector3 scale = lockstep.ReadVector3();
+            EntityData entityData = entitySystem.ReadEntityInCustomCreateEntityIA(onEntityCreatedGetsRaisedLater: true);
+
+            if (lockstep.SendingPlayerId != localPlayerId) // The sending local player already performed this initialization.
+                InitializeEntity(entityData, scale);
+
+            entitySystem.RaiseOnEntityCreatedInCustomCreateEntityIA(entityData);
+        }
+
+        private void InitializeEntity(EntityData entityData, Vector3 scale)
+        {
+            entityData.scale = scale;
+            // By the time this runs the entity for this entityData is guaranteed to not exist yet.
+            // Therefore there is no need for any additional logic here, when the entity gets created it will
+            // use the entityData, including the values that got populated above.
         }
 
         #endregion

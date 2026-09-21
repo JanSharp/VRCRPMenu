@@ -791,7 +791,7 @@ namespace JanSharp
             lockstep.WriteVector3(scale);
             EntityData entityData = entitySystem.SendCustomCreateEntityIA(onCreateScaledObjectIAId, prototype.Id, position, rotation);
 
-            InitializeEntity(entityData, scale); // Latency hiding.
+            InitializeScaledObject(entityData, scale); // Latency hiding.
             return entityData;
         }
 
@@ -803,12 +803,12 @@ namespace JanSharp
             EntityData entityData = entitySystem.ReadEntityInCustomCreateEntityIA(onEntityCreatedGetsRaisedLater: true);
 
             if (lockstep.SendingPlayerId != localPlayerId) // The sending local player already performed this initialization.
-                InitializeEntity(entityData, scale);
+                InitializeScaledObject(entityData, scale);
 
             entitySystem.RaiseOnEntityCreatedInCustomCreateEntityIA(entityData);
         }
 
-        private void InitializeEntity(EntityData entityData, Vector3 scale)
+        private void InitializeScaledObject(EntityData entityData, Vector3 scale)
         {
             entityData.scale = scale;
             // By the time this runs the entity for this entityData is guaranteed to not exist yet.

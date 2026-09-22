@@ -25,5 +25,11 @@ namespace JanSharp
         /// <param name="prototype"></param>
         /// <returns></returns>
         public abstract GameObject GetCreationPreviewInstanceForPrototype(EntityPrototype prototype);
+
+        public abstract EntityData SendCreateScaledEntityIA(
+            EntityPrototype prototype,
+            Vector3 position,
+            Quaternion rotation,
+            Vector3 scale);
     }
 }

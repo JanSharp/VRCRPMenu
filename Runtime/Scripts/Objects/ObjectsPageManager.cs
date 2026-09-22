@@ -1,12 +1,14 @@
 ﻿using UdonSharp;
 using UnityEngine;
 using VRC.SDK3.Data;
+using VRC.SDKBase;
 
 namespace JanSharp
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class ObjectsPageManager : ObjectsPageManagerAPI
     {
+        [HideInInspector][SerializeField][SingletonReference] private LockstepAPI lockstep;
         [HideInInspector][SerializeField][SingletonReference] private EntitySystem entitySystem;
 
         /// <summary>
@@ -34,9 +36,12 @@ namespace JanSharp
         public override EntityTransformGizmoBridge EntityTransformGizmo => entityTransformGizmo;
 
         private DataDictionary prototypePreviewInstsLut = new DataDictionary();
+        private uint localPlayerId;
 
         private void Start()
         {
+            localPlayerId = (uint)Networking.LocalPlayer.playerId;
+
             EntityPrototype[] prototypes = entitySystem.EntityPrototypes;
             foreach (EntityPrototype prototype in prototypes)
             {
@@ -69,6 +74,42 @@ namespace JanSharp
             preview.SetActive(false);
             prototypePreviewInstsLut.Add(prototype, preview);
             return preview;
+        }
+
+        public override EntityData SendCreateScaledEntityIA(
+            EntityPrototype prototype,
+            Vector3 position,
+            Quaternion rotation,
+            Vector3 scale)
+        {
+            if (!lockstep.IsInitialized)
+                return null;
+            lockstep.WriteVector3(scale);
+            EntityData entityData = entitySystem.SendCustomCreateEntityIA(onCreateScaledEntityIAId, prototype.Id, position, rotation);
+
+            InitializeScaledEntity(entityData, scale); // Latency hiding.
+            return entityData;
+        }
+
+        [HideInInspector][SerializeField] private uint onCreateScaledEntityIAId;
+        [LockstepInputAction(nameof(onCreateScaledEntityIAId))]
+        public void OnCreateScaledEntityIA()
+        {
+            Vector3 scale = lockstep.ReadVector3();
+            EntityData entityData = entitySystem.ReadEntityInCustomCreateEntityIA(onEntityCreatedGetsRaisedLater: true);
+
+            if (lockstep.SendingPlayerId != localPlayerId) // The sending local player already performed this initialization.
+                InitializeScaledEntity(entityData, scale);
+
+            entitySystem.RaiseOnEntityCreatedInCustomCreateEntityIA(entityData);
+        }
+
+        private void InitializeScaledEntity(EntityData entityData, Vector3 scale)
+        {
+            entityData.scale = scale;
+            // By the time this runs the entity for this entityData is guaranteed to not exist yet.
+            // Therefore there is no need for any additional logic here, when the entity gets created it will
+            // use the entityData, including the values that got populated above.
         }
     }
 }

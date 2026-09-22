@@ -781,40 +781,12 @@ namespace JanSharp
                 rotation = editingEntityData.rotation;
                 scale = editingEntityData.scale;
             }
-            EntityData duplicatedEntityData = SendCreateScaledObjectIA(editingEntityData.entityPrototype, position, rotation, scale);
+            EntityData duplicatedEntityData = objectsPageManager.SendCreateScaledEntityIA(
+                editingEntityData.entityPrototype,
+                position,
+                rotation,
+                scale);
             SetEditingEntityData(duplicatedEntityData);
-        }
-
-        private EntityData SendCreateScaledObjectIA(EntityPrototype prototype, Vector3 position, Quaternion rotation, Vector3 scale)
-        {
-            if (!lockstep.IsInitialized)
-                return null;
-            lockstep.WriteVector3(scale);
-            EntityData entityData = entitySystem.SendCustomCreateEntityIA(onCreateScaledObjectIAId, prototype.Id, position, rotation);
-
-            InitializeScaledObject(entityData, scale); // Latency hiding.
-            return entityData;
-        }
-
-        [HideInInspector][SerializeField] private uint onCreateScaledObjectIAId;
-        [LockstepInputAction(nameof(onCreateScaledObjectIAId))]
-        public void OnCreateScaledObjectIA()
-        {
-            Vector3 scale = lockstep.ReadVector3();
-            EntityData entityData = entitySystem.ReadEntityInCustomCreateEntityIA(onEntityCreatedGetsRaisedLater: true);
-
-            if (lockstep.SendingPlayerId != localPlayerId) // The sending local player already performed this initialization.
-                InitializeScaledObject(entityData, scale);
-
-            entitySystem.RaiseOnEntityCreatedInCustomCreateEntityIA(entityData);
-        }
-
-        private void InitializeScaledObject(EntityData entityData, Vector3 scale)
-        {
-            entityData.scale = scale;
-            // By the time this runs the entity for this entityData is guaranteed to not exist yet.
-            // Therefore there is no need for any additional logic here, when the entity gets created it will
-            // use the entityData, including the values that got populated above.
         }
 
         #endregion

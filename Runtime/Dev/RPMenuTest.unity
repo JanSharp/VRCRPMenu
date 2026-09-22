@@ -37387,12 +37387,12 @@ PrefabInstance:
         type: 3}
       propertyPath: inputActionHandlerInstances.Array.data[51]
       value: 
-      objectReference: {fileID: 1243300314}
+      objectReference: {fileID: 1429744411}
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
       propertyPath: inputActionHandlerInstances.Array.data[52]
       value: 
-      objectReference: {fileID: 1429744411}
+      objectReference: {fileID: 1524278254}
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
       propertyPath: inputActionHandlerInstances.Array.data[53]
@@ -37791,12 +37791,12 @@ PrefabInstance:
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
       propertyPath: inputActionHandlerEventNames.Array.data[51]
-      value: OnCreateScaledObjectIA
+      value: OnSummonIA
       objectReference: {fileID: 0}
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
       propertyPath: inputActionHandlerEventNames.Array.data[52]
-      value: OnSummonIA
+      value: OnCreateScaledEntityIA
       objectReference: {fileID: 0}
     - target: {fileID: 4728509102619734785, guid: 4f5050760fb932762b18e249c98c7afd,
         type: 3}
@@ -201283,7 +201283,7 @@ PrefabInstance:
     - target: {fileID: 5819083416454570980, guid: df8ec3e261a2a384197cc011d7d2e63f,
         type: 3}
       propertyPath: summonIAId
-      value: 52
+      value: 51
       objectReference: {fileID: 0}
     - target: {fileID: 5819083416454570980, guid: df8ec3e261a2a384197cc011d7d2e63f,
         type: 3}
@@ -202183,9 +202183,19 @@ PrefabInstance:
         type: 3}
     - target: {fileID: 2982097263622369585, guid: 92700c2678a68959e841d8c6e6e44bcb,
         type: 3}
+      propertyPath: lockstep
+      value: 
+      objectReference: {fileID: 988687136}
+    - target: {fileID: 2982097263622369585, guid: 92700c2678a68959e841d8c6e6e44bcb,
+        type: 3}
       propertyPath: entitySystem
       value: 
       objectReference: {fileID: 1811399624}
+    - target: {fileID: 2982097263622369585, guid: 92700c2678a68959e841d8c6e6e44bcb,
+        type: 3}
+      propertyPath: onCreateScaledEntityIAId
+      value: 52
+      objectReference: {fileID: 0}
     - target: {fileID: 2982097263622369585, guid: 92700c2678a68959e841d8c6e6e44bcb,
         type: 3}
       propertyPath: serializationData.Prefab
@@ -204809,11 +204819,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4388912174307664368, guid: c1a26f964e70d51e3a4af28632b3910f,
         type: 3}
-      propertyPath: onPointerStateChangedListeners.Array.data[0]
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 4388912174307664368, guid: c1a26f964e70d51e3a4af28632b3910f,
-        type: 3}
       propertyPath: onMenuOpenStateChangedListeners.Array.data[0]
       value: 
       objectReference: {fileID: 4118397}
@@ -205108,7 +205113,7 @@ PrefabInstance:
     - target: {fileID: 6683448556343420005, guid: c1a26f964e70d51e3a4af28632b3910f,
         type: 3}
       propertyPath: m_fontSize
-      value: 36
+      value: 26
       objectReference: {fileID: 0}
     - target: {fileID: 6798384038691503346, guid: c1a26f964e70d51e3a4af28632b3910f,
         type: 3}

@@ -48,9 +48,10 @@ namespace JanSharp.Internal
                 return;
             }
 
+            // The interacting hand is the opposite of that which the menu is attached to.
             var trackingType = menuPosition == MenuPositionType.LeftHand
-                ? VRCPlayerApi.TrackingDataType.LeftHand
-                : VRCPlayerApi.TrackingDataType.RightHand;
+                ? VRCPlayerApi.TrackingDataType.RightHand
+                : VRCPlayerApi.TrackingDataType.LeftHand;
             var hand = localPlayer.GetTrackingData(trackingType);
             determinedPosition = hand.position;
             determinedRotation = hand.rotation * interactables.GetRotationNormalization(trackingType);

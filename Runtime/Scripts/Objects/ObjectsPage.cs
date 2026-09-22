@@ -404,9 +404,10 @@ namespace JanSharp
                 return;
             }
 
+            // The interacting hand is the opposite of that which the menu is attached to.
             determinedHand = menuPosition == MenuPositionType.LeftHand
-                ? VRCPlayerApi.TrackingDataType.LeftHand
-                : VRCPlayerApi.TrackingDataType.RightHand;
+                ? VRCPlayerApi.TrackingDataType.RightHand
+                : VRCPlayerApi.TrackingDataType.LeftHand;
             determinedHandCallbackCustomData = callbackCustomData;
             SendCustomEvent(callbackEventName);
         }

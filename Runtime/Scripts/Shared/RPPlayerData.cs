@@ -100,7 +100,7 @@ namespace JanSharp
             }
         }
 
-        public override void OnPlayerDataUninit(bool force)
+        public override void OnPlayerDataUninit(bool forced)
         {
             ((Internal.PlayersFavoritesManager)playersFavoritesManager).OnPlayerDataUnInit(this);
         }

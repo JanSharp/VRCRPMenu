@@ -26,7 +26,7 @@ namespace JanSharp
             localDynamicDataCount = 0;
         }
 
-        public override void OnPlayerDataUninit(bool force)
+        public override void OnPlayerDataUninit(bool forced)
         {
             DataDictionary allDynamicDataById = DataManager.allDynamicDataById;
             for (int i = localDynamicDataCount - 1; i >= 0; i--)

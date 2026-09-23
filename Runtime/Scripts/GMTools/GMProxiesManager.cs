@@ -146,7 +146,7 @@ namespace JanSharp.Internal
             for (int i = 0; i < allGMProxiesCount; i++)
             {
                 GMProxyExtensionData data = allGMProxies[i];
-                if (data.entityData.createdByPlayerData != player)
+                if (data.entityData.CreatedByPlayerData != player)
                     continue;
                 GMProxyExtension ext = data.ext;
                 if (ext != null)
@@ -159,8 +159,7 @@ namespace JanSharp.Internal
             for (int i = 0; i < allGMProxiesCount; i++)
             {
                 GMProxyExtensionData data = allGMProxies[i];
-                EntitySystemPlayerData player = data.entityData.createdByPlayerData;
-                if (player != null && !player.core.isDeleted)
+                if (data.entityData.CreatedByPlayerData != null)
                     continue;
                 GMProxyExtension ext = data.ext;
                 if (ext != null)

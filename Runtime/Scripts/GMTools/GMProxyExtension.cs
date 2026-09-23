@@ -38,13 +38,12 @@ namespace JanSharp
         public override void ApplyExtensionData()
         {
             if (!viewGMProxySpawnedByPDef.valueForLocalPlayer
-                || entityData.createdByPlayerData == null
-                || entityData.createdByPlayerData.core.isDeleted)
+                || entityData.CreatedByPlayerData == null)
             {
                 pickup.interactText = data.gmProxyDisplayName;
                 return;
             }
-            RPPlayerData player = playersBackendManager.GetRPPlayerData(entityData.createdByPlayerData.core);
+            RPPlayerData player = playersBackendManager.GetRPPlayerData(entityData.CreatedByPlayerData.core);
             if (string.IsNullOrWhiteSpace(data.gmProxyDisplayName))
                 pickup.interactText = $"Spawned by: {player.PlayerDisplayNameWithCharacterName}";
             else

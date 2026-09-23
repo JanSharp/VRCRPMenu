@@ -9,7 +9,7 @@ namespace JanSharp
     public class ObjectsPageManager : ObjectsPageManagerAPI
     {
         [HideInInspector][SerializeField][SingletonReference] private LockstepAPI lockstep;
-        [HideInInspector][SerializeField][SingletonReference] private EntitySystem entitySystem;
+        [HideInInspector][SerializeField][SingletonReference] private EntitySystemAPI entitySystem;
 
         /// <summary>
         /// <para><see cref="string"/> entityPrototypeName => <see langword="true"/></para>

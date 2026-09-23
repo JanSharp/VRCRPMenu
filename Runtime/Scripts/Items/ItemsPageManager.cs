@@ -8,7 +8,7 @@ namespace JanSharp.Internal
     public class ItemsPageManager : ItemsPageManagerAPI
     {
         [HideInInspector][SerializeField][SingletonReference] private LockstepAPI lockstep;
-        [HideInInspector][SerializeField][SingletonReference] private EntitySystem entitySystem;
+        [HideInInspector][SerializeField][SingletonReference] private EntitySystemAPI entitySystem;
         [HideInInspector][SerializeField][SingletonReference] private PermissionManagerAPI permissionManager;
         [HideInInspector][SerializeField][SingletonReference] private PlayerDataManagerAPI playerDataManager;
 
@@ -72,7 +72,7 @@ namespace JanSharp.Internal
                 // latency state of one client without ever making it to the game state. That makes the life
                 // cycle easier for every system using the entity system as well as the entity system itself.
                 // Besides, this is so rare that it's basically never going to actually happen.
-                entitySystem.DestroyEntity(entityData);
+                entitySystem.DestroyEntityInGS(entityData);
             }
         }
 

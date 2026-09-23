@@ -9,7 +9,7 @@ namespace JanSharp
     {
         [HideInInspector][SerializeField][SingletonReference] private LockstepAPI lockstep;
         [HideInInspector][SerializeField][SingletonReference] private PlayersBackendManagerAPI playersBackendManager;
-        [HideInInspector][SerializeField][SingletonReference] private EntitySystem entitySystem;
+        [HideInInspector][SerializeField][SingletonReference] private EntitySystemAPI entitySystem;
 
         protected abstract DataDictionary RelevantPrototypeNamesLut { get; }
 

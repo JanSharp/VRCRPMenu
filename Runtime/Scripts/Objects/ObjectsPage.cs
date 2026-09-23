@@ -26,7 +26,7 @@ namespace JanSharp
         [HideInInspector][SerializeField][SingletonReference] private InputManagerAPI inputManager;
         [HideInInspector][SerializeField][SingletonReference] private MenuInputHandler menuInputHandler;
         [HideInInspector][SerializeField][SingletonReference] private CustomInteractablesManagerAPI interactables;
-        [HideInInspector][SerializeField][SingletonReference] private EntitySystem entitySystem;
+        [HideInInspector][SerializeField][SingletonReference] private EntitySystemAPI entitySystem;
         [HideInInspector][SerializeField][SingletonReference] private UpdateManager updateManager;
         [HideInInspector][SerializeField][FindInParent] private MenuManagerAPI menuManager;
         /// <summary>

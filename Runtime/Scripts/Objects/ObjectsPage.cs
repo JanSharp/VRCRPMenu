@@ -684,14 +684,19 @@ namespace JanSharp
         {
             if (this.editingEntityData == editingEntityData)
                 return;
+            if (this.editingEntityData != null)
+                this.editingEntityData.DecrementRefsCount();
             this.editingEntityData = editingEntityData;
-            bool hasEditingEntityData = editingEntityData != null;
 
+            bool hasEditingEntityData = this.editingEntityData != null;
             if (hasEditingEntityData)
+            {
+                this.editingEntityData.IncrementRefsCount();
                 StopPointingAtObjects();
+            }
             UpdateEntityTransformGizmo();
 
-            string objectName = hasEditingEntityData ? editingEntityData.entityPrototype.DisplayName : "";
+            string objectName = hasEditingEntityData ? this.editingEntityData.entityPrototype.DisplayName : "";
             editingHeaderLabel.text = string.Format(editingHeaderLabelFormat, objectName).Trim();
 
             editingInfoWhileDeselected.SetActive(!hasEditingEntityData);
@@ -729,7 +734,7 @@ namespace JanSharp
         {
             if (editingEntityData != null)
             {
-                if (!editingEntityData.CheckLiveliness() || editingEntityData.entityIsDestroyed)
+                if (editingEntityData.entityIsDestroyed)
                     SetEditingEntityData(null);
                 else if (waitingForEditingEntityToGetCreated && editingEntityData.entity != null)
                     UpdateEntityTransformGizmo();

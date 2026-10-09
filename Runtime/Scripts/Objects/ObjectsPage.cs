@@ -320,6 +320,7 @@ namespace JanSharp
                 return;
             ClearActiveRow();
             activeRow = row;
+            activeRow.highlightToggle.SetIsOnWithoutNotify(true);
         }
 
         public void OnHighlightToggleValueChanged(ObjectsRow row)

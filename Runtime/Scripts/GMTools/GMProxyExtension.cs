@@ -8,17 +8,22 @@ namespace JanSharp
     public class GMProxyExtension : EntityExtension
     {
         [HideInInspector][SerializeField][SingletonReference] private PlayersBackendManagerAPI playersBackendManager;
+        [HideInInspector][FindInParent] public CustomPickup pickup;
+        [HideInInspector][FindInParent] public ItemExtension item;
 
-        [System.NonSerialized] public CustomPickup pickup;
         [System.NonSerialized] public GMProxyExtensionData data;
 
         [PermissionDefinitionReference(nameof(viewGMProxySpawnedByPDef))]
         public string viewGMProxySpawnedByPermissionAsset; // A guid.
         [HideInInspector][SerializeField] private PermissionDefinition viewGMProxySpawnedByPDef;
 
+        private bool defaultDisallowStealingHeld;
+        private bool defaultDisallowStealingAttached;
+
         public override void OnInstantiate()
         {
-            pickup = GetComponent<CustomPickup>();
+            defaultDisallowStealingHeld = item.DisallowStealingHeld;
+            defaultDisallowStealingAttached = item.DisallowStealingAttached;
         }
 
         public override void AssociateWithExtensionData()
@@ -33,12 +38,25 @@ namespace JanSharp
             data.ext = null;
             data = null;
             pickup.interactText = ((GMProxyExtension)defaultExtension).pickup.interactText;
+            item.DisallowStealingHeld = defaultDisallowStealingHeld;
+            item.DisallowStealingAttached = defaultDisallowStealingAttached;
         }
 
         public override void ApplyExtensionData()
         {
-            if (!viewGMProxySpawnedByPDef.valueForLocalPlayer
-                || entityData.CreatedByPlayerData == null)
+            bool hasViewSpawnedByPermission = viewGMProxySpawnedByPDef.valueForLocalPlayer;
+            if (hasViewSpawnedByPermission)
+            {
+                item.DisallowStealingHeld = false;
+                item.DisallowStealingAttached = false;
+            }
+            else
+            {
+                item.DisallowStealingHeld = defaultDisallowStealingHeld;
+                item.DisallowStealingAttached = defaultDisallowStealingAttached;
+            }
+
+            if (!hasViewSpawnedByPermission || entityData.CreatedByPlayerData == null)
             {
                 pickup.interactText = data.gmProxyDisplayName;
                 return;
